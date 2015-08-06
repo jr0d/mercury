@@ -1,0 +1,2 @@
+remove references to logging.getLogger for python 3 compat
+
