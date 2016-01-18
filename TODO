@@ -1,2 +1,6 @@
 remove references to logging.getLogger for python 3 compat
+create a mercury namespace, ie replace import mercury_rpc with import mercury.rpc
+    https://www.python.org/dev/peps/pep-0382/
+    https://www.python.org/dev/peps/pep-0420/
+    https://docs.python.org/2/tutorial/classes.html#python-scopes-and-namespaces
 
