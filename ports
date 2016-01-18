@@ -1,2 +1,4 @@
 inventory: 9000
 rpc: 9001
+agent: 9002
+
