@@ -1,5 +1,5 @@
 # Mercury
-![alt tag](https://raw.github.rackspace.com/jared-rodriguez/mercury/master/project_mercury.png)
+![alt tag](http://kickstart.rackspace.com/project_mercury.png)
 
 This repository contains documents pertaining to the mercury project. Code can be found for each component here:
 
