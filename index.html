@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en-us">
-  <head>
+<head>
     <meta charset="UTF-8">
     <title>Mercury by jared-rodriguez</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -8,52 +8,78 @@
     <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
     <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
-  </head>
-  <body>
-    <section class="page-header">
-      <h1 class="project-name">Project Mercury</h1>
-      <h2 class="project-tagline"></h2>
-      <a href="https://github.rackspace.com/jared-rodriguez/mercury" class="btn">View on GitHub</a>
-    </section>
+</head>
+<body>
+<section class="page-header">
+    <img src="images/project_mercury_alpha.png">
+    <h1 class="project-name">Project Mercury</h1>
+    <p><i>"Liquid Metal"</i></p>
+    <h2 class="project-tagline"></h2>
+    <a href="https://github.rackspace.com/jared-rodriguez/mercury" class="btn">View on GitHub</a>
+</section>
 
-    <section class="main-content">
-<h3>
-<a id="welcome-to-project-mercury-developer-home" class="anchor" href="#welcome-to-project-mercury-developer-home" aria-hidden="true"><span class="octicon octicon-link"></span></a>Welcome to the Project Mercury overview page</h3>
+<section class="main-content">
+    <h3>
+        <a id="welcome-to-project-mercury-developer-home" class="anchor"
+           href="#welcome-to-project-mercury-developer-home" aria-hidden="true"><span
+                class="octicon octicon-link"></span></a>Welcome to the Project Mercury overview page</h3>
+        <p>Mercury is a set of services, agents, and libraries designed for the purpose of managing datacenter hardware
+            assets
+        </p>
+    <ul>
+    <li><b>Mercury is not 'cloud' software.</b> However, it can be used to deploy clouds more quickly and efficiently.</li>
 
-<p>Mercury is a set of services, agents, and libraries designed for the purpose of managing datacenter hardware assets</p>
-<p>Mercury is not 'cloud' software. However, it can be used to deploy clouds more quickly and efficiently.</p>
+    <li><b>Mercury is not configuration management.</b> However, it's real time inventory databases can be used as back ends for
+        many DevOPs work.</li>
+    </ul>
+    <h3><a id="mercury-services" class="anchor" href="#mercury-services" aria-hidden="true"><span
+            class="octicon octicon-link"></span></a>Mercury Services</h3>
+    <h4>mercury_inventory</h4>
+    <p>Controller service for a free form, document oriented database. Populated by mercury agents and multi-band
+        collectors for the purpose of building a ubiquitous document structure that describes hardware. <b>If it exists
+            here, it exists on the floor; exactly as described</b></p>
+    <h4>mercury_rpc</h4>
+    <p>Service that provides access to active agent RPC capabilities at scale. Calls can be run on a single node or an
+        entire fleet in parallel. Targets are selected using a mercury_inventory query.</p>
+    <h4>mercury_log</h4>
+    <p>Service endpoint for all logging messages originating from the mercury namespace. Allows for post-mortim and live
+        tracing of any mercury process. Provides accurate metric generation for the purpose of billing, auditing, and BU
+        reporting at any granularity. </p>
+    <h3><a id="mercury-agents" class="anchor" href="#mercury-agents" aria-hidden="true"><span
+            class="octicon octicon-link"></span></a>Mercury Agents</h3>
+    <h4>mercury_agent</h4>
+    <p>The core agent that operates within an ephemeral OS running on an inventory target (device still under provider
+        control, ie not sold or allocated). The OS environment contains libraries and abstraction layers for the intent
+        of providing a common RPC interface for provisioning and decommissioning workflows. Agent capabilities expose
+        mechanisms for managing firmware, hardware RAID, OS Provisioning, drive sanitation, etc.</p>
+    <h4>mercury_inspectors</h4>
+    <p>These core software units provide the most precises and full featured libraries for interrogating hardware,
+        discovering network interfaces and neighbors (LLDP), and detecting hardware state change. Used primarily for
+        populating the mercury_inventory database, but also useful for standalone operation</p>
+    <h3><a id="oob" class="anchor" href="#oob" aria-hidden="true"><span class="octicon octicon-link"></span></a>Out of
+        band</h3>
+    <h4>mercury_power</h4>
+    <p>Provides inventory backed, centralized mechanism for controlling device power state. Also provides interfaces to
+        higher level OBM protocols such as redfish, wsman, rac, and hp-rest. Such protocols can be used to supplement
+        inventory acquisition and discovery when running the agent and inspectors is not possible (device is sold)</p>
+    <h3><a id="inband" class="anchor" href="#inband" aria-hidden="true"><span class="octicon octicon-link"></span></a>In
+        Band</h3>
+    <h4>mercury_ssh</h4>
+    <p>Light, agent-less RPC interface used primarily to load the agent OS via kexec</p>
 
-<p>Mercury is not configuration management. However, it's real time inventory databases can be used as back ends for many DevOPs work.</p>
 
-<h3><a id="mercury-services" class="anchor" href="#mercury-services" aria-hidden="true"><span class="octicon octicon-link"></span></a>Mercury Services</h3>
-<h4>mercury_inventory</h4>
-<p>Controller service for a free form, document oriented database. Populated by mercury agents and multi-band collectors for the purpose of building a ubiquitous document structure that describes hardware. <b>If it exists here, it exists on the floor; exactly as described</b></p>
-      <h4>mercury_rpc</h4>
-      <p>Service that provides access to active agent RPC capabilities at scale. Calls can be run on a single node or an entire fleet in parallel. Targets are selected using a mercury_inventory query.</p>
-      <h4>mercury_log</h4>
-      <p>Service endpoint for all logging messages originating from the mercury namespace. Allows for post-mortim and live tracing of any mercury process. Provides accurate metric generation for the purpose of billing, auditing, and BU reporting at any granularity. </p>
-      <h3><a id="mercury-agents" class="anchor" href="#mercury-agents" aria-hidden="true"><span class="octicon octicon-link"></span></a>Mercury Agents</h3>
-      <h4>mercury_agent</h4>
-      <p>The core agent that operates within an ephemeral OS running on an inventory target (device still under provider control, ie not sold or allocated). The OS environment contains libraries and abstraction layers for the intent of providing a common RPC interface for provisioning and decommissioning workflows. Agent capabilities expose mechanisms for managing firmware, hardware RAID, OS Provisioning, drive sanitation, etc.</p>
-      <h4>mercury_inspectors</h4>
-      <p>These core software units provide the most precises and full featured libraries for interrogating hardware, discovering network interfaces and neighbors (LLDP), and detecting hardware state change. Used primarily for populating the mercury_inventory database, but also useful for standalone operation</p>
-      <h3><a id="oob" class="anchor" href="#oob" aria-hidden="true"><span class="octicon octicon-link"></span></a>Out of band</h3>
-      <h4>mercury_power</h4>
-      <p>Provides inventory backed, centralized mechanism for controlling device power state. Also provides interfaces to higher level OBM protocols such as redfish, wsman, rac, and hp-rest. Such protocols can be used to supplement inventory acquisition and discovery when running the agent and inspectors is not possible  (device is sold)</p>
-      <h3><a id="inband" class="anchor" href="#inband" aria-hidden="true"><span class="octicon octicon-link"></span></a>In Band</h3>
-      <h4>mercury_ssh</h4>
-      <p>Light, agent-less RPC interface used primarily to load the agent OS via kexec</p>
+    <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.rackspace.com/jared-rodriguez/mercury">Mercury</a> is maintained by <a
+                href="https://github.rackspace.com/jared-rodriguez">jared-rodriguez</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a
+                href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a
+                href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+    </footer>
+
+</section>
 
 
-      <footer class="site-footer">
-        <span class="site-footer-owner"><a href="https://github.rackspace.com/jared-rodriguez/mercury">Mercury</a> is maintained by <a href="https://github.rackspace.com/jared-rodriguez">jared-rodriguez</a>.</span>
-
-        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
-      </footer>
-
-    </section>
-
-  
-  </body>
+</body>
 </html>
 
