@@ -1,0 +1,88 @@
+interfaces: [
+    {
+        address:
+        carrier:
+        dev_port:
+        dev_id:
+        duplex:
+        speed:
+        predictable_names:
+        {
+            biosdevname:
+            systemd_udev:
+        }
+        pci_slot:
+        model_name:
+        vendor_name:
+        driver:
+    }
+]
+
+pci: [
+
+]
+
+processors: {
+    cpu_0: {
+
+    },
+    cpu_N: {}
+}
+memory_modules: []
+storage_os:
+raid:
+    adapters: [
+        type: {HP, LSI, PERC_LSI, etc}
+        adapter_info: {
+            # lazy collection containing adapter specific information which may differ depending on vendor and
+            # collection method
+            # examples
+            slot:
+            serial:
+            status:
+            supported_levels: [] # standardized
+            cache_info
+            firmware_version:
+            hardware_revision:
+        }
+        configuration: {
+            physical_disks: {
+                size:
+                vendor:
+                serial:
+                scsi_id:
+                interface: SAS, SATA, etc
+                type: SSD,
+                drive_firmware?
+                etc:
+            },
+            arrays: {
+                member_disks: []
+                logical_disks: {
+                    calulated_size:
+                }
+            }
+        }
+    ]
+dmi:
+    {
+        product_name:
+        vendor:
+        bios_date
+        etc:
+        # Pretty much everything in /sys/class/dmi/id/
+
+    }
+efi:
+{
+    # Null if not enabled
+}
+system_state: # Lazy collection wich is very depending on
+    # examples
+    numa_enabled:
+
+dhcp_info: {
+boot_interface:
+}
+
+

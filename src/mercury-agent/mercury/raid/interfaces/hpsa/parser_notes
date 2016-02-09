@@ -1,0 +1,814 @@
+
+[root@dhcp-20 ~]# hpssacli ctrl slot=0 show config
+
+Smart Array P440ar in Slot 0 (Embedded)   (sn: PDNLH0BRH7X32P)
+
+
+   12G SAS Exp Card at Port 1I, Box 1, OK
+
+   Port Name: 1I
+
+   Port Name: 2I
+   array A (SAS, Unused Space: 0  MB)
+
+
+      logicaldrive 1 (279.4 GB, RAID 1, OK)
+
+      physicaldrive 1I:1:1 (port 1I:box 1:bay 1, SAS, 300 GB, OK)
+      physicaldrive 1I:1:2 (port 1I:box 1:bay 2, SAS, 300 GB, OK)
+
+   array B (SAS, Unused Space: 0  MB)
+
+
+      logicaldrive 2 (838.1 GB, RAID 5, OK)
+
+      physicaldrive 1I:1:3 (port 1I:box 1:bay 3, SAS, 300 GB, OK)
+      physicaldrive 1I:1:4 (port 1I:box 1:bay 4, SAS, 300 GB, OK)
+      physicaldrive 1I:1:5 (port 1I:box 1:bay 5, SAS, 300 GB, OK)
+      physicaldrive 1I:1:6 (port 1I:box 1:bay 6, SAS, 300 GB, OK)
+
+   array C (SAS, Unused Space: 0  MB)
+
+
+      logicaldrive 3 (558.7 GB, RAID 1+0, OK)
+
+      physicaldrive 1I:1:7 (port 1I:box 1:bay 7, SAS, 300 GB, OK)
+      physicaldrive 1I:1:8 (port 1I:box 1:bay 8, SAS, 300 GB, OK)
+      physicaldrive 1I:1:9 (port 1I:box 1:bay 9, SAS, 300 GB, OK)
+      physicaldrive 1I:1:10 (port 1I:box 1:bay 10, SAS, 300 GB, OK)
+
+   array D (SAS, Unused Space: 0  MB)
+
+
+      logicaldrive 4 (1023 MB, RAID 1+0, OK)
+      logicaldrive 5 (557.7 GB, RAID 1+0, OK)
+
+      physicaldrive 1I:1:11 (port 1I:box 1:bay 11, SAS, 300 GB, OK)
+      physicaldrive 1I:1:12 (port 1I:box 1:bay 12, SAS, 300 GB, OK)
+      physicaldrive 1I:1:13 (port 1I:box 1:bay 13, SAS, 300 GB, OK)
+      physicaldrive 1I:1:14 (port 1I:box 1:bay 14, SAS, 300 GB, OK)
+
+   unassigned
+
+      physicaldrive 1I:1:15 (port 1I:box 1:bay 15, SAS, 300 GB, OK)
+      physicaldrive 1I:1:16 (port 1I:box 1:bay 16, SAS, 300 GB, OK)
+      physicaldrive 1I:1:17 (port 1I:box 1:bay 17, SAS, 300 GB, OK)
+      physicaldrive 1I:1:18 (port 1I:box 1:bay 18, SAS, 300 GB, OK)
+      physicaldrive 1I:1:19 (port 1I:box 1:bay 19, SAS, 300 GB, OK)
+      physicaldrive 1I:1:20 (port 1I:box 1:bay 20, SAS, 300 GB, OK)
+      physicaldrive 1I:1:21 (port 1I:box 1:bay 21, SAS, 300 GB, OK)
+      physicaldrive 1I:1:22 (port 1I:box 1:bay 22, SAS, 300 GB, OK)
+      physicaldrive 1I:1:23 (port 1I:box 1:bay 23, SAS, 300 GB, OK)
+      physicaldrive 1I:1:24 (port 1I:box 1:bay 24, SAS, 300 GB, OK)
+      physicaldrive 1I:1:25 (port 1I:box 1:bay 25, SAS, 300 GB, OK)
+      physicaldrive 1I:1:26 (port 1I:box 1:bay 26, SAS, 300 GB, OK)
+
+   Enclosure SEP (Vendor ID HP, Model 12G SAS Exp Card) 377  (WWID: 50014380301661BCc, Port: 1I, Box: 1)
+
+   Expander 378  (WWID: 50014380301661BD, Port: 1I, Box: 1)
+
+[root@dhcp-20 ~]# hpssacli ctrl slot=0 ld all show details
+
+Error: Syntax error at "details"
+
+[root@dhcp-20 ~]# hpssacli ctrl slot=0 ld all show detail
+
+Smart Array P440ar in Slot 0 (Embedded)
+
+   array A
+
+      Logical Drive: 1
+         Size: 279.4 GB
+         Fault Tolerance: 1
+         Heads: 255
+         Sectors Per Track: 32
+         Cylinders: 65535
+         Strip Size: 256 KB
+         Full Stripe Size: 256 KB
+         Status: OK
+         MultiDomain Status: OK
+         Caching:  Enabled
+         Unique Identifier: 600508B1001CAE3C2851A3F45D9AE9C2
+         Disk Name: /dev/sda
+         Mount Points: None
+         Logical Drive Label: 02DF0A5APDNLH0BRH7X32PCF6D
+         Mirror Group 1:
+            physicaldrive 1I:1:1 (port 1I:box 1:bay 1, SAS, 300 GB, OK)
+         Mirror Group 2:
+            physicaldrive 1I:1:2 (port 1I:box 1:bay 2, SAS, 300 GB, OK)
+         Drive Type: Data
+         LD Acceleration Method: Controller Cache
+
+   array B
+
+      Logical Drive: 2
+         Size: 838.1 GB
+         Fault Tolerance: 5
+         Heads: 255
+         Sectors Per Track: 32
+         Cylinders: 65535
+         Strip Size: 256 KB
+         Full Stripe Size: 768 KB
+         Status: OK
+         MultiDomain Status: OK
+         Caching:  Enabled
+         Parity Initialization Status: In Progress
+         Parity Initialization Progress: 36% complete
+         Unique Identifier: 600508B1001CBACA928C7BAB14B1B5D1
+         Disk Name: /dev/sdb
+         Mount Points: None
+         Logical Drive Label: 044A0CDBPDNLH0BRH7X32P74C7
+         Drive Type: Data
+         LD Acceleration Method: Controller Cache
+
+   array C
+
+      Logical Drive: 3
+         Size: 558.7 GB
+         Fault Tolerance: 1+0
+         Heads: 255
+         Sectors Per Track: 32
+         Cylinders: 65535
+         Strip Size: 256 KB
+         Full Stripe Size: 512 KB
+         Status: OK
+         MultiDomain Status: OK
+         Caching:  Enabled
+         Unique Identifier: 600508B1001CBD0B827B236BA61A0A1B
+         Disk Name: /dev/sdc
+         Mount Points: None
+         Logical Drive Label: 084A0E50PDNLH0BRH7X32P7DC6
+         Mirror Group 1:
+            physicaldrive 1I:1:7 (port 1I:box 1:bay 7, SAS, 300 GB, OK)
+            physicaldrive 1I:1:8 (port 1I:box 1:bay 8, SAS, 300 GB, OK)
+         Mirror Group 2:
+            physicaldrive 1I:1:9 (port 1I:box 1:bay 9, SAS, 300 GB, OK)
+            physicaldrive 1I:1:10 (port 1I:box 1:bay 10, SAS, 300 GB, OK)
+         Drive Type: Data
+         LD Acceleration Method: Controller Cache
+
+   array D
+
+      Logical Drive: 4
+         Size: 1023 MB
+         Fault Tolerance: 1+0
+         Heads: 255
+         Sectors Per Track: 32
+         Cylinders: 257
+         Strip Size: 256 KB
+         Full Stripe Size: 512 KB
+         Status: OK
+         MultiDomain Status: OK
+         Caching:  Enabled
+         Unique Identifier: 600508B1001C5CF5D218642B535649CD
+         Disk Name: /dev/sdd
+         Mount Points: None
+         Logical Drive Label: 0C4A0EB2PDNLH0BRH7X32PF6A6
+         Mirror Group 1:
+            physicaldrive 1I:1:11 (port 1I:box 1:bay 11, SAS, 300 GB, OK)
+            physicaldrive 1I:1:12 (port 1I:box 1:bay 12, SAS, 300 GB, OK)
+         Mirror Group 2:
+            physicaldrive 1I:1:13 (port 1I:box 1:bay 13, SAS, 300 GB, OK)
+            physicaldrive 1I:1:14 (port 1I:box 1:bay 14, SAS, 300 GB, OK)
+         Drive Type: Data
+         LD Acceleration Method: Controller Cache
+      Logical Drive: 5
+         Size: 557.7 GB
+         Fault Tolerance: 1+0
+         Heads: 255
+         Sectors Per Track: 32
+         Cylinders: 65535
+         Strip Size: 256 KB
+         Full Stripe Size: 512 KB
+         Status: OK
+         MultiDomain Status: OK
+         Caching:  Enabled
+         Unique Identifier: 600508B1001C581434FA7EC84B7EA51A
+         Disk Name: /dev/sde
+         Mount Points: None
+         Logical Drive Label: 104A0EBAPDNLH0BRH7X32P2FF3
+         Mirror Group 1:
+            physicaldrive 1I:1:11 (port 1I:box 1:bay 11, SAS, 300 GB, OK)
+            physicaldrive 1I:1:12 (port 1I:box 1:bay 12, SAS, 300 GB, OK)
+         Mirror Group 2:
+            physicaldrive 1I:1:13 (port 1I:box 1:bay 13, SAS, 300 GB, OK)
+            physicaldrive 1I:1:14 (port 1I:box 1:bay 14, SAS, 300 GB, OK)
+         Drive Type: Data
+         LD Acceleration Method: Controller Cache
+
+[root@dhcp-20 ~]# hpssacli ctrl slot=0 pd all show detail
+
+Smart Array P440ar in Slot 0 (Embedded)
+
+   array A
+
+      physicaldrive 1I:1:1
+         Port: 1I
+         Box: 1
+         Bay: 1
+         Status: OK
+         Drive Type: Data Drive
+         Interface Type: SAS
+         Size: 300 GB
+         Drive exposed to OS: False
+         Native Block Size: 512
+         Rotational Speed: 10000
+         Firmware Revision: HPDC
+         Serial Number: W5G61JXX
+         Model: HP      EG0300FBVFL
+         Current Temperature (C): 26
+         Maximum Temperature (C): 49
+         PHY Count: 2
+         PHY Transfer Rate: 6.0Gbps, Unknown
+         Drive Authentication Status: OK
+         Carrier Application Version: 11
+         Carrier Bootloader Version: 6
+         Sanitize Erase Supported: False
+
+      physicaldrive 1I:1:2
+         Port: 1I
+         Box: 1
+         Bay: 2
+         Status: OK
+         Drive Type: Data Drive
+         Interface Type: SAS
+         Size: 300 GB
+         Drive exposed to OS: False
+         Native Block Size: 512
+         Rotational Speed: 10000
+         Firmware Revision: HPDC
+         Serial Number: W5G50JJX
+         Model: HP      EG0300FBVFL
+         Current Temperature (C): 26
+         Maximum Temperature (C): 49
+         PHY Count: 2
+         PHY Transfer Rate: 6.0Gbps, Unknown
+         Drive Authentication Status: OK
+         Carrier Application Version: 11
+         Carrier Bootloader Version: 6
+         Sanitize Erase Supported: False
+
+
+   array B
+
+      physicaldrive 1I:1:3
+         Port: 1I
+         Box: 1
+         Bay: 3
+         Status: OK
+         Drive Type: Data Drive
+         Interface Type: SAS
+         Size: 300 GB
+         Drive exposed to OS: False
+         Native Block Size: 512
+         Rotational Speed: 10000
+         Firmware Revision: HPDC
+         Serial Number: W5G67DEX
+         Model: HP      EG0300FBVFL
+         Current Temperature (C): 29
+         Maximum Temperature (C): 49
+         PHY Count: 2
+         PHY Transfer Rate: 6.0Gbps, Unknown
+         Drive Authentication Status: OK
+         Carrier Application Version: 11
+         Carrier Bootloader Version: 6
+         Sanitize Erase Supported: False
+
+      physicaldrive 1I:1:4
+         Port: 1I
+         Box: 1
+         Bay: 4
+         Status: OK
+         Drive Type: Data Drive
+         Interface Type: SAS
+         Size: 300 GB
+         Drive exposed to OS: False
+         Native Block Size: 512
+         Rotational Speed: 10000
+         Firmware Revision: HPDC
+         Serial Number: W5G50GBX
+         Model: HP      EG0300FBVFL
+         Current Temperature (C): 29
+         Maximum Temperature (C): 49
+         PHY Count: 2
+         PHY Transfer Rate: 6.0Gbps, Unknown
+         Drive Authentication Status: OK
+         Carrier Application Version: 11
+         Carrier Bootloader Version: 6
+         Sanitize Erase Supported: False
+
+      physicaldrive 1I:1:5
+         Port: 1I
+         Box: 1
+         Bay: 5
+         Status: OK
+         Drive Type: Data Drive
+         Interface Type: SAS
+         Size: 300 GB
+         Drive exposed to OS: False
+         Native Block Size: 512
+         Rotational Speed: 10000
+         Firmware Revision: HPDC
+         Serial Number: W5G6EAUX
+         Model: HP      EG0300FBVFL
+         Current Temperature (C): 27
+         Maximum Temperature (C): 49
+         PHY Count: 2
+         PHY Transfer Rate: 6.0Gbps, Unknown
+         Drive Authentication Status: OK
+         Carrier Application Version: 11
+         Carrier Bootloader Version: 6
+         Sanitize Erase Supported: False
+
+      physicaldrive 1I:1:6
+         Port: 1I
+         Box: 1
+         Bay: 6
+         Status: OK
+         Drive Type: Data Drive
+         Interface Type: SAS
+         Size: 300 GB
+         Drive exposed to OS: False
+         Native Block Size: 512
+         Rotational Speed: 10000
+         Firmware Revision: HPDC
+         Serial Number: W5G5YNMX
+         Model: HP      EG0300FBVFL
+         Current Temperature (C): 27
+         Maximum Temperature (C): 48
+         PHY Count: 2
+         PHY Transfer Rate: 6.0Gbps, Unknown
+         Drive Authentication Status: OK
+         Carrier Application Version: 11
+         Carrier Bootloader Version: 6
+         Sanitize Erase Supported: False
+
+
+   array C
+
+      physicaldrive 1I:1:7
+         Port: 1I
+         Box: 1
+         Bay: 7
+         Status: OK
+         Drive Type: Data Drive
+         Interface Type: SAS
+         Size: 300 GB
+         Drive exposed to OS: False
+         Native Block Size: 512
+         Rotational Speed: 10000
+         Firmware Revision: HPDC
+         Serial Number: W5G6DT1X
+         Model: HP      EG0300FBVFL
+         Current Temperature (C): 25
+         Maximum Temperature (C): 48
+         PHY Count: 2
+         PHY Transfer Rate: 6.0Gbps, Unknown
+         Drive Authentication Status: OK
+         Carrier Application Version: 11
+         Carrier Bootloader Version: 6
+         Sanitize Erase Supported: False
+
+      physicaldrive 1I:1:8
+         Port: 1I
+         Box: 1
+         Bay: 8
+         Status: OK
+         Drive Type: Data Drive
+         Interface Type: SAS
+         Size: 300 GB
+         Drive exposed to OS: False
+         Native Block Size: 512
+         Rotational Speed: 10000
+         Firmware Revision: HPDC
+         Serial Number: W5G67DNX
+         Model: HP      EG0300FBVFL
+         Current Temperature (C): 25
+         Maximum Temperature (C): 49
+         PHY Count: 2
+         PHY Transfer Rate: 6.0Gbps, Unknown
+         Drive Authentication Status: OK
+         Carrier Application Version: 11
+         Carrier Bootloader Version: 6
+         Sanitize Erase Supported: False
+
+      physicaldrive 1I:1:9
+         Port: 1I
+         Box: 1
+         Bay: 9
+         Status: OK
+         Drive Type: Data Drive
+         Interface Type: SAS
+         Size: 300 GB
+         Drive exposed to OS: False
+         Native Block Size: 512
+         Rotational Speed: 10000
+         Firmware Revision: HPDC
+         Serial Number: W5G6AH1X
+         Model: HP      EG0300FBVFL
+         Current Temperature (C): 25
+         Maximum Temperature (C): 49
+         PHY Count: 2
+         PHY Transfer Rate: 6.0Gbps, Unknown
+         Drive Authentication Status: OK
+         Carrier Application Version: 11
+         Carrier Bootloader Version: 6
+         Sanitize Erase Supported: False
+
+      physicaldrive 1I:1:10
+         Port: 1I
+         Box: 1
+         Bay: 10
+         Status: OK
+         Drive Type: Data Drive
+         Interface Type: SAS
+         Size: 300 GB
+         Drive exposed to OS: False
+         Native Block Size: 512
+         Rotational Speed: 10000
+         Firmware Revision: HPDC
+         Serial Number: W5G61KEX
+         Model: HP      EG0300FBVFL
+         Current Temperature (C): 25
+         Maximum Temperature (C): 49
+         PHY Count: 2
+         PHY Transfer Rate: 6.0Gbps, Unknown
+         Drive Authentication Status: OK
+         Carrier Application Version: 11
+         Carrier Bootloader Version: 6
+         Sanitize Erase Supported: False
+
+
+   array D
+
+      physicaldrive 1I:1:11
+         Port: 1I
+         Box: 1
+         Bay: 11
+         Status: OK
+         Drive Type: Data Drive
+         Interface Type: SAS
+         Size: 300 GB
+         Drive exposed to OS: False
+         Native Block Size: 512
+         Rotational Speed: 10000
+         Firmware Revision: HPDC
+         Serial Number: W5G50R6X
+         Model: HP      EG0300FBVFL
+         Current Temperature (C): 25
+         Maximum Temperature (C): 49
+         PHY Count: 2
+         PHY Transfer Rate: 6.0Gbps, Unknown
+         Drive Authentication Status: OK
+         Carrier Application Version: 11
+         Carrier Bootloader Version: 6
+         Sanitize Erase Supported: False
+
+      physicaldrive 1I:1:12
+         Port: 1I
+         Box: 1
+         Bay: 12
+         Status: OK
+         Drive Type: Data Drive
+         Interface Type: SAS
+         Size: 300 GB
+         Drive exposed to OS: False
+         Native Block Size: 512
+         Rotational Speed: 10000
+         Firmware Revision: HPDC
+         Serial Number: W5G6DNRX
+         Model: HP      EG0300FBVFL
+         Current Temperature (C): 25
+         Maximum Temperature (C): 49
+         PHY Count: 2
+         PHY Transfer Rate: 6.0Gbps, Unknown
+         Drive Authentication Status: OK
+         Carrier Application Version: 11
+         Carrier Bootloader Version: 6
+         Sanitize Erase Supported: False
+
+      physicaldrive 1I:1:13
+         Port: 1I
+         Box: 1
+         Bay: 13
+         Status: OK
+         Drive Type: Data Drive
+         Interface Type: SAS
+         Size: 300 GB
+         Drive exposed to OS: False
+         Native Block Size: 512
+         Rotational Speed: 10000
+         Firmware Revision: HPDC
+         Serial Number: W5G6DVMX
+         Model: HP      EG0300FBVFL
+         Current Temperature (C): 25
+         Maximum Temperature (C): 48
+         PHY Count: 2
+         PHY Transfer Rate: 6.0Gbps, Unknown
+         Drive Authentication Status: OK
+         Carrier Application Version: 11
+         Carrier Bootloader Version: 6
+         Sanitize Erase Supported: False
+
+      physicaldrive 1I:1:14
+         Port: 1I
+         Box: 1
+         Bay: 14
+         Status: OK
+         Drive Type: Data Drive
+         Interface Type: SAS
+         Size: 300 GB
+         Drive exposed to OS: False
+         Native Block Size: 512
+         Rotational Speed: 10000
+         Firmware Revision: HPDC
+         Serial Number: W5G5LUMX
+         Model: HP      EG0300FBVFL
+         Current Temperature (C): 25
+         Maximum Temperature (C): 48
+         PHY Count: 2
+         PHY Transfer Rate: 6.0Gbps, Unknown
+         Drive Authentication Status: OK
+         Carrier Application Version: 11
+         Carrier Bootloader Version: 6
+         Sanitize Erase Supported: False
+
+
+   unassigned
+
+      physicaldrive 1I:1:15
+         Port: 1I
+         Box: 1
+         Bay: 15
+         Status: OK
+         Drive Type: Unassigned Drive
+         Interface Type: SAS
+         Size: 300 GB
+         Drive exposed to OS: False
+         Native Block Size: 512
+         Rotational Speed: 10000
+         Firmware Revision: HPDC
+         Serial Number: W5G5YH1X
+         Model: HP      EG0300FBVFL
+         Current Temperature (C): 25
+         Maximum Temperature (C): 48
+         PHY Count: 2
+         PHY Transfer Rate: 6.0Gbps, Unknown
+         Drive Authentication Status: OK
+         Carrier Application Version: 11
+         Carrier Bootloader Version: 6
+         Sanitize Erase Supported: False
+
+      physicaldrive 1I:1:16
+         Port: 1I
+         Box: 1
+         Bay: 16
+         Status: OK
+         Drive Type: Unassigned Drive
+         Interface Type: SAS
+         Size: 300 GB
+         Drive exposed to OS: False
+         Native Block Size: 512
+         Rotational Speed: 10000
+         Firmware Revision: HPDC
+         Serial Number: W5G6HD8X
+         Model: HP      EG0300FBVFL
+         Current Temperature (C): 24
+         Maximum Temperature (C): 48
+         PHY Count: 2
+         PHY Transfer Rate: 6.0Gbps, Unknown
+         Drive Authentication Status: OK
+         Carrier Application Version: 11
+         Carrier Bootloader Version: 6
+         Sanitize Erase Supported: False
+
+      physicaldrive 1I:1:17
+         Port: 1I
+         Box: 1
+         Bay: 17
+         Status: OK
+         Drive Type: Unassigned Drive
+         Interface Type: SAS
+         Size: 300 GB
+         Drive exposed to OS: False
+         Native Block Size: 512
+         Rotational Speed: 10000
+         Firmware Revision: HPDC
+         Serial Number: W5G50JGX
+         Model: HP      EG0300FBVFL
+         Current Temperature (C): 24
+         Maximum Temperature (C): 48
+         PHY Count: 2
+         PHY Transfer Rate: 6.0Gbps, Unknown
+         Drive Authentication Status: OK
+         Carrier Application Version: 11
+         Carrier Bootloader Version: 6
+         Sanitize Erase Supported: False
+
+      physicaldrive 1I:1:18
+         Port: 1I
+         Box: 1
+         Bay: 18
+         Status: OK
+         Drive Type: Unassigned Drive
+         Interface Type: SAS
+         Size: 300 GB
+         Drive exposed to OS: False
+         Native Block Size: 512
+         Rotational Speed: 10000
+         Firmware Revision: HPDC
+         Serial Number: W5G421AX
+         Model: HP      EG0300FBVFL
+         Current Temperature (C): 25
+         Maximum Temperature (C): 48
+         PHY Count: 2
+         PHY Transfer Rate: 6.0Gbps, Unknown
+         Drive Authentication Status: OK
+         Carrier Application Version: 11
+         Carrier Bootloader Version: 6
+         Sanitize Erase Supported: False
+
+      physicaldrive 1I:1:19
+         Port: 1I
+         Box: 1
+         Bay: 19
+         Status: OK
+         Drive Type: Unassigned Drive
+         Interface Type: SAS
+         Size: 300 GB
+         Drive exposed to OS: False
+         Native Block Size: 512
+         Rotational Speed: 10000
+         Firmware Revision: HPDC
+         Serial Number: W5G5YKVX
+         Model: HP      EG0300FBVFL
+         Current Temperature (C): 25
+         Maximum Temperature (C): 48
+         PHY Count: 2
+         PHY Transfer Rate: 6.0Gbps, Unknown
+         Drive Authentication Status: OK
+         Carrier Application Version: 11
+         Carrier Bootloader Version: 6
+         Sanitize Erase Supported: False
+
+      physicaldrive 1I:1:20
+         Port: 1I
+         Box: 1
+         Bay: 20
+         Status: OK
+         Drive Type: Unassigned Drive
+         Interface Type: SAS
+         Size: 300 GB
+         Drive exposed to OS: False
+         Native Block Size: 512
+         Rotational Speed: 10000
+         Firmware Revision: HPDC
+         Serial Number: W5G50JVX
+         Model: HP      EG0300FBVFL
+         Current Temperature (C): 25
+         Maximum Temperature (C): 49
+         PHY Count: 2
+         PHY Transfer Rate: 6.0Gbps, Unknown
+         Drive Authentication Status: OK
+         Carrier Application Version: 11
+         Carrier Bootloader Version: 6
+         Sanitize Erase Supported: False
+
+      physicaldrive 1I:1:21
+         Port: 1I
+         Box: 1
+         Bay: 21
+         Status: OK
+         Drive Type: Unassigned Drive
+         Interface Type: SAS
+         Size: 300 GB
+         Drive exposed to OS: False
+         Native Block Size: 512
+         Rotational Speed: 10000
+         Firmware Revision: HPDC
+         Serial Number: W5G5RSSY
+         Model: HP      EG0300FBVFL
+         Current Temperature (C): 25
+         Maximum Temperature (C): 48
+         PHY Count: 2
+         PHY Transfer Rate: 6.0Gbps, Unknown
+         Drive Authentication Status: OK
+         Carrier Application Version: 11
+         Carrier Bootloader Version: 6
+         Sanitize Erase Supported: False
+
+      physicaldrive 1I:1:22
+         Port: 1I
+         Box: 1
+         Bay: 22
+         Status: OK
+         Drive Type: Unassigned Drive
+         Interface Type: SAS
+         Size: 300 GB
+         Drive exposed to OS: False
+         Native Block Size: 512
+         Rotational Speed: 10000
+         Firmware Revision: HPDC
+         Serial Number: W5G69T5X
+         Model: HP      EG0300FBVFL
+         Current Temperature (C): 26
+         Maximum Temperature (C): 49
+         PHY Count: 2
+         PHY Transfer Rate: 6.0Gbps, Unknown
+         Drive Authentication Status: OK
+         Carrier Application Version: 11
+         Carrier Bootloader Version: 6
+         Sanitize Erase Supported: False
+
+      physicaldrive 1I:1:23
+         Port: 1I
+         Box: 1
+         Bay: 23
+         Status: OK
+         Drive Type: Unassigned Drive
+         Interface Type: SAS
+         Size: 300 GB
+         Drive exposed to OS: False
+         Native Block Size: 512
+         Rotational Speed: 10000
+         Firmware Revision: HPDC
+         Serial Number: W5G5X40Y
+         Model: HP      EG0300FBVFL
+         Current Temperature (C): 25
+         Maximum Temperature (C): 48
+         PHY Count: 2
+         PHY Transfer Rate: 6.0Gbps, Unknown
+         Drive Authentication Status: OK
+         Carrier Application Version: 11
+         Carrier Bootloader Version: 6
+         Sanitize Erase Supported: False
+
+      physicaldrive 1I:1:24
+         Port: 1I
+         Box: 1
+         Bay: 24
+         Status: OK
+         Drive Type: Unassigned Drive
+         Interface Type: SAS
+         Size: 300 GB
+         Drive exposed to OS: False
+         Native Block Size: 512
+         Rotational Speed: 10000
+         Firmware Revision: HPDC
+         Serial Number: W5G5R52Y
+         Model: HP      EG0300FBVFL
+         Current Temperature (C): 25
+         Maximum Temperature (C): 49
+         PHY Count: 2
+         PHY Transfer Rate: 6.0Gbps, Unknown
+         Drive Authentication Status: OK
+         Carrier Application Version: 11
+         Carrier Bootloader Version: 6
+         Sanitize Erase Supported: False
+
+      physicaldrive 1I:1:25
+         Port: 1I
+         Box: 1
+         Bay: 25
+         Status: OK
+         Drive Type: Unassigned Drive
+         Interface Type: SAS
+         Size: 300 GB
+         Drive exposed to OS: False
+         Native Block Size: 512
+         Rotational Speed: 15000
+         Firmware Revision: HPD5
+         Serial Number: 6XN7ZA460000N52131P6
+         Model: HP      EH0300FBQDD
+         Current Temperature (C): 43
+         Maximum Temperature (C): 61
+         PHY Count: 2
+         PHY Transfer Rate: 6.0Gbps, Unknown
+         Drive Authentication Status: OK
+         Carrier Application Version: 11
+         Carrier Bootloader Version: 6
+         Sanitize Erase Supported: False
+
+      physicaldrive 1I:1:26
+         Port: 1I
+         Box: 1
+         Bay: 26
+         Status: OK
+         Drive Type: Unassigned Drive
+         Interface Type: SAS
+         Size: 300 GB
+         Drive exposed to OS: False
+         Native Block Size: 512
+         Rotational Speed: 15000
+         Firmware Revision: HPD5
+         Serial Number: 6XN7ZA200000N52131NB
+         Model: HP      EH0300FBQDD
+         Current Temperature (C): 43
+         Maximum Temperature (C): 61
+         PHY Count: 2
+         PHY Transfer Rate: 6.0Gbps, Unknown
+         Drive Authentication Status: OK
+         Carrier Application Version: 11
+         Carrier Bootloader Version: 6
+         Sanitize Erase Supported: False
+
