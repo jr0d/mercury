@@ -112,9 +112,11 @@ class UDevHelper(object):
         result = []
 
         for candidate in self.context.list_devices(subsystem='net'):
-            if 'type' in candidate.attributes:
+            try:
                 if candidate.attributes.asint('type') == 1:
                     result.append(candidate)
+            except KeyError:
+                pass
 
         # let's go ahead and return it sorted..
         result.sort(key=lambda dev: dev.sys_name)
