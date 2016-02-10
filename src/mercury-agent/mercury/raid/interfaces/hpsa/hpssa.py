@@ -13,6 +13,8 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
+# https://kallesplayground.wordpress.com/useful-stuff/hp-smart-array-cli-commands-under-esxi/ < This!
+
 """
 hpssa hierarchy:
 
@@ -22,17 +24,18 @@ slot:
             physicaldrive
 
 Parsing (scraping) this output is dangerous and calls into this class should
-be treated with extreme prejudice
+be treated with extreme prejudice.
+
+THERE BE DRAGONS HERE
 """
+
 import logging
-import pexpect  # smh
 import os
 import re
 import time
 
-from press.layout.size import Size
 from mercury.common.helpers.cli import run, find_in_path
-
+from mercury.common.helpers.size import Size
 
 LOG = logging.getLogger(__name__)
 
@@ -213,6 +216,77 @@ class HPSSA(object):
     def refresh(self):
         self.adapters = self._raw_system_info()
 
+    def get_slot_details(self, slot):
+        for adapter in self.adapters:
+            # TODO: clean up adapter structure, so that ints are ints, OKs or bools, etc
+            if slot == int(adapter['slot']):
+                return adapter
+
+    def cache_ok(self, slot):
+        adapter = self.get_slot_details(slot)
+        return adapter.get('cache_status') == 'OK'
+
+    def get_arrays(self, slot):
+        adapter = self.get_slot_details(slot)
+        return adapter['configuration']['arrays']
+
+    def get_array_letters(self, slot):
+        arrays = self.get_arrays(slot)
+        return [x['letter'] for x in arrays]
+
+    def get_next_array_letter(self, slot):
+        """
+        TODO: Do some research here to determine what happens when we encounter more
+        than 26 arrays
+        :return:
+        """
+        letters = self.get_array_letters(slot)
+        if not letters:
+            return 'A'
+
+        last_letter = letters[-1]
+        if 'letter' == 'Z':
+            # TODO: Find out an array after Z becomes AA, if not ... *gasp*
+            raise HPRaidException('Really dumb limitation encountered')
+        return chr(ord(last_letter) + 1)
+
+    def get_array(self, slot, letter):
+        arrays = self.get_arrays(slot)
+        for array in arrays:
+            if array['letter'] == letter:
+                return array
+
+    def create(self, slot, selection, raid, array_letter=None, array_type='ld', size='max',
+               stripe_size='default', write_policy='writeback',
+               secotors=32, caching=True, ssd_overprovisioning=False, data_ld=None,
+               parity_init_method='default'):
+        """
+        Create an array
+
+        :param selction: all, allunassigned, Port:Box:Bay,...  , 1I:1:1-1I:1:6
+        :param raid: 0, 1, 5, 6, 1+0, 1+0asm, 50, 60
+        :param array_type: ld, ldcache, arrayr0
+        :param size: size in MB, min, max, maxmbr
+        :param stripe_size: 2**3-10 (8-1024), default
+        :param secotors: 32, 64
+        :param caching: True | False
+        :param ssd_overprovisioning: True | False
+        :param data_ld: ld ID, required if array_type == ldcache
+        :return:
+        """
+        if array_type == 'ldcache':
+            if not data_ld:
+                raise HPRaidException('Type: ldcache requires data_ld')
+            if caching:
+                LOG.warning('Standard caching is not supported on type: ldcache')
+                caching = False
+
+        if not array_letter:
+            array_letter = self.get_next_array_letter(slot)
+
+        command_builder = 'ctrl slot={slot} array {array_letter} ' \
+                          'create type={array_type}'
+
 
 
 if __name__ == '__main__':
@@ -220,7 +294,7 @@ if __name__ == '__main__':
     _hpssa = HPSSA()
     from pprint import pprint
     pprint(_hpssa.adapters)
-
+    print _hpssa.cache_ok(0)
 
 
 
