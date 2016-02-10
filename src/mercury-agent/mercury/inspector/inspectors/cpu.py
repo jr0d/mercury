@@ -14,7 +14,7 @@
 #    limitations under the License.
 
 import inspector
-from mercury.inspector.lib.cpuinfo import CPUInfo
+from mercury.common.misc.cpuinfo import CPUInfo
 
 
 @inspector.expose('cpu')

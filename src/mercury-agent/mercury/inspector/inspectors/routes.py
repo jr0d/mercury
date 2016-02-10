@@ -18,7 +18,7 @@ The current device routing table
 """
 
 import inspector
-from mercury.inspector.lib.iproute2 import IPRoute2
+from mercury.common.misc.iproute2 import IPRoute2
 
 
 @inspector.expose('routes')

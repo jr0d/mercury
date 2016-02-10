@@ -15,9 +15,9 @@
 
 import logging
 
-from mercury.agent.inspector.inspectors import inspectors
+from .inspectors import inspectors
 
-from mercury.inspector.lib.mercury_id import generate_mercury_id
+from mercury.common.mercury_id import generate_mercury_id
 
 
 def _collect():

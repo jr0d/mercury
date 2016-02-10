@@ -14,14 +14,14 @@
 #    limitations under the License.
 
 import logging
-
 import netifaces
-from mercury.agent.inspector.lib import biosdevname
-from mercury.agent.inspector.lib.sysfs import NetClass
-from mercury.agent.inspector.lib.udev import UDevHelper
 
 import inspector
-from mercury.inspector.lib import network_interfaces
+
+from mercury.common.misc import biosdevname
+from mercury.common.misc.sysfs import NetClass
+from mercury.common.misc.udev import UDevHelper
+from mercury.common.misc import network_interfaces
 
 log = logging.getLogger(__name__)
 

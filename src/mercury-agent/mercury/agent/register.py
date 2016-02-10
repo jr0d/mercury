@@ -18,12 +18,13 @@ import time
 
 import msgpack
 import zmq
-from mercury.agent.inspector.inspectors.routes import find_default_route
 
 from mercury.agent.config import AGENT_CONFIG_FILE
 from mercury.common.configuration import get_configuration
 from mercury.common.exceptions import MercuryCritical
 from mercury.inspector.inspectors.interfaces import get_interface_by_name
+from mercury.inspector.inspectors.routes import find_default_route
+
 
 log = logging.getLogger(__name__)
 
@@ -119,7 +120,7 @@ if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
     from mercury.inspector import inspect
     from mercury.agent.capabilities import runtime_capabilities
-    collection = inspect()
+    collection = inspect.inspect()
 
     _mercury_id = collection['mercury_id']
     _local_ip = get_dhcp_ip(collection)

@@ -15,10 +15,10 @@
 
 from collections import OrderedDict
 
-from press.structure.size import Size
+from mercury.common.helpers.size import Size
 
-from mercury.raid import HPRaid
-from mercury.raid import LSIRaid
+from mercury.raid.interfaces.hpsa.hpacu import HPRaid
+from mercury.raid.interfaces.lsi.megaraid.megacli import LSIRaid
 
 MEGACLI_PATH = '/usr/local/sbin/megacli'
 

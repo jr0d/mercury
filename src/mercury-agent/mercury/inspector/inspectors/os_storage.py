@@ -14,7 +14,7 @@
 #    limitations under the License.
 
 import inspector
-from mercury.inspector.lib import UDevHelper
+from mercury.common.misc.udev import UDevHelper
 
 
 @inspector.expose('os_storage')
