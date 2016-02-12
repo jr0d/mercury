@@ -23,7 +23,6 @@ log = logging.getLogger(__name__)
 
 RPC_CONFIG_FILE = 'mercury-rpc.yaml'
 
-
 class RegistrationService(SimpleRouterReqService):
     def __init__(self, collection):
         configuration = get_configuration(RPC_CONFIG_FILE)

@@ -16,13 +16,6 @@
 # https://kallesplayground.wordpress.com/useful-stuff/hp-smart-array-cli-commands-under-esxi/ < This!
 
 """
-hpssa hierarchy:
-
-slot:
-    array:
-        logicaldrive:
-            physicaldrive
-
 Parsing (scraping) this output is dangerous and calls into this class should
 be treated with extreme prejudice.
 
@@ -138,8 +131,10 @@ def parse_show_config(config):
 
     array_info = {}
     arrays = []
+    unassigned_drives = False
+    unassigned = []
     drives = []
-    configuration = {'arrays': arrays, 'drives': drives}
+    configuration = {'arrays': arrays, 'drives': drives, 'unassigned': unassigned}
 
     for line in config.splitlines():
         if line[:6] == _drive_indent:
@@ -167,6 +162,12 @@ def parse_show_config(config):
                         ld_info
                     )
 
+            if unassigned_drives:
+                if pd_info:
+                    unassigned.append(
+                        pd_info
+                    )
+
         if line[:3] == _array_indent:
             if line.find('array') == 3:
                 if array_info:
@@ -180,13 +181,20 @@ def parse_show_config(config):
             if line.find('unassigned') == 3:
                 arrays.append(array_info)
                 array_info = None
+                unassigned_drives = True
                 continue
+
+    # If there are no unassigned drives, we need to append the last array
+
+    if not unassigned_drives:
+        arrays.append(array_info)
 
     return configuration
 
 
 class HPSSA(object):
     details_command = 'ctrl all show detail'
+    parity_levels = [5, 6, 50, 60]
 
     def __init__(self, hpssa_path='hpssacli'):
         self.hpssacli_path = find_in_path(hpssa_path)
@@ -256,9 +264,71 @@ class HPSSA(object):
             if array['letter'] == letter:
                 return array
 
+    def get_drive(self, slot, drive_id):
+        adapter = self.get_slot_details(slot)
+        for drive in adapter['configuration']['drives']:
+            _id = '%s:%s:%s' % (drive['port'], drive['box'], drive['bay'])
+            print _id
+            print drive_id
+            if drive_id == _id:
+                return drive
+
+    @staticmethod
+    def _expand_range(_id_range):
+        """
+        Ditch this, we should sort drives by port:box:bay and then select drives by
+        enum index
+        :param _id_range:
+        :return:
+        """
+        expanded = []
+        sp = _id_range.split(':')
+        loc = sp[:2]
+        r = sp[2]
+
+        for i in xrange(*[int(x) for x in r.split('-')]):
+            expanded.append('%s:%d' % (loc, i))
+
+        return expanded
+
+    def get_drives_from_selection(self, slot, s):
+        adapter = self.get_slot_details(slot)
+        if not adapter:
+            return []
+
+        if s == 'all':
+            return adapter['configuration']['drives']
+
+        if s == 'allunassigned':
+            return adapter['configuration']['unassigned']
+
+        items = s.split(',')
+
+        print items
+        drives = []
+        for idx in xrange(len(items)):
+            if '-' in items[idx]:
+                drives += self._expand_range(items[idx])
+                continue
+            drives.append(self.get_drive(slot, items[idx]))
+
+        return drives
+
+    @staticmethod
+    def is_ssd(drive):
+        return 'Solid State' in drive['type'] or 'SSD' in drive['type']
+
+    def all_ssd(self, drives):
+        print drives
+        for drive in drives:
+            print drive
+            if not self.is_ssd(drive):
+                return False
+        return True
+
     def create(self, slot, selection, raid, array_letter=None, array_type='ld', size='max',
                stripe_size='default', write_policy='writeback',
-               secotors=32, caching=True, ssd_overprovisioning=False, data_ld=None,
+               secotors=32, caching=True, data_ld=None,
                parity_init_method='default'):
         """
         Create an array
@@ -268,25 +338,77 @@ class HPSSA(object):
         :param array_type: ld, ldcache, arrayr0
         :param size: size in MB, min, max, maxmbr
         :param stripe_size: 2**3-10 (8-1024), default
+        :param write_policy:
         :param secotors: 32, 64
         :param caching: True | False
-        :param ssd_overprovisioning: True | False
         :param data_ld: ld ID, required if array_type == ldcache
         :return:
         """
-        if array_type == 'ldcache':
-            if not data_ld:
-                raise HPRaidException('Type: ldcache requires data_ld')
-            if caching:
-                LOG.warning('Standard caching is not supported on type: ldcache')
-                caching = False
 
         if not array_letter:
             array_letter = self.get_next_array_letter(slot)
 
-        command_builder = 'ctrl slot={slot} array {array_letter} ' \
-                          'create type={array_type}'
+        command = 'ctrl slot={slot} create type={type} drives={drives} ' \
+                  'raid={raid} size={size} stripesize={stripe_size}'.format(
+            **{
+                'slot': slot,
+                'type': array_type,
+                'drives': selection,
+                'raid': raid,
+                'size': size,
+                'stripe_size': stripe_size
+            }
+        )
 
+        standard_array_options = {
+            'sectors': secotors,
+            'caching': caching and 'enable' or 'disable',
+        }
+
+        cache_array_options = {
+            'datald': data_ld,
+            'writepolicy': write_policy
+        }
+
+        ssd_array_options = {
+            'ssdoverprovisioningoptimization': 'on'
+        }
+
+        parity_array_options = {
+            'parityinitializationmethod': parity_init_method
+        }
+
+        build_options = lambda o: ' %s' % ' '.join(['%s=%s' % (x, o[x]) for x in o])
+
+        standard_array_types = ['ld', 'arrayr0']
+
+        if array_type in standard_array_types:
+            command += build_options(standard_array_options)
+
+        elif array_type == 'ldcache':
+            if not data_ld:
+                raise HPRaidException('Type: ldcache requires data_ld')
+
+            command += build_options(cache_array_options)
+
+        else:
+            raise HPRaidException('Type: %s is not supported' % array_type)
+
+        if self.all_ssd(self.get_drives_from_selection(slot, selection)):
+            command += build_options(ssd_array_options)
+
+        try:
+            if int(raid) in self.parity_levels:
+                command += build_options(parity_array_options)
+        except ValueError:
+            # 1+0 and 1+0asm will hit here
+            pass
+
+        result = self.run(command)
+
+        # return array_letter
+        LOG.info(array_letter)
+        return result
 
 
 if __name__ == '__main__':
@@ -296,6 +418,11 @@ if __name__ == '__main__':
     pprint(_hpssa.adapters)
     print _hpssa.cache_ok(0)
 
+    print _hpssa.get_drive(0, '1I:1:19')
+    res = _hpssa.create(0, '1I:1:19,1I:1:20', 1)
 
+    print res
+    print res.stderr
+    print res.returncode
 
 
