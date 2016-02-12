@@ -192,6 +192,20 @@ def parse_show_config(config):
     return configuration
 
 
+def parse_drive_info(pd_info):
+    details_indent = ' ' * 9
+    pd_details = {}
+    for line in pd_info.splitlines():
+        if not line:
+            continue
+
+        if line.find(details_indent) == 0:
+            label, data = line.split(':', 1)
+            pd_details[__scrub_label(label)] = data.strip()
+
+    return pd_details
+
+
 class HPSSA(object):
     details_command = 'ctrl all show detail'
     parity_levels = [5, 6, 50, 60]
@@ -410,6 +424,18 @@ class HPSSA(object):
         LOG.info(array_letter)
         return result
 
+    def get_pd_info(self, slot, pd):
+        cmd = 'ctrl slot=%s pd %s show detail' % (slot, pd)
+        return parse_drive_info(self.run(cmd))
+
+    @staticmethod
+    def asseble_id(pd_info):
+        return '%s:%s:%s' % (pd_info['port'], pd_info['box'], pd_info['bay'])
+
+    def get_pd_by_index(self, slot, idx):
+        adapter = self.get_slot_details(slot)
+        pd_info = adapter['configuration']['drives'][idx]
+        return self.asseble_id(pd_info)
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
@@ -419,10 +445,13 @@ if __name__ == '__main__':
     print _hpssa.cache_ok(0)
 
     print _hpssa.get_drive(0, '1I:1:19')
-    res = _hpssa.create(0, '1I:1:19,1I:1:20', 1)
+    # res = _hpssa.create(0, '1I:1:19,1I:1:20', 1)
 
-    print res
-    print res.stderr
-    print res.returncode
+    # print res
+    # print res.stderr
+    # print res.returncode
+
+    pprint(_hpssa.get_pd_info(0, '1I:1:19'))
+    pprint(_hpssa.get_pd_info(0, _hpssa.get_pd_by_index(0, 19)))
 
 
