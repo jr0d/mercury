@@ -38,3 +38,47 @@ class InventoryDBController(object):
     def __init__(self, collection):
         self.collection = collection
         self.collection.ensure_index('mercury_id', unique=True)
+
+    def update(self, data):
+        mercury_id = data.get('mercury_id')
+        if not mercury_id:
+            raise Exception('MercuryID is missing from data')
+
+        existing = self.collection.find_one({'mercury_id': mercury_id}, projection={'_id': 1})
+        if existing:
+            object_id = existing['_id']
+            log.debug('Updating _id: %s,  m_id: %s' % (object_id, mercury_id))
+            self.collection.update_one({'_id': object_id}, {'$set': data})
+        else:
+            insert_result = self.collection.insert_one(data)
+            object_id = insert_result.inserted_id
+            log.info('Created record for %s <ObjectID: %s>' % (mercury_id, object_id))
+
+        return object_id
+
+    def delete(self, mercury_id):
+        log.info('Deleting: %s' % mercury_id)
+        self.collection.delete_one({'mercury_id': mercury_id})
+
+    def get_one(self, mercury_id):
+        log.debug('Fetching: %s' % mercury_id)
+        return self.collection.find_one({'mercury_id': mercury_id})
+
+    def query(self, query):
+        log.debug('Executing query: %s' % query)
+        return self.collection.find(query, projection={'mercury_id': 1})
+
+if __name__ == '__main__':
+    from mercury.common.mongo import get_collection
+    logging.basicConfig(level=logging.DEBUG)
+    c = get_collection('test', 'mercury_inventory')
+    idbc = InventoryDBController(c)
+    oid = idbc.update({'mercury_id': '12345', 'blah': True})
+    print oid
+
+    print idbc.get_one('12345')
+    print idbc.get_one('x')
+    time.sleep(5)
+    log.info('result: ' + str(list(idbc.query({'blah': True}))))
+
+    idbc.delete('12345')

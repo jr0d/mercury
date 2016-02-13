@@ -46,10 +46,12 @@ class InventoryController(object):
     def index(self):
         return 'Hello World'
 
-    @endpoint('add')
-    def add(self, **kwargs):
+    @endpoint('update')
+    def update(self, **kwargs):
         mercury_id = kwargs.get('mercury_id')
-
+        if not mercury_id:
+            raise EndpointError('Request is missing mercury_id')
+        LOG.debug('')
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
