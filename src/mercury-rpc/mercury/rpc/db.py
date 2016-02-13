@@ -58,7 +58,7 @@ class ActiveInventoryDBController(object):
         return 'mercury_id: {mercury_id}, server: {rpc_address}, rpc_port: {rpc_port}, ' \
                'ping_port: {ping_port}'.format(**data)
 
-    def insert(self, data):
+    def update(self, data):
         document = self.collection.find_one({'mercury_id': data['mercury_id']})
 
         data['time_created'] = time.time()
@@ -75,8 +75,8 @@ class ActiveInventoryDBController(object):
             'Adding active inventory: %s' % self.data_format(data))
         return self.collection.insert_one(data).inserted_id
 
-    def remove(self, mercury_id):
-        log.debug('Removing mercury_id: %s' % mercury_id)
+    def delete(self, mercury_id):
+        log.debug('Deleting mercury_id: %s' % mercury_id)
         document = self.collection.find_one_and_delete({'mercury_id': mercury_id},
                                                        projection=['mercury_id',
                                                                    'time_created'])
@@ -88,7 +88,7 @@ class ActiveInventoryDBController(object):
         log.info('Removed mercury_id: %s, lived: %s' % (mercury_id,
                                                         now - document['time_created']))
 
-    def get(self, mercury_id):
+    def get_one(self, mercury_id):
         return self.collection.find_one({'mercury_id': mercury_id})
 
 
@@ -100,6 +100,6 @@ if __name__ == '__main__':
                  capabilities={'echo': dict(desc='echo\'s argument[0] to the console', args=1, kwargs=[])})
     _collection = get_collection('test', 'mercury_rpc')
     aidbc = ActiveInventoryDBController(_collection)
-    print aidbc.insert(_data)
-    print aidbc.get(1234)
-    aidbc.remove(1234)
+    print aidbc.update(_data)
+    print aidbc.get_one(1234)
+    aidbc.delete(1234)

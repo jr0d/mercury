@@ -66,7 +66,7 @@ def pinger(server, mercury_id, db_controller):
         time.sleep(5)
 
     log.info('%s : %s ping timeout' % (mercury_id, server))
-    db_controller.remove(mercury_id)
+    db_controller.delete(mercury_id)
 
 
 def spawn(server, mercury_id, db_controller):

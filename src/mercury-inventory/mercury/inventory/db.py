@@ -47,9 +47,13 @@ class InventoryDBController(object):
         existing = self.collection.find_one({'mercury_id': mercury_id}, projection={'_id': 1})
         if existing:
             object_id = existing['_id']
+            data['time_updated'] = time.time()
             log.debug('Updating _id: %s,  m_id: %s' % (object_id, mercury_id))
             self.collection.update_one({'_id': object_id}, {'$set': data})
         else:
+            now = time.time()
+            data['time_created'] = now
+            data['time_updated'] = now
             insert_result = self.collection.insert_one(data)
             object_id = insert_result.inserted_id
             log.info('Created record for %s <ObjectID: %s>' % (mercury_id, object_id))
@@ -74,11 +78,10 @@ if __name__ == '__main__':
     c = get_collection('test', 'mercury_inventory')
     idbc = InventoryDBController(c)
     oid = idbc.update({'mercury_id': '12345', 'blah': True})
-    print oid
+    log.info('Created : %s' % oid)
 
-    print idbc.get_one('12345')
-    print idbc.get_one('x')
-    time.sleep(5)
+    log.info('Get result for 12345: %s' % idbc.get_one('12345'))
+    log.info('Get result for x: %s' % idbc.get_one('x'))
     log.info('result: ' + str(list(idbc.query({'blah': True}))))
 
     idbc.delete('12345')

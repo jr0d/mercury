@@ -23,6 +23,7 @@ log = logging.getLogger(__name__)
 
 RPC_CONFIG_FILE = 'mercury-rpc.yaml'
 
+
 class RegistrationService(SimpleRouterReqService):
     def __init__(self, collection):
         configuration = get_configuration(RPC_CONFIG_FILE)
@@ -43,7 +44,7 @@ class RegistrationService(SimpleRouterReqService):
             log.error('Recieved invalid data')
             return dict(error=True, message='Invalid request')
 
-        self.db_controller.insert(data)
+        self.db_controller.update(data)
         endpoint = 'tcp://%s:%s' % (data['rpc_address'], data['ping_port'])
         spawn(endpoint, data['mercury_id'], self.db_controller)
 
