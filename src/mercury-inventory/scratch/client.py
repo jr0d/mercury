@@ -16,6 +16,8 @@
 import msgpack
 import zmq
 
+from pprint import pprint
+
 
 def transceiver(s, d):
     packed = msgpack.packb(d)
@@ -30,7 +32,7 @@ socket.connect('tcp://localhost:9000')
 # CREATE
 payload = dict(
         endpoint='update',
-        args = [{
+        args=[{
                 'mercury_id': 12345,
                 'attribute1': 'I am a pickle',
                 'attribute2': 'I hate pickles'
@@ -43,7 +45,15 @@ print transceiver(socket, payload)
 payload = dict(
     endpoint='get_one',
     args=[12345],
-    kwargs={ 'projection': {'attribute2': 1, 'mercury_id': 1}}
+    kwargs={'projection': {'attribute2': 1, 'mercury_id': 1}}
+)
+
+print transceiver(socket, payload)
+
+# QUERY
+payload = dict(
+    endpoint='query',
+    args=[{'attribute2': 'I hate pickles'}]
 )
 
 print transceiver(socket, payload)
@@ -54,4 +64,4 @@ payload = dict(
     args=[12345]
 )
 
-print transceiver(socket, payload)
+pprint(transceiver(socket, payload))

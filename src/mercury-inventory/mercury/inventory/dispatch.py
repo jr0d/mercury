@@ -51,19 +51,13 @@ class Dispatcher(object):
                 '\n'.join(tb)
             ))
             return dict(error=True, traceback=tb, message=endpoint_error.message)
-        except TypeError as type_error:
-            tb = traceback.format_exception(*sys.exc_info())
-            if 'unexpected keyword argument' in type_error.message:
-                LOG.info('Received incorrect argument spec for %s : <%s>' % (endpoint, type_error.message))
-                return dict(error=True, traceback=tb, message=type_error.message)
-            raise
         except Exception as e:
             tb = traceback.format_exception(*sys.exc_info())
-            LOG.error('An unhandled exception has been encountered: endpoint=%s, message=%s, traceback=%s') % (
+            LOG.error('An unhandled exception has been encountered: endpoint=%s, message=%s, traceback=%s' % (
                 endpoint,
                 e.message,
                 '\n'.join(tb)
-            )
+            ))
             return dict(error=True, traceback=tb, message=e.message)
 
         return dict(error=False, response=response)
