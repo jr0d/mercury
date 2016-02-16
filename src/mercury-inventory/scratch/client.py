@@ -16,10 +16,42 @@
 import msgpack
 import zmq
 
+
+def transceiver(s, d):
+    packed = msgpack.packb(d)
+    s.send_multipart([packed])
+    return msgpack.unpackb(socket.recv())
+
+
 ctx = zmq.Context()
 socket = ctx.socket(zmq.REQ)
 socket.connect('tcp://localhost:9000')
-packed = msgpack.packb(dict(endpoint='X'))
-socket.send_multipart([packed])
-response = msgpack.unpackb(socket.recv())
-print response
+
+# CREATE
+payload = dict(
+        endpoint='update',
+        args = [{
+                'mercury_id': 12345,
+                'attribute1': 'I am a pickle',
+                'attribute2': 'I hate pickles'
+               }]
+        )
+
+print transceiver(socket, payload)
+
+# GET
+payload = dict(
+    endpoint='get_one',
+    args=[12345],
+    kwargs={ 'projection': {'attribute2': 1, 'mercury_id': 1}}
+)
+
+print transceiver(socket, payload)
+
+# DELETE
+payload = dict(
+    endpoint='delete',
+    args=[12345]
+)
+
+print transceiver(socket, payload)

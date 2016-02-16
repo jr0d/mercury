@@ -75,12 +75,12 @@ class InventoryController(object):
         return 'Hello World'
 
     @endpoint('update')
-    def update(self, **kwargs):
-        mercury_id = kwargs.get('mercury_id')
+    def update(self, update_data):
+        mercury_id = update_data.get('mercury_id')
         if not mercury_id:
             raise EndpointError('Request is missing mercury_id', endpoint='update', request=kwargs)
 
-        object_id = self.db.update(kwargs)
+        object_id = self.db.update(update_data)
 
         return {'object_id': self.__serialize_object_id(object_id)}
 

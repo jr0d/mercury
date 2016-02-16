@@ -14,6 +14,7 @@
 #    limitations under the License.
 
 import logging
+
 from mercury.common.transport import SimpleRouterReqService
 from mercury.common.configuration import get_configuration
 from mercury.rpc.db import ActiveInventoryDBController
