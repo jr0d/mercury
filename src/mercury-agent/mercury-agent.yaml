@@ -1,5 +1,4 @@
 agent:
-  # dickpuppet
   service_bind_address: tcp://0.0.0.0:9003
   capability_package_dir: ./packages
   pong_bind_address: tcp://0.0.0.0:9004
@@ -10,7 +9,4 @@ agent:
 remote:
   rpc_service: tcp://localhost:9002
   rpc_mongo_replica_set: None
-  inventory_mongo_database: mercury_inventory
-  inventory_mongo_servers:
-    - localhost:27017
-  inventory_mongo_replica_set: None
+  inventory_service: tcp://localhost:9000

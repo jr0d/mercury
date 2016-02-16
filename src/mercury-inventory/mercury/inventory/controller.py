@@ -13,10 +13,14 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
+import bson
 import logging
-from pymongo import MongoClient
 
+from mercury.common.mongo import get_collection
+from mercury.inventory.db import InventoryDBController
+from mercury.inventory.configuration import inventory_configuration
 from mercury.inventory.exceptions import EndpointError
+
 
 LOG = logging.getLogger(__name__)
 
@@ -40,7 +44,31 @@ def endpoint(name):
 
 class InventoryController(object):
     def __init__(self):
+        self.db_configuration = inventory_configuration.get('inventory', {}).get('db', {})
+        LOG.debug('DB Configuration: %s' % self.db_configuration)
+        db_name = self.db_configuration.get('name')
+        if not db_name:
+            LOG.warning('DB name is not specified, using test')
+            db_name = 'test'
+
+        self.collection = get_collection(
+            db_name,  # Perhaps we should raise an exception
+            self.db_configuration.get('collection', 'inventory'),
+            server_or_servers=self.db_configuration.get('servers', ['localhost']),
+            replica_set=self.db_configuration.get('replica_set')
+        )
+        self.db = InventoryDBController(self.collection)
         self.endpoints = runtime_endpoints
+
+    @staticmethod
+    def __serialize_object_id(obj):
+        if isinstance(obj, bson.ObjectId):
+            obj = str(obj)
+
+        if isinstance(obj, dict):
+            obj['_id'] = str(obj['_id'])
+
+        return obj
 
     @endpoint('index')
     def index(self):
@@ -50,8 +78,29 @@ class InventoryController(object):
     def update(self, **kwargs):
         mercury_id = kwargs.get('mercury_id')
         if not mercury_id:
-            raise EndpointError('Request is missing mercury_id')
-        LOG.debug('')
+            raise EndpointError('Request is missing mercury_id', endpoint='update', request=kwargs)
+
+        object_id = self.db.update(kwargs)
+
+        return {'object_id': self.__serialize_object_id(object_id)}
+
+    @endpoint('delete')
+    def delete(self, mercury_id):
+        return self.db.delete(mercury_id=mercury_id)
+
+    @endpoint('get_one')
+    def get_one(self, mercury_id, projection=None):
+        return self.__serialize_object_id(self.db.get_one(mercury_id=mercury_id, projection=projection))
+
+    @endpoint('query')
+    def query(self, q):
+        c = self.db.query(query=q)
+        total_items = c.count()
+        items = []
+        for document in c:
+            items.append(self.__serialize_object_id(document))
+        return {'count': total_items, 'items': items}
+
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)

@@ -19,20 +19,6 @@ import time
 
 log = logging.getLogger(__name__)
 
-__scaffold = {
-    'mercury_id': '',
-    'interfaces': [],
-    'pci': [],
-    'processors': {},
-    'memory_modules': [],
-    'os_storage': [],
-    'raid': {},
-    'dmi': {},
-    'efi': {},
-    'obm': {},
-    'dhcp_info': {}
-}
-
 
 class InventoryDBController(object):
     def __init__(self, collection):
@@ -64,13 +50,14 @@ class InventoryDBController(object):
         log.info('Deleting: %s' % mercury_id)
         self.collection.delete_one({'mercury_id': mercury_id})
 
-    def get_one(self, mercury_id):
+    def get_one(self, mercury_id, projection=None):
         log.debug('Fetching: %s' % mercury_id)
-        return self.collection.find_one({'mercury_id': mercury_id})
+        return self.collection.find_one({'mercury_id': mercury_id}, projection=projection)
 
     def query(self, query):
         log.debug('Executing query: %s' % query)
         return self.collection.find(query, projection={'mercury_id': 1})
+
 
 if __name__ == '__main__':
     from mercury.common.mongo import get_collection

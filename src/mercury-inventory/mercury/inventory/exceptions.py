@@ -14,7 +14,6 @@
 #    limitations under the License.
 
 
-
 class EndpointError(Exception):
     def __init__(self, message, endpoint, request):
         """

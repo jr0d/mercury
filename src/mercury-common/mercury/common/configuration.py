@@ -12,10 +12,11 @@
 #    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
-
+import logging
 import os
 import yaml
 
+LOG = logging.getLogger(__name__)
 
 default_search_dirs = ['.', '~/.mercury', '/etc/mercury']
 
@@ -36,5 +37,6 @@ def configuration_from_yaml(path):
 def get_configuration(filename):
     config_file = find_config(filename)
     if not config_file:
+        LOG.warning('%s not found' % filename)
         return {}
     return configuration_from_yaml(config_file)
