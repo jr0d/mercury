@@ -25,6 +25,23 @@ def transceiver(s, d):
     return msgpack.unpackb(socket.recv())
 
 
+def full_req_transceiver(zmq_url, data):
+    ctx = zmq.Context()
+    socket = ctx.socket(zmq.REQ)
+    socket.connect(zmq_url)
+
+    packed = msgpack.packb(data)
+    socket.send_multipart([packed])
+
+    rep = socket.recv()
+    unpacked_rep = msgpack.unpackb(rep)
+
+    socket.close()
+
+    return unpacked_rep
+
+
+db_url = 'tcp://localhost:9000'
 ctx = zmq.Context()
 socket = ctx.socket(zmq.REQ)
 socket.connect('tcp://localhost:9000')
@@ -40,6 +57,7 @@ payload = dict(
         )
 
 print transceiver(socket, payload)
+# pprint(full_req_transceiver(db_url, payload))
 
 # GET
 payload = dict(
@@ -49,6 +67,7 @@ payload = dict(
 )
 
 print transceiver(socket, payload)
+# pprint(full_req_transceiver(db_url, payload))
 
 # QUERY
 payload = dict(
@@ -57,6 +76,7 @@ payload = dict(
 )
 
 print transceiver(socket, payload)
+# pprint(full_req_transceiver(db_url, payload))
 
 # DELETE
 payload = dict(
@@ -65,3 +85,4 @@ payload = dict(
 )
 
 pprint(transceiver(socket, payload))
+# pprint(full_req_transceiver(db_url, payload))

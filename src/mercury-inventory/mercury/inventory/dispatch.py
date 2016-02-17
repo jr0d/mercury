@@ -61,9 +61,3 @@ class Dispatcher(object):
             return dict(error=True, traceback=tb, message=e.message)
 
         return dict(error=False, response=response)
-
-
-if __name__ == '__main__':
-    logging.basicConfig(level=logging.DEBUG)
-    d = Dispatcher()
-    print d.dispatch({'endpoint': 'X'})

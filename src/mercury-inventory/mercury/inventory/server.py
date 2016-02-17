@@ -13,11 +13,10 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-"""
-POC - single threaded ROUTER / REQ pattern
 
-The server will evolve into a multithreaded REQ -> ROUTER -> ipc DEALER -> REP workers
-"""
+# POC - single threaded ROUTER / REQ pattern
+# TODO: Early code, needs cleaning
+
 import logging
 import msgpack
 import zmq
@@ -28,6 +27,7 @@ log = logging.getLogger(__name__)
 
 
 class Server(object):
+    # TODO: Use common.transport.SimpleRouterREQ
     def __init__(self, bind_address='tcp://0.0.0.0:9000'):
         self.bind_address = bind_address
         self.context = zmq.Context()
@@ -79,15 +79,18 @@ class Server(object):
                 data = self.receive()
             except KeyboardInterrupt:
                 break
+
             if not data:
                 continue
+
             address, message = data
             log.debug('Request: %s' % address.encode('hex'))
+
             response = self.dispatcher.dispatch(message)
             log.debug('Response: %s' % address.encode('hex'))
             self.send(address, response)
-        self.destroy()
 
+        self.destroy()
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)

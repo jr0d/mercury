@@ -46,6 +46,7 @@ class InventoryController(object):
     def __init__(self):
         self.db_configuration = inventory_configuration.get('inventory', {}).get('db', {})
         LOG.debug('DB Configuration: %s' % self.db_configuration)
+
         db_name = self.db_configuration.get('name')
         if not db_name:
             LOG.warning('DB name is not specified, using test')
@@ -78,7 +79,7 @@ class InventoryController(object):
     def update(self, update_data):
         mercury_id = update_data.get('mercury_id')
         if not mercury_id:
-            raise EndpointError('Request is missing mercury_id', endpoint='update', request=kwargs)
+            raise EndpointError('Request is missing mercury_id', endpoint='update', request=update_data)
 
         object_id = self.db.update(update_data)
 
@@ -100,11 +101,3 @@ class InventoryController(object):
         for document in c:
             items.append(self.__serialize_object_id(document))
         return {'count': total_items, 'items': items}
-
-
-if __name__ == '__main__':
-    logging.basicConfig(level=logging.DEBUG)
-    ic = InventoryController()
-    print ic.endpoints
-    print ic.index()
-    print ic.endpoints['index'](ic)

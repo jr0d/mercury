@@ -19,8 +19,7 @@ import time
 import msgpack
 import zmq
 
-from mercury.agent.configuration import AGENT_CONFIG_FILE
-from mercury.common.configuration import get_configuration
+from mercury.agent.configuration import agent_configuration
 from mercury.common.exceptions import MercuryCritical
 from mercury.inspector.inspectors.interfaces import get_interface_by_name
 from mercury.inspector.inspectors.routes import find_default_route
@@ -67,8 +66,7 @@ def get_dhcp_ip(device_info, method='simple'):
 
 
 def register(mercury_id, local_ip, local_ip6, capabilities):
-    agent_configuration = get_configuration(AGENT_CONFIG_FILE)
-    rpc_backend = agent_configuration.get('remote').get('rpc_service')
+    rpc_backend = agent_configuration.get('remote', {}).get('rpc_service')
 
     if not rpc_backend:
         raise MercuryCritical('Missing rpc backend in local configuration')

@@ -22,6 +22,31 @@ from mercury.common.exceptions import fancy_traceback_format
 log = logging.getLogger(__name__)
 
 
+def full_req_transceiver(zmq_url, data):
+    # TODO: Harden this
+    # TODO: Add linger and POLLIN support : https://github.com/zeromq/pyzmq/issues/132
+    ctx, socket = get_ctx_and_connect_req_socket(zmq_url)
+
+    packed = msgpack.packb(data)
+    socket.send_multipart([packed])
+
+    rep = socket.recv()
+    unpacked_rep = msgpack.unpackb(rep)
+
+    socket.close()
+    ctx.term()
+    return unpacked_rep
+
+
+def get_ctx_and_connect_req_socket(zmq_url):
+    ctx = zmq.Context()
+    # noinspection PyUnresolvedReferences
+    socket = ctx.socket(zmq.REQ)
+    socket.connect(zmq_url)
+
+    return ctx, socket
+
+
 class SimpleRouterReqService(object):
     def __init__(self, bind_address):
         self.bind_address = bind_address

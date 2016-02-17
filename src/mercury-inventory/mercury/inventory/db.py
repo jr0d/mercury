@@ -57,18 +57,3 @@ class InventoryDBController(object):
     def query(self, query):
         log.debug('Executing query: %s' % query)
         return self.collection.find(query, projection={'mercury_id': 1})
-
-
-if __name__ == '__main__':
-    from mercury.common.mongo import get_collection
-    logging.basicConfig(level=logging.DEBUG)
-    c = get_collection('test', 'mercury_inventory')
-    idbc = InventoryDBController(c)
-    oid = idbc.update({'mercury_id': '12345', 'blah': True})
-    log.info('Created : %s' % oid)
-
-    log.info('Get result for 12345: %s' % idbc.get_one('12345'))
-    log.info('Get result for x: %s' % idbc.get_one('x'))
-    log.info('result: ' + str(list(idbc.query({'blah': True}))))
-
-    idbc.delete('12345')

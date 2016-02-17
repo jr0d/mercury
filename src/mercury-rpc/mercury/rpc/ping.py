@@ -20,8 +20,8 @@ import time
 import zmq
 
 
-RETRIES = 3
-PING_TIMEOUT = 2500
+RETRIES = 3  # TODO: YAML
+PING_TIMEOUT = 2500  # TODO: YAML
 
 log = logging.getLogger(__name__)
 
@@ -44,12 +44,12 @@ def ping(socket, host):
         socks = dict(poll.poll(PING_TIMEOUT))
         if socks.get(socket) == zmq.POLLIN:
             reply = socket.recv()
-            log.debug("%s : %s" % (host, reply))
+            log.debug("%s : %s" % (host, msgpack.unpackb(reply)))
             success = True
             break
         log.debug('timeout')
         retries_left -= retries_left
-        time.sleep(5)
+        time.sleep(5)  # TODO: YAML
         socket.connect(host)
         poll.register(socket, zmq.POLLIN)
     return success
@@ -63,7 +63,7 @@ def pinger(server, mercury_id, db_controller):
         result = ping(socket, server)
         if not result:
             break
-        time.sleep(5)
+        time.sleep(5)  # TODO: YAML
 
     log.info('%s : %s ping timeout' % (mercury_id, server))
     db_controller.delete(mercury_id)

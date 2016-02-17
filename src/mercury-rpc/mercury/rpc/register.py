@@ -16,7 +16,8 @@
 import logging
 
 from mercury.common.transport import SimpleRouterReqService
-from mercury.common.configuration import get_configuration
+from mercury.common.mongo import get_collection
+from mercury.rpc.configuration import rpc_configuration
 from mercury.rpc.db import ActiveInventoryDBController
 from mercury.rpc.ping import spawn
 
@@ -27,9 +28,8 @@ RPC_CONFIG_FILE = 'mercury-rpc.yaml'
 
 class RegistrationService(SimpleRouterReqService):
     def __init__(self, collection):
-        configuration = get_configuration(RPC_CONFIG_FILE)
-        registration_service_bind_address = configuration.get('backend',
-                                                              dict()).get('registration_service_url',
+        registration_service_bind_address = rpc_configuration.get('backend',
+                                                                  {}).get('registration_service_url',
                                                                           'tcp://0.0.0.0:9002')
         super(RegistrationService, self).__init__(registration_service_bind_address)
 
@@ -52,13 +52,28 @@ class RegistrationService(SimpleRouterReqService):
         return dict(error=False, message='Registration successful')
 
 
-if __name__ == '__main__':
+def rpc_backend_register_service():
+    """
+    Entry point
+
+    :return:
+    """
     logging.basicConfig(level=logging.DEBUG,
                         format='%(asctime)s : %(levelname)s - %(name)s - %(message)s')
+    db_configuration = rpc_configuration.get('db', {})
+    collection = get_collection(db_configuration.get('rpc_mongo_db',
+                                                     'test'),
+                                db_configuration.get('rpc_mongo_collection',
+                                                     'rpc'),
+                                server_or_servers=db_configuration.get('rpc_mongo_servers',
+                                                                       'localhost'),
+                                replica_set=db_configuration.get('replica_set'))
 
-    from mercury.common.mongo import get_collection
+    server = RegistrationService(collection)
+    server.bind()
+    server.start()
 
-    _collection = get_collection('test', 'rpc')
 
-    rs = RegistrationService(_collection)
-    rs.start()
+if __name__ == '__main__':
+    rpc_backend_register_service()
+
