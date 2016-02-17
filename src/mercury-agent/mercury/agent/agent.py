@@ -24,7 +24,7 @@ agent:
 import logging
 
 from mercury.agent.capabilities import runtime_capabilities
-from mercury.agent.config import AGENT_CONFIG_FILE
+from mercury.agent.configuration import AGENT_CONFIG_FILE
 from mercury.agent.pong import spawn_pong_process
 from mercury.agent.register import get_dhcp_ip, register
 from mercury.agent.rpc import AgentService

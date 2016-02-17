@@ -19,7 +19,7 @@ import time
 import msgpack
 import zmq
 
-from mercury.agent.config import AGENT_CONFIG_FILE
+from mercury.agent.configuration import AGENT_CONFIG_FILE
 from mercury.common.configuration import get_configuration
 from mercury.common.exceptions import MercuryCritical
 from mercury.inspector.inspectors.interfaces import get_interface_by_name
