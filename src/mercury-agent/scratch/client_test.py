@@ -28,11 +28,11 @@ socket = ctx.socket(zmq.REQ)
 socket.connect('tcp://localhost:9003')
 
 for i in xrange(100):
-    response = transceiver(socket, dict(category='rpc_command', method='echo', args=['This is the message: %s' % i]))
+    response = transceiver(socket, dict(category='rpc', method='echo', args=['This is the message: %s' % i]))
     print response
 
 
-response = transceiver(socket, dict(category='rpc_command', method='inspector'))
+response = transceiver(socket, dict(category='rpc', method='inspector'))
 
 from pprint import pprint
 pprint(response)

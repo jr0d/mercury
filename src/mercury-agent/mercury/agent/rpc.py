@@ -62,7 +62,7 @@ class AgentService(SimpleRouterReqService):
         if not category:
             return self.error(1, 'missing category, nothing to do')
 
-        if category != 'rpc_command':
+        if category != 'rpc':
             # Remember, all of this is just a prototype
 
             # Need to finalize the agent contract
@@ -85,11 +85,14 @@ class AgentService(SimpleRouterReqService):
         args = message.get('args', ())
         kwargs = message.get('kwargs', {})
 
+        task_id = message.get('task_id')
+        job_id = message.get('job_id')
+
+        if None in [task_id, job_id]:
+            return self.error(3, 'message is incomplete, missing task_id/job_id')
+
         ret = capability['entry'](*args, **kwargs)
 
-        # Here we will create/check a lock if serial is True
-        # and we will create a async id and spawn a thread to work and
-        # process the request if the capability is async (long op)
         return self.sync_response(data=ret)
 
 

@@ -25,8 +25,10 @@ setup(
     author_email='jared.rodriguez@rackspace.com',
     description='',
     install_requires=[
+        'bottle',
         'pyzmq',
         'msgpack-python',
         'pymongo',
+        'redis'
     ]
 )

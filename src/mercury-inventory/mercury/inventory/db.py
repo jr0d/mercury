@@ -23,7 +23,7 @@ log = logging.getLogger(__name__)
 class InventoryDBController(object):
     def __init__(self, collection):
         self.collection = collection
-        self.collection.ensure_index('mercury_id', unique=True)
+        self.collection.create_index('mercury_id', unique=True)
 
     def update(self, data):
         mercury_id = data.get('mercury_id')

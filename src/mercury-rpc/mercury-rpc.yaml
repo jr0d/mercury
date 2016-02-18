@@ -5,6 +5,10 @@ db:
     - localhost:27017
   rpc_mongo_replica_set: None
 
+redis:
+  host: localhost
+  port: 6379
+
 inventory:
   inventory_router: tcp://localhost:9000
 

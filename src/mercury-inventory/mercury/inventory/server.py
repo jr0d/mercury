@@ -46,6 +46,7 @@ class Server(object):
 
         if len(multipart) != 3:
             log.error('Recieved request from wrong socket type, use REQ')
+            return
 
         address, empty, packed_message = multipart
         try:

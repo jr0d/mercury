@@ -25,11 +25,11 @@ import logging
 
 from mercury.agent.capabilities import runtime_capabilities
 from mercury.agent.configuration import agent_configuration
-from mercury.agent.inventory_client.client import InventoryClient
 from mercury.agent.pong import spawn_pong_process
 from mercury.agent.register import get_dhcp_ip, register
 from mercury.agent.rpc import AgentService
 from mercury.common.exceptions import MercuryCritical
+from mercury.common.inventory_client.client import InventoryClient
 from mercury.inspector.inspect import inspect
 
 

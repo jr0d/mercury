@@ -65,6 +65,14 @@ def get_dhcp_ip(device_info, method='simple'):
         return address_info[0]['addr']
 
 
+def _serialize_capabilities(capabilities):
+    _d = {}
+    for c in capabilities:
+        temp_d = capabilities[c].copy()
+        temp_d['entry'] = temp_d['entry'].__name__
+        _d[c] = temp_d
+    return _d
+
 def register(mercury_id, local_ip, local_ip6, capabilities):
     rpc_backend = agent_configuration.get('remote', {}).get('rpc_service')
 
@@ -89,9 +97,6 @@ def register(mercury_id, local_ip, local_ip6, capabilities):
     # And then there is ipv6, where we'd need to DHCP to get a route-able address
     # subnet, and then heuristically generate an ip address in the subnet, forgoing
     # the explicit need for publishing the address
-    _caps = capabilities.copy()
-    for capability in _caps:
-        del _caps[capability]['entry']
 
     payload = {
         'mercury_id': mercury_id,
@@ -100,7 +105,7 @@ def register(mercury_id, local_ip, local_ip6, capabilities):
         'rpc_port': agent_configuration.get('rpc_port', 9003),
         'ping_port': agent_configuration.get('ping_port', 9004),
         'localtime': time.time(),
-        'capabilities': _caps
+        'capabilities': _serialize_capabilities(capabilities)
     }
     packed = msgpack.packb(dict(action='register', client_info=payload))
 

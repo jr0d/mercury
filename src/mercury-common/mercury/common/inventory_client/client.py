@@ -87,16 +87,3 @@ class InventoryClient(object):
             'args': [mercury_id]
         }
         return self.check_and_return(self.transceiver(payload))
-
-
-if __name__ == '__main__':
-    ic = InventoryClient('tcp://localhost:9000')
-    _payload = {
-                'mercury_id': 12345,
-                'attribute1': 'I am a pickle',
-                'attribute2': 'I hate pickles'
-               }
-    print ic.update(_payload)
-    print ic.get_one(12345, projection={'mercury_id': 1})
-    print ic.query({'attribute2': 'I hate pickles'})
-    print ic.delete(12345)

@@ -14,13 +14,28 @@
 #    limitations under the License.
 
 import logging
+import threading
 
 LOG = logging.getLogger(__name__)
 
 runtime_capabilities = {}
 
 
-def add_capability(entry, name, description, doc=None, serial=False, async=False, num_args=None, kwarg_names=None):
+class SerialLock(object):
+    def __init__(self):
+        self.lock = threading.Lock()
+
+    def acquire(self):
+        return self.lock.acquire(False)
+
+    def release(self):
+        self.lock.release()
+
+
+serial_lock = SerialLock()
+
+
+def add_capability(entry, name, description, doc=None, serial=False, num_args=None, kwarg_names=None):
     LOG.info('Adding capability %s' % name)
     runtime_capabilities[name] = {
         'name': name,
@@ -28,25 +43,17 @@ def add_capability(entry, name, description, doc=None, serial=False, async=False
         'description': description,
         'doc': doc,
         'serial': serial,
-        'async': async,
         'num_args': num_args,
         'kwarg_names': kwarg_names
     }
 
 
-def capability(name, description, serial=False, async=False, num_args=None, kwarg_names=None):
+def capability(name, description, serial=False, num_args=None, kwarg_names=None):
     def wrap(entry):
-        def wrapped_f(*args, **kwargs):
-            ret = entry(*args, **kwargs)
-            # apply async entry here?
-            return ret
-
         LOG.info('Adding capability %s' % name)
-        add_capability(entry, name, description, doc=entry.__doc__, serial=serial, async=async, num_args=num_args,
+        add_capability(entry, name, description, doc=entry.__doc__, serial=serial, num_args=num_args,
                        kwarg_names=kwarg_names)
-        wrapped_f.__name__ = entry.__name__
-        wrapped_f.__doc__ = entry.__doc__
-        return wrapped_f
+        return entry
     return wrap
 
 
