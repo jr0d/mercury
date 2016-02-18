@@ -45,7 +45,7 @@ class ActiveInventoryDBController(object):
 
     def __init__(self, collection):
         self.collection = collection
-        self.collection.ensure_index('mercury_id', unique=True)
+        self.collection.create_index('mercury_id', unique=True)
 
     def validate(self, data):
         for k in self.keys:
@@ -88,18 +88,10 @@ class ActiveInventoryDBController(object):
         log.info('Removed mercury_id: %s, lived: %s' % (mercury_id,
                                                         now - document['time_created']))
 
-    def get_one(self, mercury_id):
-        return self.collection.find_one({'mercury_id': mercury_id})
+    def get_one(self, mercury_id, projection=None):
+        return self.collection.find_one({'mercury_id': mercury_id}, projection=projection)
 
-
-if __name__ == '__main__':
-    from mercury.common.mongo import get_collection
-    logging.basicConfig(level=logging.DEBUG)
-
-    _data = dict(mercury_id=1234, rpc_address='127.0.0.1', rpc_port=9002, ping_address='127.0.0.1', ping_port=9003,
-                 capabilities={'echo': dict(desc='echo\'s argument[0] to the console', args=1, kwargs=[])})
-    _collection = get_collection('test', 'mercury_rpc')
-    aidbc = ActiveInventoryDBController(_collection)
-    print aidbc.update(_data)
-    print aidbc.get_one(1234)
-    aidbc.delete(1234)
+    def query(self, query, projection=None):
+        if not projection:
+            projection = {'mercury_id': 1}
+        return self.collection.find(query, projection=projection)
