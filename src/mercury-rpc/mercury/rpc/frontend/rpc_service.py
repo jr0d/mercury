@@ -28,17 +28,6 @@ inventory_client = InventoryClient(inventory_router_url)
 def http_error(message, code=500):
     return HTTPResponse({'error': True, 'message': message}, status=code)
 
-@route('/api/active/', method='GET')
-def active():
-    adbc = ActiveInventoryDBController(active_collection)
-    res = list(adbc.query({}))
-
-    for i in res:
-        if '_id' in i:
-            i['_id'] = str(i['_id'])
-    return {'active': res}
-    # return {'hello': 'world'}
-
 
 @route('/api/inventory/computers', method='GET')
 def computers():
@@ -58,18 +47,36 @@ def computers_query():
 
 @route('/api/inventory/computer/<mercury_id>', method='GET')
 def computer(mercury_id):
-    print request.body.read()
-    if request.json:
-        projection = request.json.get('projection')
+    projection_keys = request.query.get('projection', '')
+    if projection_keys:
+        projection = {}
+        for k in projection_keys.split(','):
+            projection[k] = 1
     else:
-        projection = None
+        projection = None  # An empty dict means no projections, not show me everything...
 
-    computer = inventory_client.get_one(mercury_id, projection=projection)
+    c = inventory_client.get_one(mercury_id, projection=projection)
 
     if not computer:
         return http_error('mercury_id %s does not exist in inventory' % mercury_id,
                           404)
 
-    return {'computer': computer}
+    return {'computer': c}
+
+
+@route('/api/active/computers', method='GET')
+def active_computers():
+    cursor = active_collection.find({})
+    active = []
+    for document in cursor:
+        document['_id'] = str(document['_id'])
+        active.append(document)
+
+    return {'active': active}
+
+
+@route('/api/rpc/inject', method='POST')
+def inject():
+    return
 
 run(host='localhost', port=9005, debug=True)

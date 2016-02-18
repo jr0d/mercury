@@ -40,14 +40,26 @@ class RegistrationService(SimpleRouterReqService):
             return self.register(data=message.get('client_info'))
         return dict(error=True, message='Did not receive appropriate action')
 
+    def spawn_pinger(self, mercury_id, address, port):
+        endpoint = 'tcp://%s:%s' % (address, port)
+        spawn(endpoint, mercury_id, self.db_controller)
+
+    def reacquire(self):
+        existing_documents = self.db_controller.query({}, projection={'mercury_id': 1,
+                                                                      'rpc_address': 1,
+                                                                      'ping_port': 1})
+        for doc in existing_documents:
+            log.info('Attempting to reacquire %s : %s' % (doc['mercury_id'], doc['rpc_address']))
+            self.spawn_pinger(doc['mercury_id'], doc['rpc_address'], doc['ping_port'])
+
     def register(self, data):
         if not self.db_controller.validate(data):
             log.error('Recieved invalid data')
             return dict(error=True, message='Invalid request')
 
         self.db_controller.update(data)
-        endpoint = 'tcp://%s:%s' % (data['rpc_address'], data['ping_port'])
-        spawn(endpoint, data['mercury_id'], self.db_controller)
+
+        self.spawn_pinger(data['mercury_id'], data['rpc_address'], data['ping_port'])
 
         return dict(error=False, message='Registration successful')
 
@@ -70,6 +82,7 @@ def rpc_backend_register_service():
                                 replica_set=db_configuration.get('replica_set'))
 
     server = RegistrationService(collection)
+    server.reacquire()
     server.bind()
     server.start()
 
