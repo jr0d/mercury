@@ -29,5 +29,6 @@ setup(
         'pyzmq',
         'msgpack-python',
         'pymongo',
+        'redis'
     ]
 )

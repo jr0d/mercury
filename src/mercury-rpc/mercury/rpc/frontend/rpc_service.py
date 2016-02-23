@@ -75,8 +75,32 @@ def active_computers():
     return {'active': active}
 
 
+def query_active_prototype1(query):
+    # Get all inventory matching inventory mercury_ids and iterate over
+    inventory_matches = inventory_client.query(query)
+    active_matches = []
+    cursor = active_collection.find({})
+
+    for active_document in cursor:
+        for inventory_document in inventory_matches:
+            if active_document.get('mercury_id') == inventory_document.get('mercury_id'):
+                active_matches.append(active_document)
+                break
+
+    return active_matches
+
+
 @route('/api/rpc/inject', method='POST')
 def inject():
-    return
+    if not request.json:
+        return http_error('JSON request is missing', code=400)
+
+    query = request.json.get('query')
+    if not isinstance(query, dict):
+        return http_error('Query is missing from request', code=400)
+
+    active_matches = query_active_prototype1(query)
+
+    return {'total_count': len(active_matches), 'active': active_matches}
 
 run(host='localhost', port=9005, debug=True)
