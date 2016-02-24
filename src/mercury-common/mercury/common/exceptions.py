@@ -29,6 +29,10 @@ class MercuryCritical(Exception):
     pass
 
 
+class MercuryUserError(Exception):
+    pass
+
+
 def fancy_traceback_format(preamble='Exception info: '):
     exc_type, exc_value, exc_traceback = sys.exc_info()
     path, line, scope, code = traceback.extract_tb(exc_traceback)[-1]
