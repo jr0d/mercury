@@ -1,11 +1,14 @@
+import logging
 import redis
 import uuid
 
-from mercury.common.exceptions import MercuryUserError
+from mercury.common.exceptions import MercuryUserError, MercuryCritical
 from mercury.common.mongo import get_collection
 from mercury.common.transport import get_ctx_and_connect_req_socket
 
+
 JOBS_COLLECTION = 'jobs'
+log = logging.getLogger(__name__)
 
 
 class Task(object):
@@ -43,15 +46,19 @@ class Job(object):
 
         :param command: Procedure dictionary containing method, args, kwargs
         :param targets: active inventory targets
-        :raises: MercuryUserError
+        :raises MercuryUserError: catch,log, demean, and move on
+        :raises MercuryCritical: Halt and catch fire
         """
         self.command = command
         self.targets = targets
 
         self.method, self.args, self.kwargs = self.__extract_command()
-
+        self.job_id = uuid.uuid4()
         self.tasks = []
         # Populate the tasks
+
+        for target in targets:
+            self.tasks.append(self.__create_task(target))
 
     def __extract_command(self):
         """
@@ -66,18 +73,40 @@ class Job(object):
         args = self.command.get('args') or []
         kwargs = self.command.get('kwargs') or {}
 
-        self.__validate_method()
+        self.__check_method()
 
         return method, args, kwargs
 
-    def __validate_method(self):
+    def __check_method(self):
         for target in self.targets:
             try:
                 capabilities = target['capabilities']
             except KeyError:
-                raise MercuryUserError('One of more targets is malformed, missing capabilities structure')
+                raise MercuryCritical('Encountered malformed target, the database is corrupted')
             if self.method not in capabilities:
                 raise MercuryUserError('One of more targets does not support method: %s' % self.method)
+
+
+    def __create_task(self, target):
+        # TODO: select ipv4 or ipv6
+        # TODO: add yaml option: prefer_ipv6 (bool)
+        try:
+            host = target['rpc_address']
+            port = target['rpc_port']
+        except KeyError:
+            raise MercuryCritical('Encountered malformed target, the database is corrupted')
+
+        task = Task(
+            host=host,
+            port=port,
+            method=self.method,
+            args=self.args,
+            kwargs=self.kwargs
+        )
+
+        log.debug('Created task: %s' % task)
+        return task
+
 
 if __name__ == '__main__':
     t1 = Task('localhost', 9003, 'echo', ['This is the message'])
