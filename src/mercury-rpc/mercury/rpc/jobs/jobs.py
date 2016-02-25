@@ -1,5 +1,6 @@
 import logging
 import redis
+import time
 import uuid
 
 from mercury.common.exceptions import MercuryUserError, MercuryCritical
@@ -23,6 +24,7 @@ class Task(object):
         self.kwargs = kwargs or {}
         self.task_id = uuid.uuid4()
         self.status = 'NEW'
+        self.time_queued, self.time_started, self.time_completed = None
 
     def to_dict(self):
         return {
@@ -32,7 +34,10 @@ class Task(object):
             'host': self.host,
             'port': self.port,
             'task_id': str(self.task_id),
-            'status': self.status
+            'status': self.status,
+            'time_queued': self.time_queued,
+            'time_started': self.time_started,
+            'time_completed': self.time_completed
         }
 
     def __repr__(self):
@@ -41,16 +46,18 @@ class Task(object):
 
 
 class Job(object):
-    def __init__(self, command, targets):
+    def __init__(self, command, targets, collection):
         """
 
         :param command: Procedure dictionary containing method, args, kwargs
         :param targets: active inventory targets
+        :param collection: mongodb collection object
         :raises MercuryUserError: catch,log, demean, and move on
         :raises MercuryCritical: Halt and catch fire
         """
         self.command = command
         self.targets = targets
+        self.collection = collection
 
         self.method, self.args, self.kwargs = self.__extract_command()
         self.job_id = uuid.uuid4()
@@ -59,6 +66,9 @@ class Job(object):
 
         for target in targets:
             self.tasks.append(self.__create_task(target))
+
+        self.time_started = None
+        self.time_completed = None
 
     def __extract_command(self):
         """
@@ -86,7 +96,6 @@ class Job(object):
             if self.method not in capabilities:
                 raise MercuryUserError('One of more targets does not support method: %s' % self.method)
 
-
     def __create_task(self, target):
         # TODO: select ipv4 or ipv6
         # TODO: add yaml option: prefer_ipv6 (bool)
@@ -106,6 +115,22 @@ class Job(object):
 
         log.debug('Created task: %s' % task)
         return task
+
+    def to_dict(self):
+        return {
+            'method': self.method,
+            'args': self.args,
+            'kwargs': self.kwargs,
+            'job_id': str(self.job_id),
+            'time_started': self.time_started,
+            'time_completed': self.time_completed,
+            'tasks': [x.todict() for x in self.tasks]
+        }
+
+    def __insert_job(self):
+        self.time_started = time.time()
+        log.info('Inserting job: %s' % self.job_id)
+        self.collection.insert(self.to_dict())
 
 
 if __name__ == '__main__':

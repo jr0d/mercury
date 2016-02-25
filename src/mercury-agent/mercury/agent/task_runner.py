@@ -13,8 +13,14 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
+import threading
 
 
+class TaskRunner(object):
+    def __int__(self, job_id, task_id, entry):
+        self.job_id = job_id
+        self.task_id = task_id
+        self.entry = entry
 
-
+        self.time_started, self.time_completed = None
 
