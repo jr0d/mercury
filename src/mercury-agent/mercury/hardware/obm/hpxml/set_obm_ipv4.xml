@@ -1,0 +1,12 @@
+<RIBCL VERSION="2.0">
+ <LOGIN USER_LOGIN="Administrator" PASSWORD="password">
+  <RIB_INFO MODE="write">
+   <MOD_NETWORK_SETTINGS>
+     <IP_ADDRESS VALUE="%address%"/>
+     <SUBNET_MASK VALUE="%netmask%"/>
+     <GATEWAY_IP_ADDRESS VALUE="%gateway%"/>
+   </MOD_NETWORK_SETTINGS>
+  </RIB_INFO>
+ </LOGIN>
+</RIBCL>
+

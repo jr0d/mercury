@@ -25,10 +25,15 @@ setup(
     author_email='jared.rodriguez@rackspace.com',
     description='',
     install_requires=[
+        'lxml'
         'pyzmq',
         'msgpack-python',
         'netifaces',
         'pexpect',
         'pyudev'
-    ]
+    ],
+    entry_points="""
+    [console_scripts]
+    mercury_agent = mercury.agent.agent:main
+    """,
 )

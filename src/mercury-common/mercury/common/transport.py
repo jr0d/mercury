@@ -17,12 +17,19 @@ import logging
 import msgpack
 import zmq
 
-from mercury.common.exceptions import fancy_traceback_format
+from mercury.common.exceptions import parse_exception, fancy_traceback_format
 
 log = logging.getLogger(__name__)
 
 
 def full_req_transceiver(zmq_url, data):
+    """
+    Used when you want to send and close
+
+    :param zmq_url:
+    :param data:
+    :return:
+    """
     # TODO: Harden this
     # TODO: Add linger and POLLIN support : https://github.com/zeromq/pyzmq/issues/132
     ctx, socket = get_ctx_and_connect_req_socket(zmq_url)
@@ -45,6 +52,30 @@ def get_ctx_and_connect_req_socket(zmq_url):
     socket.connect(zmq_url)
 
     return ctx, socket
+
+
+class SimpleRouterReqClient(object):
+    def __init__(self, zmq_url):
+        self.zmq_url = zmq_url
+        self.ctx, self.socket = get_ctx_and_connect_req_socket(self.zmq_url)
+
+    def transceiver(self, payload):
+        # TODO: Harden this
+        # TODO: Add linger and POLLIN support :
+        # https://github.com/zeromq/pyzmq/issues/132
+
+        packed = msgpack.packb(payload)
+
+        # blocks
+        self.socket.send_multipart([packed])
+
+        # blocks
+        rep = self.socket.recv()
+
+        return msgpack.unpackb(rep)
+
+    def close(self):
+        self.socket.close()
 
 
 class SimpleRouterReqService(object):
@@ -107,8 +138,9 @@ class SimpleRouterReqService(object):
             try:
                 response = self.process(message)
             except Exception:
+                exc_dict = parse_exception()
                 log.error('process raised an exception and should not have.')
-                log.error(fancy_traceback_format('Exception data:'))
+                log.error(fancy_traceback_format(exc_dict, 'Exception data:'))
                 self.send_error(address, 'Encountered server error, sorry')
                 continue
             log.debug('Response: %s' % address.encode('hex'))

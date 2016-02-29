@@ -1,0 +1,17 @@
+<RIBCL VERSION="2.1">
+ <LOGIN USER_LOGIN="Administrator" PASSWORD="password">
+  <USER_INFO MODE="write">
+  <ADD_USER
+    USER_NAME = "%user%"
+    USER_LOGIN = "%user%"
+    PASSWORD = "%password%">
+    <ADMIN_PRIV value = "Y"/>
+    <REMOTE_CONS_PRIV value = "Y"/>
+    <RESET_SERVER_PRIV value = "Y"/>
+    <VIRTUAL_MEDIA_PRIV value = "Y"/>
+    <CONFIG_ILO_PRIV value = "Y"/>
+  </ADD_USER>
+  </USER_INFO>
+ </LOGIN>
+</RIBCL>
+

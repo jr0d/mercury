@@ -17,6 +17,7 @@ from __future__ import print_function
 import logging
 
 from mercury.agent.capabilities import capability
+from mercury.common.helpers.cli import run
 
 
 log = logging.getLogger(__name__)
@@ -30,4 +31,31 @@ def echo(message):
     :return: None
     """
     log.info('Echo: %s' % message)
+    print(message)
     return message
+
+
+@capability('run', 'Run an arbitrary command', num_args=1)
+def runner(command, _input=''):
+    """
+    Run a shell command
+    :param command: The shell command to use
+    :param _input: Optional data to pass to stdin
+    :return:
+    """
+    log.info('Running: %s' % command)
+
+    r = run(command, ignore_error=True, raise_exception=False, _input=_input)
+    return {
+        'stdout': r.stdout,
+        'stderr': r.stderr,
+        'returncode': r.returncode
+    }
+
+
+@capability('kexec', 'kexec into kernel at supplied location', kwarg_names=['kernel', 'initrd', 'options'])
+def kexec(kernel='', initrd='', options=None, kernel_type='bzImage'):
+    """
+    Kexec into a kernel
+    """
+

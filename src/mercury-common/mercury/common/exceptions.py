@@ -33,13 +33,19 @@ class MercuryUserError(Exception):
     pass
 
 
-def fancy_traceback_format(preamble='Exception info: '):
+def parse_exception():
     exc_type, exc_value, exc_traceback = sys.exc_info()
     path, line, scope, code = traceback.extract_tb(exc_traceback)[-1]
-    return '%s (%s : %s): scope=%s, path=%s, line=%d, code=%s' % (preamble,
-                                                                  exc_type,
-                                                                  exc_value,
-                                                                  scope,
-                                                                  path,
-                                                                  line,
-                                                                  code)
+    return {
+            'exc_type': str(exc_type),
+            'exc_value': str(exc_value),
+            'scope': str(scope),
+            'path': path,
+            'line': line,
+            'code': code
+            }
+
+
+def fancy_traceback_format(exc_dict, preamble='Exception info: '):
+    return '{preamble} ({exc_type} : {exc_value}): scope={scope}, ' \
+           'path={path}, line={line}, code={code}'.format(preamble=preamble, **exc_dict)

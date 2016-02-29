@@ -14,28 +14,13 @@
 #    limitations under the License.
 
 import logging
-import threading
 
 LOG = logging.getLogger(__name__)
 
 runtime_capabilities = {}
 
 
-class SerialLock(object):
-    def __init__(self):
-        self.lock = threading.Lock()
-
-    def acquire(self):
-        return self.lock.acquire(False)
-
-    def release(self):
-        self.lock.release()
-
-
-serial_lock = SerialLock()
-
-
-def add_capability(entry, name, description, doc=None, serial=False, num_args=None, kwarg_names=None):
+def add_capability(entry, name, description, doc=None, serial=False, num_args=None, kwarg_names=None, no_return=False):
     LOG.info('Adding capability %s' % name)
     runtime_capabilities[name] = {
         'name': name,
@@ -44,31 +29,15 @@ def add_capability(entry, name, description, doc=None, serial=False, num_args=No
         'doc': doc,
         'serial': serial,
         'num_args': num_args,
-        'kwarg_names': kwarg_names
+        'kwarg_names': kwarg_names,
+        'no_return': no_return
     }
 
 
-def capability(name, description, serial=False, num_args=None, kwarg_names=None):
+def capability(name, description, serial=False, num_args=None, kwarg_names=None, no_return=False):
     def wrap(entry):
-        LOG.info('Adding capability %s' % name)
         add_capability(entry, name, description, doc=entry.__doc__, serial=serial, num_args=num_args,
-                       kwarg_names=kwarg_names)
+                       kwarg_names=kwarg_names, no_return=no_return)
         return entry
     return wrap
 
-
-@capability('test', 'Test Capability', num_args=2)
-def cap1(a, b):
-    """
-    Add a and b
-    :param a: int
-    :param b: int
-    :return: result
-    """
-    return a + b
-
-
-if __name__ == '__main__':
-    print runtime_capabilities['test']
-    print runtime_capabilities['test']['doc']
-    print runtime_capabilities['test']['entry'](1, 2)

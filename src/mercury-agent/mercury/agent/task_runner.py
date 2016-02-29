@@ -13,14 +13,74 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
+import logging
+import time
 import threading
+
+from mercury.agent.client import BackEndClient
+from mercury.common.exceptions import parse_exception, fancy_traceback_format
+
+log = logging.getLogger(__name__)
 
 
 class TaskRunner(object):
-    def __int__(self, job_id, task_id, entry):
+    def __init__(self, job_id, task_id, entry, backend_url,
+                 entry_args=None, entry_kwargs=None, lock=None):
         self.job_id = job_id
         self.task_id = task_id
         self.entry = entry
+        self.args = entry_args or ()
+        self.kwargs = entry_kwargs or {}
+        self.lock = lock
 
-        self.time_started, self.time_completed = None
+        self.time_started = None
+        self.time_completed = None
 
+        self.backend = BackEndClient(backend_url)
+
+    def __run(self):
+        self.time_started = time.time()
+        traceback_info = None
+        # noinspection PyBroadException
+        try:
+            return_data = self.entry(*self.args, **self.kwargs)
+            # TODO: Create response contract for procedures
+            if isinstance(return_data, dict) and return_data.get('error'):
+                result = 'ERROR'
+            else:
+                result = 'SUCCESS'
+        except Exception:
+            exc_dict = parse_exception()
+            log.error(fancy_traceback_format(exc_dict,
+                                             'Critical error while running task: %s [%s], elapsed' % (
+                                                 self.entry.__name__,
+                                                 self.task_id)))
+            traceback_info = exc_dict
+            result = 'ERROR'
+            return_data = None
+        finally:
+            if self.lock:
+                log.debug('Releasing lock for %s' % self.lock.task_id)
+                self.lock.release()
+
+        self.time_completed = time.time()
+        log.info('Task completed: %s [%s], elapsed %s' % (self.entry.__name__,
+                                                          self.task_id,
+                                                          self.time_completed - self.time_started))
+        log.debug('Publishing response to: %s' % self.backend.zmq_url)
+
+        response = self.backend.push_response({
+            'result': result,
+            'data': return_data,
+            'traceback_info': traceback_info,
+            'job_id': self.job_id,
+            'task_id': self.task_id,
+            'time_started': self.time_started,
+            'time_completed': self.time_completed
+        })
+        log.debug('Dispatch successful : %s' % response)
+
+    def run(self):
+        log.info('Starting task: %s [%s]' % (self.entry.__name__, self.task_id))
+        t = threading.Thread(target=self.__run)
+        t.start()

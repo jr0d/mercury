@@ -13,11 +13,13 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-import logging
-
-from .inspectors import inspectors
-
+from mercury.inspector.inspectors import inspectors, late_inspectors
 from mercury.common.mercury_id import generate_mercury_id
+
+# Global storage for device_info it is mostly read only and only overwritten during
+# inspector runs
+
+global_device_info = {}
 
 
 def _collect():
@@ -38,24 +40,16 @@ def inspect():
 
     collected['mercury_id'] = generate_mercury_id(dmi, interfaces)
 
+<<<<<<< Updated upstream
+    for inspector, f in late_inspectors:
+        collected[inspector] = f(collected)
+
     return collected
+=======
+    # I am not sure if this is the best place for this.
+>>>>>>> Stashed changes
 
-if __name__ == '__main__':
-    logging.basicConfig(level=logging.DEBUG)
-    import json
+    global global_device_info
+    global_device_info.update(**collected)
 
-    _collected = inspect()
-    from pprint import pprint
-    pprint(_collected)
-    length = len(json.dumps(_collected))
-
-    print length
-
-    import msgpack
-
-    packed = msgpack.packb(_collected)
-
-    print len(packed)
-
-    print (length * 100000.0) / 1024 / 1024
-
+    return collected

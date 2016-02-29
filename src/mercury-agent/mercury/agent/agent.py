@@ -19,8 +19,12 @@ agent:
     1) Start Pong service
     2) Start RPC service
     2) Register
+
+#PROTOTYPE
+
 """
 
+import argparse
 import logging
 
 from mercury.agent.capabilities import runtime_capabilities
@@ -30,13 +34,13 @@ from mercury.agent.register import get_dhcp_ip, register
 from mercury.agent.rpc import AgentService
 from mercury.common.exceptions import MercuryCritical
 from mercury.common.inventory_client.client import InventoryClient
-from mercury.inspector.inspect import inspect
+from mercury.inspector import inspect
 
 
 log = logging.getLogger(__name__)
 
 
-def main(dhcp_ip_method='simple'):
+def spawn_agent(dhcp_ip_method='simple'):
     """
     Prototype agent service entry
     :param dhcp_ip_method: method to get dhcp
@@ -47,16 +51,24 @@ def main(dhcp_ip_method='simple'):
     remote_config = agent_configuration.get('remote', {})
     agent_bind_address = local_config.get('service_bind_address', 'tcp://0.0.0.0:9003')
     pong_bind_address = local_config.get('pong_bind_address', 'tcp://0.0.0.0:9004')
+
     inventory_url = remote_config.get('inventory_service')
+
+    if not inventory_url:
+        raise MercuryCritical('Inventory service URL is not specified')
+
+    rpc_backend = agent_configuration.get('remote', {}).get('rpc_service')
+
+    if not rpc_backend:
+        raise MercuryCritical('Missing rpc backend in local configuration')
+
     log.debug('agent: %s, pong: %s, inventory_remote: %s' % (agent_bind_address,
                                                              pong_bind_address,
                                                              inventory_url))
 
     log.info('Running inspectors')
-    device_info = inspect()
 
-    if not inventory_url:
-        raise MercuryCritical('Inventory service URL is not specified')
+    device_info = inspect.inspect()
 
     log.info('Registering device inventory')
 
@@ -71,14 +83,25 @@ def main(dhcp_ip_method='simple'):
     log.info('Registering device')
     local_ip = get_dhcp_ip(device_info, method=dhcp_ip_method)
     local_ipv6 = None
-    register(device_info['mercury_id'], local_ip, local_ipv6, runtime_capabilities)
+    register(rpc_backend, device_info['mercury_id'], local_ip, local_ipv6, runtime_capabilities)
 
     log.info('Starting agent rpc service: %s' % agent_bind_address)
-    agent_service = AgentService(agent_bind_address)
+    agent_service = AgentService(agent_bind_address, rpc_backend)
     agent_service.bind()
     agent_service.start()
 
-if __name__ == '__main__':
+
+def _parse_args():
+    parser = argparse.ArgumentParser(description='Mercury Agent')
+
+
+def main():
     logging.basicConfig(level=logging.DEBUG)
     log.info('[prototype] starting agent')
-    main('simple')
+    logging.getLogger('mercury.agent.pong').setLevel(logging.ERROR)
+
+    spawn_agent('simple')
+
+
+if __name__ == '__main__':
+    main()

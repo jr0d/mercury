@@ -37,13 +37,13 @@ class MongoCollection(object):
         self.collection_name = collection
 
         # Get handles
-        log.info('Connecting to %s : replicaSet: %s' % (self.servers,
-                                                        self.replica_set))
+        log.debug('Connecting to %s : replicaSet: %s' % (self.servers,
+                                                         self.replica_set))
         self.connection = pymongo.MongoClient(self.servers,
                                               replicaset=self.replica_set)
-        log.info('database: %s' % self.database_name)
+        log.debug('database: %s' % self.database_name)
         self.db = self.connection[self.database_name]
-        log.info('collection: %s' % self.collection_name)
+        log.debug('collection: %s' % self.collection_name)
         self.collection = self.db[self.collection_name]
 
 

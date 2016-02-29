@@ -1,0 +1,45 @@
+Job Preprocessor:
+
+    Primitive payload:
+        method:
+        args:
+        kwargs:
+
+    Preprocessor payload:
+        # Invokes higher level payload processors which are registered at runtime
+        # Preprocessors will convert intermediary payloads to primitive payloads before
+        # injecting tasks
+        
+        preprocessor: <The preprocessor name/id for which this payload is formatted for>
+        _payload: <fulfilled request contract of preprocessor>
+        
+        # Should preprocessors be called from worker threads? YES!!! This way they can handle complex tasks.
+        
+        
+Example:
+    
+    preprocessor: press_static_assets
+    _payload: 
+        template: """
+            target: ubuntu
+            networking:
+                hostname: {{asset.networking.hostname}}
+            ...
+        """
+        assets:
+            -
+              criteria:  # Inventory query
+                -
+                  $and:
+                    -
+                      lldp.boot_interface.switch_name: j6-23-1s.ord1
+                    -
+                      lldp.boot_interface.switch_port_stripped: 1
+              data:
+                networking:
+                    hostname: c0001.openstack.rackspace.com
+                ...
+            -
+            ...
+                  
+                

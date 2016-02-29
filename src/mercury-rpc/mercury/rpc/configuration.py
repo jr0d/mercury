@@ -16,7 +16,12 @@
 from mercury.common.configuration import get_configuration
 
 
-__all__ = ['RPC_CONFIG_FILE', 'rpc_configuration']
-
 RPC_CONFIG_FILE = 'mercury-rpc.yaml'
+
+TASK_QUEUE = 'rpc_tasks'
+
 rpc_configuration = get_configuration(RPC_CONFIG_FILE)
+
+db_configuration = rpc_configuration.get('db', {})
+
+print db_configuration

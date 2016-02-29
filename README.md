@@ -1,15 +1,38 @@
-# Mercury
+**Under Construction**
 ![alt tag](project_mercury.png)
 
-This repository contains documents pertaining to the mercury project. Code can be found for each component here:
+# Welcome
+This is the mercury project repository. Here you will find the full 
+mercury source code and documentation targeted at developers.
+User and System Administration documentation will be available at a 
+later time.
 
+## Overview
+**Mercury is a set of services, agents, and libraries designed for the 
+purpose of managing datacenter hardware assets**
 
-[inspector](https://github.rackspace.com/jared-rodriguez/mercury-inspector)
+Mercury is not 'cloud' software. However, it can be used to deploy 
+clouds onto physical assets.
 
-[common](https://github.rackspace.com/jared-rodriguez/mercury-common)
+Mercury is not configuration management. However, it's real time 
+inventory databases can be used as back ends for many DevOPs workloads.
 
-[rpc](https://github.rackspace.com/jared-rodriguez/mercury-rpc)
+At a high level, Mercury is a protocol for interacting with physical 
+assets in a 'pre-provisioned' state. The code herein is an
+implementation of that protocol.
 
-[agent](https://github.rackspace.com/jared-rodriguez/mercury-agent)
+## Code structure
+At present, mercury exists as a set of python packages which use the 
+mercury namespace. 
 
-[inventory](https://github.rackspace.com/jared-rodriguez/mercury-inventory)
+## Services
+### mercury_inventory
+### Installation
+## Mercury development tenets
+- Simplicity
+- Ease of Administration
+- Control
+- Forget Nothing
+- Log Everything
+
+TBC

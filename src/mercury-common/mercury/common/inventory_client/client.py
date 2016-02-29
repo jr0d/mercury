@@ -14,32 +14,15 @@
 #    limitations under the License.
 
 import logging
-import msgpack
 
 from mercury.common.exceptions import MercuryCritical
-from mercury.common.transport import get_ctx_and_connect_req_socket
+from mercury.common.transport import SimpleRouterReqClient
 
 
 LOG = logging.getLogger(__name__)
 
 
-class InventoryClient(object):
-    def __init__(self, zmq_url):
-        self.zmq_url = zmq_url
-        self.ctx, self.socket = get_ctx_and_connect_req_socket(self.zmq_url)
-
-    def transceiver(self, payload):
-        LOG.debug('Transmitting payload')
-        packed = msgpack.packb(payload)
-
-        # blocks
-        self.socket.send_multipart([packed])
-
-        # blocks
-        rep = self.socket.recv()
-
-        return msgpack.unpackb(rep)
-
+class InventoryClient(SimpleRouterReqClient):
     @staticmethod
     def raise_reply_error(reply):
         raise MercuryCritical('Problem talking to inventory service: message = %s, tb = %s' % (
