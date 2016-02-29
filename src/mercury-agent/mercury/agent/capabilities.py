@@ -21,20 +21,6 @@ LOG = logging.getLogger(__name__)
 runtime_capabilities = {}
 
 
-class SerialLock(object):
-    def __init__(self):
-        self.lock = threading.Lock()
-
-    def acquire(self):
-        return self.lock.acquire(False)
-
-    def release(self):
-        self.lock.release()
-
-
-serial_lock = SerialLock()
-
-
 def add_capability(entry, name, description, doc=None, serial=False, num_args=None, kwarg_names=None):
     LOG.info('Adding capability %s' % name)
     runtime_capabilities[name] = {

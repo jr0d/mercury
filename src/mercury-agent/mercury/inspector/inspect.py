@@ -15,7 +15,7 @@
 
 import logging
 
-from .inspectors import inspectors
+from mercury.inspector.inspectors import inspectors
 
 from mercury.common.mercury_id import generate_mercury_id
 

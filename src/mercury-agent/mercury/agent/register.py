@@ -16,9 +16,7 @@
 import logging
 import time
 
-import msgpack
-import zmq
-
+from mercury.agent.client import BackEndClient
 from mercury.agent.configuration import agent_configuration
 from mercury.common.exceptions import MercuryCritical
 from mercury.inspector.inspectors.interfaces import get_interface_by_name
@@ -73,11 +71,14 @@ def _serialize_capabilities(capabilities):
         _d[c] = temp_d
     return _d
 
+
 def register(mercury_id, local_ip, local_ip6, capabilities):
     rpc_backend = agent_configuration.get('remote', {}).get('rpc_service')
 
     if not rpc_backend:
         raise MercuryCritical('Missing rpc backend in local configuration')
+
+    backend = BackEndClient(rpc_backend)
 
     # There is still some confusion regarding how best to determine what ip
     # to publish. Current wisdom suggest that we find the default gateway,
@@ -107,16 +108,8 @@ def register(mercury_id, local_ip, local_ip6, capabilities):
         'localtime': time.time(),
         'capabilities': _serialize_capabilities(capabilities)
     }
-    packed = msgpack.packb(dict(action='register', client_info=payload))
 
-    ctx = zmq.Context.instance()
-
-    # noinspection PyUnresolvedReferences
-    socket = ctx.socket(zmq.REQ)
-    socket.connect(rpc_backend)
-    socket.send(packed)
-
-    return msgpack.unpackb(socket.recv())
+    return backend.register(payload)
 
 
 if __name__ == '__main__':

@@ -81,4 +81,5 @@ def main(dhcp_ip_method='simple'):
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
     log.info('[prototype] starting agent')
+    logging.getLogger('mercury.agent.pong').setLevel(logging.ERROR)
     main('simple')

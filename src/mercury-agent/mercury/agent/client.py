@@ -13,15 +13,24 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-from mercury.common.configuration import get_configuration
+import logging
+
+from mercury.common.transport import SimpleRouterReqClient
+
+log = logging.getLogger(__name__)
 
 
-RPC_CONFIG_FILE = 'mercury-rpc.yaml'
+class BackEndClient(SimpleRouterReqClient):
+    def register(self, client_info):
+        _payload = {
+            'action': 'register',
+            'client_info': client_info
+        }
+        return self.transceiver(_payload)
 
-TASK_QUEUE = 'rpc_tasks'
-
-rpc_configuration = get_configuration(RPC_CONFIG_FILE)
-
-db_configuration = rpc_configuration.get('db', {})
-
-print db_configuration
+    def push_response(self, response_data):
+        _payload = {
+            'action': 'task_return',
+            'response': response_data
+        }
+        return self.transceiver(_payload)
