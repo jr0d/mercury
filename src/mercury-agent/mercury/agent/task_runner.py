@@ -15,25 +15,37 @@
 
 import logging
 import time
+import traceback
 import threading
 
+from mercury.common.exceptions import fancy_traceback_format
 
 log = logging.getLogger(__name__)
 
 
 class TaskRunner(object):
-    def __int__(self, job_id, task_id, entry, entry_args, entry_kwargs):
+    def __int__(self, job_id, task_id, entry, entry_args, entry_kwargs, lock=None):
         self.job_id = job_id
         self.task_id = task_id
         self.entry = entry
         self.args = entry_args
         self.kwargs = entry_kwargs
+        self.lock = lock
 
         self.time_started, self.time_completed = None
 
     def __run(self):
-        result = self.entry
+        self.time_started = time.time()
+        # noinspection PyBroadException
+        try:
+            result = self.entry(*self.args, **self.kwargs)
+        except Exception as e:
+
+        log.info('Task completed: %s [%s], elapsed' % (self.entry.__name__, self.task_id))
+        self.time_completed = time.time()
 
 
     def run(self):
         log.info('Starting task: %s [%s]' % (self.entry.__name__, self.task_id))
+        t = threading.Thread(target=self.__run, args=self.args, kwargs=self.kwargs)
+        t.start()
