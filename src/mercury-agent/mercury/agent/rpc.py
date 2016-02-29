@@ -92,7 +92,6 @@ class AgentService(SimpleRouterReqService):
             return self.error(3, 'message is incomplete, missing task_id/job_id')
 
         ret = capability['entry'](*args, **kwargs)
-
         return self.sync_response(data=ret)
 
 
