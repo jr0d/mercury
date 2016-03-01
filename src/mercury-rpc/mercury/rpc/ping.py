@@ -64,7 +64,9 @@ def pinger(server, mercury_id, db_controller):
         if not result:
             break
         time.sleep(5)  # TODO: YAML
-
+    # Scan jobs for any tasks targeting this node
+    #  1. Fail the task
+    #  2. Signal to any active worker threads to stop processing the task
     log.info('%s : %s ping timeout' % (mercury_id, server))
     db_controller.delete(mercury_id)
 
