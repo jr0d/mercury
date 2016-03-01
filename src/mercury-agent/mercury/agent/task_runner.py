@@ -24,15 +24,17 @@ log = logging.getLogger(__name__)
 
 
 class TaskRunner(object):
-    def __int__(self, job_id, task_id, entry, entry_args, entry_kwargs, lock=None):
+    def __init__(self, job_id, task_id, entry,
+                 entry_args=None, entry_kwargs=None, lock=None):
         self.job_id = job_id
         self.task_id = task_id
         self.entry = entry
-        self.args = entry_args
-        self.kwargs = entry_kwargs
+        self.args = entry_args or ()
+        self.kwargs = entry_kwargs or {}
         self.lock = lock
 
-        self.time_started, self.time_completed = None
+        self.time_started = None
+        self.time_completed = None
 
     def __run(self):
         self.time_started = time.time()
@@ -43,12 +45,32 @@ class TaskRunner(object):
             log.error(fancy_traceback_format(
                 'Critical error while running task: %s [%s], elapsed' % (self.entry.__name__,
                                                                          self.task_id)))
+            # Dispatch Error
+            return
+        finally:
+            if self.lock:
+                log.debug('Releasing lock for %s' % self.lock.task_id)
+                self.lock.release()
 
         log.info('Task completed: %s [%s], elapsed' % (self.entry.__name__, self.task_id))
         self.time_completed = time.time()
 
+        # Dispatch Result
+        print result
 
     def run(self):
         log.info('Starting task: %s [%s]' % (self.entry.__name__, self.task_id))
-        t = threading.Thread(target=self.__run, args=self.args, kwargs=self.kwargs)
+        t = threading.Thread(target=self.__run)
         t.start()
+
+
+if __name__ == '__main__':
+    import uuid
+
+    def subtract(a, b):
+        return a - b
+
+    task_runner = TaskRunner(uuid.uuid4(), uuid.uuid4(), subtract, entry_args=[9, 3])
+    print task_runner.__dict__
+    task_runner.run()
+    print task_runner.__dict__

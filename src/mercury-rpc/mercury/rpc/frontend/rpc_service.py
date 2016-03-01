@@ -1,26 +1,32 @@
 import logging
 
-from bottle import abort, route, run, request, response, HTTPResponse
+from bottle import route, run, request, HTTPResponse
 
 from mercury.common.inventory_client.client import InventoryClient  # TODO: Clean up import
 from mercury.common.mongo import get_collection
-from mercury.rpc.configuration import rpc_configuration
-from mercury.rpc.db import ActiveInventoryDBController
+from mercury.common.exceptions import MercuryCritical
+from mercury.rpc.configuration import rpc_configuration, db_configuration
+from mercury.rpc.jobs import Job, get_jobs_collection
+
 
 log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
 
-db_configuration = rpc_configuration.get('db', {})
 active_collection = get_collection(db_configuration.get('rpc_mongo_db',
                                                         'test'),
                                    db_configuration.get('rpc_mongo_collection',
                                                         'rpc'),
                                    server_or_servers=db_configuration.get('rpc_mongo_servers',
                                                                           'localhost'),
-                                   replica_set=db_configuration.get('replica_set'))
+                                   replica_set=db_configuration.get('rpc_replica_set'))
+
+jobs_collection = get_jobs_collection()
 
 inventory_configuration = rpc_configuration.get('inventory', {})
 inventory_router_url = inventory_configuration.get('inventory_router')
+
+if not inventory_router_url:
+    raise MercuryCritical('Configuration is missing or invalid')
 
 inventory_client = InventoryClient(inventory_router_url)
 
@@ -78,11 +84,13 @@ def active_computers():
 def query_active_prototype1(query):
     # Get all inventory matching inventory mercury_ids and iterate over
     inventory_matches = inventory_client.query(query)
+
     active_matches = []
     cursor = active_collection.find({})
 
     for active_document in cursor:
-        for inventory_document in inventory_matches:
+        for inventory_document in inventory_matches['items']:
+
             if active_document.get('mercury_id') == inventory_document.get('mercury_id'):
                 active_matches.append(active_document)
                 break
@@ -92,15 +100,26 @@ def query_active_prototype1(query):
 
 @route('/api/rpc/inject', method='POST')
 def inject():
-    if not request.json:
-        return http_error('JSON request is missing', code=400)
+    try:
+        if not request.json:
+            return http_error('JSON request is missing', code=400)
+    except ValueError:
+        return http_error('JSON request is malformed', code=400)
 
+    # Using instance here because we are checking for
     query = request.json.get('query')
     if not isinstance(query, dict):
         return http_error('Query is missing from request', code=400)
 
-    active_matches = query_active_prototype1(query)
+    command = request.json.get('command')
+    if not isinstance(command, dict):
+        return http_error('Command is missing from request or is malformed', code=400)
 
-    return {'total_count': len(active_matches), 'active': active_matches}
+    active_matches = query_active_prototype1(query)
+    log.debug('Matched %d active computers' % len(active_matches))
+    job = Job(command, active_matches, jobs_collection)
+    job.start()
+
+    return {'job_id': str(job.job_id)}
 
 run(host='localhost', port=9005, debug=True)

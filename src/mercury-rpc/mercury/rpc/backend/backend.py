@@ -26,12 +26,12 @@ log = logging.getLogger(__name__)
 RPC_CONFIG_FILE = 'mercury-rpc.yaml'
 
 
-class RegistrationService(SimpleRouterReqService):
+class BackEndService(SimpleRouterReqService):
     def __init__(self, collection):
         registration_service_bind_address = rpc_configuration.get('backend',
-                                                                  {}).get('registration_service_url',
+                                                                  {}).get('service_url',
                                                                           'tcp://0.0.0.0:9002')
-        super(RegistrationService, self).__init__(registration_service_bind_address)
+        super(BackEndService, self).__init__(registration_service_bind_address)
 
         self.db_controller = ActiveInventoryDBController(collection)
 
@@ -63,8 +63,25 @@ class RegistrationService(SimpleRouterReqService):
 
         return dict(error=False, message='Registration successful')
 
+    def task_return(self, response_data):
+        """Update Job task with response data and result status
+        :param response_data: {
+            job_id:
+            task_id:
+            mercury_id:
+            method:
+            time_started:
+            time_completed:
+            data: {
+            }
+            result: SUCCESS|ERROR|EXCEPTION|TIMEOUT
+        }
+        :return:
+        """
+        assert self
 
-def rpc_backend_register_service():
+
+def rpc_backend_service():
     """
     Entry point
 
@@ -81,12 +98,11 @@ def rpc_backend_register_service():
                                                                        'localhost'),
                                 replica_set=db_configuration.get('replica_set'))
 
-    server = RegistrationService(collection)
+    server = BackEndService(collection)
     server.reacquire()
     server.bind()
     server.start()
 
 
 if __name__ == '__main__':
-    rpc_backend_register_service()
-
+    rpc_backend_service()

@@ -14,14 +14,32 @@
 #    limitations under the License.
 
 import logging
+import threading
 
 from mercury.agent.capabilities import runtime_capabilities
+from mercury.agent.task_runner import TaskRunner
 from mercury.common.transport import SimpleRouterReqService
 
 LOG = logging.getLogger(__name__)
 
 
+class SerialLock(object):
+    def __init__(self):
+        self.task_id = None
+        self.lock = threading.Lock()
+
+    def acquire(self, task_id):
+        self.task_id = task_id
+        return self.lock.acquire(False)  # don't block on acquire
+
+    def release(self):
+        self.task_id = None
+        self.lock.release()
+
+
 class AgentService(SimpleRouterReqService):
+    serial_lock = SerialLock()
+
     @staticmethod
     def error(code, message='', data=None):
         return {'status': code, 'message': message, 'data': data}
@@ -91,8 +109,30 @@ class AgentService(SimpleRouterReqService):
         if None in [task_id, job_id]:
             return self.error(3, 'message is incomplete, missing task_id/job_id')
 
-        ret = capability['entry'](*args, **kwargs)
-        return self.sync_response(data=ret)
+        # Task runner inject
+        # ret = capability['entry'](*args, **kwargs)
+
+        if capability.get('serial'):
+            LOG.info('capability %s is serial, attempting to acquire lock' %
+                     capability['name'])
+            if not self.serial_lock.acquire(task_id):
+                LOG.info('Could not acquire lock, locked by %s' % task_id)
+                return self.error(5, 'Could not acquire lock, task is already running')
+            LOG.info('Lock acquired for %s' % task_id)
+            tmp_lock = self.serial_lock
+        else:
+            tmp_lock = None  # We don't care about the lock, unless we are running
+            # a serial task
+
+        task_runner = TaskRunner(job_id,
+                                 task_id,
+                                 capability['entry'],
+                                 entry_args=args,
+                                 entry_kwargs=kwargs,
+                                 lock=tmp_lock)
+        task_runner.run()
+        return self.sync_response(data=dict(time_started=task_runner.time_started,
+                                            message='Hakuna matata'))
 
 
 if __name__ == '__main__':
