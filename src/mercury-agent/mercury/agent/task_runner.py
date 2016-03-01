@@ -40,6 +40,9 @@ class TaskRunner(object):
         try:
             result = self.entry(*self.args, **self.kwargs)
         except Exception as e:
+            log.error(fancy_traceback_format(
+                'Critical error while running task: %s [%s], elapsed' % (self.entry.__name__,
+                                                                         self.task_id)))
 
         log.info('Task completed: %s [%s], elapsed' % (self.entry.__name__, self.task_id))
         self.time_completed = time.time()
