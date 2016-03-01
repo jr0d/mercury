@@ -91,9 +91,7 @@ class AgentService(SimpleRouterReqService):
         if None in [task_id, job_id]:
             return self.error(3, 'message is incomplete, missing task_id/job_id')
 
-        # lock
         ret = capability['entry'](*args, **kwargs)
-        # unlock
         return self.sync_response(data=ret)
 
 
