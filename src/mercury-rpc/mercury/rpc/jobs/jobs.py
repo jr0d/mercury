@@ -1,3 +1,4 @@
+import json
 import logging
 import redis
 import time
@@ -65,7 +66,7 @@ class Task(object):
         log.debug('Queuing task: %s' % self.task_id)
         redis_client = redis.Redis()
         self.time_queued = time.time()
-        redis_client.lpush(TASK_QUEUE, self.to_dict())
+        redis_client.lpush(TASK_QUEUE, json.dumps(self.to_dict()))
 
 
 class Job(object):
