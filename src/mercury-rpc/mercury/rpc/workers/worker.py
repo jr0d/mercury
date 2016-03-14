@@ -6,6 +6,7 @@ import threading
 import time
 
 from mercury.common.transport import SimpleRouterReqClient
+from mercury.rpc.jobs import update_job_task
 
 log = logging.getLogger(__name__)
 
@@ -34,8 +35,18 @@ class Worker(object):
         return task
 
     @staticmethod
-    def update_job(task):
-        pass
+    def update_job(task, response):
+        if response['status'] == 0:
+            _payload = {
+                'status': 'DISPATCHED',
+                'time_started': time.time()
+            }
+        else:
+            _payload = {
+                'status': 'ERROR',
+                'result': response
+            }
+        return update_job_task(task['job_id'], task['task_id'], _payload)
 
     @staticmethod
     def dispatch_task(task):
@@ -58,7 +69,7 @@ class Worker(object):
         while self.maximum_requests:
             task = self.fetch_task()
             response = self.dispatch_task(task)
-            print response
+            self.update_job(task, response)
             self.maximum_requests -= 1
 
 
@@ -76,4 +87,5 @@ if __name__ == '__main__':
     w = Worker('rpc_tasks', 10, 3600)
     _task = w.fetch_task()
     print _task
-    print w.dispatch_task(_task)
+    _response = w.dispatch_task(_task)
+    print w.update_job(_task, _response)

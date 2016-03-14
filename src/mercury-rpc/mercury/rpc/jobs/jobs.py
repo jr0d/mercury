@@ -26,6 +26,28 @@ def get_jobs_collection(db='', collection='', servers=None, replica_set=None):
     )
 
 
+def update_job_task(job_id, task_id, document):
+    """
+    Helper function that simplifies updating job tasks by constructing tasks.<task_id>.k
+    :param job_id: The job
+    :param task_id: The task
+    :param document: A dictionary that represents the changes to job task
+    :return: return value of pymongo.Collection.update
+    """
+    collection = get_jobs_collection()
+    selector = 'tasks.{task_id}'.format(task_id=task_id)
+    updated_dict = {}
+    for k, v in document.items():
+        updated_dict['%s.%s' % (selector, k)] = v
+
+    return collection.update(
+        spec={'job_id': job_id},
+        document={
+            '$set': updated_dict
+        }
+    )
+
+
 class Task(object):
     """
     There is a voice in my head shouting 'JUST SUBCLASS DICT!!!'
@@ -87,11 +109,12 @@ class Job(object):
 
         self.method, self.args, self.kwargs = self.__extract_command()
         self.job_id = uuid.uuid4()
-        self.tasks = []
+        self.tasks = {}
         # Populate the tasks
 
         for target in targets:
-            self.tasks.append(self.__create_task(target))
+            task = self.__create_task(target)
+            self.tasks[str(task.task_id)] = task
 
         self.time_started = None
         self.time_completed = None
@@ -146,6 +169,10 @@ class Job(object):
         return task
 
     def to_dict(self):
+        tasks_dict = dict()
+        for task in self.tasks.values():
+            tasks_dict[str(task.task_id)] = task.to_dict()
+
         return {
             'method': self.method,
             'args': self.args,
@@ -153,13 +180,13 @@ class Job(object):
             'job_id': str(self.job_id),
             'time_started': self.time_started,
             'time_completed': self.time_completed,
-            'tasks': [x.to_dict() for x in self.tasks]
+            'tasks': tasks_dict
         }
 
     def __insert_job(self):
         self.time_started = time.time()
 
-        for task in self.tasks:
+        for task in self.tasks.values():
             task.enqueue()
 
         log.info('Inserting job: %s' % self.job_id)
@@ -168,9 +195,3 @@ class Job(object):
 
     def start(self):
         self.__insert_job()
-
-
-if __name__ == '__main__':
-    t1 = Task('localhost', 9003, 'echo', ['This is the message'])
-    print t1
-    print t1.to_dict()

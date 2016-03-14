@@ -78,7 +78,7 @@ class BackEndService(SimpleRouterReqService):
         }
         :return:
         """
-        assert self
+        assert self  ### START HERE
 
 
 def rpc_backend_service():
