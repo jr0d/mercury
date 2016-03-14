@@ -5,6 +5,8 @@ import signal
 import threading
 import time
 
+from mercury.common.transport import SimpleRouterReqClient
+
 log = logging.getLogger(__name__)
 
 
@@ -16,26 +18,48 @@ class Worker(object):
         self.birth = None
         self.redis = redis.Redis()
 
-    def fetch_work(self):
+    def fetch_task(self):
         message = self.redis.blpop(self.task_queue_name)[1]
         try:
-            work = json.loads(message)
+            task = json.loads(message)
         except ValueError:
             log.error('Popped some bad data off the queue')
             log.debug('DATA: %s' % message)
             return
 
-        log.debug('Fetched task %s for work it was %s seconds old' % (
-            work['task_id'],
-            time.time() - work['time_queued']
+        log.debug('Fetched task %s; it was %s seconds old' % (
+            task['task_id'],
+            time.time() - task['time_queued']
         ))
-        return work
+        return task
+
+    @staticmethod
+    def update_job(task):
+        pass
+
+    @staticmethod
+    def dispatch_task(task):
+        url = 'tcp://{host}:{port}'.format(**task)
+        client = SimpleRouterReqClient(url)
+        _payload = {
+            'category': 'rpc',
+            'method': task['method'],
+            'args': task['args'],
+            'kwargs': task['kwargs'],
+            'task_id': task['task_id'],
+            'job_id': task['job_id']
+        }
+        response = client.transceiver(_payload)
+        return response
 
     def start(self):
         self.birth = time.time()
 
         while self.maximum_requests:
-            work = self.fetch_work()
+            task = self.fetch_task()
+            response = self.dispatch_task(task)
+            print response
+            self.maximum_requests -= 1
 
 
 class Manager(object):
@@ -50,4 +74,6 @@ class Manager(object):
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
     w = Worker('rpc_tasks', 10, 3600)
-    print w.fetch_work()
+    _task = w.fetch_task()
+    print _task
+    print w.dispatch_task(_task)

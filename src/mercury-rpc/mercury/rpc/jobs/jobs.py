@@ -30,7 +30,8 @@ class Task(object):
     """
     There is a voice in my head shouting 'JUST SUBCLASS DICT!!!'
     """
-    def __init__(self, mercury_id, host, port, method, args=None, kwargs=None):
+    def __init__(self, job_id, mercury_id, host, port, method, args=None, kwargs=None):
+        self.job_id = job_id
         self.mercury_id = mercury_id
         self.host = host
         self.port = port
@@ -48,6 +49,7 @@ class Task(object):
             'args': self.args,
             'kwargs': self.kwargs,
             'mercury_id': self.mercury_id,
+            'job_id': str(self.job_id),
             'host': self.host,
             'port': self.port,
             'task_id': str(self.task_id),
@@ -131,6 +133,7 @@ class Job(object):
             raise MercuryCritical('Encountered malformed target, the database is corrupted')
 
         task = Task(
+            job_id=self.job_id,
             mercury_id=mercury_id,
             host=host,
             port=port,
