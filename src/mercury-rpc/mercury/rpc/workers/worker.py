@@ -25,6 +25,7 @@ class Worker(object):
         message = self.redis.blpop(self.task_queue_name, timeout=1)
         if not message:
             return
+        message = message[1]
         try:
             task = json.loads(message)
         except ValueError:
@@ -105,6 +106,8 @@ class Manager(object):
             if self.workers[idx]['thread'].is_alive():
                 active.append(self.workers[idx])
             else:
+                # An optimization that usually should be present in a property
+                # "I'm sure you can find a better way to implement this" - Hussam
                 self.workers.pop(idx)
         return active
 
@@ -112,6 +115,7 @@ class Manager(object):
         count = len(self.active_workers)
         while count <= self.number_of_workers:
             self.spawn()
+            count += 1
 
     def manage(self):
         # noinspection PyUnusedLocal
@@ -130,6 +134,6 @@ class Manager(object):
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
-    manager = Manager('rpc_tasks', 10, 30)
+    manager = Manager('rpc_tasks', 10, 3600)
     manager.manage()
 

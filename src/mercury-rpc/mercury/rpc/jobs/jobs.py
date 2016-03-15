@@ -38,7 +38,7 @@ def update_job_task_existing_connection(collection, job_id, task_id, document):
     updated_dict = {}
     for k, v in document.items():
         accessor = '%s.%s' % (selector, k)
-        log.debug('Updating: %s => %s' % (accessor, v))
+        # log.debug('Updating: %s => %s' % (accessor, v))
         updated_dict['%s.%s' % (selector, k)] = v
 
     return collection.update(

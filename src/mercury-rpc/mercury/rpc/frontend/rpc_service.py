@@ -35,6 +35,16 @@ def http_error(message, code=500):
     return HTTPResponse({'error': True, 'message': message}, status=code)
 
 
+def get_projection_from_qsa():
+    projection_keys = request.query.get('projection', '')
+    projection = {}
+    if projection_keys:
+        for k in projection_keys.split(','):
+            projection[k] = 1
+
+    return projection or None
+
+
 @route('/api/inventory/computers', method='GET')
 def computers():
     return {'computers': inventory_client.query({})}
@@ -53,14 +63,7 @@ def computers_query():
 
 @route('/api/inventory/computer/<mercury_id>', method='GET')
 def computer(mercury_id):
-    projection_keys = request.query.get('projection', '')
-    if projection_keys:
-        projection = {}
-        for k in projection_keys.split(','):
-            projection[k] = 1
-    else:
-        projection = None  # An empty dict means no projections, not show me everything...
-
+    projection = get_projection_from_qsa()
     c = inventory_client.get_one(mercury_id, projection=projection)
 
     if not computer:
@@ -98,8 +101,30 @@ def query_active_prototype1(query):
     return active_matches
 
 
-@route('/api/rpc/inject', method='POST')
-def inject():
+@route('/api/rpc/job/<job_id>', method='GET')
+def get_job(job_id):
+    projection = get_projection_from_qsa()
+    job = jobs_collection.find_one({'job_id': job_id}, projection=projection)
+    job['_id'] = str(job['_id'])
+    return {'job': job}
+
+
+@route('/api/rpc/jobs', method='GET')
+def get_jobs():
+    projection = get_projection_from_qsa()
+    if not projection:
+        projection = {'tasks': False}
+    c = jobs_collection.find({}, projection=projection).sort('time_created', 1)
+    count = c.count()
+    jobs = []
+    for job in c:
+        job['_id'] = str(job['_id'])
+        jobs.append(job)
+    return {'count': count, 'jobs': list(jobs)}
+
+
+@route('/api/rpc/jobs', method='POST')
+def post_jobs():
     try:
         if not request.json:
             return http_error('JSON request is missing', code=400)
