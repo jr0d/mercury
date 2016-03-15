@@ -18,7 +18,10 @@ import time
 import traceback
 import threading
 
-from mercury.common.exceptions import fancy_traceback_format
+from mercury.agent.client import BackEndClient
+from mercury.agent.configuration import agent_configuration
+from mercury.common.exceptions import parse_exception, fancy_traceback_format, MercuryCritical
+from mercury.common.transport import SimpleRouterReqClient
 
 log = logging.getLogger(__name__)
 
@@ -36,27 +39,52 @@ class TaskRunner(object):
         self.time_started = None
         self.time_completed = None
 
+        rpc_backend = agent_configuration.get('remote', {}).get('rpc_service')
+        if not rpc_backend:
+            raise MercuryCritical('Missing rpc backend in local configuration')
+
+        self.backend = BackEndClient(rpc_backend)
+
     def __run(self):
         self.time_started = time.time()
+        traceback_info = None
         # noinspection PyBroadException
         try:
-            result = self.entry(*self.args, **self.kwargs)
-        except Exception as e:
-            log.error(fancy_traceback_format(
-                'Critical error while running task: %s [%s], elapsed' % (self.entry.__name__,
-                                                                         self.task_id)))
-            # Dispatch Error
-            return
+            return_data = self.entry(*self.args, **self.kwargs)
+            # TODO: Create response contract for procedures
+            if isinstance(return_data, dict) and return_data.get('error'):
+                result = 'ERROR'
+            else:
+                result = 'SUCCESS'
+        except Exception:
+            exc_dict = parse_exception()
+            log.error(fancy_traceback_format(exc_dict,
+                                             'Critical error while running task: %s [%s], elapsed' % (
+                                                 self.entry.__name__,
+                                                 self.task_id)))
+            traceback_info = exc_dict
+            result = 'ERROR'
         finally:
             if self.lock:
                 log.debug('Releasing lock for %s' % self.lock.task_id)
                 self.lock.release()
 
-        log.info('Task completed: %s [%s], elapsed' % (self.entry.__name__, self.task_id))
         self.time_completed = time.time()
+        log.info('Task completed: %s [%s], elapsed %s' % (self.entry.__name__,
+                                                          self.task_id,
+                                                          self.time_completed - self.time_started))
+        log.debug('Publishing response to: %s' % self.backend.zmq_url)
 
-        # Dispatch Result
-        print result
+        response = self.backend.push_response({
+            'result': result,
+            'data': return_data,
+            'traceback_info': traceback_info,
+            'job_id': self.job_id,
+            'task_id': self.task_id,
+            'time_started': self.time_started,
+            'time_completed': self.time_completed
+        })
+        log.debug('Dispatch successful : %s' % response)
 
     def run(self):
         log.info('Starting task: %s [%s]' % (self.entry.__name__, self.task_id))
@@ -67,8 +95,10 @@ class TaskRunner(object):
 if __name__ == '__main__':
     import uuid
 
+
     def subtract(a, b):
         return a - b
+
 
     task_runner = TaskRunner(uuid.uuid4(), uuid.uuid4(), subtract, entry_args=[9, 3])
     print task_runner.__dict__

@@ -18,9 +18,13 @@ class Worker(object):
         self.maximum_age = maximum_age
         self.birth = None
         self.redis = redis.Redis()
+        self.kill_signal = None
+        self.handled_tasks = 0
 
     def fetch_task(self):
-        message = self.redis.blpop(self.task_queue_name)[1]
+        message = self.redis.blpop(self.task_queue_name, timeout=1)
+        if not message:
+            return
         try:
             task = json.loads(message)
         except ValueError:
@@ -35,20 +39,6 @@ class Worker(object):
         return task
 
     @staticmethod
-    def update_job(task, response):
-        if response['status'] == 0:
-            _payload = {
-                'status': 'DISPATCHED',
-                'time_started': time.time()
-            }
-        else:
-            _payload = {
-                'status': 'ERROR',
-                'result': response
-            }
-        return update_job_task(task['job_id'], task['task_id'], _payload)
-
-    @staticmethod
     def dispatch_task(task):
         url = 'tcp://{host}:{port}'.format(**task)
         client = SimpleRouterReqClient(url)
@@ -60,32 +50,86 @@ class Worker(object):
             'task_id': task['task_id'],
             'job_id': task['job_id']
         }
+        log.debug('Dispatching task: %s' % task)
         response = client.transceiver(_payload)
+        if response['status'] != 0:
+            update_job_task(task['job_id'], task['task_id'], {'status': 'ERROR',
+                                                              'response': 'Dispatch Error: %s' % response})
         return response
 
     def start(self):
         self.birth = time.time()
-
-        while self.maximum_requests:
+        while self.handled_tasks < self.maximum_requests:
+            if self.kill_signal:
+                log.info(
+                    'Shutting down... I served my masters well: %s tasks ,'
+                    'lived %s seconds' % (self.handled_tasks,
+                                          time.time() - self.birth))
+                break
             task = self.fetch_task()
+            if not task:
+                continue
             response = self.dispatch_task(task)
-            self.update_job(task, response)
-            self.maximum_requests -= 1
+            log.debug('Task dispatched: %s' % response)
+            self.handled_tasks += 1
 
 
 class Manager(object):
-    def __init__(self, task_queue_name, number_of_workers=10, maximum_requests_per_thread=5000):
+    def __init__(self, task_queue_name, number_of_workers=10, maximum_requests_per_thread=5000, maximum_age=3600):
         self.task_queue_name = task_queue_name
         self.number_of_workers = number_of_workers
         self.max_requests = maximum_requests_per_thread
+        self.max_age = maximum_age
 
         self.workers = []
 
+    def spawn(self):
+        worker_dict = {}
+        w = Worker(self.task_queue_name, self.max_requests, self.max_age)
+        worker_dict['worker_class'] = w
+        t = threading.Thread(target=w.start)
+        t.start()
+        log.info('Spawned thread: %s' % t.ident)
+        worker_dict['thread'] = t
+        self.workers.append(worker_dict)
+
+    def kill_all(self):
+        for worker in self.active_workers:
+            log.info('Sending kill signal to worker %s' % worker['thread'].ident)
+            worker['worker_class'].kill_signal = True
+
+    @property
+    def active_workers(self):
+        active = []
+        for idx in range(len(self.workers)):
+            if self.workers[idx]['thread'].is_alive():
+                active.append(self.workers[idx])
+            else:
+                self.workers.pop(idx)
+        return active
+
+    def spawn_threads(self):
+        count = len(self.active_workers)
+        while count <= self.number_of_workers:
+            self.spawn()
+
+    def manage(self):
+        # noinspection PyUnusedLocal
+        def term_handler(*args, **kwargs):
+            log.info('Caught TERM signal, sending kill all')
+            self.kill_all()
+
+        signal.signal(signal.SIGTERM, term_handler)
+
+        try:
+            while True:
+                self.spawn_threads()
+                time.sleep(.01)
+        except KeyboardInterrupt:
+            term_handler()
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
-    w = Worker('rpc_tasks', 10, 3600)
-    _task = w.fetch_task()
-    print _task
-    _response = w.dispatch_task(_task)
-    print w.update_job(_task, _response)
+    manager = Manager('rpc_tasks', 10, 30)
+    manager.manage()
+

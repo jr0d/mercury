@@ -14,16 +14,21 @@
 #    limitations under the License.
 
 import logging
+import time
 
 from mercury.common.transport import SimpleRouterReqService
 from mercury.common.mongo import get_collection
 from mercury.rpc.configuration import rpc_configuration
 from mercury.rpc.db import ActiveInventoryDBController
+from mercury.rpc.jobs import is_completed, update_job_task_existing_connection
 from mercury.rpc.ping import spawn
 
 log = logging.getLogger(__name__)
 
 RPC_CONFIG_FILE = 'mercury-rpc.yaml'
+
+
+# TODO: Rewrite BackEndService as a general message purpose router
 
 
 class BackEndService(SimpleRouterReqService):
@@ -35,9 +40,16 @@ class BackEndService(SimpleRouterReqService):
 
         self.db_controller = ActiveInventoryDBController(collection)
 
+        # Temporary configuration storage to get jobs collection name
+        # See TODO
+        self.jobs_collection_name = rpc_configuration.get('db', {}).get('jobs_mongo_collection',
+                                                                        'rpc_jobs')
+
     def process(self, message):
         if message.get('action') == 'register':
             return self.register(data=message.get('client_info'))
+        elif message.get('action') == 'task_return':
+            return self.task_return(message.get('response'))
         return dict(error=True, message='Did not receive appropriate action')
 
     def spawn_pinger(self, mercury_id, address, port):
@@ -78,7 +90,38 @@ class BackEndService(SimpleRouterReqService):
         }
         :return:
         """
-        assert self  ### START HERE
+        # Database is abstracted away by a controller class, we'll rework the class
+        # to simply accept a db object
+
+        db = self.db_controller.collection.database
+        collection = db[self.jobs_collection_name]
+        job_id = response_data['job_id']
+        task_id = response_data['task_id']
+        update = {
+            'status': response_data['result'],  # Naming conventions changed when coding provider
+            'time_started': response_data['time_started'],
+            'time_completed': response_data['time_completed'],
+            'result': response_data['traceback_info'] or response_data['data']
+        }
+
+        log.info('Task completed: task_id: {task_id} job: {job_id} result: {result}'.format(
+            **response_data
+        ))
+
+        # Probably introduces a race condition. Instead, update the manager service (TBC)
+        # That a task landed on the return bus
+        # Race condition #2 : Updating status to DISPATCHED is occurring AFTER
+        # this update... ZeroMQ is faster than the time it takes to get a collection
+        # in the worker...
+        # time.sleep(.05)
+        update_job_task_existing_connection(collection, job_id, task_id, update)
+
+        if is_completed(collection, job_id):
+            log.info('Job completed: {job_id}'.format(job_id=job_id))
+            collection.update({'job_id': job_id}, {'$set': {
+                'time_completed': time.time()}})
+
+        return dict(message='Accepted')
 
 
 def rpc_backend_service():
@@ -89,6 +132,7 @@ def rpc_backend_service():
     """
     logging.basicConfig(level=logging.DEBUG,
                         format='%(asctime)s : %(levelname)s - %(name)s - %(message)s')
+    logging.getLogger('mercury.rpc.ping').setLevel(logging.INFO)
     db_configuration = rpc_configuration.get('db', {})
     collection = get_collection(db_configuration.get('rpc_mongo_db',
                                                      'test'),

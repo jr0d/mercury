@@ -17,7 +17,7 @@ import logging
 import msgpack
 import zmq
 
-from mercury.common.exceptions import fancy_traceback_format
+from mercury.common.exceptions import parse_exception, fancy_traceback_format
 
 log = logging.getLogger(__name__)
 
@@ -138,8 +138,9 @@ class SimpleRouterReqService(object):
             try:
                 response = self.process(message)
             except Exception:
+                exc_dict = parse_exception()
                 log.error('process raised an exception and should not have.')
-                log.error(fancy_traceback_format('Exception data:'))
+                log.error(fancy_traceback_format(exc_dict, 'Exception data:'))
                 self.send_error(address, 'Encountered server error, sorry')
                 continue
             log.debug('Response: %s' % address.encode('hex'))

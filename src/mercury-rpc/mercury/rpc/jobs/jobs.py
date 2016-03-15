@@ -26,7 +26,7 @@ def get_jobs_collection(db='', collection='', servers=None, replica_set=None):
     )
 
 
-def update_job_task(job_id, task_id, document):
+def update_job_task_existing_connection(collection, job_id, task_id, document):
     """
     Helper function that simplifies updating job tasks by constructing tasks.<task_id>.k
     :param job_id: The job
@@ -34,10 +34,11 @@ def update_job_task(job_id, task_id, document):
     :param document: A dictionary that represents the changes to job task
     :return: return value of pymongo.Collection.update
     """
-    collection = get_jobs_collection()
     selector = 'tasks.{task_id}'.format(task_id=task_id)
     updated_dict = {}
     for k, v in document.items():
+        accessor = '%s.%s' % (selector, k)
+        log.debug('Updating: %s => %s' % (accessor, v))
         updated_dict['%s.%s' % (selector, k)] = v
 
     return collection.update(
@@ -46,6 +47,38 @@ def update_job_task(job_id, task_id, document):
             '$set': updated_dict
         }
     )
+
+
+def update_job_task(job_id, task_id, document):
+    """
+    Same as above, but creates a new pool. For short running threads
+    :param job_id:
+    :param task_id:
+    :param document:
+    :return:
+    """
+    collection = get_jobs_collection()
+    return update_job_task_existing_connection(collection, job_id, task_id, document)
+
+
+def get_tasks(collection, job_id):
+    doc = collection.find_one({'job_id': job_id}, projection={'tasks': 1, '_id': 0})
+    return doc.get('tasks') or {}
+
+
+def is_completed(collection, job_id):
+    """
+    This will likely change once Job statuses are finalized
+    :param collection:
+    :param job_id:
+    :return:
+    """
+    complete_statuses = ['SUCCESS', 'ERROR', 'EXCEPTION', 'TIMEOUT'] # This will move
+    tasks = get_tasks(collection, job_id)
+    for task_id in tasks:
+        if tasks[task_id]['status'] not in complete_statuses:
+            return False
+    return True
 
 
 class Task(object):
