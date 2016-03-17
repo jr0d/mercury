@@ -71,7 +71,7 @@ def generate_mercury_id(inspected_dmi, inspected_interfaces):
         LOG.debug(
             'Generating mercury ID using asset/serial information: tag=%s, serial=%s' % (
                 inspected_dmi['chassis_asset_tag'],
-                inspected_dmi['chassis_seria']
+                inspected_dmi['chassis_serial']
             ))
     else:
         meta_type = META_TYPE_MAC
