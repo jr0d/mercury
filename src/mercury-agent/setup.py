@@ -30,5 +30,9 @@ setup(
         'netifaces',
         'pexpect',
         'pyudev'
-    ]
+    ],
+    entry_points="""
+    [console_scripts]
+    mercury_agent = mercury.agent.agent:main
+    """,
 )

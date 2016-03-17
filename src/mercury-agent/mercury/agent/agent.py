@@ -36,7 +36,7 @@ from mercury.inspector.inspect import inspect
 log = logging.getLogger(__name__)
 
 
-def main(dhcp_ip_method='simple'):
+def spawn_agent(dhcp_ip_method='simple'):
     """
     Prototype agent service entry
     :param dhcp_ip_method: method to get dhcp
@@ -78,8 +78,14 @@ def main(dhcp_ip_method='simple'):
     agent_service.bind()
     agent_service.start()
 
-if __name__ == '__main__':
+
+def main():
     logging.basicConfig(level=logging.DEBUG)
     log.info('[prototype] starting agent')
     logging.getLogger('mercury.agent.pong').setLevel(logging.ERROR)
-    main('simple')
+
+    spawn_agent('simple')
+
+
+if __name__ == '__main__':
+    main()
