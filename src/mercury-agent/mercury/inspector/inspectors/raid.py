@@ -20,6 +20,7 @@ from mercury.common.helpers.size import Size
 from mercury.raid.interfaces.hpsa.hpacu import HPRaid
 from mercury.raid.interfaces.lsi.megaraid.megacli import LSIRaid
 
+
 MEGACLI_PATH = '/usr/local/sbin/megacli'
 
 

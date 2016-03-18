@@ -4,7 +4,7 @@ from bottle import route, run, request, HTTPResponse
 
 from mercury.common.inventory_client.client import InventoryClient  # TODO: Clean up import
 from mercury.common.mongo import get_collection
-from mercury.common.exceptions import MercuryCritical
+from mercury.common.exceptions import MercuryCritical, MercuryUserError
 from mercury.rpc.configuration import rpc_configuration, db_configuration
 from mercury.rpc.jobs import Job, get_jobs_collection
 
@@ -33,6 +33,14 @@ inventory_client = InventoryClient(inventory_router_url)
 
 def http_error(message, code=500):
     return HTTPResponse({'error': True, 'message': message}, status=code)
+
+
+def check_json():
+    try:
+        if not request.json:
+            return http_error('JSON request is missing', code=400)
+    except ValueError:
+        return http_error('JSON request is malformed', code=400)
 
 
 def get_projection_from_qsa():
@@ -101,6 +109,15 @@ def query_active_prototype1(query):
     return active_matches
 
 
+def get_active():
+    # Using instance here because we are checking for
+    query = request.json.get('query')
+    if not isinstance(query, dict):
+        return http_error('Query is missing from request', code=400)
+
+    return query_active_prototype1(query)
+
+
 @route('/api/rpc/job/<job_id>', method='GET')
 def get_job(job_id):
     projection = get_projection_from_qsa()
@@ -125,26 +142,29 @@ def get_jobs():
 
 @route('/api/rpc/jobs', method='POST')
 def post_jobs():
-    try:
-        if not request.json:
-            return http_error('JSON request is missing', code=400)
-    except ValueError:
-        return http_error('JSON request is malformed', code=400)
-
-    # Using instance here because we are checking for
-    query = request.json.get('query')
-    if not isinstance(query, dict):
-        return http_error('Query is missing from request', code=400)
-
+    check_json()
     command = request.json.get('command')
     if not isinstance(command, dict):
         return http_error('Command is missing from request or is malformed', code=400)
 
-    active_matches = query_active_prototype1(query)
+    active_matches = get_active()
     log.debug('Matched %d active computers' % len(active_matches))
-    job = Job(command, active_matches, jobs_collection)
+    # request.json.get('asset_backend')?
+    # request.json.get('assets')?
+    try:
+        job = Job(command, active_matches, jobs_collection)
+    except MercuryUserError as mue:
+        return http_error(str(mue), code=400)
     job.start()
 
     return {'job_id': str(job.job_id)}
+
+
+@route('/api/orca/press', method='POST')
+def post_orca_press_job():
+    check_json()
+    query = request.json.get('query')
+    if not isinstance(query, dict):
+        return http_error('Query is missing from request', code=400)
 
 run(host='localhost', port=9005, debug=True)

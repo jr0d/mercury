@@ -37,9 +37,9 @@ def parse_exception():
     exc_type, exc_value, exc_traceback = sys.exc_info()
     path, line, scope, code = traceback.extract_tb(exc_traceback)[-1]
     return {
-            'exc_type': exc_type,
-            'exc_value': exc_value,
-            'scope': scope,
+            'exc_type': str(exc_type),
+            'exc_value': str(exc_value),
+            'scope': str(scope),
             'path': path,
             'line': line,
             'code': code

@@ -64,6 +64,7 @@ class TaskRunner(object):
                                                  self.task_id)))
             traceback_info = exc_dict
             result = 'ERROR'
+            return_data = None
         finally:
             if self.lock:
                 log.debug('Releasing lock for %s' % self.lock.task_id)

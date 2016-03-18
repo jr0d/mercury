@@ -45,7 +45,7 @@ class CLIException(Exception):
 
 
 def run(command, bufsize=1048567, dry_run=False, raise_exception=False, ignore_error=False,
-        quiet=False, env=None):
+        quiet=False, env=None, _input=''):
     """Runs a command and stores the important bits in an attribute string.
 
 
@@ -57,6 +57,7 @@ def run(command, bufsize=1048567, dry_run=False, raise_exception=False, ignore_e
     :param quiet:
     :param bufsize: Buffer line size.
     :type bufsize: int.
+    :param _input: Pass data into stdin fd
 
     :param dry_run: Should we perform a dry run of the command.
     :type dry_run: bool.
@@ -69,8 +70,10 @@ def run(command, bufsize=1048567, dry_run=False, raise_exception=False, ignore_e
     our_env = os.environ.copy()
     our_env.update(env or dict())
     cmd = shlex.split(str(command))
+    stdin = _input and subprocess.PIPE or None
     if not dry_run:
         p = subprocess.Popen(cmd,
+                             stdin=stdin,
                              stdout=subprocess.PIPE,
                              stderr=subprocess.PIPE,
                              bufsize=bufsize,

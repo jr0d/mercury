@@ -207,9 +207,6 @@ class Job(object):
             tasks_dict[str(task.task_id)] = task.to_dict()
 
         return {
-            'method': self.method,
-            'args': self.args,
-            'kwargs': self.kwargs,
             'job_id': str(self.job_id),
             'time_started': self.time_started,
             'time_completed': self.time_completed,

@@ -22,14 +22,11 @@ from press.exceptions import PressCriticalException
 @capability('exec_press', description='Execute press using the supplied configuration', serial=True,
             kwarg_names=['configuration'])
 def execute_press(configuration=None):
-    try:
         # Make entry main return something
         # Modify press to allow injecting a specific log configuration
         # Or.. just rely on the press logging facility?
         # since this is a long operation.. investigate return queue
         # implement serial locking
         # Let's take the time to implement this fully... NMP (no more prototypes)
-        entry_main(configuration)
-    except PressCriticalException:
-        pass
+    return entry_main(configuration)
 
