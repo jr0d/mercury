@@ -1,10 +1,11 @@
+**Under Construction**
 ![alt tag](project_mercury.png)
 
 # Welcome
 This is the mercury project repository. Here you will find the full 
-mercury source code and documentation related to developers.
+mercury source code and documentation targeted at developers.
 User and System Administration documentation will be available at a 
-later time and, hopefully, more formal than a simple README 
+later time.
 
 ## Overview
 **Mercury is a set of services, agents, and libraries designed for the 
