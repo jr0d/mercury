@@ -72,11 +72,7 @@ def _serialize_capabilities(capabilities):
     return _d
 
 
-def register(mercury_id, local_ip, local_ip6, capabilities):
-    rpc_backend = agent_configuration.get('remote', {}).get('rpc_service')
-
-    if not rpc_backend:
-        raise MercuryCritical('Missing rpc backend in local configuration')
+def register(rpc_backend, mercury_id, local_ip, local_ip6, capabilities):
 
     backend = BackEndClient(rpc_backend)
 
@@ -99,6 +95,8 @@ def register(mercury_id, local_ip, local_ip6, capabilities):
     # subnet, and then heuristically generate an ip address in the subnet, forgoing
     # the explicit need for publishing the address
 
+    # UPDATE: Determine the route taken to find rpc_backend and use that interface
+
     payload = {
         'mercury_id': mercury_id,
         'rpc_address': local_ip,
@@ -110,16 +108,3 @@ def register(mercury_id, local_ip, local_ip6, capabilities):
     }
 
     return backend.register(payload)
-
-
-if __name__ == '__main__':
-    logging.basicConfig(level=logging.DEBUG)
-    from mercury.inspector import inspect
-    from mercury.agent.capabilities import runtime_capabilities
-    collection = inspect.inspect()
-
-    _mercury_id = collection['mercury_id']
-    _local_ip = get_dhcp_ip(collection)
-    _local_ip6 = ''
-
-    response = register(_mercury_id, _local_ip, _local_ip6, runtime_capabilities)

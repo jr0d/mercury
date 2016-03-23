@@ -19,15 +19,13 @@ import traceback
 import threading
 
 from mercury.agent.client import BackEndClient
-from mercury.agent.configuration import agent_configuration
-from mercury.common.exceptions import parse_exception, fancy_traceback_format, MercuryCritical
-from mercury.common.transport import SimpleRouterReqClient
+from mercury.common.exceptions import parse_exception, fancy_traceback_format
 
 log = logging.getLogger(__name__)
 
 
 class TaskRunner(object):
-    def __init__(self, job_id, task_id, entry,
+    def __init__(self, job_id, task_id, entry, backend_url,
                  entry_args=None, entry_kwargs=None, lock=None):
         self.job_id = job_id
         self.task_id = task_id
@@ -39,11 +37,7 @@ class TaskRunner(object):
         self.time_started = None
         self.time_completed = None
 
-        rpc_backend = agent_configuration.get('remote', {}).get('rpc_service')
-        if not rpc_backend:
-            raise MercuryCritical('Missing rpc backend in local configuration')
-
-        self.backend = BackEndClient(rpc_backend)
+        self.backend = BackEndClient(backend_url)
 
     def __run(self):
         self.time_started = time.time()
@@ -92,16 +86,3 @@ class TaskRunner(object):
         t = threading.Thread(target=self.__run)
         t.start()
 
-
-if __name__ == '__main__':
-    import uuid
-
-
-    def subtract(a, b):
-        return a - b
-
-
-    task_runner = TaskRunner(uuid.uuid4(), uuid.uuid4(), subtract, entry_args=[9, 3])
-    print task_runner.__dict__
-    task_runner.run()
-    print task_runner.__dict__

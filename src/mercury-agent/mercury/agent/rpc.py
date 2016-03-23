@@ -40,6 +40,14 @@ class SerialLock(object):
 class AgentService(SimpleRouterReqService):
     serial_lock = SerialLock()
 
+    def __init__(self, bind_address, rpc_backend_url):
+        """The Agent RPC service
+        :param bind_address: The the zeromq bind address for the service
+        :param rpc_backend_url: RPC backend URL
+        """
+        self.rpc_backend_url = rpc_backend_url
+        super(AgentService, self).__init__(bind_address)
+
     @staticmethod
     def error(code, message='', data=None):
         return {'status': code, 'message': message, 'data': data}
@@ -127,18 +135,10 @@ class AgentService(SimpleRouterReqService):
         task_runner = TaskRunner(job_id,
                                  task_id,
                                  capability['entry'],
+                                 self.rpc_backend_url,
                                  entry_args=args,
                                  entry_kwargs=kwargs,
                                  lock=tmp_lock)
         task_runner.run()
         return self.sync_response(data=dict(time_started=task_runner.time_started,
                                             message='Hakuna matata'))
-
-
-if __name__ == '__main__':
-    logging.basicConfig(level=logging.DEBUG)
-
-    _bind_address = 'tcp://0.0.0.0:9003'
-    agent_server = AgentService(_bind_address)
-    print runtime_capabilities
-    agent_server.start()
