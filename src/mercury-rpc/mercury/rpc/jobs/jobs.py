@@ -127,7 +127,7 @@ class Task(object):
 
 
 class Job(object):
-    def __init__(self, command, targets, collection):
+    def __init__(self, instruction, targets, collection):
         """
 
         :param command: Procedure dictionary containing method, args, kwargs
@@ -136,11 +136,15 @@ class Job(object):
         :raises MercuryUserError: catch, log, demean, and move on
         :raises MercuryCritical: Halt and catch fire
         """
-        self.command = command
+        self.instruction = instruction
         self.targets = targets
         self.collection = collection
 
-        self.method, self.args, self.kwargs = self.__extract_command()
+        self.method, self.args, self.kwargs = [None, None, None]
+
+        self.preprocessor = None
+        self.primitive = False
+
         self.job_id = uuid.uuid4()
         self.tasks = {}
         # Populate the tasks
@@ -157,8 +161,10 @@ class Job(object):
         command should be a dictionary containing the full procedure call
         :return: Extracted method(str), args(list), and kwargs(dict)
         """
+
+        if self.instruction['']
         try:
-            method = self.command['method']
+            method = self.instruction['method']
         except KeyError:
             raise MercuryUserError('Job is missing method key')
 

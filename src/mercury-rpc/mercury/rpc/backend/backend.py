@@ -13,6 +13,7 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
+import datetime
 import logging
 import time
 
@@ -117,10 +118,12 @@ class BackEndService(SimpleRouterReqService):
         update_job_task_existing_connection(collection, job_id, task_id, update)
 
         if is_completed(collection, job_id):
+            now = time.time()
+            ttl_time = datetime.datetime.utcfromtimestamp(now)
             log.info('Job completed: {job_id}'.format(job_id=job_id))
             collection.update({'job_id': job_id}, {'$set': {
-                'time_completed': time.time()}})
-
+                'time_completed': now,
+                'ttl_time_completed': ttl_time}})
         return dict(message='Accepted')
 
 

@@ -44,7 +44,7 @@ def runner(command, _input=''):
     """
     log.info('Running: %s' % command)
 
-    r = run('command', ignore_error=True, raise_exception=False, _input=_input)
+    r = run(command, ignore_error=True, raise_exception=False, _input=_input)
     return {
         'stdout': r.stdout,
         'stderr': r.stderr,
