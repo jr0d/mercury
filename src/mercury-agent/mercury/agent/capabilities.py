@@ -14,7 +14,6 @@
 #    limitations under the License.
 
 import logging
-import threading
 
 LOG = logging.getLogger(__name__)
 
@@ -36,7 +35,6 @@ def add_capability(entry, name, description, doc=None, serial=False, num_args=No
 
 def capability(name, description, serial=False, num_args=None, kwarg_names=None):
     def wrap(entry):
-        LOG.info('Adding capability %s' % name)
         add_capability(entry, name, description, doc=entry.__doc__, serial=serial, num_args=num_args,
                        kwarg_names=kwarg_names)
         return entry

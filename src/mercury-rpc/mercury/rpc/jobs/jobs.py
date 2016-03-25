@@ -7,7 +7,7 @@ import uuid
 from mercury.common.exceptions import MercuryUserError, MercuryCritical
 from mercury.common.mongo import get_collection
 from mercury.rpc.configuration import db_configuration, TASK_QUEUE
-
+from mercury.rpc.preprocessors import instruction_preprocessors
 
 log = logging.getLogger(__name__)
 
@@ -140,8 +140,6 @@ class Job(object):
         self.targets = targets
         self.collection = collection
 
-        self.method, self.args, self.kwargs = [None, None, None]
-
         self.preprocessor = None
         self.primitive = False
 
@@ -155,25 +153,6 @@ class Job(object):
 
         self.time_started = None
         self.time_completed = None
-
-    def __extract_command(self):
-        """
-        command should be a dictionary containing the full procedure call
-        :return: Extracted method(str), args(list), and kwargs(dict)
-        """
-
-        if self.instruction['']
-        try:
-            method = self.instruction['method']
-        except KeyError:
-            raise MercuryUserError('Job is missing method key')
-
-        args = self.command.get('args') or []
-        kwargs = self.command.get('kwargs') or {}
-
-        self.__check_method(method)
-
-        return method, args, kwargs
 
     def __check_method(self, method):
         for target in self.targets:
@@ -194,14 +173,34 @@ class Job(object):
         except KeyError:
             raise MercuryCritical('Encountered malformed target, the database is corrupted')
 
+        # Preprocessor entry
+
+        method = self.instruction.get('method')
+        if method:
+            self.primitive = True
+            call_data = {
+                'method': self.instruction['method'],
+                'args': self.instruction.get('args', []),
+                'kwargs': self.instruction.get('kwargs', {})
+            }
+
+        else:
+            self.preprocessor = self.instruction.get('preprocessor')
+            if not self.preprocessor:
+                raise MercuryUserError('Contract invalid')
+
+            preprocessor = instruction_preprocessors.get(self.preprocessor)
+            if not preprocessor:
+                raise MercuryUserError('Specified preprocessor does not exist')
+
+            call_data = preprocessor(target, self.instruction)
+
         task = Task(
             job_id=self.job_id,
             mercury_id=mercury_id,
             host=host,
             port=port,
-            method=self.method,
-            args=self.args,
-            kwargs=self.kwargs
+            **call_data
         )
 
         log.debug('Created task: %s' % task)

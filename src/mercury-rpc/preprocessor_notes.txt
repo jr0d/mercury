@@ -20,12 +20,12 @@ Example:
     
     preprocessor: press_static_assets
     _payload: 
-        template:
+        template: """
             target: ubuntu
             networking:
                 hostname: {{asset.networking.hostname}}
             ...
-        
+        """
         assets:
             -
               criteria:  # Inventory query

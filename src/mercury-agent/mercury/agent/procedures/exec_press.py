@@ -28,5 +28,7 @@ def execute_press(configuration=None):
         # since this is a long operation.. investigate return queue
         # implement serial locking
         # Let's take the time to implement this fully... NMP (no more prototypes)
+
+        # TODO: Do not rely on entry_main. Import Press, setup logging, and init plugins here
     return entry_main(configuration)
 

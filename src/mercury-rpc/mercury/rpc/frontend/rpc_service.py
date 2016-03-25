@@ -143,8 +143,8 @@ def get_jobs():
 @route('/api/rpc/jobs', method='POST')
 def post_jobs():
     check_json()
-    command = request.json.get('command')
-    if not isinstance(command, dict):
+    instruction = request.json.get('instruction')
+    if not isinstance(instruction, dict):
         return http_error('Command is missing from request or is malformed', code=400)
 
     active_matches = get_active()
@@ -152,7 +152,7 @@ def post_jobs():
     # request.json.get('asset_backend')?
     # request.json.get('assets')?
     try:
-        job = Job(command, active_matches, jobs_collection)
+        job = Job(instruction, active_matches, jobs_collection)
     except MercuryUserError as mue:
         return http_error(str(mue), code=400)
     job.start()
