@@ -53,6 +53,18 @@ def get_projection_from_qsa():
     return projection or None
 
 
+def job_transformer(doc):
+    if not doc:
+        return
+
+    doc['_id'] = str(doc['_id'])
+    ttl_time_completed = doc.get('ttl_time_completed')
+    if ttl_time_completed:
+        doc['ttl_time_completed'] = ttl_time_completed.ctime()
+
+    return doc
+
+
 @route('/api/inventory/computers', method='GET')
 def computers():
     return {'computers': inventory_client.query({})}
@@ -118,12 +130,13 @@ def get_active():
     return query_active_prototype1(query)
 
 
-@route('/api/rpc/job/<job_id>', method='GET')
+@route('/api/rpc/jobs/<job_id>', method='GET')
 def get_job(job_id):
     projection = get_projection_from_qsa()
     job = jobs_collection.find_one({'job_id': job_id}, projection=projection)
-    job['_id'] = str(job['_id'])
-    return {'job': job}
+    if not job:
+        return http_error('Job not found', code=404)
+    return {'job': job_transformer(job)}
 
 
 @route('/api/rpc/jobs', method='GET')
@@ -135,9 +148,8 @@ def get_jobs():
     count = c.count()
     jobs = []
     for job in c:
-        job['_id'] = str(job['_id'])
-        jobs.append(job)
-    return {'count': count, 'jobs': list(jobs)}
+        jobs.append(job_transformer(job))
+    return {'count': count, 'jobs': jobs}
 
 
 @route('/api/rpc/jobs', method='POST')
@@ -158,13 +170,5 @@ def post_jobs():
     job.start()
 
     return {'job_id': str(job.job_id)}
-
-
-@route('/api/orca/press', method='POST')
-def post_orca_press_job():
-    check_json()
-    query = request.json.get('query')
-    if not isinstance(query, dict):
-        return http_error('Query is missing from request', code=400)
 
 run(host='localhost', port=9005, debug=True)

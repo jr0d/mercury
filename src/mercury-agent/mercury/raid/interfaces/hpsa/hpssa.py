@@ -282,8 +282,6 @@ class HPSSA(object):
         adapter = self.get_slot_details(slot)
         for drive in adapter['configuration']['drives']:
             _id = '%s:%s:%s' % (drive['port'], drive['box'], drive['bay'])
-            print _id
-            print drive_id
             if drive_id == _id:
                 return drive
 
@@ -318,7 +316,6 @@ class HPSSA(object):
 
         items = s.split(',')
 
-        print items
         drives = []
         for idx in xrange(len(items)):
             if '-' in items[idx]:
@@ -333,9 +330,7 @@ class HPSSA(object):
         return 'Solid State' in drive['type'] or 'SSD' in drive['type']
 
     def all_ssd(self, drives):
-        print drives
         for drive in drives:
-            print drive
             if not self.is_ssd(drive):
                 return False
         return True

@@ -129,8 +129,7 @@ class Task(object):
 class Job(object):
     def __init__(self, instruction, targets, collection):
         """
-
-        :param command: Procedure dictionary containing method, args, kwargs
+        :param instruction: Procedure dictionary containing method, args, kwargs
         :param targets: active inventory targets
         :param collection: mongodb collection object (capped)
         :raises MercuryUserError: catch, log, demean, and move on
@@ -193,7 +192,8 @@ class Job(object):
             if not preprocessor:
                 raise MercuryUserError('Specified preprocessor does not exist')
 
-            call_data = preprocessor(target, self.instruction)
+            log.info('Calling %s preprocessor' % preprocessor['name'])
+            call_data = preprocessor['entry'](target, self.instruction)
 
         task = Task(
             job_id=self.job_id,

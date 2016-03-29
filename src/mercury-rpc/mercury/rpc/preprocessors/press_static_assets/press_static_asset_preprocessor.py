@@ -25,7 +25,7 @@ def press_static_assets(target, instruction):
     """Uses a mercury_id indexed asset store which is supplied, in it's entirety, within the instruction
     :param target: A target containing a mercury_id
     :param instruction: A dictionary containing two fields, template and assets
-        template is a string containing a mustache formatted press configuration
+        template is a string containing a yaml formatted press configuration mustache template
         assets is a dictionary indexed by mercury_id. Each value contains render information
         relevant to the template. If the asset data does not contain data for the target mercury_id
         a MercuryUserException exception is raised
@@ -46,6 +46,6 @@ def press_static_assets(target, instruction):
     if not render_data:
         raise MercuryUserError('Assets supplied do not cover target')
 
-    configuration = pystache.render(template, **render_data)
+    configuration = yaml.load(pystache.render(template, **render_data))
 
     return {'method': 'exec_press', 'kwargs': {'configuration': configuration}}
