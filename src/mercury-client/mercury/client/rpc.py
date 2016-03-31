@@ -37,11 +37,11 @@ class Job(object):
 
 
 if __name__ == '__main__':
-    job = Job('http://localhost:9005', {}, {'method': 'run', 'args': ['cat /etc/redhat-release']})
+    job = Job('http://localhost:9005', {}, {'method': 'inspector'})
     job.post_job()
     from pprint import pprint
     pprint(job.get_job())
     pprint(job.job_id)
     import time
-    time.sleep(10)
+    time.sleep(.2)
     pprint(job.get_job())
