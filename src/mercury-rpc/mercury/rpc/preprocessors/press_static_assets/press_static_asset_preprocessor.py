@@ -20,6 +20,18 @@ from mercury.common.exceptions import MercuryUserError
 from mercury.rpc.preprocessors import preprocessor
 
 
+def __asset_list_hax(assets):
+    """Converts any lists to a string so they can be properly rendered by pystache
+    """
+    for k, v in assets.items():
+
+        if isinstance(v, dict):
+            __asset_list_hax(v)
+
+        if isinstance(v, list):
+            assets[k] = '[%s]' % ', '.join(v)
+
+
 @preprocessor.preprocessor('press_static_assets', 'Uses user supplied assets to render press configuration templates')
 def press_static_assets(target, instruction):
     """Uses a mercury_id indexed asset store which is supplied, in it's entirety, within the instruction
@@ -35,7 +47,7 @@ def press_static_assets(target, instruction):
     :return: exec_press capability contract
     """
 
-    template = instruction.get('template')
+    template = '\n'.join(instruction.get('template'))
     asset_db = instruction.get('assets')
 
     if not template and asset_db:
@@ -43,9 +55,13 @@ def press_static_assets(target, instruction):
 
     render_data = asset_db.get(target['mercury_id'])
 
+    __asset_list_hax(render_data)
+
     if not render_data:
         raise MercuryUserError('Assets supplied do not cover target')
 
-    configuration = yaml.load(pystache.render(template, **render_data))
+    rendered = pystache.render(template, **render_data)
+
+    configuration = yaml.load(rendered)
 
     return {'method': 'exec_press', 'kwargs': {'configuration': configuration}}
