@@ -31,6 +31,7 @@ def echo(message):
     :return: None
     """
     log.info('Echo: %s' % message)
+    print(message)
     return message
 
 
@@ -50,3 +51,11 @@ def runner(command, _input=''):
         'stderr': r.stderr,
         'returncode': r.returncode
     }
+
+
+@capability('kexec', 'kexec into kernel at supplied location', kwarg_names=['kernel', 'initrd', 'options'])
+def kexec(kernel='', initrd='', options=None, kernel_type='bzImage'):
+    """
+    Kexec into a kernel
+    """
+
