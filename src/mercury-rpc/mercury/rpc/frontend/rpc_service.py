@@ -161,8 +161,7 @@ def post_jobs():
 
     active_matches = get_active()
     log.debug('Matched %d active computers' % len(active_matches))
-    # request.json.get('asset_backend')?
-    # request.json.get('assets')?
+
     try:
         job = Job(instruction, active_matches, jobs_collection)
     except MercuryUserError as mue:
@@ -170,5 +169,6 @@ def post_jobs():
     job.start()
 
     return {'job_id': str(job.job_id)}
+
 
 run(host='localhost', port=9005, debug=True)
