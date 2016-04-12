@@ -29,6 +29,7 @@ def get_jobs_collection(db='', collection='', servers=None, replica_set=None):
 def update_job_task_existing_connection(collection, job_id, task_id, document):
     """
     Helper function that simplifies updating job tasks by constructing tasks.<task_id>.k
+    :param collection:
     :param job_id: The job
     :param task_id: The task
     :param document: A dictionary that represents the changes to job task
@@ -37,8 +38,6 @@ def update_job_task_existing_connection(collection, job_id, task_id, document):
     selector = 'tasks.{task_id}'.format(task_id=task_id)
     updated_dict = {}
     for k, v in document.items():
-        accessor = '%s.%s' % (selector, k)
-        # log.debug('Updating: %s => %s' % (accessor, v))
         updated_dict['%s.%s' % (selector, k)] = v
 
     return collection.update(
@@ -73,7 +72,7 @@ def is_completed(collection, job_id):
     :param job_id:
     :return:
     """
-    complete_statuses = ['SUCCESS', 'ERROR', 'EXCEPTION', 'TIMEOUT'] # This will move
+    complete_statuses = ['SUCCESS', 'ERROR', 'EXCEPTION', 'TIMEOUT']  # This will move
     tasks = get_tasks(collection, job_id)
     for task_id in tasks:
         if tasks[task_id]['status'] not in complete_statuses:

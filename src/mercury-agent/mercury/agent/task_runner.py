@@ -15,7 +15,6 @@
 
 import logging
 import time
-import traceback
 import threading
 
 from mercury.agent.client import BackEndClient
@@ -85,4 +84,3 @@ class TaskRunner(object):
         log.info('Starting task: %s [%s]' % (self.entry.__name__, self.task_id))
         t = threading.Thread(target=self.__run)
         t.start()
-

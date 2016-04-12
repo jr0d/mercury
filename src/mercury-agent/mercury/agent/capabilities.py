@@ -51,8 +51,3 @@ def cap1(a, b):
     """
     return a + b
 
-
-if __name__ == '__main__':
-    print runtime_capabilities['test']
-    print runtime_capabilities['test']['doc']
-    print runtime_capabilities['test']['entry'](1, 2)

@@ -136,4 +136,3 @@ if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
     manager = Manager('rpc_tasks', 10, 3600)
     manager.manage()
-
