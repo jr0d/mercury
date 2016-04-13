@@ -52,6 +52,9 @@ class Worker(object):
             'job_id': task['job_id']
         }
         log.debug('Dispatching task: %s' % task)
+        # Status update happens before dispatch because the task COULD complete
+        # before write due to connection overhead
+        update_job_task(task['job_id'], task['task_id'], {'status': 'DISPATCHING'})
         response = client.transceiver(_payload)
         if response['status'] != 0:
             update_job_task(task['job_id'], task['task_id'], {'status': 'ERROR',

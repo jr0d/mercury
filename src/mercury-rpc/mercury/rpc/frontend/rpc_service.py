@@ -36,10 +36,16 @@ def http_error(message, code=500):
 
 
 def check_json():
+    log.debug('HERE?????')
     try:
+        log.debug("WTF?????")
         if not request.json:
+            log.debug("I AM A CHEEZBURGER")  ### DOES NOT GET HERE
             return http_error('JSON request is missing', code=400)
+        log.debug('AND HERE>>>>>') ## OR HERE!!!!!!!
+        _ = request.json.get('VALID?')
     except ValueError:
+        # ValueError is not being triggered here even when the json is bad
         return http_error('JSON request is malformed', code=400)
 
 
@@ -155,7 +161,13 @@ def get_jobs():
 @route('/api/rpc/jobs', method='POST')
 def post_jobs():
     check_json()
-    instruction = request.json.get('instruction')
+    # But it is being triggered here (see check_json)
+    try:
+        instruction = request.json.get('instruction')
+    except ValueError:
+        log.debug('Make NO sense')
+        raise
+
     if not isinstance(instruction, dict):
         return http_error('Command is missing from request or is malformed', code=400)
 
