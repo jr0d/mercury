@@ -1,6 +1,6 @@
 import logging
 
-from bottle import route, run, request, HTTPResponse
+from bottle import route, run, request, HTTPResponse, abort
 
 from mercury.common.inventory_client.client import InventoryClient  # TODO: Clean up import
 from mercury.common.mongo import get_collection
