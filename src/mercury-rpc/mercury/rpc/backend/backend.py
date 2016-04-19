@@ -29,7 +29,7 @@ log = logging.getLogger(__name__)
 RPC_CONFIG_FILE = 'mercury-rpc.yaml'
 
 
-# TODO: Rewrite BackEndService as a general message purpose router
+# TODO: Rewrite BackEndService as a general purpose message router
 
 
 class BackEndService(SimpleRouterReqService):
@@ -109,21 +109,24 @@ class BackEndService(SimpleRouterReqService):
             **response_data
         ))
 
-        # Probably introduces a race condition. Instead, update the manager service (TBC)
-        # That a task landed on the return bus
-        # Race condition #2 : Updating status to DISPATCHED is occurring AFTER
-        # this update... ZeroMQ is faster than the time it takes to get a collection
-        # in the worker...
-        # time.sleep(.05)
         update_job_task_existing_connection(collection, job_id, task_id, update)
 
         if is_completed(collection, job_id):
             now = time.time()
             ttl_time = datetime.datetime.utcfromtimestamp(now)
             log.info('Job completed: {job_id}'.format(job_id=job_id))
-            collection.update({'job_id': job_id}, {'$set': {
-                'time_completed': now,
-                'ttl_time_completed': ttl_time}})
+            collection.update(
+                {
+                    'job_id': job_id
+                },
+                {
+                    '$set': {
+                        'time_completed': now,
+                        'ttl_time_completed': ttl_time
+                    }
+                }
+            )
+
         return dict(message='Accepted')
 
 

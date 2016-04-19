@@ -12,6 +12,8 @@ from mercury.rpc.jobs import Job, get_jobs_collection
 log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
 
+# TODO: Change name of rpc collection to agents collection.
+
 active_collection = get_collection(db_configuration.get('rpc_mongo_db',
                                                         'test'),
                                    db_configuration.get('rpc_mongo_collection',
@@ -35,18 +37,16 @@ def http_error(message, code=500):
     return HTTPResponse({'error': True, 'message': message}, status=code)
 
 
-def check_json():
-    log.debug('HERE?????')
-    try:
-        log.debug("WTF?????")
-        if not request.json:
-            log.debug("I AM A CHEEZBURGER")  ### DOES NOT GET HERE
-            return http_error('JSON request is missing', code=400)
-        log.debug('AND HERE>>>>>') ## OR HERE!!!!!!!
-        _ = request.json.get('VALID?')
-    except ValueError:
-        # ValueError is not being triggered here even when the json is bad
-        return http_error('JSON request is malformed', code=400)
+def validate_json(f):
+    def wrapper(*args, **kwargs):
+        try:
+            if not request.json:
+                return http_error('JSON request is missing', code=400)
+        except ValueError:
+            return http_error('JSON request is malformed', code=400)
+
+        return f(*args, **kwargs)
+    return wrapper
 
 
 def get_projection_from_qsa():
@@ -77,6 +77,7 @@ def computers():
 
 
 @route('/api/inventory/computers/query', method='POST')
+@validate_json
 def computers_query():
     if not request.json:
         return http_error('JSON request is missing', code=400)
@@ -87,7 +88,7 @@ def computers_query():
     return {'computers': inventory_client.query(query)}
 
 
-@route('/api/inventory/computer/<mercury_id>', method='GET')
+@route('/api/inventory/computers/<mercury_id>', method='GET')
 def computer(mercury_id):
     projection = get_projection_from_qsa()
     c = inventory_client.get_one(mercury_id, projection=projection)
@@ -127,8 +128,8 @@ def query_active_prototype1(query):
     return active_matches
 
 
+@validate_json
 def get_active():
-    # Using instance here because we are checking for
     query = request.json.get('query')
     if not isinstance(query, dict):
         return http_error('Query is missing from request', code=400)
@@ -159,8 +160,8 @@ def get_jobs():
 
 
 @route('/api/rpc/jobs', method='POST')
+@validate_json
 def post_jobs():
-    check_json()
     # But it is being triggered here (see check_json)
     try:
         instruction = request.json.get('instruction')

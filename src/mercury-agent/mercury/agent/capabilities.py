@@ -20,7 +20,7 @@ LOG = logging.getLogger(__name__)
 runtime_capabilities = {}
 
 
-def add_capability(entry, name, description, doc=None, serial=False, num_args=None, kwarg_names=None):
+def add_capability(entry, name, description, doc=None, serial=False, num_args=None, kwarg_names=None, no_return=False):
     LOG.info('Adding capability %s' % name)
     runtime_capabilities[name] = {
         'name': name,
@@ -29,14 +29,15 @@ def add_capability(entry, name, description, doc=None, serial=False, num_args=No
         'doc': doc,
         'serial': serial,
         'num_args': num_args,
-        'kwarg_names': kwarg_names
+        'kwarg_names': kwarg_names,
+        'no_return': no_return
     }
 
 
-def capability(name, description, serial=False, num_args=None, kwarg_names=None):
+def capability(name, description, serial=False, num_args=None, kwarg_names=None, no_return=False):
     def wrap(entry):
         add_capability(entry, name, description, doc=entry.__doc__, serial=serial, num_args=num_args,
-                       kwarg_names=kwarg_names)
+                       kwarg_names=kwarg_names, no_return=no_return)
         return entry
     return wrap
 

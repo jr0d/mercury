@@ -14,21 +14,19 @@
 #    limitations under the License.
 
 from mercury.agent.capabilities import capability
-
 from press.entry import entry_main
-from press.exceptions import PressCriticalException
 
 
 @capability('exec_press', description='Execute press using the supplied configuration', serial=True,
             kwarg_names=['configuration'])
 def execute_press(configuration=None):
         # Make entry main return something
-        # Modify press to allow injecting a specific log configuration
-        # Or.. just rely on the press logging facility?
-        # since this is a long operation.. investigate return queue
-        # implement serial locking
-        # Let's take the time to implement this fully... NMP (no more prototypes)
-
         # TODO: Do not rely on entry_main. Import Press, setup logging, and init plugins here
     return entry_main(configuration)
 
+
+@capability('exec_press_no_return', description='Execute press using the supplied configuration', serial=True,
+            kwarg_names=['configuration'], no_return=True)
+def execute_press_nor(configuration=None):
+        # TODO: Do not rely on entry_main. Import Press, setup logging, and init plugins here
+    return entry_main(configuration)
