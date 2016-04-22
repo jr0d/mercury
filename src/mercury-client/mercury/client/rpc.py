@@ -36,6 +36,10 @@ class Job(object):
         return r.json()
 
 
+class Mercury(object):
+    pass
+
+
 if __name__ == '__main__':
     job = Job('http://localhost:9005', {}, {'method': 'inspector'})
     job.post_job()

@@ -1,0 +1,11 @@
+<RIBCL VERSION="2.0">
+ <LOGIN USER_LOGIN="Administrator" PASSWORD="password">
+   <SERVER_INFO MODE="write">
+    <SET_PERSISTENT_BOOT>
+      <DEVICE value = "NETWORK" />
+      <DEVICE value = "HDD" />
+     </SET_PERSISTENT_BOOT>
+   </SERVER_INFO>
+ </LOGIN>
+</RIBCL>
+

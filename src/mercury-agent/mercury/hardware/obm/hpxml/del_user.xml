@@ -1,0 +1,8 @@
+<RIBCL VERSION="2.1">
+ <LOGIN USER_LOGIN="Administrator" PASSWORD="password">
+     <USER_INFO MODE="write">
+         <DELETE_USER USER_LOGIN="%user%" />
+  </USER_INFO>
+ </LOGIN>
+</RIBCL>
+

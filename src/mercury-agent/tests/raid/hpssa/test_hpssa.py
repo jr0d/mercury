@@ -18,12 +18,8 @@
 import os
 import unittest
 
-from mercury.raid.interfaces.hpsa.hpssa import (
-    parse_adapter_details,
-    parse_show_config,
-    HPSSA,
-    HPParserException,
-    HPRaidException
+from mercury.hardware.raid.interfaces.hpsa.hpssa import (
+    parse_show_config
 )
 
 path_of_test = os.path.dirname(__file__)

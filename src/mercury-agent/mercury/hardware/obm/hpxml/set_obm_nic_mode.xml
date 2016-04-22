@@ -1,0 +1,10 @@
+<RIBCL version="2.21">
+   <LOGIN USER_LOGIN="Administrator" PASSWORD="calvincalvin">
+      <RIB_INFO MODE="WRITE" >
+         <MOD_NETWORK_SETTINGS>
+            <SHARED_NETWORK_PORT VALUE="N"/>
+         </MOD_NETWORK_SETTINGS>
+      </RIB_INFO>
+   </LOGIN>
+</RIBCL>
+
