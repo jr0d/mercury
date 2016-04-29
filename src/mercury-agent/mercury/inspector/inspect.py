@@ -13,7 +13,7 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-from mercury.inspector.inspectors import inspectors
+from mercury.inspector.inspectors import inspectors, late_inspectors
 from mercury.common.mercury_id import generate_mercury_id
 
 
@@ -34,6 +34,9 @@ def inspect():
     interfaces = collected.get('interfaces') or {}
 
     collected['mercury_id'] = generate_mercury_id(dmi, interfaces)
+
+    for inspector, f in late_inspectors:
+        collected[inspector] = f(collected)
 
     return collected
 

@@ -27,7 +27,7 @@ setup(
     install_requires=[
         'bottle',
         'pyzmq',
-        'pystache'
+        'pystache',
         'msgpack-python',
         'pymongo',
         'redis'
