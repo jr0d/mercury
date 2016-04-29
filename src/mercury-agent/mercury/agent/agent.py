@@ -19,11 +19,13 @@ agent:
     1) Start Pong service
     2) Start RPC service
     2) Register
+
+#PROTOTYPE
+
 """
 
 import argparse
 import logging
-import sys
 
 from mercury.agent.capabilities import runtime_capabilities
 from mercury.agent.configuration import agent_configuration
@@ -32,7 +34,7 @@ from mercury.agent.register import get_dhcp_ip, register
 from mercury.agent.rpc import AgentService
 from mercury.common.exceptions import MercuryCritical
 from mercury.common.inventory_client.client import InventoryClient
-from mercury.inspector.inspect import inspect
+from mercury.inspector import inspect
 
 
 log = logging.getLogger(__name__)
@@ -65,7 +67,8 @@ def spawn_agent(dhcp_ip_method='simple'):
                                                              inventory_url))
 
     log.info('Running inspectors')
-    device_info = inspect()
+
+    device_info = inspect.inspect()
 
     log.info('Registering device inventory')
 
@@ -96,7 +99,6 @@ def main():
     logging.basicConfig(level=logging.DEBUG)
     log.info('[prototype] starting agent')
     logging.getLogger('mercury.agent.pong').setLevel(logging.ERROR)
-
 
     spawn_agent('simple')
 

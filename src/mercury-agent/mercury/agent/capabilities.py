@@ -41,14 +41,3 @@ def capability(name, description, serial=False, num_args=None, kwarg_names=None,
         return entry
     return wrap
 
-
-@capability('test', 'Test Capability', num_args=2)
-def cap1(a, b):
-    """
-    Add a and b
-    :param a: int
-    :param b: int
-    :return: result
-    """
-    return a + b
-
