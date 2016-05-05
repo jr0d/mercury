@@ -40,16 +40,10 @@ def inspect():
 
     collected['mercury_id'] = generate_mercury_id(dmi, interfaces)
 
-<<<<<<< Updated upstream
     for inspector, f in late_inspectors:
         collected[inspector] = f(collected)
-
-    return collected
-=======
-    # I am not sure if this is the best place for this.
->>>>>>> Stashed changes
 
     global global_device_info
     global_device_info.update(**collected)
 
-    return collected
+    return global_device_info

@@ -269,4 +269,3 @@ class IPMIToolHP(IPMITool):
         self.configure_static_network(ip_address, netmask, gateway)
         self.create_superuser_hp(username, password)
         return self.verify_network_info(ip_address, netmask, gateway, 'static')
-
