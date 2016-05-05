@@ -25,6 +25,7 @@ async_inspectors = []
 
 # TODO: Consider manifest driven inspector orchestration
 
+
 def run_inspector(name, f, *args, **kwargs):
     # noinspection PyBroadException
     try:

@@ -15,10 +15,10 @@
 
 from collections import OrderedDict
 
-from mercury.raid.interfaces.hpsa.hpacu import HPRaid
+from mercury.hardware.raid.interfaces.hpsa.hpacu import HPRaid
 
 from mercury.common.helpers.size import Size
-from mercury.inspector.inspectors import late_inspector
+from mercury.inspector.inspectors import expose_late
 from mercury.hardware.raid.interfaces.lsi.megaraid.megacli import LSIRaid
 
 
@@ -87,8 +87,6 @@ class LSIRAIDCollector(dict):
             self['disks'].append(d)
 
 
-@late_inspector(raid)
+@expose_late('raid')
 def raid_inspector(device_info):
     return 'I am a turtle'
-
-
