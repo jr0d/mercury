@@ -20,3 +20,9 @@ def is_quanta(dmi_info):
 
 def get_product_name(dmi_info):
     return dmi_info.get('product_name')
+
+# PCI
+
+
+def smart_array_gen9(pci_data):
+    device_id = "3239"  # Smart Array Gen9 Controllers

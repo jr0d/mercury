@@ -89,4 +89,11 @@ class LSIRAIDCollector(dict):
 
 @expose_late('raid')
 def raid_inspector(device_info):
-    return 'I am a turtle'
+
+    if device_info['dmi']['sys_vendor'] == 'HP':
+        return 'I am a turtle'
+
+    if device_info['dmi']['sys_vendor'] == 'Dell Inc.':
+        return 'I am a zombie'
+
+    return 'I am a {}'.format(device_info['dmi']['sys_vendor'])
