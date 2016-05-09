@@ -13,59 +13,16 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-from collections import OrderedDict
 
-from mercury.hardware.raid.interfaces.hpsa.hpacu import HPRaid
 
 from mercury.common.helpers.size import Size
 from mercury.inspector.inspectors import expose_late
+
+from mercury.hardware.drivers.hp_raid import SmartArrayDriver
 from mercury.hardware.raid.interfaces.lsi.megaraid.megacli import LSIRaid
 
 
 MEGACLI_PATH = '/usr/local/sbin/megacli'
-
-
-class HPRaidCollector(dict):
-    @staticmethod
-    def sort_disks(disks):
-        box_index = OrderedDict()
-
-        for _d in sorted(disks, key=lambda k: k['box']):
-            box = _d['box']
-            if box not in box_index:
-                box_index[box] = [_d]
-            else:
-                box_index[box].append(_d)
-
-        for idx in box_index:
-            box_index[idx].sort(key=lambda k: k['bay'])
-
-        # transform statement requires a copy due to lazy indexing
-        # possible efficency gain in performing a left(box) right(bay) sort
-        disks_sorted = []
-
-        for idx in box_index:
-            disks_sorted += box_index[idx]
-
-        return disks_sorted
-
-    def inspect(self):
-        hp_raid = HPRaid()
-        self['disks'] = list()
-
-        disks = self.sort_disks(hp_raid.get_physical_drives())
-
-        for drive in disks:
-            d = {
-                'size': drive['size'] * 1024 ** 3,
-                'hp_extra': {
-                    'scsi_id': drive['scsi_id'],
-                    'port': drive['port'],
-                    'bay': drive['bay'],
-                    'box': drive['box']
-                }
-            }
-            self['disks'].append(d)
 
 
 class LSIRAIDCollector(dict):
