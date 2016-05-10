@@ -15,23 +15,25 @@
 
 import logging
 
-from mercury.hardware import platform_detection
-from mercury.hardware.drivers import registered_drivers
+from mercury.hardware.drivers import get_subsystem_drivers
 from mercury.inspector.inspectors import expose_late
 
 
 log = logging.getLogger(__name__)
 
-MEGACLI_PATH = '/usr/local/sbin/megacli'
-
 
 @expose_late('raid')
 def raid_inspector(device_info):
-    controller_pci_info = platform_detection.get_raid_controllers(device_info['pci'])
+    drivers = get_subsystem_drivers('raid')
 
-    if not controller_pci_info:
-        log.debug('No RAID bus controllers detected')
+    if not drivers:
         return
 
+    _inspected = list()
 
+    for driver in drivers:
+        log.info('Running RAID inspector %s' % driver.name)
+        _inspected.append(driver.inspect())
+
+    return _inspected
 

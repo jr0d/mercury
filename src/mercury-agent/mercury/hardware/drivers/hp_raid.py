@@ -3,10 +3,15 @@ from mercury.hardware.drivers import driver, PCIDriverBase
 from mercury.hardware.raid.interfaces.hpsa.hpssa import HPSSA
 
 
-@driver(driver_type='raid')
+@driver()
 class SmartArrayDriver(PCIDriverBase):
+    name = 'hpssa'
+    driver_type = 'raid'
     _handler = HPSSA
-    PCI_DEVICE_IDS = [platform_detection.SMART_ARRAY_DEVICE_ID_9]
+
+    PCI_DEVICE_IDS = [
+        "3239"  # Smart Array Gen9 Controllers
+    ]
 
     @classmethod
     def probe(cls, pci_data):
@@ -16,10 +21,13 @@ class SmartArrayDriver(PCIDriverBase):
 
         owns = list()
         for device in raid_pci_devices:
-            if device['device_id'] in cls.PCI_DEVICE_IDS:
+            if cls.check(device):
                 owns.append(device['slot'])
         return owns
 
-    @property
-    def handler(self):
-        return self._handler()
+    @classmethod
+    def check(cls, pci_device):
+        return pci_device['device_id'] in cls.PCI_DEVICE_IDS
+
+    def inspect(self):
+        pass
