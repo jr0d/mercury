@@ -22,6 +22,7 @@ from mercury.inspector.inspectors import expose_late
 log = logging.getLogger(__name__)
 
 
+# noinspection PyUnusedLocal
 @expose_late('raid')
 def raid_inspector(device_info):
     drivers = get_subsystem_drivers('raid')
@@ -33,7 +34,10 @@ def raid_inspector(device_info):
 
     for driver in drivers:
         log.info('Running RAID inspector %s' % driver.name)
-        _inspected.append(driver.inspect())
+        data = driver.inspect()
+        if isinstance(data, list):
+            _inspected += data
+        else:
+            _inspected.append(data)
 
     return _inspected
-

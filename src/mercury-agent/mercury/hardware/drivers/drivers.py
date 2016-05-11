@@ -52,14 +52,13 @@ def driver():
 
 def get_subsystem_drivers(subsystem):
     drivers = []
-    for driver in driver_class_cache:
-        if driver_class_cache[driver].driver_type == subsystem:
-            drivers.append(driver_class_cache[driver])
+    for d in driver_class_cache:
+        if driver_class_cache[d].driver_type == subsystem:
+            drivers.append(driver_class_cache[d])
     return drivers
 
 
-def set_driver_cache(driver):
-    if not driver_class_cache.get(driver.name):
-        log.info('Initializing driver: %s' % driver.name)
-        driver_class_cache[driver.name] = driver()
-
+def set_driver_cache(d):
+    if not driver_class_cache.get(d['name']):
+        log.info('Initializing driver: %s' % d['name'])
+        driver_class_cache[d['name']] = d['class']()

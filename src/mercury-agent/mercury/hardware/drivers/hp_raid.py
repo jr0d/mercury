@@ -15,7 +15,7 @@ class SmartArrayDriver(PCIDriverBase):
 
     @classmethod
     def probe(cls, pci_data):
-        raid_pci_devices = platform_detection.get_raid_controllers(cls.device_info['pci'])
+        raid_pci_devices = platform_detection.get_raid_controllers(pci_data)
         if not platform_detection.has_smart_array_gen9(pci_data=raid_pci_devices):
             return
 
@@ -30,4 +30,6 @@ class SmartArrayDriver(PCIDriverBase):
         return pci_device['device_id'] in cls.PCI_DEVICE_IDS
 
     def inspect(self):
-        pass
+        hpssa = HPSSA()
+
+        

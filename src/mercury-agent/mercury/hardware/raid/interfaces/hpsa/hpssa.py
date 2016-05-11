@@ -134,7 +134,7 @@ def parse_show_config(config):
     unassigned_drives = False
     unassigned = []
     drives = []
-    configuration = {'arrays': arrays, 'drives': drives, 'unassigned': unassigned}
+    configuration = {'arrays': arrays, 'unassigned': unassigned}
 
     for line in config.splitlines():
         if line[:6] == _drive_indent:
@@ -189,7 +189,7 @@ def parse_show_config(config):
     if not unassigned_drives:
         arrays.append(array_info)
 
-    return configuration
+    return drives, configuration
 
 
 def parse_drive_info(pd_info):
@@ -231,7 +231,7 @@ class HPSSA(object):
 
         for adapter in adapters:
             _config = self._get_raw_config(adapter['slot'])
-            adapter['configuration'] = parse_show_config(_config)
+            adapter['drives'], adapter['configuration'] = parse_show_config(_config)
 
         return adapters
 
@@ -280,7 +280,7 @@ class HPSSA(object):
 
     def get_drive(self, slot, drive_id):
         adapter = self.get_slot_details(slot)
-        for drive in adapter['configuration']['drives']:
+        for drive in adapter['drives']:
             _id = '%s:%s:%s' % (drive['port'], drive['box'], drive['bay'])
             if drive_id == _id:
                 return drive
@@ -309,7 +309,7 @@ class HPSSA(object):
             return []
 
         if s == 'all':
-            return adapter['configuration']['drives']
+            return adapter['drives']
 
         if s == 'allunassigned':
             return adapter['configuration']['unassigned']
@@ -424,29 +424,10 @@ class HPSSA(object):
         return parse_drive_info(self.run(cmd))
 
     @staticmethod
-    def asseble_id(pd_info):
+    def assemble_id(pd_info):
         return '%s:%s:%s' % (pd_info['port'], pd_info['box'], pd_info['bay'])
 
     def get_pd_by_index(self, slot, idx):
         adapter = self.get_slot_details(slot)
-        pd_info = adapter['configuration']['drives'][idx]
-        return self.asseble_id(pd_info)
-
-if __name__ == '__main__':
-    logging.basicConfig(level=logging.DEBUG)
-    _hpssa = HPSSA()
-    from pprint import pprint
-    pprint(_hpssa.adapters)
-    print _hpssa.cache_ok(0)
-
-    print _hpssa.get_drive(0, '1I:1:19')
-    # res = _hpssa.create(0, '1I:1:19,1I:1:20', 1)
-
-    # print res
-    # print res.stderr
-    # print res.returncode
-
-    pprint(_hpssa.get_pd_info(0, '1I:1:19'))
-    pprint(_hpssa.get_pd_info(0, _hpssa.get_pd_by_index(0, 19)))
-
-
+        pd_info = adapter['drives'][idx]
+        return self.assemble_id(pd_info)

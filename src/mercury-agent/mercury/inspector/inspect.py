@@ -44,7 +44,7 @@ def inspect():
     # populate_drivers
 
     for driver in registered_pci_drivers:
-        if driver.probe(collected['pci']):
+        if driver['class'].probe(collected['pci']):
             set_driver_cache(driver)
 
     for inspector, f in late_inspectors:

@@ -25,7 +25,7 @@ setup(
     author_email='jared.rodriguez@rackspace.com',
     description='',
     install_requires=[
-        'lxml'
+        'lxml',
         'pyzmq',
         'msgpack-python',
         'netifaces',

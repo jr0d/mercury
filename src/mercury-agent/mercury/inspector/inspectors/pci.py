@@ -19,7 +19,7 @@ from mercury.common.misc import lspci
 
 @inspector.expose('pci')
 def pci_inspector():
-    _pci = dict(components=lspci.parse_nnvmmk())
+    _pci = lspci.parse_nnvmmk()
     return _pci
 
 
