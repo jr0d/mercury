@@ -1,6 +1,6 @@
 import logging
 
-from mercury.hardware.raid.interfaces.hpsa.hpssa import HPSSA
+from hpssa import HPSSA
 
 logging.basicConfig(level=logging.DEBUG)
 logging.getLogger('mercury.common').setLevel(level=logging.WARN)
@@ -18,3 +18,5 @@ print _hpssa.get_drive(0, '1I:1:19')
 
 pprint(_hpssa.get_pd_info(0, '1I:1:19'))
 pprint(_hpssa.get_pd_info(0, _hpssa.get_pd_by_index(0, 19)))
+
+pprint(_hpssa.adapters[0].total_size)

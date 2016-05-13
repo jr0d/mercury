@@ -143,14 +143,14 @@ class LSIRaid(object):
                 len(drives), span_depth
             ))
         span_list = list()
-        for x in xrange(0, len(drives), span_depth):
+        for x in range(0, len(drives), span_depth):
             span_list.append(drives[x:x + span_depth])
 
         array_count = 1
         out = '-CfgSpanAdd -r' + str(raid_level) + ' '
         array_out = str()
         for array in span_list:
-            array_list = ['%s:%d' % (self.enclosure, array[x]) for x in xrange(0, len(array))]
+            array_list = ['%s:%d' % (self.enclosure, array[x]) for x in range(0, len(array))]
             array_out += '-Array%d[%s] ' % (array_count, ', '.join(array_list))
             array_count += 1
 
@@ -186,7 +186,7 @@ class LSIRaid(object):
             return dict()
 
         out, err, ret = self.megacli('-PdList -a%d' % adapter)
-        for x in xrange(0, num):
+        for x in range(0, num):
             disk = dict()
             for line in out.splitlines()[count:]:
                 if 'Device Id' in line:
@@ -258,7 +258,7 @@ class LSIRaid(object):
             return dict()
 
         out, err, ret = self.megacli('-LdInfo -Lall -a%d' % adapter)
-        for x in xrange(0, num):
+        for x in range(0, num):
             vd = dict()
             for line in out.splitlines()[count:]:
 

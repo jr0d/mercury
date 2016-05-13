@@ -30,6 +30,7 @@ setup(
         'pystache',
         'msgpack-python',
         'pymongo',
-        'redis'
+        'redis',
+        'python-hpssa'
     ]
 )

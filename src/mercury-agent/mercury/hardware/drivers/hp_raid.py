@@ -1,6 +1,7 @@
+from hpssa import HPSSA
+
 from mercury.hardware import platform_detection
 from mercury.hardware.drivers import driver, PCIDriverBase
-from mercury.hardware.raid.interfaces.hpsa.hpssa import HPSSA
 
 
 @driver()
@@ -32,4 +33,15 @@ class SmartArrayDriver(PCIDriverBase):
     def inspect(self):
         hpssa = HPSSA()
 
-        
+        adapters = []
+        for adapter in hpssa.adapters:
+            _a = dict(**adapter)
+            _a.update({
+                'total_drives': adapter.total_drives,
+                'total_size': adapter.total_size,
+                'adapter_handler': self.name
+            })
+
+            adapters.append(_a)
+
+        return adapters

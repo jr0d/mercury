@@ -72,6 +72,8 @@ class Size(object):
         's': sector
     }
 
+    iec_units = ['KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'TiB']
+
     iec_symbol_converter = {
         'k': 'KiB',
         'kB': 'KiB',
@@ -81,7 +83,7 @@ class Size(object):
         'GB': 'GiB',
         'T': 'TiB',
         'TB': 'TiB',
-        'PB': 'PiB'  # We'll top here... because yolo
+        'PB': 'PiB'  # We'll stop here... because yolo
     }
 
     def __init__(self, value, force_iec_values=False):
@@ -163,6 +165,14 @@ class Size(object):
     @property
     def megabytes(self):
         return Decimal(self.bytes) / self.megabyte
+
+    def iec_unit_conversion(self):
+        """
+        For hard drive manufacturers
+        :return:
+        """
+
+        raise NotImplementedError
 
     def __repr__(self):
         rep = '<%s> : %ib' % (self.__class__.__name__, self.bytes)

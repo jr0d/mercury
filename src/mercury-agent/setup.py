@@ -30,7 +30,8 @@ setup(
         'msgpack-python',
         'netifaces',
         'pexpect',
-        'pyudev'
+        'pyudev',
+        'python-hpssa'
     ],
     entry_points="""
     [console_scripts]
