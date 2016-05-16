@@ -20,11 +20,12 @@ TODO: storecli, and not this.....
 """
 
 import os
-import subprocess
 
+from mercury.common.helpers.cli import find_in_path, run
 from mercury.inspector.lib.lspci import PCIBus
 
 LSI_VENDOR_ID = '1000'
+DEFAULT_MEGACLI_PATH = 'megacli'
 
 
 def has_lsi_raid():
@@ -56,13 +57,13 @@ class LSIRaidException(Exception):
 
 
 class LSIRaid(object):
-    def __init__(self, megacli_bin='/usr/sbin/megacli',
+    def __init__(self, megacli_path=DEFAULT_MEGACLI_PATH,
                  adapter=0):
 
         self.clear = False
         self.adapter = adapter
-        self.megacli_bin = megacli_bin
-        if not os.path.isfile(self.megacli_bin):
+        self.megacli_bin = find_in_path(megacli_path)
+        if not self.megacli_bin:
             raise LSIRaidException('megacli binary is missing.')
 
         self.vdisks = None
@@ -83,10 +84,9 @@ class LSIRaid(object):
     def megacli(self, args, bufsize=1048567):
         cmd = [self.megacli_bin] + args.split()
         cmd = cmd + ['-NoLog']
-        p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, bufsize=bufsize)
-        out, err = p.communicate()
-        ret = p.returncode
-        return out, err, ret
+
+        out = run(' '.join(cmd), bufsize=bufsize)
+        return out, out.stderr, out.returncode
 
     def get_adapter_raw(self):
         out, err, ret = self.megacli('-AdpAllInfo -a%d' % self.adapter)

@@ -10,3 +10,7 @@ remote:
   rpc_service: tcp://localhost:9002
   rpc_mongo_replica_set: None
   inventory_service: tcp://localhost:9000
+
+hardware:
+  raid:
+    megacli_path: /usr/local/sbin/megacli
