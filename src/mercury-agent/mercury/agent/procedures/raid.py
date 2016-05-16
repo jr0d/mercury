@@ -13,6 +13,14 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
+import logging
+
+from mercury.agent.capabilities import capability
+from mercury.hardware.drivers.drivers import driver_class_cache
 
 
+@capability('hpssa_create_array',
+            description='Create array on an HP SmartArray Controller',
+            )
 
+# LETS GET IT 
