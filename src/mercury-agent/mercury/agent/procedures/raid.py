@@ -16,11 +16,68 @@
 import logging
 
 from mercury.agent.capabilities import capability
+from mercury.common.exceptions import MercuryUserError
 from mercury.hardware.drivers.drivers import driver_class_cache
 
+log = logging.getLogger(__name__)
+
+
+# TODO: Dependant capabilities
+# TODO: inspector update tasks for inventory sync after hardware change, ie creating/removing an array
 
 @capability('hpssa_create_array',
             description='Create array on an HP SmartArray Controller',
+            kwarg_names=['slot', 'selection', 'raid'],
+            serial=True
             )
+def hpssa_create_array(slot, selection, raid, array_letter=None, array_type='ld', size='max',
+                       stripe_size='default', write_policy='writeback', sectors=32, caching=True,
+                       data_ld=None, parity_init_method='default'):
+    """
+    Create an array
 
-# LETS GET IT 
+    :param slot: Slot ID of the adapter you are targeting
+    :param selection: all, allunassigned, Port:Box:Bay,...  , 1I:1:1-1I:1:6
+    :param raid: 0, 1, 5, 6, 1+0, 1+0asm, 50, 60
+    :param array_letter: Optional array ID, Any unused, A-Z
+    :param array_type: ld, ldcache, arrayr0
+    :param size: size in MB, min, max, maxmbr
+    :param stripe_size: 2**3-10 (8-1024), default
+    :param write_policy: writeback, writethrough
+    :param sectors: 32, 64
+    :param caching: True | False
+    :param data_ld: ld ID, required if array_type == ldcache
+    :param parity_init_method: default
+
+    :return type dict: stdout, stderr, returncode
+    """
+
+    hp_raid_driver = driver_class_cache.get('hpssa')
+    if not hp_raid_driver:
+        # Once dependent capabilities are added, this will no longer be necessary
+        log.error('Attempt to use platform specific procedure without supporting driver')
+        raise MercuryUserError('Required driver, hpssa, is not loaded. Check platform')
+
+    log.info('Creating HPSSA Array: {0} {1} {2}'.format(slot, str(selection), raid))
+
+    result = hp_raid_driver.handler.create(
+        slot,
+        selection,
+        raid,
+        array_letter=array_letter,
+        array_type=array_type,
+        size=size,
+        stripe_size=stripe_size,
+        write_policy=write_policy,
+        sectors=sectors,
+        caching=caching,
+        data_ld=data_ld,
+        parity_init_method=parity_init_method
+    )
+
+    if result.returncode:
+        log.error('Error creating array')
+        raise MemoryError('Failed to create array: stdout={0}\nstderr={1}'.format(result,
+                                                                                  result.stderr))
+
+    return {'stdout': result, 'stderr': result.stderr, 'returncode': result.returncode}
