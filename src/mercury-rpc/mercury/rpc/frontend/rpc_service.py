@@ -111,6 +111,16 @@ def active_computers():
     return {'active': active}
 
 
+@route('/api/active/computers/<mercury_id>', method='GET')
+def active_computer(mercury_id):
+    projection = get_projection_from_qsa()
+    c = active_collection.find_one({'mercury_id': mercury_id}, projection=projection)
+    if not c:
+        return http_error('No such device', 404)
+    c['_id'] = str(c['_id'])
+    return c
+
+
 def query_active_prototype1(query):
     # Get all inventory matching inventory mercury_ids and iterate over
     inventory_matches = inventory_client.query(query)
@@ -184,4 +194,4 @@ def post_jobs():
     return {'job_id': str(job.job_id)}
 
 
-run(host='localhost', port=9005, debug=True)
+run(host='0.0.0.0', port=9005, debug=True)

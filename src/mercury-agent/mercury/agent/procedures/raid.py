@@ -25,6 +25,16 @@ log = logging.getLogger(__name__)
 # TODO: Dependant capabilities
 # TODO: inspector update tasks for inventory sync after hardware change, ie creating/removing an array
 
+
+def get_hp_raid_driver():
+    hp_raid_driver = driver_class_cache.get('hpssa')
+    if not hp_raid_driver:
+        # Once dependent capabilities are added, this will no longer be necessary
+        log.error('Attempt to use platform specific procedure without supporting driver')
+        raise MercuryUserError('Required driver, hpssa, is not loaded. Check platform')
+    return hp_raid_driver
+
+
 @capability('hpssa_create_array',
             description='Create array on an HP SmartArray Controller',
             kwarg_names=['slot', 'selection', 'raid'],
@@ -52,11 +62,7 @@ def hpssa_create_array(slot, selection, raid, array_letter=None, array_type='ld'
     :return type dict: stdout, stderr, returncode
     """
 
-    hp_raid_driver = driver_class_cache.get('hpssa')
-    if not hp_raid_driver:
-        # Once dependent capabilities are added, this will no longer be necessary
-        log.error('Attempt to use platform specific procedure without supporting driver')
-        raise MercuryUserError('Required driver, hpssa, is not loaded. Check platform')
+    hp_raid_driver = get_hp_raid_driver()
 
     log.info('Creating HPSSA Array: {0} {1} {2}'.format(slot, str(selection), raid))
 
@@ -81,3 +87,44 @@ def hpssa_create_array(slot, selection, raid, array_letter=None, array_type='ld'
                                                                                   result.stderr))
 
     return {'stdout': result, 'stderr': result.stderr, 'returncode': result.returncode}
+
+
+@capability('hpssa_delete_ld', description='Delete a logical drive on a given controller',
+            kwarg_names=['slot', 'logical_drive'], serial=True)
+def hpssa_delete_ld(slot, logical_drive):
+    """
+    Delete a logical drive
+    :param slot: Adapter slot
+    :param logical_drive: Logical drive id
+    :return dict: stdout, stderr, returncode
+    """
+    hp_raid_driver = get_hp_raid_driver()
+    result = hp_raid_driver.handler.delete_logical_drive(slot, logical_drive)
+
+    return {'stdout': result, 'stderr': result.stderr, 'returncode': result.returncode}
+
+
+@capability('hpssa_clear_configuration', description='Delete all arrays on a given controller',
+            kwarg_names=['slot'], serial=True)
+def hpssa_clear_configuration(slot):
+    """
+    Delete all arrays on a given controller
+    :param slot: Adapter slot
+    :return dict:  stdout, stderr, returncode
+    """
+    hp_raid_driver = get_hp_raid_driver()
+    result = hp_raid_driver.handler.delete_all_logical_drives(slot)
+
+    return {'stdout': result, 'stderr': result.stderr, 'returncode': result.returncode}
+
+
+@capability('hpssa_clear_configuration_all_controllers',
+            description='Delete all configurations from all RAID controllers',
+            serial=True)
+def hpssa_clear_configurations_all_controllers():
+    """
+    Nuke it from orbit. It's the only way to be sure
+    :return dict: Indexed by adapter slot
+    """
+    hp_raid_driver = get_hp_raid_driver()
+    return hp_raid_driver.handler.clear_configuration()
