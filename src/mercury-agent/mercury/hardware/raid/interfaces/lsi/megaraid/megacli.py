@@ -22,7 +22,7 @@ TODO: storecli, and not this.....
 import os
 
 from mercury.common.helpers.cli import find_in_path, run
-from mercury.inspector.lib.lspci import PCIBus
+from mercury.common.misc.lspci import PCIBus
 
 LSI_VENDOR_ID = '1000'
 DEFAULT_MEGACLI_PATH = 'megacli'
