@@ -31,13 +31,13 @@ class InventoryDBController(object):
             raise Exception('MercuryID is missing from data')
 
         existing = self.collection.find_one({'mercury_id': mercury_id}, projection={'_id': 1})
+        now = time.time()
         if existing:
             object_id = existing['_id']
-            data['time_updated'] = time.time()
+            data['time_updated'] = now
             log.debug('Updating _id: %s,  m_id: %s' % (object_id, mercury_id))
             self.collection.update_one({'_id': object_id}, {'$set': data})
         else:
-            now = time.time()
             data['time_created'] = now
             data['time_updated'] = now
             insert_result = self.collection.insert_one(data)
@@ -54,6 +54,9 @@ class InventoryDBController(object):
         log.debug('Fetching: %s' % mercury_id)
         return self.collection.find_one({'mercury_id': mercury_id}, projection=projection)
 
-    def query(self, query):
+    def query(self, query, extra_projection=None):
         log.debug('Executing query: %s' % query)
-        return self.collection.find(query, projection={'mercury_id': 1})
+        projection = {'mercury_id': 1}
+        if extra_projection:
+            projection.update(extra_projection)
+        return self.collection.find(query, projection=projection)

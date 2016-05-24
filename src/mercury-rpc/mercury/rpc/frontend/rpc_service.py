@@ -1,3 +1,5 @@
+# Prototype Front End Service
+
 import logging
 
 from bottle import route, run, request, HTTPResponse, abort
@@ -121,12 +123,18 @@ def active_computer(mercury_id):
     return c
 
 
-def query_active_prototype1(query):
+####################################################################
+# These functions highlight some optimization issues related having
+# separated the active and persistent inventory.
+####################################################################
+
+
+def query_active_prototype1(query, projection=None):
     # Get all inventory matching inventory mercury_ids and iterate over
     inventory_matches = inventory_client.query(query)
 
     active_matches = []
-    cursor = active_collection.find({})
+    cursor = active_collection.find({}, projection=projection)
 
     for active_document in cursor:
         for inventory_document in inventory_matches['items']:
@@ -138,13 +146,36 @@ def query_active_prototype1(query):
     return active_matches
 
 
+def query_active_inventory(query, projection=None):
+    """
+    The same as query active prototype but returns the inventory records instead
+    :param query:
+    :return:
+    """
+    if not projection:
+        projection = {'mercury_id': 1}
+
+    inventory_matches = inventory_client.query(query, projection=projection)
+    active_inventory = []
+    cursor = active_collection.find({}, projection={'mercury_id': 1})
+
+    for document in cursor:
+        for inventory_document in inventory_matches['items']:
+            if document.get('mercury_id') == inventory_document.get('mercury_id'):
+                active_inventory.append(inventory_document)
+                break
+    return active_inventory
+
+#####
+
 @validate_json
 def get_active():
     query = request.json.get('query')
     if not isinstance(query, dict):
         return http_error('Query is missing from request', code=400)
 
-    return query_active_prototype1(query)
+    projection = get_projection_from_qsa()
+    return query_active_prototype1(query, projection=projection)
 
 
 @route('/api/rpc/jobs/<job_id>', method='GET')

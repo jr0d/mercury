@@ -57,10 +57,13 @@ class InventoryClient(SimpleRouterReqClient):
         }
         return self.check_and_return(self.transceiver(payload))
 
-    def query(self, query_data):
+    def query(self, query_data, projection=None):
         payload = {
             'endpoint': 'query',
-            'args': [query_data]
+            'args': [query_data],
+            'kwargs': {
+                'projection': projection
+            }
         }
         return self.check_and_return(self.transceiver(payload))
 

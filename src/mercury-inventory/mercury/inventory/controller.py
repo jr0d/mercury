@@ -94,8 +94,8 @@ class InventoryController(object):
         return self.__serialize_object_id(self.db.get_one(mercury_id=mercury_id, projection=projection))
 
     @endpoint('query')
-    def query(self, q):
-        c = self.db.query(query=q)
+    def query(self, q, projection=None):
+        c = self.db.query(query=q, extra_projection=projection)
         total_items = c.count()
         items = []
         for document in c:
