@@ -20,8 +20,10 @@ import time
 import zmq
 
 
-RETRIES = 3  # TODO: YAML
+RETRIES = 5  # TODO: YAML
 PING_TIMEOUT = 2500  # TODO: YAML
+BACK_OFF = .42
+
 
 log = logging.getLogger(__name__)
 
@@ -41,7 +43,8 @@ def ping(socket, host):
             'timestamp': time.time()
         }
         socket.send(msgpack.packb(_payload))
-        socks = dict(poll.poll(PING_TIMEOUT))
+        _timeout = int((PING_TIMEOUT + (RETRIES and PING_TIMEOUT or 0) * (RETRIES**BACK_OFF)))
+        socks = dict(poll.poll(_timeout))
         if socks.get(socket) == zmq.POLLIN:
             reply = socket.recv()
             log.debug("%s : %s" % (host, msgpack.unpackb(reply)))

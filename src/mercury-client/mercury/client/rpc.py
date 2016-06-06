@@ -36,7 +36,7 @@ class Job(object):
         return r.json()
 
 
-class Mercury(object):
+class Inventory(object):
     pass
 
 

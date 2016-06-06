@@ -95,3 +95,4 @@ class ActiveInventoryDBController(object):
         if not projection:
             projection = {'mercury_id': 1}
         return self.collection.find(query, projection=projection)
+

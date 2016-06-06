@@ -2,7 +2,7 @@
 
 import logging
 
-from bottle import route, run, request, HTTPResponse, abort
+from bottle import route, run, request, HTTPResponse
 
 from mercury.common.inventory_client.client import InventoryClient  # TODO: Clean up import
 from mercury.common.mongo import get_collection
@@ -126,6 +126,7 @@ def active_computer(mercury_id):
 ####################################################################
 # These functions highlight some optimization issues related having
 # separated the active and persistent inventory.
+# We still think it's worth it, for now.
 ####################################################################
 
 
@@ -149,6 +150,7 @@ def query_active_prototype1(query, projection=None):
 def query_active_inventory(query, projection=None):
     """
     The same as query active prototype but returns the inventory records instead
+    :param projection:
     :param query:
     :return:
     """
@@ -167,6 +169,7 @@ def query_active_inventory(query, projection=None):
     return active_inventory
 
 #####
+
 
 @validate_json
 def get_active():
