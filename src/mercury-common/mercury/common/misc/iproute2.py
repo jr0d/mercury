@@ -34,17 +34,33 @@ class IPRoute2(object):
     @staticmethod
     def _dzip(l):
         _d = {}
+        length = len(l)
+        if length % 2:
+            raise Exception('The list length is ODD, cannot unzip')
         for idx in xrange(0, len(l), 2):
             _d[l[idx]] = l[idx+1]
         return _d
 
     def parse_table(self):
+        singletons = ['dead', 'onlink', 'pervasive', 'offload', 'notify', 'linkdown']
+
         for line in self.raw_table.splitlines():
             if line:
                 line = line.split()
                 route = {'destination': line[0]}
+                for singleton in singletons:
+                    if singleton in line:
+                        route[singleton] = True
+                        line.remove(singleton)
+
                 route.update(self._dzip(line[1:]))
                 self.table.append(route)
 
     def get_table(self):
         return self.ip('route show')
+
+
+if __name__ == '__main__':
+    ip_route = IPRoute2()
+    from pprint import pprint
+    pprint(ip_route.table)
