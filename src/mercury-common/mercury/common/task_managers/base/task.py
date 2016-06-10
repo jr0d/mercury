@@ -5,13 +5,13 @@ class Task(object):
     def fetch(self):
         raise NotImplementedError
 
-    def _do(self):
+    def do(self):
         raise NotImplementedError
 
-    def do(self):
+    def execute(self):
         if not self.task:
             raise Exception('Task has not been populated')
-        result = self._do()
+        result = self.do()
         self.task = None
         return result
 

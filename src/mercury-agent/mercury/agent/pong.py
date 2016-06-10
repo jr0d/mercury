@@ -38,7 +38,7 @@ class PongService(object):
         self.running = False
 
     def bind(self):
-        LOG.info('Binding ping service: %s' % self.bind_address)
+        LOG.info('Binding pong service: %s' % self.bind_address)
         self.socket.bind(self.bind_address)
 
     @staticmethod

@@ -2,7 +2,7 @@ import logging
 
 
 from mercury.common.task_managers.base import Manager
-from mercury.common.task_managers.redis.worker import RedisTask
+from mercury.common.task_managers.redis.task import RedisTask
 from mercury.common.transport import SimpleRouterReqClient
 from mercury.rpc.jobs import update_job_task
 
@@ -10,7 +10,7 @@ log = logging.getLogger(__name__)
 
 
 class RPCTask(RedisTask):
-    def _do(self):
+    def do(self):
         url = 'tcp://{host}:{port}'.format(**self.task)
         client = SimpleRouterReqClient(url)
         _payload = {

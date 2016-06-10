@@ -27,5 +27,5 @@ class Worker(object):
             task = self.task.fetch()
             if not task:
                 continue
-            self.task.do()
+            self.task.execute()
             self.handled_tasks += 1

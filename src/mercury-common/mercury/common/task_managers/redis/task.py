@@ -33,7 +33,7 @@ class RedisTask(Task):
         ))
         self.task = task
 
-    def _do(self):
+    def do(self):
         raise NotImplementedError
 
     @classmethod

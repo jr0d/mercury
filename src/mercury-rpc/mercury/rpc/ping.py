@@ -44,15 +44,16 @@ def ping(socket, host):
         }
         socket.send(msgpack.packb(_payload))
         _timeout = int((PING_TIMEOUT + (RETRIES and PING_TIMEOUT or 0) * (RETRIES**BACK_OFF)))
+        log.debug('Ping Sent : TIMEOUT = %d' % _timeout)
         socks = dict(poll.poll(_timeout))
         if socks.get(socket) == zmq.POLLIN:
             reply = socket.recv()
             log.debug("%s : %s" % (host, msgpack.unpackb(reply)))
             success = True
             break
-        log.debug('timeout')
-        retries_left -= retries_left
-        time.sleep(5)  # TODO: YAML
+        log.debug('Timeout - Retries - %d' % retries_left)
+        retries_left -= 1
+        socket.close()
         socket.connect(host)
         poll.register(socket, zmq.POLLIN)
     return success
