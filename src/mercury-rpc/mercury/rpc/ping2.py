@@ -18,6 +18,7 @@ import msgpack
 import threading
 import time
 import zmq
+import signal
 
 
 log = logging.getLogger(__name__)
@@ -46,7 +47,7 @@ class Lock(object):
 
 
 class ActiveDBSyncList(object):
-    TICKER = .02
+    TICKER = 2
 
     def __init__(self, db_controller, expire=5):
         self.__data = []
@@ -54,6 +55,9 @@ class ActiveDBSyncList(object):
         self.db_controller = db_controller
         self.load_time = 0
         self.expire = expire
+
+        self.sync_thread = None
+        self.kill = False
 
     def append(self, last_ping, element):
         self.__data.append((
@@ -75,7 +79,7 @@ class ActiveDBSyncList(object):
 
         query = {'time_created': {'$gt': self.load_time}}
 
-        cursor = self.db_controller(query=query, projection=projection)
+        cursor = self.db_controller.query(query=query, projection=projection)
 
         num_items = cursor.count()
         if num_items:
@@ -84,6 +88,7 @@ class ActiveDBSyncList(object):
                 self.append(0, element)
 
         self.lock.release()
+        self.load_time = time.time()
 
     def sort(self):
         self.lock.acquire()
@@ -96,11 +101,30 @@ class ActiveDBSyncList(object):
         self.lock.acquire()
         if self.__data:
             now = time.time()
-            if now - self.__data[-1][0]:
+            if (now - self.__data[-1][0]) > self.expire:
                 element = self.__data.pop()
 
         self.lock.release()
         return element
+
+    def sync(self):
+        while True:
+            if self.kill:
+                break
+            self.load()
+            self.sort()
+            time.sleep(self.TICKER)
+
+    def start(self):
+        def term_handler(*args, **kwargs):
+            log.info('Caught TERM signal, shutting down')
+            self.kill = True
+
+        signal.signal(signal.SIGTERM, term_handler)
+
+        log.info('Starting sync tread')
+        self.sync_thread = threading.Thread(target=self.sync)
+        self.sync_thread.start()
 
 
 def ping(ctx, zurl, timeout=2500):
@@ -123,3 +147,31 @@ def ping(ctx, zurl, timeout=2500):
     log.debug("%s : %s" % (zurl, msgpack.unpackb(reply)))
     socket.close()
     return True
+
+if __name__ == '__main__':
+    from mercury.rpc.db import ActiveInventoryDBController
+    from mercury.rpc.configuration import rpc_configuration
+    from mercury.common.mongo import get_collection
+
+    logging.basicConfig(level=logging.DEBUG,
+                        format='%(asctime)s : %(levelname)s - %(name)s - %(message)s')
+    logging.getLogger('mercury.rpc.ping').setLevel(logging.DEBUG)
+    db_configuration = rpc_configuration.get('db', {})
+    collection = get_collection(db_configuration.get('rpc_mongo_db',
+                                                 'test'),
+                            db_configuration.get('rpc_mongo_collection',
+                                                 'rpc'),
+                            server_or_servers=db_configuration.get('rpc_mongo_servers',
+                                                                   'localhost'),
+                            replica_set=db_configuration.get('replica_set'))
+    db_controller = ActiveInventoryDBController(collection=collection)
+
+    sync_list = ActiveDBSyncList(db_controller)
+    sync_list.start()
+
+    try:
+        while True:
+            time.sleep(10)
+    except KeyboardInterrupt:
+        sync_list.kill = True
+
