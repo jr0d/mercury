@@ -14,10 +14,11 @@
 #    limitations under the License.
 
 import logging
-import msgpack
 import threading
 import time
 import zmq
+
+from mercury.rpc.ping2 import ping as ping2
 
 
 RETRIES = 5  # TODO: YAML
@@ -28,43 +29,26 @@ BACK_OFF = .42
 log = logging.getLogger(__name__)
 
 
-def ping(socket, host):
-    socket.connect(host)
-
-    poll = zmq.Poller()
-    poll.register(socket, zmq.POLLIN)
+def ping(ctx, host):
 
     retries_left = RETRIES
 
-    success = False
+    result = False
     while retries_left:
-        _payload = {
-            'message': 'ping',
-            'timestamp': time.time()
-        }
-        socket.send(msgpack.packb(_payload))
         _timeout = int((PING_TIMEOUT + (RETRIES and PING_TIMEOUT or 0) * (RETRIES**BACK_OFF)))
-        log.debug('Ping Sent : TIMEOUT = %d' % _timeout)
-        socks = dict(poll.poll(_timeout))
-        if socks.get(socket) == zmq.POLLIN:
-            reply = socket.recv()
-            log.debug("%s : %s" % (host, msgpack.unpackb(reply)))
-            success = True
+        result = ping2(ctx, host, timeout=_timeout)
+        if result:
             break
-        log.debug('Timeout - Retries - %d' % retries_left)
         retries_left -= 1
-        socket.close()
-        socket.connect(host)
-        poll.register(socket, zmq.POLLIN)
-    return success
+
+    return result
 
 
 def pinger(server, mercury_id, db_controller):
     ctx = zmq.Context.instance()
-    socket = ctx.socket(zmq.REQ)
     while True:
         log.debug('Pinging %s : %s' % (mercury_id, server))
-        result = ping(socket, server)
+        result = ping(ctx, server)
         if not result:
             break
         time.sleep(5)  # TODO: YAML

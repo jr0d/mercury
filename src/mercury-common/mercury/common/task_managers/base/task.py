@@ -1,3 +1,8 @@
+import logging
+
+log = logging.getLogger(__name__)
+
+
 class Task(object):
     def __init__(self):
         self.task = None

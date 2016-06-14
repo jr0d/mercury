@@ -13,6 +13,8 @@ class RedisTask(Task):
         super(RedisTask, self).__init__()
 
         self.queue_name = queue_name
+        log.debug('Redis QUEUE name: %s' % self.queue_name)
+
         self.redis = redis.Redis()
 
     def fetch(self):
@@ -32,6 +34,7 @@ class RedisTask(Task):
             time.time() - task['time_queued']
         ))
         self.task = task
+        return task
 
     def do(self):
         raise NotImplementedError

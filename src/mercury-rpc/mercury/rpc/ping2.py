@@ -20,13 +20,12 @@ import time
 import zmq
 import signal
 
-
 log = logging.getLogger(__name__)
-
 
 RETRIES = 5  # TODO: YAML
 PING_TIMEOUT = 2500  # TODO: YAML
 BACK_OFF = .42
+
 
 # make Lock a context manager
 # make a lock decorator
@@ -148,6 +147,7 @@ def ping(ctx, zurl, timeout=2500):
     socket.close()
     return True
 
+
 if __name__ == '__main__':
     from mercury.rpc.db import ActiveInventoryDBController
     from mercury.rpc.configuration import rpc_configuration
@@ -158,12 +158,12 @@ if __name__ == '__main__':
     logging.getLogger('mercury.rpc.ping').setLevel(logging.DEBUG)
     db_configuration = rpc_configuration.get('db', {})
     collection = get_collection(db_configuration.get('rpc_mongo_db',
-                                                 'test'),
-                            db_configuration.get('rpc_mongo_collection',
-                                                 'rpc'),
-                            server_or_servers=db_configuration.get('rpc_mongo_servers',
-                                                                   'localhost'),
-                            replica_set=db_configuration.get('replica_set'))
+                                                     'test'),
+                                db_configuration.get('rpc_mongo_collection',
+                                                     'rpc'),
+                                server_or_servers=db_configuration.get('rpc_mongo_servers',
+                                                                       'localhost'),
+                                replica_set=db_configuration.get('replica_set'))
     db_controller = ActiveInventoryDBController(collection=collection)
 
     sync_list = ActiveDBSyncList(db_controller)
@@ -174,4 +174,3 @@ if __name__ == '__main__':
             time.sleep(10)
     except KeyboardInterrupt:
         sync_list.kill = True
-
