@@ -31,15 +31,15 @@ log = logging.getLogger(__name__)
 
 def ping(ctx, host):
 
-    retries_left = RETRIES
+    failures = 0
 
     result = False
-    while retries_left:
-        _timeout = int((PING_TIMEOUT + (RETRIES and PING_TIMEOUT or 0) * (RETRIES**BACK_OFF)))
+    while failures < RETRIES:
+        _timeout = int((PING_TIMEOUT + (failures and PING_TIMEOUT or 0) * (failures**BACK_OFF)))
         result = ping2(ctx, host, timeout=_timeout)
         if result:
             break
-        retries_left -= 1
+        failures += 1
 
     return result
 
