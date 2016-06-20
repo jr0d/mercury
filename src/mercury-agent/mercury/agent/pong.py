@@ -38,7 +38,7 @@ class PongService(object):
         self.running = False
 
     def bind(self):
-        LOG.info('Binding ping service: %s' % self.bind_address)
+        LOG.info('Binding pong service: %s' % self.bind_address)
         self.socket.bind(self.bind_address)
 
     @staticmethod
@@ -73,9 +73,16 @@ class PongService(object):
         return message
 
     def pong(self):
+        try:
+            loadavg = os.getloadavg()
+        except OSError as os_error:
+            # Issue: https://github.com/jr0d/mercury/issues/4
+            LOG.error('Error getting load average: %s' % str(os_error))
+            loadavg = (0.0, 0.0, 0.0)
+
         _packet = {
             'timestamp': time.time(),
-            'load': os.getloadavg(),
+            'load': loadavg,
             'message': 'pong'
         }
         LOG.debug('PONG: %s' % _packet)

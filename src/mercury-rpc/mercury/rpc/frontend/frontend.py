@@ -2,14 +2,13 @@
 
 import logging
 
-from bottle import route, run, request, HTTPResponse, abort
+from bottle import route, run, request, HTTPResponse
 
 from mercury.common.inventory_client.client import InventoryClient  # TODO: Clean up import
 from mercury.common.mongo import get_collection
 from mercury.common.exceptions import MercuryCritical, MercuryUserError
 from mercury.rpc.configuration import rpc_configuration, db_configuration
 from mercury.rpc.jobs import Job, get_jobs_collection
-
 
 log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
@@ -48,6 +47,7 @@ def validate_json(f):
             return http_error('JSON request is malformed', code=400)
 
         return f(*args, **kwargs)
+
     return wrapper
 
 
@@ -61,11 +61,16 @@ def get_projection_from_qsa():
     return projection or None
 
 
+def convert_id(doc):
+    if '_id' in doc:
+        doc['_id'] = str(doc['_id'])
+
+
 def job_transformer(doc):
     if not doc:
         return
 
-    doc['_id'] = str(doc['_id'])
+    convert_id(doc)
     ttl_time_completed = doc.get('ttl_time_completed')
     if ttl_time_completed:
         doc['ttl_time_completed'] = ttl_time_completed.ctime()
@@ -85,9 +90,11 @@ def computers_query():
         return http_error('JSON request is missing', code=400)
 
     query = request.json.get('query')
+    projection = get_projection_from_qsa()
+
     if not isinstance(query, dict):
         return http_error('Query is missing from request', code=400)
-    return {'computers': inventory_client.query(query)}
+    return {'computers': inventory_client.query(query, projection=projection)}
 
 
 @route('/api/inventory/computers/<mercury_id>', method='GET')
@@ -126,8 +133,8 @@ def active_computer(mercury_id):
 ####################################################################
 # These functions highlight some optimization issues related having
 # separated the active and persistent inventory.
+# We still think it's worth it, for now.
 ####################################################################
-
 
 def query_active_prototype1(query, projection=None):
     # Get all inventory matching inventory mercury_ids and iterate over
@@ -141,14 +148,19 @@ def query_active_prototype1(query, projection=None):
 
             if active_document.get('mercury_id') == inventory_document.get('mercury_id'):
                 active_matches.append(active_document)
+                convert_id(active_document)
                 break
 
     return active_matches
 
 
+###
+
+
 def query_active_inventory(query, projection=None):
     """
     The same as query active prototype but returns the inventory records instead
+    :param projection:
     :param query:
     :return:
     """
@@ -166,7 +178,9 @@ def query_active_inventory(query, projection=None):
                 break
     return active_inventory
 
+
 #####
+
 
 @validate_json
 def get_active():
@@ -176,6 +190,14 @@ def get_active():
 
     projection = get_projection_from_qsa()
     return query_active_prototype1(query, projection=projection)
+
+
+@route('/api/active/computers/query', method='POST')
+def active_computer_query():
+    active = get_active()
+    if isinstance(active, HTTPResponse):
+        return active
+    return {'active': active}
 
 
 @route('/api/rpc/jobs/<job_id>', method='GET')
@@ -214,6 +236,10 @@ def post_jobs():
         return http_error('Command is missing from request or is malformed', code=400)
 
     active_matches = get_active()
+
+    if isinstance(active_matches, HTTPResponse):
+        return active_matches
+
     log.debug('Matched %d active computers' % len(active_matches))
 
     try:

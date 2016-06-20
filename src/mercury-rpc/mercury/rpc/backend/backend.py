@@ -138,7 +138,7 @@ def rpc_backend_service():
     """
     logging.basicConfig(level=logging.DEBUG,
                         format='%(asctime)s : %(levelname)s - %(name)s - %(message)s')
-    logging.getLogger('mercury.rpc.ping').setLevel(logging.INFO)
+    logging.getLogger('mercury.rpc.ping').setLevel(logging.DEBUG)
     db_configuration = rpc_configuration.get('db', {})
     collection = get_collection(db_configuration.get('rpc_mongo_db',
                                                      'test'),

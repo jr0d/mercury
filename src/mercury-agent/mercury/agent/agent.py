@@ -97,8 +97,14 @@ def _parse_args():
 
 def main():
     logging.basicConfig(level=logging.DEBUG)
-    log.info('[prototype] starting agent')
-    logging.getLogger('mercury.agent.pong').setLevel(logging.ERROR)
+    fh = logging.FileHandler('mercury-agent.log')
+    fh.setLevel(logging.DEBUG)
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    fh.setFormatter(formatter)
+    mercury_logger = logging.getLogger('mercury')
+    mercury_logger.addHandler(fh)
+    mercury_logger.info('[prototype] starting agent')
+    logging.getLogger('mercury.agent.pong').setLevel(logging.DEBUG)
 
     spawn_agent('simple')
 
