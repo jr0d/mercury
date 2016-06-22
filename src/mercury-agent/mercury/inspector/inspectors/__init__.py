@@ -13,15 +13,15 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-from inspector import inspectors, late_inspectors, expose, expose_late
+from .inspector import inspectors, late_inspectors, expose, expose_late
 
-from cpu import cpu_inspector
-from dmi import dmi_inspector
-from interfaces import interface_inspector
-from os_storage import os_storage_inspector
-from pci import pci_inspector
-from routes import route_inspector
+from .cpu import cpu_inspector
+from .dmi import dmi_inspector
+from .interfaces import interface_inspector
+from .os_storage import os_storage_inspector
+from .pci import pci_inspector
+from .routes import route_inspector
 
 # Late
 
-from raid import raid_inspector
+from .raid import raid_inspector

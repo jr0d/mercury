@@ -100,7 +100,7 @@ class Size(object):
         if isinstance(value, Size):
             return value.bytes
 
-        if isinstance(value, (int, long)):
+        if isinstance(value, int):
             if value > self.yobibyte:
                 raise SizeObjectValError('Value is impossibly large.')
             return value
@@ -108,14 +108,14 @@ class Size(object):
         if isinstance(value, (float, Decimal)):
             return int(round(value))
 
-        if not isinstance(value, (str, unicode)):
+        if not isinstance(value, str):
             raise SizeObjectValError(
                 'Value is not in a format I can understand')
 
         if value.isdigit():
             return int(value)
 
-        valid_suffices = self.symbols.keys()
+        valid_suffices = list(self.symbols.keys())
         suffix_index = 0
         for valid_suffix in valid_suffices:
             our_index = value.find(valid_suffix)

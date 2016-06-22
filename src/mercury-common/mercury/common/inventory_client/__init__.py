@@ -1,1 +1,1 @@
-from client import InventoryClient
+from .client import InventoryClient

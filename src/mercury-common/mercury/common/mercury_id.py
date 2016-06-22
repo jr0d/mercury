@@ -114,4 +114,4 @@ if __name__ == '__main__':
     _dmi = dmi_inspector()
     _interfaces = interface_inspector()
 
-    print(generate_mercury_id(_dmi, _interfaces))
+    print((generate_mercury_id(_dmi, _interfaces)))

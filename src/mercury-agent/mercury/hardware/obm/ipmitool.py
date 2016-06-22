@@ -261,7 +261,7 @@ class IPMIToolHP(IPMITool):
         user_elements = user_tree.xpath('.//USER_LOGIN')
         if user_elements:
             for user_element in user_elements:
-                user = user_element.values()[0]
+                user = list(user_element.values())[0]
                 self.run_hpon('-f %s -s user=%s' % (self.del_user_path, user))
         self.run_hpon('-f %s -s user=%s,password=%s' % (self.add_user_path, username, password))
 

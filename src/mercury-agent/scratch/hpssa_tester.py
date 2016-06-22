@@ -7,9 +7,9 @@ logging.getLogger('mercury.common').setLevel(level=logging.WARN)
 _hpssa = HPSSA()
 from pprint import pprint
 pprint(_hpssa.adapters)
-print _hpssa.cache_ok(0)
+print(_hpssa.cache_ok(0))
 
-print _hpssa.get_drive(0, '1I:1:19')
+print(_hpssa.get_drive(0, '1I:1:19'))
 # res = _hpssa.create(0, '1I:1:19,1I:1:20', 1)
 
 # print res

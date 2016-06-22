@@ -24,4 +24,4 @@ rpc_configuration = get_configuration(RPC_CONFIG_FILE)
 
 db_configuration = rpc_configuration.get('db', {})
 
-print db_configuration
+print(db_configuration)

@@ -37,7 +37,7 @@ def update_job_task_existing_connection(collection, job_id, task_id, document):
     """
     selector = 'tasks.{task_id}'.format(task_id=task_id)
     updated_dict = {}
-    for k, v in document.items():
+    for k, v in list(document.items()):
         updated_dict['%s.%s' % (selector, k)] = v
 
     return collection.update(
@@ -207,7 +207,7 @@ class Job(object):
 
     def to_dict(self):
         tasks_dict = dict()
-        for task in self.tasks.values():
+        for task in list(self.tasks.values()):
             tasks_dict[str(task.task_id)] = task.to_dict()
 
         return {
@@ -220,7 +220,7 @@ class Job(object):
     def __insert_job(self):
         self.time_started = time.time()
 
-        for task in self.tasks.values():
+        for task in list(self.tasks.values()):
             task.enqueue()
 
         log.info('Inserting job: %s' % self.job_id)

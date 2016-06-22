@@ -55,10 +55,10 @@ def ping(socket, host):
         socks = dict(poll.poll(PING_TIMEOUT))
         if socks.get(socket) == zmq.POLLIN:
             reply = socket.recv()
-            print "I: reply: %s" % reply
+            print("I: reply: %s" % reply)
             success = True
             break
-        print "Timeout"
+        print("Timeout")
         retries_left -= retries_left
         time.sleep(5)
         socket.connect(host)
@@ -71,9 +71,9 @@ def pinger():
     ctx = zmq.Context.instance()
     socket = ctx.socket(zmq.REQ)
     while True:
-        print 'I: sending ping'
+        print('I: sending ping')
         result = ping(socket, server_host)
-        print result
+        print(result)
         time.sleep(10)
 
 
@@ -97,8 +97,8 @@ if __name__ == '__main__':
     server_thread = threading.Thread(target=pong, args=[server])
     server_thread.start()
 
-    for x in xrange(1000):
-        print 'I: Starting thread #%d' % x
+    for x in range(1000):
+        print('I: Starting thread #%d' % x)
         client_thread = threading.Thread(target=pinger)
         client_thread.start()
         time.sleep(.2)

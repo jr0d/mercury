@@ -56,7 +56,7 @@ payload = dict(
                }]
         )
 
-print transceiver(socket, payload)
+print(transceiver(socket, payload))
 # pprint(full_req_transceiver(db_url, payload))
 
 # GET
@@ -66,7 +66,7 @@ payload = dict(
     kwargs={'projection': {'attribute2': 1, 'mercury_id': 1}}
 )
 
-print transceiver(socket, payload)
+print(transceiver(socket, payload))
 # pprint(full_req_transceiver(db_url, payload))
 
 # QUERY
@@ -75,7 +75,7 @@ payload = dict(
     args=[{'attribute2': 'I hate pickles'}]
 )
 
-print transceiver(socket, payload)
+print(transceiver(socket, payload))
 # pprint(full_req_transceiver(db_url, payload))
 
 # DELETE

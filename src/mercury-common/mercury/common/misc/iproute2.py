@@ -37,7 +37,7 @@ class IPRoute2(object):
         length = len(l)
         if length % 2:
             raise Exception('The list length is ODD, cannot unzip')
-        for idx in xrange(0, len(l), 2):
+        for idx in range(0, len(l), 2):
             _d[l[idx]] = l[idx+1]
         return _d
 

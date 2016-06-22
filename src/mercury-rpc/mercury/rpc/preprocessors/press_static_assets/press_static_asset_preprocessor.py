@@ -23,7 +23,7 @@ from mercury.rpc.preprocessors import preprocessor
 def __asset_list_hax(assets):
     """Converts any lists to a string so they can be properly rendered by pystache
     """
-    for k, v in assets.items():
+    for k, v in list(assets.items()):
 
         if isinstance(v, dict):
             __asset_list_hax(v)

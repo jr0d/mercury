@@ -99,7 +99,7 @@ class UDevHelper(object):
     def monitor_partition_by_devname(monitor, partition_id, action=None):
         monitor.filter_by('block', device_type="partition")
         for _, device in monitor:
-            log.debug('Seen: %s' % device.items())
+            log.debug('Seen: %s' % list(device.items()))
             if action and device.get('ACTION') != action:
                 log.debug('Action, %s, does not match %s' % (action, device.get('ACTION')))
                 continue

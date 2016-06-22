@@ -27,9 +27,9 @@ ctx = zmq.Context()
 socket = ctx.socket(zmq.REQ)
 socket.connect('tcp://localhost:9003')
 
-for i in xrange(100):
+for i in range(100):
     response = transceiver(socket, dict(category='rpc', method='echo', args=['This is the message: %s' % i]))
-    print response
+    print(response)
 
 
 response = transceiver(socket, dict(category='rpc', method='inspector'))

@@ -16,7 +16,7 @@
 import logging
 import netifaces
 
-import inspector
+from . import inspector
 
 from mercury.common.misc import biosdevname
 from mercury.common.misc.sysfs import NetClass
@@ -39,7 +39,7 @@ def index_gateways(gateways):
             continue
         log.debug(gateway)
         _d[gateway[1]] = list()
-        _d[gateway[1]].append(dict(zip(['gateway_ip', 'interface', 'default'], gateway)))
+        _d[gateway[1]].append(dict(list(zip(['gateway_ip', 'interface', 'default'], gateway))))
     return _d
 
 

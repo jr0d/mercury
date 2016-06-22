@@ -28,7 +28,7 @@ import zipfile
 
 from xml.etree import ElementTree
 
-from StringIO import StringIO
+from io import StringIO
 from subprocess import Popen, PIPE
 
 LOG = logging.getLogger(__name__)
@@ -198,7 +198,7 @@ Warning: SSD Over Provisioning Optimization will be performed on the physical
 
         # HP logical disks are identified by an ID #, 1+...
         # the ID is unique across the entire controller, not array
-        array_numbers = range(1, 27)
+        array_numbers = list(range(1, 27))
 
         arrays = list()
         global_hotspares = list()

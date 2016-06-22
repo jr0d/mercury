@@ -13,7 +13,7 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-import inspector
+from . import inspector
 from mercury.common.misc.udev import UDevHelper
 
 
@@ -23,7 +23,7 @@ def os_storage_inspector():
     _os_storage = {}
     storage_devices = uh.discover_valid_storage_devices(fc_enabled=True, loop_enabled=True)
     for storage_device in storage_devices:
-        _os_storage[storage_device['DEVNAME']] = (dict(storage_device.items()))
+        _os_storage[storage_device['DEVNAME']] = (dict(list(storage_device.items())))
     return _os_storage
 
 

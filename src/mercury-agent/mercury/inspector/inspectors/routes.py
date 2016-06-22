@@ -17,7 +17,7 @@
 The current device routing table
 """
 
-import inspector
+from . import inspector
 from mercury.common.misc.iproute2 import IPRoute2
 
 

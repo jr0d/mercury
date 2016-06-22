@@ -1,1 +1,1 @@
-from jobs import *
+from .jobs import *

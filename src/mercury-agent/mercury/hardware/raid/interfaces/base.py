@@ -13,7 +13,7 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-RAID_BUS_CONTROLLER = 0104
+RAID_BUS_CONTROLLER = 0o104
 
 
 class Adaptor(object):
