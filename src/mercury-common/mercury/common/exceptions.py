@@ -16,20 +16,22 @@
 import sys
 import traceback
 
+class MercuryGeneralException(Exception):
+    pass
 
-class MercuryBackendError(Exception):
+class MercuryBackendError(MercuryGeneralException):
     pass
 
 
-class MercuryIdException(Exception):
+class MercuryIdException(MercuryGeneralException):
     pass
 
 
-class MercuryCritical(Exception):
+class MercuryCritical(MercuryGeneralException):
     pass
 
 
-class MercuryUserError(Exception):
+class MercuryUserError(MercuryGeneralException):
     pass
 
 
