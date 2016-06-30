@@ -21,32 +21,76 @@ class LLDPInspector(object):
         self.pids = {}
 
     def _run(self, interface):
-        try:
-            self.pids[interface]['result'] = cli.run('{} {}'.format(self.lldplite, interface), ignore_error=True,
-                                                     raise_exception=False, quiet=True)
-        except Exception as e:
-            print(e)
+        result = cli.run('{} {}'.format(self.lldplite, interface), ignore_error=True,
+                         raise_exception=False, quiet=True)
+
+        if result.returncode == 5:
+            log.info('LLDP timeout on {}'.format(interface))
+        self.process(interface, result)
 
     def inspect(self):
-        interfaces = [1, 2, 3, 4]
-        for i in interfaces:
-            p = threading.Thread(target=self._run, args=(i,))
-            self.pids[i] = {'process': p, 'result': None}
-            p.start()
+        for i in self.device_info.get('interfaces', []):
+            if i.get('carrier'):
+                log.info('Interface {} is active, sniffing for LLDP packets'.format(i['devname']))
+                p = threading.Thread(target=self._run, args=(i,))
+                self.pids[i] = {'process': p, 'result': None}
+                p.start()
 
-    def process(self, result):
-        # Update DB
-        pass
+    def get_interface_index(self, interface):
+        interfaces = self.device_info.get('interfaces')
+        if interfaces:
+            for _i in range(len(interfaces)):
+                if interfaces[_i]['devname'] == interface:
+                    return _i
+        return -1
+
+    def process(self, interface, switch_info):
+        interface_index = self.get_interface_index(interface)
+        if not interface_index:
+            raise MercuryGeneralException('Interface is missing somehow')
+
+        update_data = {
+            'mercury_id': self.device_info['mercury_id'],
+            'update_data':
+                {
+                    'interfaces.{interface_index}.lldp_info_lite': switch_info
+                }
+        }
 
     def cleanup(self):
         pass
 
 
+def get_lldp_info(interface, lldplight_path=LLDPLITE_DEFAULT_PATH):
+    _path = cli.find_in_path(lldplight_path)
+
+    if not _path:
+        log.error('lldplite does not exist in path')
+        return None
+
+    command = '{} {}'.format(_path, interface)
+    result = cli.run(command)
+
+    if result.returncode == 5:
+        log.debug('Timed out waiting for LLDP broadcast on {}'.format(interface))
+        return None
+
+    elif result.returncode:
+        log.error("Problem running lldplite: {}".format(result.stderr))
+        return None
+
+    switch_name = result.split()[0]
+    port_number = int(result.split()[1].split('/')[-1])
+
+    log.info('LLDP info: {} {}'.format(switch_name, port_number))
+
+    return {'switch_name': switch_name, 'port_number': port_number}
+
+# Find all interfaces
+
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
-    l = LLDPInspector(None, None,
-                      '/Users/jared/git/mercury/src/mercury-agent/mercury/inspector/'
-                      'inspectors/async_inspectors/lldplite.sh')
+    l = LLDPInspector(None, None, 'lldplite.sh')
     l.inspect()
     try:
         time.sleep(15)

@@ -35,6 +35,10 @@ class MercuryUserError(MercuryGeneralException):
     pass
 
 
+class MercuryRecoverableError(Exception):
+    pass
+
+
 def parse_exception():
     exc_type, exc_value, exc_traceback = sys.exc_info()
     path, line, scope, code = traceback.extract_tb(exc_traceback)[-1]

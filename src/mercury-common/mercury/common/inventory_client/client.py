@@ -36,13 +36,23 @@ class InventoryClient(SimpleRouterReqClient):
 
         return reply['response']
 
-    def update(self, update_data):
-        if 'mercury_id' not in update_data:
-            raise MercuryCritical('mercury_id is missing from payload')
+    def insert_one(self, device_info):
+        mercury_id = device_info.get('mercury_id')
+        if not mercury_id:
+            raise MercuryCritical('device_info is missing mercury_id')
 
         payload = {
-            'endpoint': 'update',
-            'args': [update_data]
+            'endpoint': 'insert_one',
+            'args': [device_info]
+        }
+        return self.check_and_return(self.transceiver(payload))
+
+    def update_one(self, mercury_id, update_data):
+
+        payload = {
+            'endpoint': 'update_one',
+            'args': [mercury_id],
+            'kwargs': {'update_data': update_data}
         }
 
         return self.check_and_return(self.transceiver(payload))

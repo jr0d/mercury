@@ -16,6 +16,7 @@
 import logging
 import time
 
+from mercury.common.exceptions import MercuryCritical, MercuryGeneralException
 
 log = logging.getLogger(__name__)
 
@@ -25,26 +26,53 @@ class InventoryDBController(object):
         self.collection = collection
         self.collection.create_index('mercury_id', unique=True)
 
-    def update(self, data):
+    def insert_one(self, data):
         mercury_id = data.get('mercury_id')
         if not mercury_id:
-            raise Exception('MercuryID is missing from data')
+            raise MercuryCritical('MercuryID is missing from payload. Shame. Shame. Shame.')
 
         existing = self.collection.find_one({'mercury_id': mercury_id}, projection={'_id': 1})
-        now = time.time()
         if existing:
-            object_id = existing['_id']
-            data['time_updated'] = now
-            log.debug('Updating _id: %s,  m_id: %s' % (object_id, mercury_id))
-            self.collection.update_one({'_id': object_id}, {'$set': data})
-        else:
-            data['time_created'] = now
-            data['time_updated'] = now
-            insert_result = self.collection.insert_one(data)
-            object_id = insert_result.inserted_id
-            log.info('Created record for %s <ObjectID: %s>' % (mercury_id, object_id))
+            del data['mercury_id']
+            self.update_one(mercury_id, data)
+            return existing['object_id']
 
-        return object_id
+        now = time.time()
+        data['time_created'] = now
+        data['time_updated'] = now
+
+        insert_result = self.collection.insert_one(data)
+        return insert_result.inserted_id
+
+    def update_one(self, mercury_id, data=None):
+        """
+        Very simple update_one/insert method. Here monitor hooks will be run.
+
+        Monitor hooks will inspect the update data for information they care about and perform
+        some sort of action. For instance, one such hook may monitor for an update containing
+        LLDP information. The hook might publish this transaction to a subscriber interested in
+        such things.
+
+        TODO: change function name to update_one.
+        TODO: update prototype so that it takes the arguments, mercury_id, data=None
+            (if data is None, create an empty dict and touch time_updated)
+        :param mercury_id: The update target
+        :param data: The update or insert data
+        :return:
+        """
+        data = data or {}
+
+        if not data:
+            log.warning('Update data is empty')
+
+        if not self.collection.find_one({'mercury_id': mercury_id}, projection={'_id': 1}).count():
+            raise MercuryGeneralException('Attempting to update non-existing record')
+
+        if 'mercury_id' in data:
+            raise MercuryCritical('MercuryID cannot be updated once a record already exists')
+
+        data['time_updated'] = time.time()
+        self.collection.update_one({'mercury_id': mercury_id}, {'$set': data})
 
     def delete(self, mercury_id):
         log.info('Deleting: %s' % mercury_id)

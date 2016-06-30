@@ -103,9 +103,10 @@ def run(command, bufsize=1048567, dry_run=False, raise_exception=False, ignore_e
 
 
 def find_in_path(filename):
-    if os.path.isabs(filename):
-        if os.path.exists(filename):
-            return filename
+    _temp_path = os.path.realpath(os.path.expanduser(filename))
+    if os.path.isabs(_temp_path):
+        if os.path.exists(_temp_path):
+            return _temp_path
         else:
             return None
 

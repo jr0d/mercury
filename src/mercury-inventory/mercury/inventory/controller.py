@@ -75,15 +75,18 @@ class InventoryController(object):
     def index(self):
         return 'Hello World'
 
-    @endpoint('update')
-    def update(self, update_data):
-        mercury_id = update_data.get('mercury_id')
+    @endpoint('insert_one')
+    def insert_one(self, device_info):
+        mercury_id = device_info.get('device_info')
         if not mercury_id:
-            raise EndpointError('Request is missing mercury_id', endpoint='update', request=update_data)
+            EndpointError('device_info packet must contain a mercury_id', 'insert_one', device_info)
+        self.db.get_one()
 
-        object_id = self.db.update(update_data)
-
-        return {'object_id': self.__serialize_object_id(object_id)}
+    @endpoint('update_one')
+    def update_one(self, mercury_id, update_data):
+        if 'mercury_id' in update_data:
+            raise EndpointError('Cannot update mercury_id with this method', 'update_one', update_data)
+        return {'object_id': self.__serialize_object_id(self.db.update_one(mercury_id, update_data))}
 
     @endpoint('delete')
     def delete(self, mercury_id):

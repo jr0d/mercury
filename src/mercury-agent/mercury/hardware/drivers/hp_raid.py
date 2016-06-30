@@ -14,7 +14,7 @@
 #    limitations under the License.
 
 
-from hpssa import HPSSA
+from hpssa.hpssa import HPSSA
 
 from mercury.hardware import platform_detection
 from mercury.hardware.drivers import driver, PCIDriverBase

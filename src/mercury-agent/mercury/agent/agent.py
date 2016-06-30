@@ -40,55 +40,54 @@ from mercury.inspector import inspect
 log = logging.getLogger(__name__)
 
 
-def spawn_agent(dhcp_ip_method='simple'):
-    """
-    Prototype agent service entry
-    :param dhcp_ip_method: method to get dhcp
-    :return:
-    """
+class Agent(object):
+    def __init__(self, configuration):
+        self.configuration = configuration
+        self.local_config = self.configuration.get('agent', {})
+        self.remote_config = self.configuration.get('remote', {})
+        self.agent_bind_address = self.local_config.get('service_bind_address', 'tcp://0.0.0.0:9003')
+        self.pong_bind_address = self.local_config.get('pong_bind_address', 'tcp://0.0.0.0:9004')
 
-    local_config = agent_configuration.get('agent', {})
-    remote_config = agent_configuration.get('remote', {})
-    agent_bind_address = local_config.get('service_bind_address', 'tcp://0.0.0.0:9003')
-    pong_bind_address = local_config.get('pong_bind_address', 'tcp://0.0.0.0:9004')
+        self.inventory_url = self.remote_config.get('inventory_service')
 
-    inventory_url = remote_config.get('inventory_service')
+        if not self.inventory_url:
+            raise MercuryCritical('Inventory service URL is not specified')
 
-    if not inventory_url:
-        raise MercuryCritical('Inventory service URL is not specified')
+        self.rpc_backend = agent_configuration.get('remote', {}).get('rpc_service')
 
-    rpc_backend = agent_configuration.get('remote', {}).get('rpc_service')
+        if not self.rpc_backend:
+            raise MercuryCritical('Missing rpc backend in local configuration')
 
-    if not rpc_backend:
-        raise MercuryCritical('Missing rpc backend in local configuration')
+    def run(self, dhcp_ip_method='simple'):
+        log.debug('Agent: %s, Pong: %s, Inventory: %s' % (self.agent_bind_address,
+                                                          self.pong_bind_address,
+                                                          self.inventory_url))
 
-    log.debug('agent: %s, pong: %s, inventory_remote: %s' % (agent_bind_address,
-                                                             pong_bind_address,
-                                                             inventory_url))
+        log.info('Running inspectors')
 
-    log.info('Running inspectors')
+        device_info = inspect.inspect()
 
-    device_info = inspect.inspect()
+        log.info('Registering device inventory')
 
-    log.info('Registering device inventory')
+        inventory_client = InventoryClient(self.inventory_url)
+        object_id = inventory_client.insert_one(device_info)
 
-    inventory_client = InventoryClient(inventory_url)
-    object_id = inventory_client.update(device_info)
+        log.debug('Created record: %s' % object_id)
 
-    log.debug('Created record: %s' % object_id)
+        log.info('Starting pong service')
+        spawn_pong_process(self.pong_bind_address)
 
-    log.info('Starting pong service')
-    spawn_pong_process(pong_bind_address)
+        log.info('Registering device')
+        local_ip = get_dhcp_ip(device_info, method=dhcp_ip_method)
+        local_ipv6 = None
+        register(self.rpc_backend, device_info['mercury_id'], local_ip, local_ipv6, runtime_capabilities)
 
-    log.info('Registering device')
-    local_ip = get_dhcp_ip(device_info, method=dhcp_ip_method)
-    local_ipv6 = None
-    register(rpc_backend, device_info['mercury_id'], local_ip, local_ipv6, runtime_capabilities)
+        # AsyncInspectors
 
-    log.info('Starting agent rpc service: %s' % agent_bind_address)
-    agent_service = AgentService(agent_bind_address, rpc_backend)
-    agent_service.bind()
-    agent_service.start()
+        log.info('Starting agent rpc service: %s' % self.agent_bind_address)
+        agent_service = AgentService(self.agent_bind_address, self.rpc_backend)
+        agent_service.bind()
+        agent_service.start()
 
 
 def _parse_args():
@@ -106,7 +105,8 @@ def main():
     mercury_logger.info('[prototype] starting agent')
     logging.getLogger('mercury.agent.pong').setLevel(logging.DEBUG)
 
-    spawn_agent('simple')
+    agent = Agent(agent_configuration)
+    agent.run('simple')
 
 
 if __name__ == '__main__':

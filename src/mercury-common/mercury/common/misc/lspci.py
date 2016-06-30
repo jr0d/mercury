@@ -86,6 +86,7 @@ def parse_nnvmmk():
         hush = line.split('[')
         return '['.join(hush[0:-1]).strip()
 
+    out = out.decode()
     blocks = out.split('\n\n')
 
     for block in blocks:

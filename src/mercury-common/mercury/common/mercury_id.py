@@ -36,7 +36,7 @@ META_TYPE_BOARD_ASSET_SERIAL = '03'
 
 
 def _build_hash(target, meta_type):
-    digest = hashlib.sha1(target).hexdigest()
+    digest = hashlib.sha1(target.encode('ascii')).hexdigest()
     return meta_type + digest
 
 

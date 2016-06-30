@@ -13,8 +13,8 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-from .exec_press import *
-from .inspector import *
-from .misc import *
-from .raid import *
+from mercury.agent.procedures.exec_press import *
+from mercury.agent.procedures.inspector import *
+from mercury.agent.procedures.misc import *
+from mercury.agent.procedures.raid import *
 
