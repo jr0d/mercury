@@ -56,7 +56,7 @@ class PongService(object):
         r = self.socket.recv()
 
         try:
-            message = msgpack.unpackb(r)
+            message = msgpack.unpackb(r, encoding='utf-8')
         except TypeError as type_error:
             LOG.error('Recieved unpacked, non-string type: %s : %s' % (type(r), type_error))
             return

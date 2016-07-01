@@ -54,9 +54,9 @@ class Dispatcher(object):
             tb = traceback.format_exception(*sys.exc_info())
             LOG.error('An unhandled exception has been encountered: endpoint=%s, message=%s, traceback=%s' % (
                 endpoint,
-                e.message,
+                str(e),
                 '\n'.join(tb)
             ))
-            return dict(error=True, traceback=tb, message=e.message)
+            return dict(error=True, traceback=tb, message=str(e))
 
         return dict(error=False, response=response)

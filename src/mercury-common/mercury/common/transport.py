@@ -13,6 +13,7 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
+import binascii
 import logging
 import msgpack
 import zmq
@@ -38,7 +39,7 @@ def full_req_transceiver(zmq_url, data):
     socket.send_multipart([packed])
 
     rep = socket.recv()
-    unpacked_rep = msgpack.unpackb(rep)
+    unpacked_rep = msgpack.unpackb(rep, encoding='utf-8')
 
     socket.close()
     ctx.term()
@@ -72,7 +73,7 @@ class SimpleRouterReqClient(object):
         # blocks
         rep = self.socket.recv()
 
-        return msgpack.unpackb(rep)
+        return msgpack.unpackb(rep, encoding='utf-8')
 
     def close(self):
         self.socket.close()
@@ -100,7 +101,7 @@ class SimpleRouterReqService(object):
 
         address, empty, packed_message = multipart
         try:
-            message = msgpack.unpackb(packed_message)
+            message = msgpack.unpackb(packed_message, encoding='utf-8')
         except TypeError as type_error:
             self.send_error(address, 'Recieved unpacked, non-string type: %s : %s' % (type(packed_message), type_error))
             return
@@ -116,7 +117,7 @@ class SimpleRouterReqService(object):
         self.send(address, data)
 
     def send(self, address, message):
-        self.socket.send_multipart([address, '', msgpack.packb(message)])
+        self.socket.send_multipart([address, b'', msgpack.packb(message)])
 
     def destroy(self):
         self.context.destroy()
@@ -133,7 +134,7 @@ class SimpleRouterReqService(object):
             if not data:
                 continue
             address, message = data
-            log.debug('Request: %s' % address.encode('hex'))
+            log.debug('Request: %s' % binascii.hexlify(address))
             # noinspection PyBroadException
             try:
                 response = self.process(message)
@@ -143,7 +144,7 @@ class SimpleRouterReqService(object):
                 log.error(fancy_traceback_format(exc_dict, 'Exception data:'))
                 self.send_error(address, 'Encountered server error, sorry')
                 continue
-            log.debug('Response: %s' % address.encode('hex'))
+            log.debug('Response: %s' % binascii.hexlify(address))
             self.send(address, response)
         self.destroy()
 

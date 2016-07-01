@@ -143,7 +143,7 @@ def ping(ctx, zurl, timeout=2500):
         return False
 
     reply = socket.recv()
-    log.debug("%s : %s" % (zurl, msgpack.unpackb(reply)))
+    log.debug("%s : %s" % (zurl, msgpack.unpackb(reply, encoding='utf-8')))
     socket.close()
     return True
 

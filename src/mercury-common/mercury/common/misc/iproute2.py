@@ -43,8 +43,8 @@ class IPRoute2(object):
 
     def parse_table(self):
         singletons = ['dead', 'onlink', 'pervasive', 'offload', 'notify', 'linkdown']
-
         for line in self.raw_table.splitlines():
+            print(line)
             if line:
                 line = line.split()
                 route = {'destination': line[0]}

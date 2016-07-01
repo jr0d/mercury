@@ -17,6 +17,7 @@
 # POC - single threaded ROUTER / REQ pattern
 # TODO: Early code, needs cleaning
 
+import binascii
 import logging
 import msgpack
 import zmq
@@ -50,7 +51,7 @@ class Server(object):
 
         address, empty, packed_message = multipart
         try:
-            message = msgpack.unpackb(packed_message)
+            message = msgpack.unpackb(packed_message, encoding='utf-8')
         except TypeError as type_error:
             self.send_error(address, 'Recieved unpacked, non-string type: %s : %s' % (type(packed_message), type_error))
             return
@@ -66,7 +67,7 @@ class Server(object):
         self.send(address, data)
 
     def send(self, address, message):
-        self.socket.send_multipart([address, '', msgpack.packb(message)])
+        self.socket.send_multipart([address, b'', msgpack.packb(message)])
 
     def destroy(self):
         self.context.destroy()
@@ -85,10 +86,10 @@ class Server(object):
                 continue
 
             address, message = data
-            log.debug('Request: %s' % address.encode('hex'))
+            log.debug('Request: %s' % binascii.hexlify(address))
 
             response = self.dispatcher.dispatch(message)
-            log.debug('Response: %s' % address.encode('hex'))
+            log.debug('Response: %s' % binascii.hexlify(address))
             self.send(address, response)
 
         self.destroy()

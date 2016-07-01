@@ -33,7 +33,7 @@ class InventoryClient(SimpleRouterReqClient):
     def check_and_return(self, reply):
         if reply.get('error'):
             self.raise_reply_error(reply)
-
+        print(reply)
         return reply['response']
 
     def insert_one(self, device_info):

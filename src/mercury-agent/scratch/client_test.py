@@ -20,7 +20,7 @@ import zmq
 def transceiver(s, d):
     packed = msgpack.packb(d)
     s.send_multipart([packed])
-    return msgpack.unpackb(socket.recv())
+    return msgpack.unpackb(socket.recv(), encoding='utf-8')
 
 
 ctx = zmq.Context()

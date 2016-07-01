@@ -33,9 +33,11 @@ class InventoryDBController(object):
 
         existing = self.collection.find_one({'mercury_id': mercury_id}, projection={'_id': 1})
         if existing:
+            # implicit update
+            log.info('Record exists, performing update instead.')
             del data['mercury_id']
             self.update_one(mercury_id, data)
-            return existing['object_id']
+            return str(existing['_id'])
 
         now = time.time()
         data['time_created'] = now
@@ -65,7 +67,7 @@ class InventoryDBController(object):
         if not data:
             log.warning('Update data is empty')
 
-        if not self.collection.find_one({'mercury_id': mercury_id}, projection={'_id': 1}).count():
+        if not self.collection.count({'mercury_id': mercury_id}, projection={'_id': 1}):
             raise MercuryGeneralException('Attempting to update non-existing record')
 
         if 'mercury_id' in data:

@@ -26,7 +26,7 @@ class AttributeString(str):
         """
         For introspection
         """
-        str.__init__(x)
+        str.__init__(x, encoding='utf-8')
         self.stderr = ''
         self.returncode = None
         self.command = ''
@@ -103,14 +103,13 @@ def run(command, bufsize=1048567, dry_run=False, raise_exception=False, ignore_e
 
 
 def find_in_path(filename):
-    _temp_path = os.path.realpath(os.path.expanduser(filename))
-    if os.path.isabs(_temp_path):
+    if os.path.split(filename)[0]:
+        _temp_path = os.path.realpath(os.path.expanduser(filename))
         if os.path.exists(_temp_path):
             return _temp_path
-        else:
-            return None
 
-    for path in os.environ['PATH'].split(os.pathsep):
-        abspath = os.path.join(path, filename)
-        if os.path.exists(abspath):
-            return abspath
+    else:
+        for path in os.environ['PATH'].split(os.pathsep):
+            abspath = os.path.join(path, filename)
+            if os.path.exists(abspath):
+                return abspath

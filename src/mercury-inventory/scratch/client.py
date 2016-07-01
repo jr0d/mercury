@@ -22,7 +22,7 @@ from pprint import pprint
 def transceiver(s, d):
     packed = msgpack.packb(d)
     s.send_multipart([packed])
-    return msgpack.unpackb(socket.recv())
+    return msgpack.unpackb(socket.recv(), encoding='utf-8')
 
 
 def full_req_transceiver(zmq_url, data):
@@ -34,7 +34,7 @@ def full_req_transceiver(zmq_url, data):
     socket.send_multipart([packed])
 
     rep = socket.recv()
-    unpacked_rep = msgpack.unpackb(rep)
+    unpacked_rep = msgpack.unpackb(rep, encoding='utf-8')
 
     socket.close()
 
