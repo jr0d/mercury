@@ -64,7 +64,7 @@ def expose_late(name, run_if=None):
     """
     def wrap(f):
         def wrapped_f(early_device_info):
-            if hasattr(f, 'run_if') and not f.run_if(early_devices_info):
+            if hasattr(f, 'run_if') and not f.run_if(early_device_info):
                 log.info('Requirement not satisfied for %s (%s)' % (f.__name__, name))
                 return None
             return run_inspector(name, f, early_device_info)
@@ -76,4 +76,3 @@ def expose_late(name, run_if=None):
         late_inspectors.append((name, wrapped_f))
         return wrapped_f
     return wrap
-
