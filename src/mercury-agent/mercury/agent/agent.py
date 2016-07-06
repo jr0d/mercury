@@ -36,6 +36,10 @@ from mercury.common.exceptions import MercuryCritical
 from mercury.common.inventory_client.client import InventoryClient
 from mercury.inspector import inspect
 
+# Async Inspectors
+
+from mercury.inspector.inspectors.async_inspectors.lldp import LLDPInspector
+
 
 log = logging.getLogger(__name__)
 
@@ -83,6 +87,7 @@ class Agent(object):
         register(self.rpc_backend, device_info['mercury_id'], local_ip, local_ipv6, runtime_capabilities)
 
         # AsyncInspectors
+        LLDPInspector(device_info, inventory_client)
 
         log.info('Starting agent rpc service: %s' % self.agent_bind_address)
         agent_service = AgentService(self.agent_bind_address, self.rpc_backend)

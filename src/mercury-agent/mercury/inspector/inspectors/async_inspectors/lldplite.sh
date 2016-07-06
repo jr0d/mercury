@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 
-sleep 10
-echo xxx gxxx/$1
+sleep 2
+echo xxx gxxx/10

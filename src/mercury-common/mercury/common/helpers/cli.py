@@ -21,20 +21,46 @@ import subprocess
 log = logging.getLogger(__name__)
 
 
-class AttributeString(str):
-    def __init__(self, x):
-        """
-        For introspection
-        """
-        str.__init__(x, encoding='utf-8')
-        self.stderr = ''
-        self.returncode = None
-        self.command = ''
-        self.comments = ''
+class CLIResult(str):
+    ENCODING = 'utf-8'
+
+    def __new__(cls, *args, **kwargs):
+        return str.__new__(cls, object=cls.__decode(args[0]))
+
+    def __init__(self, stdout='', stderr='', returncode=None):
+        self._stdout = stdout
+        self._stderr = stderr
+        self.returncode = returncode
+
+        super(CLIResult, self).__init__()
+
+    @classmethod
+    def __decode(cls, v):
+        if isinstance(v, bytes):
+            return v.decode(cls.ENCODING)
+        return v
+
+    def __str__(self):
+        return self.__decode(self._stdout)
+
+    def __repr__(self):
+        return self.__str__()
 
     @property
     def stdout(self):
-        return self
+        return self.__str__()
+
+    @property
+    def stderr(self):
+        return self.__decode(self._stderr)
+
+    @stdout.setter
+    def stdout(self, value):
+        self._stdout = value
+
+    @stderr.setter
+    def stderr(self, value):
+        self._stderr = value
 
 
 class CLIException(Exception):
@@ -62,7 +88,7 @@ def run(command, bufsize=1048567, dry_run=False, raise_exception=False, ignore_e
     :param dry_run: Should we perform a dry run of the command.
     :type dry_run: bool.
 
-    :returns: :func:`mercury_AttributeString`.
+    :returns: :func:`mercury_CLIResult`.
 
     """
     if not quiet:
@@ -79,6 +105,7 @@ def run(command, bufsize=1048567, dry_run=False, raise_exception=False, ignore_e
                              bufsize=bufsize,
                              env=our_env)
         out, err = p.communicate()
+
         ret = p.returncode
     else:
         out, err, ret = '', '', 0
@@ -95,11 +122,9 @@ def run(command, bufsize=1048567, dry_run=False, raise_exception=False, ignore_e
         if raise_exception:
             raise CLIException(err)
 
-    attr_string = AttributeString(out)
-    attr_string.stderr = err
-    attr_string.returncode = ret
-    attr_string.command = command
-    return attr_string
+    cli_result = CLIResult(out, err, ret)
+
+    return cli_result
 
 
 def find_in_path(filename):
