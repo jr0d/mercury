@@ -37,7 +37,7 @@ class InventoryDBController(object):
             log.info('Record exists, performing update instead.')
             del data['mercury_id']
             self.update_one(mercury_id, data)
-            return str(existing['_id'])
+            return existing['_id']
 
         now = time.time()
         data['time_created'] = now

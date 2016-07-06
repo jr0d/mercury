@@ -22,9 +22,9 @@ import signal
 
 log = logging.getLogger(__name__)
 
-RETRIES = 5  # TODO: YAML
-PING_TIMEOUT = 2500  # TODO: YAML
-BACK_OFF = .42
+RETRIES = 3  # TODO: YAML
+PING_TIMEOUT = 2000  # TODO: YAML
+BACK_OFF = .2
 
 
 # make Lock a context manager

@@ -32,7 +32,7 @@ from mercury.agent.configuration import agent_configuration
 from mercury.agent.pong import spawn_pong_process
 from mercury.agent.register import get_dhcp_ip, register
 from mercury.agent.rpc import AgentService
-from mercury.common.exceptions import MercuryCritical
+from mercury.common.exceptions import MercuryCritical, MercuryGeneralException
 from mercury.common.inventory_client.client import InventoryClient
 from mercury.inspector import inspect
 
@@ -87,7 +87,10 @@ class Agent(object):
         register(self.rpc_backend, device_info['mercury_id'], local_ip, local_ipv6, runtime_capabilities)
 
         # AsyncInspectors
-        LLDPInspector(device_info, inventory_client)
+        try:
+            LLDPInspector(device_info, inventory_client)
+        except MercuryGeneralException as mge:
+            log.error('Caught recoverable exception running async inspector: {}'.format(mge))
 
         log.info('Starting agent rpc service: %s' % self.agent_bind_address)
         agent_service = AgentService(self.agent_bind_address, self.rpc_backend)
@@ -108,7 +111,7 @@ def main():
     mercury_logger = logging.getLogger('mercury')
     mercury_logger.addHandler(fh)
     mercury_logger.info('[prototype] starting agent')
-    logging.getLogger('mercury.agent.pong').setLevel(logging.DEBUG)
+    logging.getLogger('mercury.agent.pong').setLevel(logging.ERROR)
 
     agent = Agent(agent_configuration)
     agent.run('simple')

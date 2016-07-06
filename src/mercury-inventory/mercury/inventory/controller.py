@@ -80,7 +80,7 @@ class InventoryController(object):
         mercury_id = device_info.get('device_info')
         if not mercury_id:
             EndpointError('device_info packet must contain a mercury_id', 'insert_one', device_info)
-        self.db.insert_one(device_info)
+        return {'object_id': str(self.db.insert_one(device_info))}
 
     @endpoint('update_one')
     def update_one(self, mercury_id, update_data):
