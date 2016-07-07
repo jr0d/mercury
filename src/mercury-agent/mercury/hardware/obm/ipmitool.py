@@ -54,6 +54,10 @@ class BMCException(Exception):
     pass
 
 
+class IPMIToolParsingError(Exception):
+    pass
+
+
 class IPMITool(object):
     def __init__(self, ipmitool_path=DEFAULT_IPMITOOL_PATH):
         self.ipmitool_path = find_in_path(ipmitool_path)
@@ -173,6 +177,37 @@ class IPMITool(object):
             self.run('sol payload enable %d %d' % (channel, user_id))
         self.run('user enable %d' % user_id)
 
+    @staticmethod
+    def parse_output_type1(data):
+        key = None
+        parsed = {}
+        for line in data.splitlines():
+            sline = line.split(':', 1)
+            if len(sline) == 1:
+                if not key:
+                    raise IPMIToolParsingError('Key is not set for presumed list value')
+                value = sline[0].strip()
+                parsed[key].append(value)
+                continue
+            key = sline[0].strip().lower().replace(' ', '_')
+            if not sline[1].strip():
+                parsed[key] = list()
+            else:
+                parsed[key] = sline[1].strip()
+
+        return parsed
+
+    @property
+    def bmc_info(self):
+        log.debug('Getting bmc info')
+        out, err, returncode = self.run('mc info')
+        if returncode:
+            log.error('Problem getting bmc info : '
+                      'std {} - err {} - return {}'.format(out, err, returncode))
+            return None
+
+        return self.parse_output_type1(out)
+
 
 class DCMITool(IPMITool):
     def __init__(self, dcmitool_path='/usr/local/sbin/Qdcmitool'):
@@ -269,3 +304,6 @@ class IPMIToolHP(IPMITool):
         self.configure_static_network(ip_address, netmask, gateway)
         self.create_superuser_hp(username, password)
         return self.verify_network_info(ip_address, netmask, gateway, 'static')
+
+    def parse_network_info(self, channel=2):
+        return super(IPMIToolHP, self).parse_network_info(channel=channel)

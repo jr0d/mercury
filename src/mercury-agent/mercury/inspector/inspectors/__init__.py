@@ -25,3 +25,4 @@ from .routes import route_inspector
 # Late
 
 from .raid import raid_inspector
+from .bmc import bmc_inspector

@@ -14,7 +14,7 @@
 #    limitations under the License.
 
 from mercury.inspector.inspectors import inspectors, late_inspectors
-from mercury.hardware.drivers import registered_pci_drivers, set_driver_cache
+from mercury.hardware.drivers import registered_drivers, set_driver_cache
 from mercury.common.mercury_id import generate_mercury_id
 
 # Global storage for device_info it is mostly read only and only overwritten during
@@ -43,8 +43,10 @@ def inspect():
 
     # populate_drivers
 
-    for driver in registered_pci_drivers:
-        if driver['class'].probe(collected['pci']):
+    for driver in registered_drivers:
+        _wants = driver['class'].wants
+
+        if driver['class'].probe(_wants and collected[_wants] or collected):
             set_driver_cache(driver)
 
     for inspector, f in late_inspectors:

@@ -44,6 +44,7 @@ class MegaRaidSASDriver(PCIDriverBase):
     name = 'megaraid_sas'  # named after the kernel module
     driver_type = 'raid'
     _handler = LSIRaid
+    wants = 'pci'
 
     @classmethod
     def probe(cls, pci_data):

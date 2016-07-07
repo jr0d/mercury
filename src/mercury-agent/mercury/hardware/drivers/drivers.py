@@ -3,18 +3,28 @@ import logging
 log = logging.getLogger(__name__)
 
 
-registered_pci_drivers = list()
+registered_drivers = list()
 driver_class_cache = dict()
 
 
-class PCIDriverBase(object):
+class DriverBase(object):
     name = ''
     driver_type = ''
     _handler = None
+    wants = ''
 
     def __init__(self):
         self.handler = self._handler()
 
+    @classmethod
+    def probe(cls, context_data):
+        raise NotImplementedError
+
+    def inspect(self):
+        raise NotImplementedError
+
+
+class PCIDriverBase(DriverBase):
     @classmethod
     def probe(cls, pci_data):
         """
@@ -40,10 +50,11 @@ class PCIDriverBase(object):
 def driver():
     def decorator(cls):
         log.info('Registering driver: %s' % cls.__name__)
-        registered_pci_drivers.append({
+        registered_drivers.append({
             'name': cls.name,
             'class': cls,
-            'driver_type': cls.driver_type
+            'driver_type': cls.driver_type,
+            'wants': cls.wants
         })
 
         return cls

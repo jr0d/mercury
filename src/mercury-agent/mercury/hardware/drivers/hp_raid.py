@@ -25,6 +25,7 @@ class SmartArrayDriver(PCIDriverBase):
     name = 'hpssa'
     driver_type = 'raid'
     _handler = HPSSA
+    wants = 'pci'
 
     PCI_DEVICE_IDS = [
         "3239"  # Smart Array Gen9 Controllers
