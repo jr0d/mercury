@@ -18,10 +18,10 @@ import netifaces
 
 from . import inspector
 
-from mercury.common.misc import biosdevname
-from mercury.common.misc.sysfs import NetClass
-from mercury.common.misc.udev import UDevHelper
-from mercury.common.misc import network_interfaces
+from mercury.inspector.hwlib import biosdevname
+from mercury.inspector.hwlib.sysfs import NetClass
+from mercury.inspector.hwlib.udev import UDevHelper
+from mercury.inspector.hwlib import network_interfaces
 
 log = logging.getLogger(__name__)
 

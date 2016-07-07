@@ -14,7 +14,7 @@
 #    limitations under the License.
 
 from . import inspector
-from mercury.common.misc.sysfs import DMI
+from mercury.inspector.hwlib.sysfs import DMI
 
 
 @inspector.expose('dmi')

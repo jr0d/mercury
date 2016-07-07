@@ -14,7 +14,7 @@
 #    limitations under the License.
 
 from mercury.inspector.inspectors import inspector
-from mercury.common.misc import lspci
+from mercury.inspector.hwlib import lspci
 
 
 @inspector.expose('pci')

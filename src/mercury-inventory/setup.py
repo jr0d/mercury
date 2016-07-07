@@ -26,6 +26,6 @@ setup(
     description='',
     install_requires=[
         'pyzmq',
-        'msgpack-python'
+        'msgpack-python',
     ]
 )

@@ -29,7 +29,8 @@ setup(
         'msgpack-python',
         'netifaces',
         'pyudev',
-        'python-hpssa'
+        'python-hpssa',
+        'lxml'
     ],
     entry_points="""
     [console_scripts]
