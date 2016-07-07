@@ -1,6 +1,5 @@
 import logging
 import threading
-import time
 
 from mercury.common.exceptions import MercuryGeneralException
 from mercury.common.helpers import cli
@@ -46,7 +45,7 @@ class LLDPInspector(object):
         if switch_info:
             self.inventory_client.update_one(
                 self.device_info['mercury_id'],
-                {'$push': {self.__key__: dict(interface=interface, **switch_info)}})
+                {self.__key__: {interface: dict(interface=interface, **switch_info)}})
             self.pids[interface]['result'] = switch_info
         else:
             self.pids[interface]['result'] = {'error': True}
@@ -73,33 +72,3 @@ def get_lldp_info(interface, lldplight_path):
     log.info('LLDP info: {} {}'.format(switch_name, port_number))
 
     return {'switch_name': switch_name, 'port_number': port_number}
-
-# Find all interfaces
-
-if __name__ == '__main__':
-    logging.basicConfig(level=logging.DEBUG)
-    device_info = {
-        'mercury_id': '1234',
-        'interfaces': [
-            {'devname': 'eth0', 'carrier': True},
-            {'devname': 'eth1', 'carrier': True}
-        ]
-    }
-
-    class IC(object):
-        @staticmethod
-        def update_one(m_id, data):
-            print('M_ID => {}, {}'.format(m_id, data))
-
-    logging.basicConfig(level=logging.DEBUG)
-    l = LLDPInspector(device_info, IC(), '/home/jared/git/lldpr/lldplite')
-
-    l.inspect()
-    try:
-        time.sleep(3)
-    except KeyboardInterrupt:
-        import sys
-        sys.exit(0)
-    finally:
-        print(l.pids)
-

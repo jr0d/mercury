@@ -88,7 +88,7 @@ class Agent(object):
 
         # AsyncInspectors
         try:
-            LLDPInspector(device_info, inventory_client)
+            LLDPInspector(device_info, inventory_client).inspect()
         except MercuryGeneralException as mge:
             log.error('Caught recoverable exception running async inspector: {}'.format(mge))
 
