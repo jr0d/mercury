@@ -16,7 +16,7 @@
 import logging
 import netifaces
 
-from . import inspector
+from mercury.inspector.inspectors import inspector
 
 from mercury.inspector.hwlib import biosdevname
 from mercury.inspector.hwlib.sysfs import NetClass
@@ -57,6 +57,7 @@ def interface_inspector():
     log.debug(gateways)
 
     for interface in interfaces:
+        log.debug('Inspecting: {}'.format(interface))
         ndi = NetClass(interface)
         _iface = dict()
         _iface['devname'] = interface
@@ -64,7 +65,8 @@ def interface_inspector():
         if not address:
             continue
         _iface['address'] = address
-        _iface['carrier'] = bool(ndi.carrier)
+        _iface['carrier'] = ndi.carrier
+        log.debug('Interface {} is {}'.format(interface, ndi.carrier and 'up' or 'down'))
         _iface['dev_port'] = ndi.dev_port
         _iface['duplex'] = ndi.duplex
         _iface['speed'] = ndi.speed

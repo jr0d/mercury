@@ -58,19 +58,8 @@ class ActiveInventoryDBController(object):
         return 'mercury_id: {mercury_id}, server: {rpc_address}, rpc_port: {rpc_port}, ' \
                'ping_port: {ping_port}'.format(**data)
 
-    def update(self, data):
-        document = self.collection.find_one({'mercury_id': data['mercury_id']})
-
+    def insert(self, data):
         data['time_created'] = time.time()
-
-        if document:
-            log.warning(
-                'Attempted insert of existing object. Offending: %s' % data['mercury_id'])
-
-            log.info('Performing update: %s' % self.data_format(data))
-            self.collection.update_one({'mercury_id': data['mercury_id']}, {'$set': data})
-            return document['_id']
-
         log.info(
             'Adding active inventory: %s' % self.data_format(data))
         return self.collection.insert_one(data).inserted_id
@@ -96,3 +85,5 @@ class ActiveInventoryDBController(object):
             projection = {'mercury_id': 1}
         return self.collection.find(query, projection=projection)
 
+    def exists(self, mercury_id):
+        return bool(self.collection.count({'mercury_id': mercury_id}))

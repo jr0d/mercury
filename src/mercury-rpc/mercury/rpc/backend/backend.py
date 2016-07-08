@@ -70,7 +70,10 @@ class BackEndService(SimpleRouterReqService):
             log.error('Recieved invalid data')
             return dict(error=True, message='Invalid request')
 
-        self.db_controller.update(data)
+        if self.db_controller.exists(data['mercury_id']):
+            return dict(error=True, message='Already registered!')
+
+        self.db_controller.insert(data)
 
         self.spawn_pinger(data['mercury_id'], data['rpc_address'], data['ping_port'])
 

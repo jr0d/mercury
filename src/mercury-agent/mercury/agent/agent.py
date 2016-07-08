@@ -71,12 +71,12 @@ class Agent(object):
 
         device_info = inspect.inspect()
 
-        log.info('Registering device inventory')
+        log.info('Registering device inventory for MercuryID {}'.format(device_info['mercury_id']))
 
         inventory_client = InventoryClient(self.inventory_url)
         object_id = inventory_client.insert_one(device_info)
 
-        log.debug('Created record: %s' % object_id)
+        log.debug('Created/Updated inventory record: %s' % object_id)
 
         log.info('Starting pong service')
         spawn_pong_process(self.pong_bind_address)
@@ -112,6 +112,7 @@ def main():
     mercury_logger.addHandler(fh)
     mercury_logger.info('[prototype] starting agent')
     logging.getLogger('mercury.agent.pong').setLevel(logging.ERROR)
+    logging.getLogger('hpssa._cli').setLevel(logging.ERROR)
 
     agent = Agent(agent_configuration)
     agent.run('simple')

@@ -39,16 +39,20 @@ class LLDPInspector(object):
             for _i in range(len(interfaces)):
                 if interfaces[_i]['devname'] == interface:
                     return _i
+        log.error('{} index is somehow missing from device info'.format(interface))
         return -1
 
     def process(self, interface, switch_info):
-        if switch_info:
-            self.inventory_client.update_one(
-                self.device_info['mercury_id'],
-                {self.__key__: {interface: dict(interface=interface, **switch_info)}})
-            self.pids[interface]['result'] = switch_info
-        else:
-            self.pids[interface]['result'] = {'error': True}
+        index = self.get_interface_index(interface)
+
+        if not switch_info or index == -1:
+            self.pids[interface]['result'] = {'missing': True}
+            return
+
+        self.inventory_client.update_one(
+            self.device_info['mercury_id'],
+            {'interfaces.{}.lldp'.format(self.get_interface_index(interface)): switch_info})
+        self.pids[interface]['result'] = switch_info
 
     def cleanup(self):
         pass

@@ -28,6 +28,17 @@ def parse_cookie(path):
         return ''
 
 
+def convert_bool(data):
+    if not data:
+        return False
+
+    try:
+        return bool(int(data))
+    except ValueError:
+        log.warning('Problem coercing data to int, probably not a bool : {}'.format(data))
+        return bool(data)
+
+
 def append_sys(path):
     return os.path.join('/sys', path.lstrip('/'))
 
@@ -55,7 +66,7 @@ class NetClass(SysFSBase):
 
     @property
     def carrier(self):
-        return self.get_cookie('carrier')
+        return convert_bool(self.get_cookie('carrier'))
 
     @property
     def dev_port(self):
