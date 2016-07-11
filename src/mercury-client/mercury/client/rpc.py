@@ -61,5 +61,5 @@ if __name__ == '__main__':
     # jobs = Jobs('http://mercury:9005')
     # pprint(jobs.get())
     ac = ActiveComputers('http://mercury:9005')
-    pprint(ac.get())
-    pprint(ac.query({'mercury_id': '017f3b1adc67a79050e3655747a0b6b0711c81ad68'}, projection=['mercury_id']))
+    # pprint(ac.get())
+    pprint(ac.get(params={'projection': 'mercury_id'}))
