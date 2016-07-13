@@ -13,8 +13,19 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
+import logging
+
 from mercury.agent.capabilities import capability
+from mercury.agent.configuration import agent_configuration
+from mercury.common.exceptions import fancy_traceback_format
+
 from press.entry import entry_main
+
+from press.plugins import init_plugins
+from press.press_main import Press
+
+
+log = logging.getLogger(__name__)
 
 
 @capability('exec_press', description='Execute press using the supplied configuration', serial=True,
@@ -30,3 +41,17 @@ def execute_press(configuration=None):
 def execute_press_nor(configuration=None):
         # TODO: Do not rely on entry_main. Import Press, setup logging, and init plugins here
     return entry_main(configuration)
+
+
+@capability('press', description='Native press support in mercury', serial=True,
+            kwarg_names=['configuration'])
+def press_native(configuration):
+    plugin_dir = agent_configuration.get('press', {}).get('plugin_dir')
+    if plugin_dir:
+        log.info('Initializing plugins. PLUGIN_DIR: {}'.format(plugin_dir))
+        init_plugins(configuration, plugin_dir)
+
+    press = Press(configuration)
+
+    press.run()
+

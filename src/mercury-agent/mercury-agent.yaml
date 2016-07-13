@@ -14,3 +14,6 @@ remote:
 hardware:
   raid:
     megacli_path: /usr/local/sbin/megacli
+
+press:
+  plugin_dir: press/plugins
