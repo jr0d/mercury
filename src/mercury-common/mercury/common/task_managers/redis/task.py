@@ -22,6 +22,8 @@ class RedisTask(Task):
         if not message:
             return
         message = message[1]
+        if isinstance(message, bytes):
+            message = message.decode()
         try:
             task = json.loads(message)
         except ValueError:
