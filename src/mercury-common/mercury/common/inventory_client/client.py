@@ -33,7 +33,6 @@ class InventoryClient(SimpleRouterReqClient):
     def check_and_return(self, reply):
         if reply.get('error'):
             self.raise_reply_error(reply)
-        print(reply)
         return reply['response']
 
     def insert_one(self, device_info):
@@ -53,8 +52,6 @@ class InventoryClient(SimpleRouterReqClient):
             'endpoint': 'update_one',
             'args': [mercury_id],
             'kwargs': {'update_data': update_data}
-            'endpoint': 'insert',
-            'args': [update_data]
         }
 
         return self.check_and_return(self.transceiver(payload))
