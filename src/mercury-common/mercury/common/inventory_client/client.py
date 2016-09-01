@@ -53,6 +53,8 @@ class InventoryClient(SimpleRouterReqClient):
             'endpoint': 'update_one',
             'args': [mercury_id],
             'kwargs': {'update_data': update_data}
+            'endpoint': 'insert',
+            'args': [update_data]
         }
 
         return self.check_and_return(self.transceiver(payload))

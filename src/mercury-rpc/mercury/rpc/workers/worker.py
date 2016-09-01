@@ -1,10 +1,10 @@
 import logging
 
 
-from mercury.common.task_managers.base import Manager
+from mercury.common.task_managers.base.manager import Manager
 from mercury.common.task_managers.redis.task import RedisTask
 from mercury.common.transport import SimpleRouterReqClient
-from mercury.rpc.jobs import update_job_task
+from mercury.rpc.jobs import update_task
 
 log = logging.getLogger(__name__)
 
@@ -22,13 +22,13 @@ class RPCTask(RedisTask):
             'job_id': self.task['job_id']
         }
         log.debug('Dispatching task: %s' % self.task)
-        # Status update happens before dispatch because the task COULD complete
+        # Status insert happens before dispatch because the task COULD complete
         # before write due to connection overhead
-        update_job_task(self.task['job_id'], self.task['task_id'], {'status': 'DISPATCHING'})
+        update_task(self.task['task_id'], {'status': 'DISPATCHING'})
         response = client.transceiver(_payload)
         if response['status'] != 0:
-            update_job_task(self.task['job_id'], self.task['task_id'],
-                            {'status': 'ERROR', 'response': 'Dispatch Error: %s' % response})
+            update_task(self.task['task_id'],
+                       {'status': 'ERROR', 'response': 'Dispatch Error: %s' % response})
         return response
 
     @classmethod

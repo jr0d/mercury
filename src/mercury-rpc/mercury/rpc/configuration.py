@@ -14,6 +14,7 @@
 #    limitations under the License.
 
 from mercury.common.configuration import get_configuration
+from mercury.common.mongo import get_collection
 
 
 RPC_CONFIG_FILE = 'mercury-rpc.yaml'
@@ -24,4 +25,32 @@ rpc_configuration = get_configuration(RPC_CONFIG_FILE)
 
 db_configuration = rpc_configuration.get('db', {})
 
-print(db_configuration)
+
+def get_tasks_collection(connection=None):
+    tasks_db = db_configuration.get('tasks_mongo_db', 'test')
+    tasks_collection = db_configuration.get('tasks_mongo_collection', 'rpc_tasks')
+    tasks_servers = db_configuration.get('tasks_mongo_servers', 'localhost')
+    replica_set = db_configuration.get('tasks_replica_set')
+
+    return get_collection(
+        tasks_db,
+        tasks_collection,
+        connection=connection,
+        server_or_servers=tasks_servers,
+        replica_set=replica_set
+    )
+
+
+def get_jobs_collection(connection=None):
+    jobs_db = db_configuration.get('jobs_mongo_db', 'test')
+    jobs_collection = db_configuration.get('jobs_mongo_collection', 'rpc_jobs')
+    jobs_servers = db_configuration.get('jobs_mongo_servers', 'localhost')
+    replica_set = db_configuration.get('jobs_replica_set')
+
+    return get_collection(
+        jobs_db,
+        jobs_collection,
+        connection=connection,
+        server_or_servers=jobs_servers,
+        replica_set=replica_set
+    )

@@ -18,10 +18,13 @@ import logging
 import time
 
 from mercury.common.transport import SimpleRouterReqService
-from mercury.common.mongo import get_collection
-from mercury.rpc.configuration import rpc_configuration
+from mercury.common.mongo import get_collection, get_connection
+from mercury.rpc.configuration import rpc_configuration, get_jobs_collection, get_tasks_collection
 from mercury.rpc.db import ActiveInventoryDBController
-from mercury.rpc.jobs import is_completed, update_job_task_existing_connection
+from mercury.rpc.jobs import (
+    is_completed,
+    update_task_existing_connection
+)
 from mercury.rpc.ping import spawn
 
 log = logging.getLogger(__name__)
@@ -33,18 +36,16 @@ RPC_CONFIG_FILE = 'mercury-rpc.yaml'
 
 
 class BackEndService(SimpleRouterReqService):
-    def __init__(self, collection):
+    def __init__(self, active_db_collection, jobs_collection, tasks_collection):
         registration_service_bind_address = rpc_configuration.get('backend',
                                                                   {}).get('service_url',
                                                                           'tcp://0.0.0.0:9002')
         super(BackEndService, self).__init__(registration_service_bind_address)
 
-        self.db_controller = ActiveInventoryDBController(collection)
+        self.active_db_controller = ActiveInventoryDBController(active_db_collection)
 
-        # Temporary configuration storage to get jobs collection name
-        # See TODO
-        self.jobs_collection_name = rpc_configuration.get('db', {}).get('jobs_mongo_collection',
-                                                                        'rpc_jobs')
+        self.jobs_collection = jobs_collection
+        self.tasks_collection = tasks_collection
 
     def process(self, message):
         if message.get('action') == 'register':
@@ -55,25 +56,22 @@ class BackEndService(SimpleRouterReqService):
 
     def spawn_pinger(self, mercury_id, address, port):
         endpoint = 'tcp://%s:%s' % (address, port)
-        spawn(endpoint, mercury_id, self.db_controller)
+        spawn(endpoint, mercury_id, self.active_db_controller)
 
     def reacquire(self):
-        existing_documents = self.db_controller.query({}, projection={'mercury_id': 1,
-                                                                      'rpc_address': 1,
-                                                                      'ping_port': 1})
+        existing_documents = self.active_db_controller.query({}, projection={'mercury_id': 1,
+                                                                             'rpc_address': 1,
+                                                                             'ping_port': 1})
         for doc in existing_documents:
             log.info('Attempting to reacquire %s : %s' % (doc['mercury_id'], doc['rpc_address']))
             self.spawn_pinger(doc['mercury_id'], doc['rpc_address'], doc['ping_port'])
 
     def register(self, data):
-        if not self.db_controller.validate(data):
+        if not self.active_db_controller.validate(data):
             log.error('Recieved invalid data')
             return dict(error=True, message='Invalid request')
 
-        if self.db_controller.exists(data['mercury_id']):
-            return dict(error=True, message='Already registered!')
-
-        self.db_controller.insert(data)
+        self.active_db_controller.insert(data)
 
         self.spawn_pinger(data['mercury_id'], data['rpc_address'], data['ping_port'])
 
@@ -94,17 +92,16 @@ class BackEndService(SimpleRouterReqService):
         }
         :return:
         """
-        # Database is abstracted away by a controller class, we'll rework the class
-        # to simply accept a db object
+        now = time.time()
+        ttl_time = datetime.datetime.utcfromtimestamp(now)
 
-        db = self.db_controller.collection.database
-        collection = db[self.jobs_collection_name]
         job_id = response_data['job_id']
         task_id = response_data['task_id']
         update = {
             'status': response_data['result'],  # Naming conventions changed when coding provider
             'time_started': response_data['time_started'],
             'time_completed': response_data['time_completed'],
+            'ttl_time_completed': ttl_time,
             'result': response_data['traceback_info'] or response_data['data']
         }
 
@@ -112,13 +109,12 @@ class BackEndService(SimpleRouterReqService):
             **response_data
         ))
 
-        update_job_task_existing_connection(collection, job_id, task_id, update)
+        update_task_existing_connection(self.tasks_collection, task_id, update)
 
-        if is_completed(collection, job_id):
-            now = time.time()
-            ttl_time = datetime.datetime.utcfromtimestamp(now)
+        if is_completed(self.tasks_collection, job_id):
+
             log.info('Job completed: {job_id}'.format(job_id=job_id))
-            collection.update(
+            self.jobs_collection.update_one(
                 {
                     'job_id': job_id
                 },
@@ -144,15 +140,24 @@ def rpc_backend_service():
     logging.getLogger('mercury.rpc.ping').setLevel(logging.ERROR)
     logging.getLogger('mercury.rpc.ping2').setLevel(logging.ERROR)
     db_configuration = rpc_configuration.get('db', {})
-    collection = get_collection(db_configuration.get('rpc_mongo_db',
-                                                     'test'),
-                                db_configuration.get('rpc_mongo_collection',
-                                                     'rpc'),
-                                server_or_servers=db_configuration.get('rpc_mongo_servers',
+
+    connection = get_connection(server_or_servers=db_configuration.get('rpc_mongo_servers',
                                                                        'localhost'),
                                 replica_set=db_configuration.get('replica_set'))
 
-    server = BackEndService(collection)
+    active_db_collection = get_collection(db_configuration.get('rpc_mongo_db',
+                                                               'test'),
+                                          db_configuration.get('rpc_mongo_collection',
+                                                               'rpc'),
+                                          connection)
+
+    jobs_collection = get_jobs_collection(connection)
+    tasks_collection = get_tasks_collection(connection)
+
+    jobs_collection.create_index('ttl_time_completed', expireAfterSeconds=3600)
+    tasks_collection.create_index('ttl_time_completed', expireAfterSeconds=3600)
+
+    server = BackEndService(active_db_collection, jobs_collection, tasks_collection)
     server.reacquire()
     server.bind()
     server.start()

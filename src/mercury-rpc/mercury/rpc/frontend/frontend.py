@@ -5,25 +5,36 @@ import logging
 from bottle import route, run, request, HTTPResponse
 
 from mercury.common.inventory_client.client import InventoryClient  # TODO: Clean up import
-from mercury.common.mongo import get_collection
+from mercury.common.mongo import get_collection, get_connection
 from mercury.common.exceptions import MercuryCritical, MercuryUserError
-from mercury.rpc.configuration import rpc_configuration, db_configuration
-from mercury.rpc.jobs import Job, get_jobs_collection
+from mercury.rpc.configuration import (
+    rpc_configuration,
+    db_configuration,
+    get_jobs_collection,
+    get_tasks_collection
+)
+
+
+from mercury.rpc.jobs import Job
 
 log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
 
 # TODO: Change name of rpc collection to agents collection.
 
+connection = get_connection(server_or_servers=db_configuration.get('rpc_mongo_servers',
+                                                                   'localhost'),
+                            replica_set=db_configuration.get('rpc_replica_set'))
+
 active_collection = get_collection(db_configuration.get('rpc_mongo_db',
                                                         'test'),
                                    db_configuration.get('rpc_mongo_collection',
                                                         'rpc'),
-                                   server_or_servers=db_configuration.get('rpc_mongo_servers',
-                                                                          'localhost'),
-                                   replica_set=db_configuration.get('rpc_replica_set'))
+                                   connection=connection)
 
-jobs_collection = get_jobs_collection()
+
+jobs_collection = get_jobs_collection(connection)
+tasks_collection = get_tasks_collection(connection)
 
 inventory_configuration = rpc_configuration.get('inventory', {})
 inventory_router_url = inventory_configuration.get('inventory_router')
@@ -64,9 +75,10 @@ def get_projection_from_qsa():
 def convert_id(doc):
     if '_id' in doc:
         doc['_id'] = str(doc['_id'])
+    return doc
 
 
-def job_transformer(doc):
+def doc_transformer(doc):
     if not doc:
         return
 
@@ -80,7 +92,8 @@ def job_transformer(doc):
 
 @route('/api/inventory/computers', method='GET')
 def computers():
-    return {'computers': inventory_client.query({})}
+    projection = get_projection_from_qsa()
+    return {'computers': inventory_client.query({}, projection=projection)}
 
 
 @route('/api/inventory/computers/query', method='POST')
@@ -206,19 +219,56 @@ def get_job(job_id):
     job = jobs_collection.find_one({'job_id': job_id}, projection=projection)
     if not job:
         return http_error('Job not found', code=404)
-    return {'job': job_transformer(job)}
+    return {'job': doc_transformer(job)}
+
+
+@route('/api/rpc/jobs/<job_id>/status', method='GET')
+def get_job_status(job_id):
+    error_states = ['ERROR', 'TIMEOUT', 'EXCEPTION']
+    job = jobs_collection.find_one({'job_id': job_id})
+    if not job:
+        return http_error('Job not found', code=404)
+    tasks = tasks_collection.find({'job_id': job_id}, {'task_id': 1, 'status': 1, '_id': 0})
+
+    job['has_failures'] = False
+    job['tasks'] = []
+
+    for task in tasks:
+        job['tasks'].append(convert_id(task))
+        if task['status'] in error_states:
+            job['has_failures'] = True
+
+    log.debug(convert_id(job))
+    return {'job': doc_transformer(job)}
+
+
+@route('/api/rpc/tasks/<job_id>', method='GET')
+def get_tasks(job_id):
+    projection = get_projection_from_qsa()
+    c = tasks_collection.find({'job_id': job_id}, projection=projection)
+    count = c.count()
+    tasks = []
+    for task in c:
+        tasks.append(doc_transformer(task))
+    return {'count': count, 'tasks': tasks}
+
+
+@route('/api/rpc/task/<task_id>')
+def get_task(task_id):
+    task = tasks_collection.find_one({'task_id': task_id})
+    if not task:
+        return http_error('Task not found', code=404)
+    return {'task': doc_transformer(task)}
 
 
 @route('/api/rpc/jobs', method='GET')
 def get_jobs():
     projection = get_projection_from_qsa()
-    if not projection:
-        projection = {'tasks': False}
     c = jobs_collection.find({}, projection=projection).sort('time_created', 1)
     count = c.count()
     jobs = []
     for job in c:
-        jobs.append(job_transformer(job))
+        jobs.append(doc_transformer(job))
     return {'count': count, 'jobs': jobs}
 
 
@@ -243,7 +293,7 @@ def post_jobs():
     log.debug('Matched %d active computers' % len(active_matches))
 
     try:
-        job = Job(instruction, active_matches, jobs_collection)
+        job = Job(instruction, active_matches, jobs_collection, tasks_collection)
     except MercuryUserError as mue:
         return http_error(str(mue), code=400)
     job.start()
