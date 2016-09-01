@@ -21,7 +21,7 @@ from mercury.inspector.hwlib.udev import UDevHelper
 def os_storage_inspector():
     uh = UDevHelper()
     _os_storage = {}
-    storage_devices = uh.discover_valid_storage_devices(fc_enabled=True, loop_enabled=True)
+    storage_devices = uh.discover_valid_storage_devices(fc_enabled=True, loop_enabled=False)
     for storage_device in storage_devices:
         _os_storage[storage_device['DEVNAME']] = (dict(list(storage_device.items())))
     return _os_storage
