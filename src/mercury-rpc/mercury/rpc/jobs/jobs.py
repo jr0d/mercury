@@ -5,79 +5,54 @@ import time
 import uuid
 
 from mercury.common.exceptions import MercuryUserError, MercuryCritical
-from mercury.common.mongo import get_collection
-from mercury.rpc.configuration import db_configuration, TASK_QUEUE
+from mercury.rpc.configuration import TASK_QUEUE, get_jobs_collection
 from mercury.rpc.preprocessors import instruction_preprocessors
 
 log = logging.getLogger(__name__)
 
 
-def get_jobs_collection(db='', collection='', servers=None, replica_set=None):
-    jobs_db = db or db_configuration.get('jobs_mongo_db', 'test')
-    jobs_collection = collection or db_configuration.get('jobs_mongo_collection', 'rpc_jobs')
-    jobs_servers = servers or db_configuration.get('jobs_mongo_servers', 'localhost')
-    replica_set = replica_set or db_configuration.get('jobs_replica_set')
-
-    return get_collection(
-        jobs_db,
-        jobs_collection,
-        server_or_servers=jobs_servers,
-        replica_set=replica_set
-    )
-
-
-def update_job_task_existing_connection(collection, job_id, task_id, document):
+def update_task_existing_connection(collection, task_id, document):
     """
     Helper function that simplifies updating job tasks by constructing tasks.<task_id>.k
     :param collection:
-    :param job_id: The job
     :param task_id: The task
     :param document: A dictionary that represents the changes to job task
-    :return: return value of pymongo.Collection.update
+    :return: return value of pymongo.Collection.insert
     """
-    selector = 'tasks.{task_id}'.format(task_id=task_id)
-    updated_dict = {}
-    for k, v in list(document.items()):
-        updated_dict['%s.%s' % (selector, k)] = v
 
-    return collection.update(
-        spec={'job_id': job_id},
-        document={
-            '$set': updated_dict
+    return collection.update_one(
+        filter={'task_id': task_id},
+        update={
+            '$set': document
         }
     )
 
 
-def update_job_task(job_id, task_id, document):
+def update_task(task_id, document):
     """
     Same as above, but creates a new pool. For short running threads
-    :param job_id:
     :param task_id:
     :param document:
     :return:
     """
     collection = get_jobs_collection()
-    return update_job_task_existing_connection(collection, job_id, task_id, document)
+    return update_task_existing_connection(collection, task_id, document)
 
 
-def get_tasks(collection, job_id):
-    doc = collection.find_one({'job_id': job_id}, projection={'tasks': 1, '_id': 0})
-    return doc.get('tasks') or {}
+def get_tasks(tasks_collection, job_id):
+    docs = tasks_collection.find({'job_id': job_id})
+    return docs or []
 
 
-def is_completed(collection, job_id):
+def is_completed(tasks_collection, job_id):
     """
     This will likely change once Job statuses are finalized
-    :param collection:
+    :param tasks_collection:
     :param job_id:
     :return:
     """
     complete_statuses = ['SUCCESS', 'ERROR', 'EXCEPTION', 'TIMEOUT']  # This will move
-    tasks = get_tasks(collection, job_id)
-    for task_id in tasks:
-        if tasks[task_id]['status'] not in complete_statuses:
-            return False
-    return True
+    return tasks_collection.count({'job_id': job_id, 'status': {'$nin': complete_statuses}}) == 0
 
 
 class Task(object):
@@ -95,7 +70,10 @@ class Task(object):
         self.result = {}
         self.task_id = uuid.uuid4()
         self.status = 'NEW'
-        self.time_queued, self.time_started, self.time_completed = [None, None, None]
+        self.time_queued = None
+        self.time_started = None
+        self.time_completed = None
+        self.ttl_time_completed = None
 
     def to_dict(self):
         return {
@@ -111,7 +89,8 @@ class Task(object):
             'time_queued': self.time_queued,
             'time_started': self.time_started,
             'time_completed': self.time_completed,
-            'result': self.result
+            'result': self.result,
+            'ttl_time_completed': self.ttl_time_completed
         }
 
     def __repr__(self):
@@ -126,7 +105,7 @@ class Task(object):
 
 
 class Job(object):
-    def __init__(self, instruction, targets, collection):
+    def __init__(self, instruction, targets, jobs_collection, tasks_collection):
         """
         :param instruction: Procedure dictionary containing method, args, kwargs
         :param targets: active inventory targets
@@ -136,7 +115,8 @@ class Job(object):
         """
         self.instruction = instruction
         self.targets = targets
-        self.collection = collection
+        self.jobs_collection = jobs_collection
+        self.tasks_collection = tasks_collection
 
         self.preprocessor = None
         self.primitive = False
@@ -149,8 +129,11 @@ class Job(object):
             task = self.__create_task(target)
             self.tasks[str(task.task_id)] = task
 
+        self.task_count = len(targets)
+
         self.time_started = None
         self.time_completed = None
+        self.ttl_time_completed = None
 
     def __check_method(self, method):
         for target in self.targets:
@@ -206,15 +189,13 @@ class Job(object):
         return task
 
     def to_dict(self):
-        tasks_dict = dict()
-        for task in list(self.tasks.values()):
-            tasks_dict[str(task.task_id)] = task.to_dict()
-
         return {
             'job_id': str(self.job_id),
             'time_started': self.time_started,
             'time_completed': self.time_completed,
-            'tasks': tasks_dict
+            'ttl_time_completed': self.ttl_time_completed,
+            'instruction': self.instruction,
+            'task_count': self.task_count
         }
 
     def __insert_job(self):
@@ -225,7 +206,8 @@ class Job(object):
 
         log.info('Inserting job: %s' % self.job_id)
 
-        self.collection.insert_one(self.to_dict())
+        self.jobs_collection.insert_one(self.to_dict())
+        self.tasks_collection.insert_many([task.to_dict() for task in list(self.tasks.values())])
 
     def start(self):
         self.__insert_job()

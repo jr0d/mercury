@@ -48,7 +48,7 @@ socket.connect('tcp://localhost:9000')
 
 # CREATE
 payload = dict(
-        endpoint='update',
+        endpoint='insert',
         args=[{
                 'mercury_id': 12345,
                 'attribute1': 'I am a pickle',

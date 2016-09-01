@@ -11,6 +11,13 @@ db:
     - localhost:27017
   jobs_mongo_replica_set: None
 
+  tasks_mongo_db: mercury
+  tasks_mongo_collection: rpc_tasks
+  tasks_mongo_servers:
+    - localhost:27017
+  tasks_mongo_replica_set: None
+
+
 redis:
   host: localhost
   port: 6379

@@ -23,7 +23,7 @@ log = logging.getLogger(__name__)
 
 
 # TODO: Dependant capabilities
-# TODO: inspector update tasks for inventory sync after hardware change, ie creating/removing an array
+# TODO: inspector insert tasks for inventory sync after hardware change, ie creating/removing an array
 
 
 def get_hp_raid_driver():

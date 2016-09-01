@@ -1,1 +1,1 @@
-from .jobs import *
+from mercury.rpc.jobs.jobs import *

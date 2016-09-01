@@ -47,8 +47,9 @@ class ActiveInventoryDBController(object):
         self.collection = collection
         self.collection.create_index('mercury_id', unique=True)
 
-    def validate(self, data):
-        for k in self.keys:
+    @classmethod
+    def validate(cls, data):
+        for k in cls.keys:
             if k not in data:
                 return False
         return True
@@ -58,8 +59,20 @@ class ActiveInventoryDBController(object):
         return 'mercury_id: {mercury_id}, server: {rpc_address}, rpc_port: {rpc_port}, ' \
                'ping_port: {ping_port}'.format(**data)
 
-    def insert(self, data):
+    def insert(self, data, perform_update=True):
+        document = self.get_one(data['mercury_id'])
+
         data['time_created'] = time.time()
+
+        if document:
+            log.warning(
+                'Attempted insert of existing object. Offending: %s' % data['mercury_id'])
+
+            if perform_update:
+                log.info('Performing insert: %s' % self.data_format(data))
+                self.collection.update_one({'mercury_id': data['mercury_id']}, {'$set': data})
+            return document['_id']
+
         log.info(
             'Adding active inventory: %s' % self.data_format(data))
         return self.collection.insert_one(data).inserted_id
@@ -87,3 +100,4 @@ class ActiveInventoryDBController(object):
 
     def exists(self, mercury_id):
         return bool(self.collection.count({'mercury_id': mercury_id}))
+
