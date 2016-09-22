@@ -96,24 +96,23 @@ class InventoryController(object):
     def get_one(self, mercury_id, projection=None):
         return self.__serialize_object_id(self.db.get_one(mercury_id=mercury_id, projection=projection))
 
-    def format_query_response(self, c):
+    @endpoint('query')
+    def query(self, q, projection, offset_id=None, limit=0):
+        c = self.db.query(query=q, extra_projection=projection,
+                          offset_id=offset_id, limit=limit)
         current_count = c.count(with_limit_and_skip=True)  # I am not sure if counting twice is worth it
         total_items = c.count() - current_count
 
         items = []
         for document in c:
             items.append(self.__serialize_object_id(document))
-        return {'remaining': total_items, 'current_window': current_count, 'items': items}
 
-    @endpoint('query')
-    def query(self, q, projection=None):
-        c = self.db.query(query=q, extra_projection=projection)
-        return self.format_query_response(c)
-
-    @endpoint('query_limit')
-    def query_limit(self, q, projection, offset_id=None, limit=100):
-        c = self.db.query(query=q, extra_projection=projection, offset_id=offset_id, limit=limit)
-        return self.format_query_response(c)
+        return {
+            'remaining': total_items,
+            'current_window': current_count,
+            'limit': limit,
+            'items': items
+        }
 
     @endpoint('count')
     def count(self, q):

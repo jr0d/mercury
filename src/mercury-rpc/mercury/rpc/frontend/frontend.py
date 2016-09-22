@@ -63,6 +63,14 @@ def validate_json(f):
     return wrapper
 
 
+def check_query(f):
+    def wrapper(*args, **kwargs):
+        if not isinstance(request.json.get('query'), dict):
+            return http_error('JSON request is malformed', code=400)
+        return f(*args, **kwargs)
+    return wrapper
+
+
 def get_projection_from_qsa():
     projection_keys = request.query.get('projection', '')
     projection = {}
@@ -75,7 +83,7 @@ def get_projection_from_qsa():
 
 def get_paging_info_from_qsa():
     _d = {
-        'limit': 0,
+        'limit': 250,
         'offset_id': None
     }
     limit = request.query.get('limit')
@@ -119,19 +127,23 @@ def computers():
 
 @route('/api/inventory/computers/query', method='POST')
 @validate_json
+@check_query
 def computers_query():
-    if not request.json:
-        return http_error('JSON request is missing', code=400)
-
     query = request.json.get('query')
     projection = get_projection_from_qsa()
     paging_data = get_paging_info_from_qsa()
 
-    if not isinstance(query, dict):
-        return http_error('Query is missing from request', code=400)
     return {'computers': inventory_client.query(query, projection=projection,
                                                 offset_id=paging_data['offset_id'],
                                                 limit=paging_data['limit'])}
+
+
+@route('/api/inventory/computers/count', method='POST')
+@validate_json
+@check_query
+def computer_query_count():
+    query = request.json.get('query')
+    return {'count': inventory_client.count(query)}
 
 
 @route('/api/inventory/computers/<mercury_id>', method='GET')
@@ -223,21 +235,17 @@ def query_active_inventory(query, projection=None):
 #####
 
 
-@validate_json
-def get_active():
-    query = request.json.get('query')
-    if not isinstance(query, dict):
-        return http_error('Query is missing from request', code=400)
-
-    projection = get_projection_from_qsa()
+def get_active(query, projection):
     return query_active_prototype1(query, projection=projection)
 
 
 @route('/api/active/computers/query', method='POST')
+@validate_json
+@check_query
 def active_computer_query():
-    active = get_active()
-    if isinstance(active, HTTPResponse):
-        return active
+    query = request.json.get('query')
+    projection = get_projection_from_qsa()
+    active = get_active(query, projection)
     return {'active': active}
 
 
@@ -302,21 +310,17 @@ def get_jobs():
 
 @route('/api/rpc/jobs', method='POST')
 @validate_json
+@check_query
 def post_jobs():
-    # But it is being triggered here (see check_json)
-    try:
-        instruction = request.json.get('instruction')
-    except ValueError:
-        log.debug('Make NO sense')
-        raise
+    instruction = request.json.get('instruction')
 
     if not isinstance(instruction, dict):
         return http_error('Command is missing from request or is malformed', code=400)
 
-    active_matches = get_active()
+    query = request.json.get('query')
+    projection = get_projection_from_qsa()
 
-    if isinstance(active_matches, HTTPResponse):
-        return active_matches
+    active_matches = get_active(query, projection)
 
     log.debug('Matched %d active computers' % len(active_matches))
 
