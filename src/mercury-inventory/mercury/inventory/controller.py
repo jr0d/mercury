@@ -97,12 +97,13 @@ class InventoryController(object):
         return self.__serialize_object_id(self.db.get_one(mercury_id=mercury_id, projection=projection))
 
     def format_query_response(self, c):
-        total_items = c.count()
         current_count = c.count(with_limit_and_skip=True)  # I am not sure if counting twice is worth it
+        total_items = c.count() - current_count
+
         items = []
         for document in c:
             items.append(self.__serialize_object_id(document))
-        return {'total': total_items, 'current_window': current_count, 'items': items}
+        return {'remaining': total_items, 'current_window': current_count, 'items': items}
 
     @endpoint('query')
     def query(self, q, projection=None):
