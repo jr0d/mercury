@@ -93,6 +93,7 @@ class Agent(object):
             log.error('Caught recoverable exception running async inspector: {}'.format(mge))
 
         log.info('Starting agent rpc service: %s' % self.agent_bind_address)
+
         agent_service = AgentService(self.agent_bind_address, self.rpc_backend)
         agent_service.bind()
         agent_service.start()

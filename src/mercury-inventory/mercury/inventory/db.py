@@ -13,6 +13,7 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
+import bson
 import logging
 import time
 
@@ -84,9 +85,26 @@ class InventoryDBController(object):
         log.debug('Fetching: %s' % mercury_id)
         return self.collection.find_one({'mercury_id': mercury_id}, projection=projection)
 
-    def query(self, query, extra_projection=None):
+    def query(self, query, extra_projection=None, offset_id=None, limit=0, sort='_id', sort_direction=1):
+        if offset_id:
+            query['_id'] = {'$gt': bson.ObjectId(offset_id)}
+
         log.debug('Executing query: %s' % query)
+
         projection = {'mercury_id': 1}
+
         if extra_projection:
             projection.update(extra_projection)
-        return self.collection.find(query, projection=projection)
+
+        c = self.collection.find(query, projection=projection)
+
+        if limit:
+            c.limit(limit)
+
+        if sort:
+            c.sort(sort, sort_direction)
+
+        return c
+
+    def count(self, query):
+        return self.collection.count(query)

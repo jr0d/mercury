@@ -35,4 +35,3 @@ def parse_meminfo():
 
 if __name__ == '__main__':
     print(parse_meminfo())
-

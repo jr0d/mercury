@@ -1,5 +1,6 @@
 # Prototype Front End Service
 
+import bson
 import logging
 
 from bottle import route, run, request, HTTPResponse
@@ -72,6 +73,23 @@ def get_projection_from_qsa():
     return projection or None
 
 
+def get_paging_info_from_qsa():
+    _d = {
+        'limit': 0,
+        'offset_id': None
+    }
+    limit = request.query.get('limit')
+    offset_id = request.query.get('offset_id')
+
+    if limit and limit.isdigit():
+        _d['limit'] = int(limit)
+
+    if bson.ObjectId.is_valid(offset_id):
+        _d['offset_id'] = offset_id
+
+    return _d
+
+
 def convert_id(doc):
     if '_id' in doc:
         doc['_id'] = str(doc['_id'])
@@ -93,7 +111,10 @@ def doc_transformer(doc):
 @route('/api/inventory/computers', method='GET')
 def computers():
     projection = get_projection_from_qsa()
-    return {'computers': inventory_client.query({}, projection=projection)}
+    paging_data = get_paging_info_from_qsa()
+    return {'computers': inventory_client.query({}, projection=projection,
+                                                offset_id=paging_data['offset_id'],
+                                                limit=paging_data['limit'])}
 
 
 @route('/api/inventory/computers/query', method='POST')
@@ -104,10 +125,13 @@ def computers_query():
 
     query = request.json.get('query')
     projection = get_projection_from_qsa()
+    paging_data = get_paging_info_from_qsa()
 
     if not isinstance(query, dict):
         return http_error('Query is missing from request', code=400)
-    return {'computers': inventory_client.query(query, projection=projection)}
+    return {'computers': inventory_client.query(query, projection=projection,
+                                                offset_id=paging_data['offset_id'],
+                                                limit=paging_data['limit'])}
 
 
 @route('/api/inventory/computers/<mercury_id>', method='GET')
@@ -124,7 +148,11 @@ def computer(mercury_id):
 
 @route('/api/active/computers', method='GET')
 def active_computers():
-    cursor = active_collection.find({})
+    projection = get_projection_from_qsa()
+    if not projection:
+        print('projection: ' + str(projection))
+        projection = {'capabilities': 0}
+    cursor = active_collection.find({}, projection=projection)
     active = []
     for document in cursor:
         document['_id'] = str(document['_id'])
