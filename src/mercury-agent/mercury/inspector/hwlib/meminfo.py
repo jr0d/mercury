@@ -13,7 +13,7 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-from size import Size
+from size.size import Size
 
 
 def parse_meminfo():

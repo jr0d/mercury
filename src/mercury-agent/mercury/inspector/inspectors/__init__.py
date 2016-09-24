@@ -19,6 +19,7 @@ from .cpu import cpu_inspector
 from .dmi import dmi_inspector
 from .interfaces import interface_inspector
 from .os_storage import os_storage_inspector
+from .mem import memory_inspector
 from .pci import pci_inspector
 from .routes import route_inspector
 
