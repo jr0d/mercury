@@ -13,3 +13,25 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
+"""
+EVENTUAL CLASS HIERARCHY REPRESENTING INVENTORY/COMPUTER and ACTIVE/COMPUTER
+"""
+import json
+
+
+class MercuryID(object):
+    pass
+
+
+class Computer(object):
+    def __init__(self):
+        self.raw_json_data = None
+        self.computer_raw_object = None
+
+    @classmethod
+    def from_json(cls, json_data):
+        obj = cls()
+        obj.raw_json_data = json_data
+        obj.computer_raw_object = json.loads(json_data)
+
+        return obj

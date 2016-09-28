@@ -45,7 +45,7 @@ def ping(ctx, host):
 
 
 def pinger(server, mercury_id, db_controller):
-    ctx = zmq.Context.instance()
+    ctx = zmq.Context()
     while True:
         log.debug('Pinging %s : %s' % (mercury_id, server))
         result = ping(ctx, server)
@@ -56,6 +56,8 @@ def pinger(server, mercury_id, db_controller):
     #  1. Fail the task
     #  2. Signal to any active worker threads to stop processing the task
     log.info('%s : %s ping timeout' % (mercury_id, server))
+    log.debug('Destroying thread 0mq context')
+    ctx.destroy()
     db_controller.delete(mercury_id)
 
 

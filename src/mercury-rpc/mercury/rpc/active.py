@@ -136,6 +136,7 @@ class ActiveInventoryRuntimeHandler(object):
     def register(self, record):
         if not self.db_controller.validate(record):
             return False
+
         if not self.db_controller.exists(record['mercury_id']):
             log.info('Adding active device: {}'.format(record['mercury_id']))
             self.db_controller.insert(record, perform_update=False)

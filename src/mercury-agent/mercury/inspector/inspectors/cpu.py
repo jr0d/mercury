@@ -13,13 +13,13 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-from . import inspector
+from mercury.inspector.inspectors import inspector
 from mercury.inspector.hwlib.cpuinfo import CPUInfo
 
 
 @inspector.expose('cpu')
 def cpu_inspector():
-    _cpu = {}
+    _cpu = []
     cpu_info = CPUInfo()
 
     processors = cpu_info.physical_index
@@ -36,7 +36,8 @@ def cpu_inspector():
         # speed
         _proc_dict['frequency'] = CPUInfo.get_speed_info(processor)
 
-        _cpu['cpu%d' % _id] = _proc_dict
+        _cpu.append(_proc_dict)
+        _cpu.sort(key=lambda k: k['physical_id'])
 
     return _cpu
 

@@ -120,9 +120,9 @@ def doc_transformer(doc):
 def computers():
     projection = get_projection_from_qsa()
     paging_data = get_paging_info_from_qsa()
-    return {'computers': inventory_client.query({}, projection=projection,
-                                                offset_id=paging_data['offset_id'],
-                                                limit=paging_data['limit'])}
+    return inventory_client.query({}, projection=projection,
+                                  offset_id=paging_data['offset_id'],
+                                  limit=paging_data['limit'])
 
 
 @route('/api/inventory/computers/query', method='POST')
@@ -133,9 +133,9 @@ def computers_query():
     projection = get_projection_from_qsa()
     paging_data = get_paging_info_from_qsa()
 
-    return {'computers': inventory_client.query(query, projection=projection,
-                                                offset_id=paging_data['offset_id'],
-                                                limit=paging_data['limit'])}
+    return inventory_client.query(query, projection=projection,
+                                  offset_id=paging_data['offset_id'],
+                                  limit=paging_data['limit'])
 
 
 @route('/api/inventory/computers/count', method='POST')
@@ -155,7 +155,7 @@ def computer(mercury_id):
         return http_error('mercury_id %s does not exist in inventory' % mercury_id,
                           404)
 
-    return {'computer': c}
+    return c
 
 
 @route('/api/active/computers', method='GET')
