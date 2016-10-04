@@ -56,9 +56,10 @@ def pinger(server, mercury_id, db_controller):
     #  1. Fail the task
     #  2. Signal to any active worker threads to stop processing the task
     log.info('%s : %s ping timeout' % (mercury_id, server))
-    log.debug('Destroying thread 0mq context')
-    ctx.destroy()
-    db_controller.delete(mercury_id)
+    # log.debug('Attempting to destroy thread 0mq context')
+    # ctx.destroy()  ## HANGS!!!!
+    # log.debug('Context destroyed')
+    db_controller.delete(mercury_id)  # Threads persist
 
 
 def spawn(server, mercury_id, db_controller):
