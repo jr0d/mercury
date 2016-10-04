@@ -67,8 +67,21 @@ class InventoryController(object):
             obj = str(obj)
 
         if isinstance(obj, dict):
-            obj['_id'] = str(obj['_id'])
+            if '_id' in obj:
+                obj['_id'] = str(obj['_id'])
+        return obj
 
+    @staticmethod
+    def __deserialize_object_id(obj):
+        if '_id' in obj:
+            if isinstance(obj['_id'], dict):
+                # ex: {'_id': {'$gt': 'xxxxx'}}
+                for key, value in list(obj['_id'].items()):
+                    if bson.ObjectId.is_valid(value):
+                        obj['_id'][key] = bson.ObjectId(value)
+                        break  # there should only be one
+            elif isinstance(obj['_id'], str):
+                obj['_id'] = bson.ObjectId(obj['_id'])
         return obj
 
     @endpoint('index')
@@ -97,21 +110,23 @@ class InventoryController(object):
         return self.__serialize_object_id(self.db.get_one(mercury_id=mercury_id, projection=projection))
 
     @endpoint('query')
-    def query(self, q, projection, offset_id=None, limit=0):
-        c = self.db.query(query=q, extra_projection=projection,
-                          offset_id=offset_id, limit=limit)
-        current_count = c.count(with_limit_and_skip=True)  # I am not sure if counting twice is worth it
-        total_items = c.count() - current_count
+    def query(self, q, projection, limit=0, sort_direction=1):
+        c = self.db.query(query=self.__deserialize_object_id(q),
+                          extra_projection=projection,
+                          limit=limit,
+                          sort_direction=sort_direction)
+
+        total_items = c.count()  # I am not sure if counting twice is worth it
 
         items = []
         for document in c:
             items.append(self.__serialize_object_id(document))
 
         return {
-            'remaining': total_items,
-            'current_window': current_count,
+            'total': total_items,
             'limit': limit,
-            'items': items
+            'items': items,
+            'direction': sort_direction > 0 and 'ASCENDING' or 'DESCENDING'
         }
 
     @endpoint('count')

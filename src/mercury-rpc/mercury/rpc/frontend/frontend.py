@@ -83,17 +83,24 @@ def get_projection_from_qsa():
 
 def get_paging_info_from_qsa():
     _d = {
-        'limit': 250,
-        'offset_id': None
+        'limit': 250,  # TODO: Move this to configuration files
+        'offset_id': None,
+        'sort_direction': 1
     }
     limit = request.query.get('limit')
     offset_id = request.query.get('offset_id')
+    sort_direction = request.query.get('sort_direction')
 
     if limit and limit.isdigit():
         _d['limit'] = int(limit)
 
     if bson.ObjectId.is_valid(offset_id):
         _d['offset_id'] = offset_id
+
+    try:
+        _d['sort_direction'] = int(sort_direction)
+    except (TypeError, ValueError):  # None == TypeError, anything else == ValueError
+        pass
 
     return _d
 
@@ -121,8 +128,8 @@ def computers():
     projection = get_projection_from_qsa()
     paging_data = get_paging_info_from_qsa()
     return inventory_client.query({}, projection=projection,
-                                  offset_id=paging_data['offset_id'],
-                                  limit=paging_data['limit'])
+                                  limit=paging_data['limit'],
+                                  sort_direction=paging_data['sort_direction'])
 
 
 @route('/api/inventory/computers/query', method='POST')
@@ -132,10 +139,11 @@ def computers_query():
     query = request.json.get('query')
     projection = get_projection_from_qsa()
     paging_data = get_paging_info_from_qsa()
+    log.debug('QUERY: {}'.format(query))
 
     return inventory_client.query(query, projection=projection,
-                                  offset_id=paging_data['offset_id'],
-                                  limit=paging_data['limit'])
+                                  limit=paging_data['limit'],
+                                  sort_direction=paging_data['sort_direction'])
 
 
 @route('/api/inventory/computers/count', method='POST')
