@@ -68,7 +68,13 @@ def _serialize_capabilities(capabilities):
     for c in capabilities:
         temp_d = capabilities[c].copy()
         temp_d['entry'] = temp_d['entry'].__name__
+        callback = temp_d['dependency_callback']
+        if callback and not callback():
+            log.debug('{} : Dependency callback returned false, not exposing capability'.format(c))
+            continue
+        del temp_d['dependency_callback']
         _d[c] = temp_d
+        log.debug('{} : Capability confirmed and exportable'.format(c))
     return _d
 
 

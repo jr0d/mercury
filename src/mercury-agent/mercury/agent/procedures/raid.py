@@ -22,7 +22,6 @@ from mercury.hardware.drivers.drivers import driver_class_cache
 log = logging.getLogger(__name__)
 
 
-# TODO: Dependant capabilities
 # TODO: inspector insert tasks for inventory sync after hardware change, ie creating/removing an array
 
 
@@ -35,10 +34,15 @@ def get_hp_raid_driver():
     return hp_raid_driver
 
 
+def has_hp_raid_driver():
+    return bool(driver_class_cache.get('hpssa'))
+
+
 @capability('hpssa_create_array',
             description='Create array on an HP SmartArray Controller',
             kwarg_names=['slot', 'selection', 'raid'],
-            serial=True
+            serial=True,
+            dependency_callback=has_hp_raid_driver
             )
 def hpssa_create_array(slot, selection, raid, array_letter=None, array_type='ld', size='max',
                        stripe_size='default', write_policy='writeback', sectors=32, caching=True,
@@ -90,7 +94,7 @@ def hpssa_create_array(slot, selection, raid, array_letter=None, array_type='ld'
 
 
 @capability('hpssa_delete_ld', description='Delete a logical drive on a given controller',
-            kwarg_names=['slot', 'logical_drive'], serial=True)
+            kwarg_names=['slot', 'logical_drive'], serial=True, dependency_callback=has_hp_raid_driver)
 def hpssa_delete_ld(slot, logical_drive):
     """
     Delete a logical drive
@@ -105,7 +109,7 @@ def hpssa_delete_ld(slot, logical_drive):
 
 
 @capability('hpssa_clear_configuration', description='Delete all arrays on a given controller',
-            kwarg_names=['slot'], serial=True)
+            kwarg_names=['slot'], serial=True, dependency_callback=has_hp_raid_driver)
 def hpssa_clear_configuration(slot):
     """
     Delete all arrays on a given controller
@@ -120,7 +124,8 @@ def hpssa_clear_configuration(slot):
 
 @capability('hpssa_clear_configuration_all_controllers',
             description='Delete all configurations from all RAID controllers',
-            serial=True)
+            serial=True,
+            dependency_callback=has_hp_raid_driver)
 def hpssa_clear_configurations_all_controllers():
     """
     Nuke it from orbit. It's the only way to be sure
