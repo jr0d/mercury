@@ -16,8 +16,10 @@
 import sys
 import traceback
 
+
 class MercuryGeneralException(Exception):
     pass
+
 
 class MercuryBackendError(MercuryGeneralException):
     pass
@@ -35,7 +37,11 @@ class MercuryUserError(MercuryGeneralException):
     pass
 
 
-class MercuryRecoverableError(Exception):
+class MercuryRecoverableError(MercuryGeneralException):
+    pass
+
+
+class MercuryConfigurationError(MercuryGeneralException):
     pass
 
 

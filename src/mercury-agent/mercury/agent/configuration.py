@@ -14,9 +14,28 @@
 #    limitations under the License.
 
 from mercury.common.configuration import get_configuration
-
+from mercury.common.exceptions import MercuryConfigurationError
+from mercury.common.inventory_client import InventoryClient
 
 __all__ = ['AGENT_CONFIG_FILE', 'agent_configuration']
 
+# Private
+__inventory_client = None
+
+# Helpers
 AGENT_CONFIG_FILE = 'mercury-agent.yaml'
 agent_configuration = get_configuration(AGENT_CONFIG_FILE)
+remote_configuration = agent_configuration.get('remote', {})
+
+try:
+    inventory_url = remote_configuration['inventory_service']
+except KeyError:
+    raise MercuryConfigurationError('Missing inventory service url')
+
+
+def get_inventory_client():
+    # TODO: Trying this out, 0mq says it is ok
+    global __inventory_client
+    if not __inventory_client:
+        __inventory_client = InventoryClient(inventory_url)
+    return __inventory_client

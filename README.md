@@ -75,7 +75,7 @@ else: id = 00 + sha1(onboard_mac_address0 + onboard_mac_addressN …)
 The purpose of MercuryId is to create an indexable value devices that will never change. The Id can easily be
 re-generated via the aforementioned algorithm should it ever be lost.
 
-## Frontend API
+### Frontend API
 Mercury provide simple bottle service for querying the inventory, viewing active agents and their capabilities, and 
 scheduling jobs. Front end documentation can be found here: XXX
 
@@ -160,7 +160,7 @@ the press workflow. For instance, if I happen to create a job that matches 12 ac
 single press configuration to the method deploy_os, all 12 nodes would be provisioned using the same user and
 networking information. This is usually not the intended result. As such, mercury provides a preprocessor interface.
 
-## press_static_assets preprocessor
+### press_static_assets preprocessor
 
 This provided preprocessor allows
 
