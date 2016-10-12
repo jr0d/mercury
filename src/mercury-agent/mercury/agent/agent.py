@@ -34,6 +34,7 @@ from mercury.agent.register import get_dhcp_ip, register
 from mercury.agent.rpc import AgentService
 from mercury.common.exceptions import MercuryCritical, MercuryGeneralException
 from mercury.common.inventory_client.client import InventoryClient
+from mercury.hardware.drivers import driver_class_cache
 from mercury.inspector import inspect
 
 # Async Inspectors
