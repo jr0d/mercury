@@ -16,5 +16,5 @@
 from mercury.agent.procedures.exec_press import *
 from mercury.agent.procedures.inspector import *
 from mercury.agent.procedures.misc import *
-from mercury.agent.procedures.raid import *
+from mercury.agent.procedures.hp_raid import *
 

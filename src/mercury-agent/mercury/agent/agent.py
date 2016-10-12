@@ -28,13 +28,15 @@ import argparse
 import logging
 
 from mercury.agent.capabilities import runtime_capabilities
-from mercury.agent.configuration import agent_configuration
+from mercury.agent.configuration import (
+    agent_configuration,
+    inventory_url,  # Only so we can report it
+    get_inventory_client
+)
 from mercury.agent.pong import spawn_pong_process
 from mercury.agent.register import get_dhcp_ip, register
 from mercury.agent.rpc import AgentService
 from mercury.common.exceptions import MercuryCritical, MercuryGeneralException
-from mercury.common.inventory_client.client import InventoryClient
-from mercury.hardware.drivers import driver_class_cache
 from mercury.inspector import inspect
 
 # Async Inspectors
@@ -47,16 +49,15 @@ log = logging.getLogger(__name__)
 
 class Agent(object):
     def __init__(self, configuration):
+        """
+
+        :param configuration:
+        """
         self.configuration = configuration
         self.local_config = self.configuration.get('agent', {})
         self.remote_config = self.configuration.get('remote', {})
         self.agent_bind_address = self.local_config.get('service_bind_address', 'tcp://0.0.0.0:9003')
         self.pong_bind_address = self.local_config.get('pong_bind_address', 'tcp://0.0.0.0:9004')
-
-        self.inventory_url = self.remote_config.get('inventory_service')
-
-        if not self.inventory_url:
-            raise MercuryCritical('Inventory service URL is not specified')
 
         self.rpc_backend = agent_configuration.get('remote', {}).get('rpc_service')
 
@@ -66,7 +67,7 @@ class Agent(object):
     def run(self, dhcp_ip_method='simple'):
         log.debug('Agent: %s, Pong: %s, Inventory: %s' % (self.agent_bind_address,
                                                           self.pong_bind_address,
-                                                          self.inventory_url))
+                                                          inventory_url))
 
         log.info('Running inspectors')
 
@@ -74,7 +75,7 @@ class Agent(object):
 
         log.info('Registering device inventory for MercuryID {}'.format(device_info['mercury_id']))
 
-        inventory_client = InventoryClient(self.inventory_url)
+        inventory_client = get_inventory_client()
         object_id = inventory_client.insert_one(device_info)
 
         log.debug('Created/Updated inventory record: %s' % object_id)
