@@ -114,7 +114,7 @@ def main():
     mercury_logger = logging.getLogger('mercury')
     mercury_logger.addHandler(fh)
     mercury_logger.info('[prototype] starting agent')
-    logging.getLogger('mercury.agent.pong').setLevel(logging.DEBUG)
+    logging.getLogger('mercury.agent.pong').setLevel(logging.ERROR)
     logging.getLogger('hpssa._cli').setLevel(logging.ERROR)
 
     agent = Agent(agent_configuration)
