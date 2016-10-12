@@ -26,9 +26,6 @@ from mercury.inspector.inspectors.raid import raid_inspector
 log = logging.getLogger(__name__)
 
 
-# TODO: inspector insert tasks for inventory sync after hardware change, ie creating/removing an array
-
-
 def get_hp_raid_driver():
     hp_raid_driver = driver_class_cache.get('hpssa')
     if not hp_raid_driver:
@@ -44,7 +41,7 @@ def has_hp_raid_driver():
 
 def update_inventory():
     inventory_client = get_inventory_client()
-    raid_info = raid_inspector()
+    raid_info = raid_inspector(global_device_info)
     mercury_id = global_device_info['mercury_id']
 
     log.debug('RAID configuration changed, updating inventory')
@@ -56,6 +53,8 @@ def update_on_change(f):
         result = f(*args, **kwargs)
         update_inventory()
         return result
+    wrapped_f.__name__ = f.__name__
+    wrapped_f.__doc__ = f.__doc__
     return wrapped_f
 
 
