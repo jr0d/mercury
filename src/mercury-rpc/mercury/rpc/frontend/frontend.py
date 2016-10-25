@@ -178,7 +178,7 @@ def active_computers():
         document['_id'] = str(document['_id'])
         active.append(document)
 
-    return {'active': active}
+    return {'active': active, 'count': len(active)}
 
 
 @route('/api/active/computers/<mercury_id>', method='GET')
@@ -254,7 +254,7 @@ def active_computer_query():
     query = request.json.get('query')
     projection = get_projection_from_qsa()
     active = get_active(query, projection)
-    return {'active': active}
+    return {'active': active, 'count': len(active)}
 
 
 @route('/api/rpc/jobs/<job_id>', method='GET')
