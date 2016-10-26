@@ -1,17 +1,25 @@
 import json
 
+
 from collections import Counter
+from colors import blue, bold, red, magenta
 
 from mercury.client.inventory import InventoryComputers
-from mercury.client.rpc import ActiveComputers, JobQuery
+from mercury.client.rpc import ActiveComputers, JobQuery, TaskInterface
 
 from pprint import pprint
+
 from pygments import highlight, lexers, formatters
 from size import Size
 
-INV = InventoryComputers('http://mercury.iad3:9005')
-ACTIVE = ActiveComputers('http://mercury.iad3:9005')
+
+URL = 'http://mercury.iad3:9005'
 TARGETS = {"interfaces.lldp.switch_name": {"$regex": ".*g13.*iad3$"}}
+
+INV = InventoryComputers(URL)
+ACTIVE = ActiveComputers(URL)
+TASKS = TaskInterface(URL)
+
 # TARGETS = {"raid.adapter_handler": 'hpssa'}
 
 
@@ -49,6 +57,23 @@ def storage_homogony_report(report_items):
     return round(sum(v_matrix) / 3, 2)
 
 
+def _jq(data):
+    return highlight(json.dumps(data, sort_keys=True, indent=4),
+                    lexers.JsonLexer(), formatters.TerminalFormatter())
+
+
+def jq(data):
+    print(_jq(data))
+
+
+def bb(message):
+    print(blue(message, bg='black'))
+
+
+def pause():
+    input(blue('=> ', bg='black'))
+
+
 def storage_report():
     active_matches = ACTIVE.query(TARGETS, params={'projection': 'mercury_id'})['active']
     inv_matches = INV.query(TARGETS,
@@ -57,7 +82,6 @@ def storage_report():
 
     matches = prune_inactive(inv_matches, active_matches)
 
-    report = {}
     report_items = []
     for inv in matches:
         item = {
@@ -69,10 +93,104 @@ def storage_report():
 
         report_items.append(item)
 
-    print(highlight(json.dumps(dict(report=report_items), sort_keys=True, indent=4),
-                    lexers.JsonLexer(), formatters.TerminalFormatter()))
+    report = {
+        'count': len(matches),
+        'items':  report_items,
+        'homogeneity': storage_homogony_report(report_items)
+    }
 
-    print(storage_homogony_report(report_items))
+    return report
+
 
 if __name__ == '__main__':
-    storage_report()
+
+    # INVENTORY DEMO
+
+    bb('Mercury Demo v1')
+    pause()
+    bb('------> Inventory DEMO <------')
+    bb('Query #1: {}, limit: 10')
+
+    pause()
+
+    response = INV.query({}, params={'limit': 10})
+
+    jq(response)
+
+    pause()
+
+    bb('Query #2:  {"interfaces.lldp.switch_name": {"$regex": "g13.*iad3$"}}\n'
+       'Limit 10\n'
+       'Projection: dmi.product_name,cpu.model_name')
+
+    pause()
+    response = INV.query(TARGETS, params={'projection': 'dmi.product_name,cpu.model_name',
+                                          'limit': 10})
+    jq(response)
+
+    m_id = input('Enter MercuryID => ')
+    bb('GET: /api/inventory/computers/{}'.format(m_id))
+    pause()
+    response = INV.get(m_id)
+
+    jq(response)
+
+    pause()
+
+    # ACTIVE INVENTORY DEMO
+    bb('<------- ACTIVE INVENTORY DEMO ------>')
+    pause()
+    response = ACTIVE.get()
+
+    jq(response)
+
+    pause()
+
+    # CAPABILITIES DEMO
+    bb('<------- CAPABILITIES DEMO ------>')
+    m_id = input('Enter MercuryID => ')
+    bb('GET: /api/active/computers/{}'.format(m_id))
+    pause()
+    response = ACTIVE.get(m_id)
+
+    jq(response)
+    pause()
+
+    for c in response.get('capabilities').values():
+        print('{}\n{}\n{}'.format(red(bold(c['name'])),
+                                  blue(c['description']),
+                                  c.get('doc') and magenta(c['doc'] or '')))
+
+    pause()
+
+    # RPC DEMO
+
+    bb('<---- RPC DEMO ---->')
+    bb('Task #1: Hello World on target: {}')
+    job = JobQuery(URL, {}, instruction={'method': 'echo', 'args': ['Hello World!']})
+    pause()
+    job.post_job()
+    bb('JobID: {}'.format(job.job_id))
+    pause()
+    jq(job.get_status())
+    pause()
+
+    bb('Task #2: method: run, args: [cat /etc/shadow] : target {}')
+    job = JobQuery(URL, {}, instruction={'method': 'run', 'args': ['cat /etc/shadow']})
+    pause()
+    job.post_job()
+    bb('JobID: {}'.format(job.job_id))
+    pause()
+    jq(job.get_status())
+    bb('Show task results...')
+    pause()
+    task = TaskInterface(URL)
+    jq(task.get(job.job_id))
+    pause()
+    print(red('PWNED by Mercury', style='bold+underline', bg='yellow'))
+    pause()
+
+    # STORAGE DEMO
+    # jq(storage_report())
+
+    # PROVISIONING DEMO
