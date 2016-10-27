@@ -39,7 +39,6 @@ class JobQuery(JobInterfaceBase):
             'instruction': self.instruction
         }
         r = self.post(data=_payload)
-
         self.job_id = r['job_id']
 
     def get_status(self):

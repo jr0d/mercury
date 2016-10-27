@@ -2,12 +2,11 @@ import json
 
 
 from collections import Counter
-from colors import blue, bold, red, magenta
+from colors import blue, red
 
 from mercury.client.inventory import InventoryComputers
 from mercury.client.rpc import ActiveComputers, JobQuery, TaskInterface
 
-from pprint import pprint
 
 from pygments import highlight, lexers, formatters
 from size import Size
@@ -59,7 +58,7 @@ def storage_homogony_report(report_items):
 
 def _jq(data):
     return highlight(json.dumps(data, sort_keys=True, indent=4),
-                    lexers.JsonLexer(), formatters.TerminalFormatter())
+                     lexers.JsonLexer(), formatters.TerminalFormatter())
 
 
 def jq(data):
@@ -102,12 +101,42 @@ def storage_report():
     return report
 
 
-if __name__ == '__main__':
+def hpssa_clear_configuration(slot):
+    return {
+            'method': 'hpssa_clear_configuration',
+            'kwargs': {
+                'slot': slot
+            }
+        }
 
-    # INVENTORY DEMO
 
-    bb('Mercury Demo v1')
+def hp_create_array(slot, selection, raid):
+    return {
+
+            'method': 'hpssa_create_array',
+            'kwargs': {
+                'slot': slot,
+                'selection': selection,
+                'raid': raid
+            }
+        }
+
+
+def poll_status(timeout=120):
+    pass
+
+
+def active_demo():
+    bb('<------- ACTIVE INVENTORY DEMO ------>')
     pause()
+    response = ACTIVE.get()
+
+    jq(response)
+
+    pause()
+
+
+def inventory_demo():
     bb('------> Inventory DEMO <------')
     bb('Query #1: {}, limit: 10')
 
@@ -137,16 +166,8 @@ if __name__ == '__main__':
 
     pause()
 
-    # ACTIVE INVENTORY DEMO
-    bb('<------- ACTIVE INVENTORY DEMO ------>')
-    pause()
-    response = ACTIVE.get()
 
-    jq(response)
-
-    pause()
-
-    # CAPABILITIES DEMO
+def capabilities_demo():
     bb('<------- CAPABILITIES DEMO ------>')
     m_id = input('Enter MercuryID => ')
     bb('GET: /api/active/computers/{}'.format(m_id))
@@ -156,15 +177,15 @@ if __name__ == '__main__':
     jq(response)
     pause()
 
-    for c in response.get('capabilities').values():
-        print('{}\n{}\n{}'.format(red(bold(c['name'])),
-                                  blue(c['description']),
-                                  c.get('doc') and magenta(c['doc'] or '')))
+    # for c in response.get('capabilities').values():
+    #     print('{}\n{}\n{}'.format(red(bold(c['name'])),
+    #                               blue(c['description']),
+    #                               c.get('doc') and magenta(c['doc'] or '')))
+    #
+    # pause()
 
-    pause()
 
-    # RPC DEMO
-
+def rpc_demo():
     bb('<---- RPC DEMO ---->')
     bb('Task #1: Hello World on target: {}')
     job = JobQuery(URL, {}, instruction={'method': 'echo', 'args': ['Hello World!']})
@@ -190,7 +211,116 @@ if __name__ == '__main__':
     print(red('PWNED by Mercury', style='bold+underline', bg='yellow'))
     pause()
 
+
+def storage_demo():
+    bb('<---- STORAGE DEMO ---->')
+    bb('Storage Report Aggregator\nQ: {"interfaces.lldp.switch_name": {"$regex": ".*g13.*iad3$"}}')
+    pause()
+    jq(storage_report())
+
+    pause()
+
+    bb('Task #1: Delete configuration from controller in slot 3\n'
+       'Instruction: hpssa_clear_configuration\n'
+       'kwargs: {slot: 3}\n'
+       'Targets: {"interfaces.lldp.switch_name": {"$regex": ".*g13.*iad3$"}}')
+    pause()
+    job = JobQuery(URL, TARGETS, hpssa_clear_configuration(3))
+    job.post_job()
+    bb('JobID: {}'.format(job.job_id))
+    pause()
+    jq(job.get_status())
+    bb('Show task results...')
+    pause()
+    task = TaskInterface(URL)
+    jq(task.get(job.job_id))
+
+    m_id = input('Enter MercuryID => ')
+    bb('GET: /api/inventory/computers/{}'.format(m_id))
+    pause()
+    response = INV.get(m_id, params={'projection': 'raid.configuration'})
+
+    jq(response)
+    pause()
+
+    bb('Task #2: Create Array\n'
+       'Instruction: hpssa_create_array\n'
+       'kwargs: {slot: 3, selection: all, raid: 6}\n'
+       'Targets: {"interfaces.lldp.switch_name": {"$regex": ".*g13.*iad3$"}}')
+
+    pause()
+    job = JobQuery(URL, TARGETS, hp_create_array(3, 'all', '6'))
+    job.post_job()
+    bb('JobID: {}'.format(job.job_id))
+    pause()
+    jq(job.get_status())
+    bb('Show task results...')
+    pause()
+    task = TaskInterface(URL)
+    jq(task.get(job.job_id))
+
+    m_id = input('Enter MercuryID => ')
+    bb('GET: /api/inventory/computers/{}'.format(m_id))
+    pause()
+    response = INV.get(m_id, params={'projection': 'raid.configuration'})
+
+    jq(response)
+
+    pause()
+
+
+def provisioning_demo():
+    import yaml
+
+    with open('/tmp/ubuntu.yaml') as fp:
+        data = yaml.load(fp)
+
+    jq(data)
+    pause()
+
+    j = JobQuery(URL, {'mercury_id': '0158e25529ef2757e621507069bc4301a605237873'}, instruction={
+        'method': 'exec_press',
+        'kwargs': {
+            'configuration': data
+        }
+
+    })
+
+    j.post_job()
+
+    bb('JOB ID: {}'.format(j.job_id))
+
+    pause()
+
+
+if __name__ == '__main__':
+
+    provisioning_demo()
+    import sys
+    sys.exit(0)
+    bb('Mercury Demo v1')
+
+    pause()
+    # INVENTORY DEMO
+
+    inventory_demo()
+
+    # ACTIVE INVENTORY DEMO
+
+    active_demo()
+
+    # CAPABILITIES DEMO
+
+    capabilities_demo()
+
+    # RPC DEMO
+
+    rpc_demo()
+
     # STORAGE DEMO
-    # jq(storage_report())
+
+    storage_demo()
 
     # PROVISIONING DEMO
+
+    provisioning_demo()
