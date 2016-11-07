@@ -273,16 +273,16 @@ def provisioning_demo():
     import yaml
 
     with open('/tmp/ubuntu.yaml') as fp:
-        data = yaml.load(fp)
+       data = yaml.load(fp)
 
     jq(data)
     pause()
 
     j = JobQuery(URL, {'mercury_id': '0158e25529ef2757e621507069bc4301a605237873'}, instruction={
-        'method': 'exec_press',
-        'kwargs': {
-            'configuration': data
-        }
+       'method': 'exec_press',
+       'kwargs': {
+           'configuration': data
+       }
 
     })
 
@@ -292,13 +292,19 @@ def provisioning_demo():
 
     pause()
 
+    jq(j.get_status())
+    bb('Show task results...')
+    pause()
+    task = TaskInterface(URL)
+    jq(task.get(j.job_id))
+
 
 if __name__ == '__main__':
-
-    provisioning_demo()
-    import sys
-    sys.exit(0)
     bb('Mercury Demo v1')
+
+#    import sys
+#    provisioning_demo()
+#    sys.exit()
 
     pause()
     # INVENTORY DEMO

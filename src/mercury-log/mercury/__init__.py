@@ -13,27 +13,6 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
+from pkgutil import extend_path
+__path__ = extend_path(__path__, __name__)
 
-import logging
-
-from mercury.common import transport
-from mercury.inventory.dispatch import Dispatcher
-
-log = logging.getLogger(__name__)
-
-
-class InventoryServer(transport.SimpleRouterReqService):
-    def __init__(self, bind_address):
-        super(InventoryServer, self).__init__(bind_address)
-
-        self.dispatcher = Dispatcher()
-
-    def process(self, message):
-        return self.dispatcher.dispatch(message)
-
-
-if __name__ == '__main__':
-    logging.basicConfig(level=logging.DEBUG)
-    s = InventoryServer('tcp://0.0.0.0:9000')
-    s.bind()
-    s.start()
