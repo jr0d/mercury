@@ -13,7 +13,6 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-import binascii
 import logging
 import msgpack
 import zmq
@@ -79,6 +78,28 @@ class SimpleRouterReqClient(object):
         self.socket.close()
 
 
+def parse_multipart_message(message):
+    log.debug('parsing raw message: {}'.format(message))
+
+    if len(message) < 3:
+        log.error('Recieved non-multipart message')
+        return {}
+
+    address_segment = message[:-1]
+    data_segment = message[-1]
+
+    return {'address': address_segment, 'message': data_segment}
+
+
+def serialize_addresses(multipart_address):
+    addresses = []
+    for el in multipart_address:
+        if el:
+            addresses.append(el)
+
+    return addresses
+
+
 class SimpleRouterReqService(object):
     def __init__(self, bind_address):
         self.bind_address = bind_address
@@ -95,21 +116,21 @@ class SimpleRouterReqService(object):
     def receive(self):
         multipart = self.socket.recv_multipart()
 
-        if len(multipart) != 3:
-            log.error('Recieved request from wrong socket type, use REQ')
+        parsed_message = parse_multipart_message(multipart)
+
+        if not parsed_message:
             return
 
-        address, empty, packed_message = multipart
         try:
-            message = msgpack.unpackb(packed_message, encoding='utf-8')
+            message = msgpack.unpackb(parsed_message['message'], encoding='utf-8')
         except TypeError as type_error:
-            self.send_error(address, 'Recieved unpacked, non-string type: %s : %s' % (type(packed_message), type_error))
+            self.send_error(parsed_message['address'], 'Recieved unpacked, non-string type: %s : %s' % (type(packed_message), type_error))
             return
         except msgpack.UnpackException as unpack_exception:
-            self.send_error(address, 'Received invalid request: %s' % str(unpack_exception))
+            self.send_error(parsed_message['address'], 'Received invalid request: %s' % str(unpack_exception))
             return
 
-        return address, message
+        return parsed_message['address'], message
 
     def send_error(self, address, message):
         data = {'error': True, 'message': message}
@@ -117,7 +138,7 @@ class SimpleRouterReqService(object):
         self.send(address, data)
 
     def send(self, address, message):
-        self.socket.send_multipart([address, b'', msgpack.packb(message)])
+        self.socket.send_multipart(address + [msgpack.packb(message)])
 
     def destroy(self):
         self.context.destroy()
@@ -134,7 +155,7 @@ class SimpleRouterReqService(object):
             if not data:
                 continue
             address, message = data
-            log.debug('Request: %s' % binascii.hexlify(address))
+            # log.debug('Request: %s' % binascii.hexlify(address))
             # noinspection PyBroadException
             try:
                 response = self.process(message)
@@ -144,11 +165,9 @@ class SimpleRouterReqService(object):
                 log.error(fancy_traceback_format(exc_dict, 'Exception data:'))
                 self.send_error(address, 'Encountered server error, sorry')
                 continue
-            log.debug('Response: %s' % binascii.hexlify(address))
+            # log.debug('Response: %s' % binascii.hexlify(address))
             self.send(address, response)
         self.destroy()
 
     def process(self, message):
-        assert message
-        assert self
-        raise NotImplemented
+        raise NotImplementedError

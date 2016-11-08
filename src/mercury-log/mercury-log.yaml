@@ -1,0 +1,9 @@
+db:
+  database: mercury
+  collection: log
+  servers:
+    - localhost:27017
+  replica_set: None
+
+service:
+  url: tcp://0.0.0.0:9006
