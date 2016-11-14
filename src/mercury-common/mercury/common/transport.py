@@ -79,8 +79,6 @@ class SimpleRouterReqClient(object):
 
 
 def parse_multipart_message(message):
-    log.debug('parsing raw message: {}'.format(message))
-
     if len(message) < 3:
         log.error('Recieved non-multipart message')
         return {}
