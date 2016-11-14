@@ -35,6 +35,7 @@ from mercury.agent.configuration import (
 )
 from mercury.agent.pong import spawn_pong_process
 from mercury.agent.register import get_dhcp_ip, register
+from mercury.agent.remote_logging import MercuryLogHandler
 from mercury.agent.rpc import AgentService
 from mercury.common.exceptions import MercuryCritical, MercuryGeneralException
 from mercury.inspector import inspect
@@ -60,6 +61,7 @@ class Agent(object):
         self.pong_bind_address = self.local_config.get('pong_bind_address', 'tcp://0.0.0.0:9004')
 
         self.rpc_backend = agent_configuration.get('remote', {}).get('rpc_service')
+        self.log_backend = agent_configuration.get('remote', {}).get('log_service')
 
         if not self.rpc_backend:
             raise MercuryCritical('Missing rpc backend in local configuration')
@@ -86,7 +88,16 @@ class Agent(object):
         log.info('Registering device')
         local_ip = get_dhcp_ip(device_info, method=dhcp_ip_method)
         local_ipv6 = None
+
         register(self.rpc_backend, device_info['mercury_id'], local_ip, local_ipv6, runtime_capabilities)
+
+        # LogHandler
+
+        mh = MercuryLogHandler(self.log_backend, device_info['mercury_id'])
+
+        log.info('Adding MercuryLogHandler')
+        log.addHandler(mh)
+        log.info('LogHandler added!')
 
         # AsyncInspectors
         try:
