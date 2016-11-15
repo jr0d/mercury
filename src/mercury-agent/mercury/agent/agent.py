@@ -49,7 +49,7 @@ log = logging.getLogger(__name__)
 
 
 class Agent(object):
-    def __init__(self, configuration):
+    def __init__(self, configuration, logger):
         """
 
         :param configuration:
@@ -61,7 +61,7 @@ class Agent(object):
         self.pong_bind_address = self.local_config.get('pong_bind_address', 'tcp://0.0.0.0:9004')
 
         self.rpc_backend = agent_configuration.get('remote', {}).get('rpc_service')
-        self.log_backend = agent_configuration.get('remote', {}).get('log_service')
+        self.log_handler = logger
 
         if not self.rpc_backend:
             raise MercuryCritical('Missing rpc backend in local configuration')
@@ -93,11 +93,9 @@ class Agent(object):
 
         # LogHandler
 
-        mh = MercuryLogHandler(self.log_backend, device_info['mercury_id'])
-
-        log.info('Adding MercuryLogHandler')
-        log.addHandler(mh)
-        log.info('LogHandler added!')
+        log.info('Injecting MercuryID for remote logging')
+        self.log_handler.set_mercury_id(device_info['mercury_id'])
+        log.info('Injection completed')
 
         # AsyncInspectors
         try:
@@ -117,6 +115,8 @@ def _parse_args():
 
 
 def main():
+
+    # TODO: SERVICE BASE CLASS
     logging.basicConfig(level=logging.DEBUG)
     fh = logging.FileHandler('mercury-agent.log')
     fh.setLevel(logging.DEBUG)
@@ -125,10 +125,13 @@ def main():
     mercury_logger = logging.getLogger('mercury')
     mercury_logger.addHandler(fh)
     mercury_logger.info('[prototype] starting agent')
-    logging.getLogger('mercury.agent.pong').setLevel(logging.DEBUG)
+    logging.getLogger('mercury.agent.pong').setLevel(logging.ERROR)
     logging.getLogger('hpssa._cli').setLevel(logging.ERROR)
 
-    agent = Agent(agent_configuration)
+    # TODO: CLEAN THIS UP
+    mh = MercuryLogHandler(agent_configuration.get('remote', {}).get('log_service'))
+    mercury_logger.addHandler(mh)
+    agent = Agent(agent_configuration, mh)
     agent.run('simple')
 
 

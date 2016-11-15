@@ -25,6 +25,7 @@ class AgentLogService(SimpleRouterReqService):
 
     @staticmethod
     def validate_message(message):
+        LOG.debug(message)
         required = [
                 'mercury_id',
                 'level',
@@ -39,12 +40,32 @@ class AgentLogService(SimpleRouterReqService):
 
         return True
 
+    @staticmethod
+    def set_job_info_from_thread(message):
+        """
+        The task runner thread (agent.task_runner) has the following naming convention:
+
+        _<job_id>_<task_id>
+
+        This lets us associate logging messages to jobs/tasks from within the execution thread.
+        :param message: reference to the log message
+        :return: None
+        """
+        thread_name = message.get('threadName')
+        if thread_name and thread_name[0] == '_':
+            job_id, task_id = thread_name.split('_')[1:]
+            message['job_id'] = job_id
+            message['task_id'] = task_id
+
     def process(self, message):
-        if not self.validate_message(message):
-            raise MercuryGeneralException('Logging controller recieved invalid message')
+        # if not self.validate_message(message):
+        #    raise MercuryGeneralException('Logging controller recieved invalid message')
 
         message.update({'time_created': time.time()})
+        LOG.debug(message)
+        self.set_job_info_from_thread(message)
         self.log_collection.insert(message)
+        return {'message': 'ok'}
 
 
 if __name__ == '__main__':

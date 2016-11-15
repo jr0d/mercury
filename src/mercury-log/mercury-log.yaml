@@ -3,7 +3,7 @@ db:
   collection: log
   servers:
     - localhost:27017
-  replica_set: None
+  replica_set: null
 
 service:
   url: tcp://0.0.0.0:9006

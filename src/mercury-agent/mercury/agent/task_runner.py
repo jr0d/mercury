@@ -54,20 +54,24 @@ class TaskRunner(object):
             log.error(fancy_traceback_format(exc_dict,
                                              'Critical error while running task: %s [%s], elapsed' % (
                                                  self.entry.__name__,
-                                                 self.task_id)))
+                                                 self.task_id)),
+                      extra={'task_id': self.task_id, 'job_id': self.job_id})
             traceback_info = exc_dict
             result = 'ERROR'
             return_data = None
         finally:
             if self.lock:
-                log.debug('Releasing lock for %s' % self.lock.task_id)
+                log.debug('Releasing lock for %s' % self.lock.task_id,
+                          extra={'task_id': self.task_id, 'job_id': self.job_id})
                 self.lock.release()
 
         self.time_completed = time.time()
         log.info('Task completed: %s [%s], elapsed %s' % (self.entry.__name__,
                                                           self.task_id,
-                                                          self.time_completed - self.time_started))
-        log.debug('Publishing response to: %s' % self.backend.zmq_url)
+                                                          self.time_completed - self.time_started),
+                 extra={'task_id': self.task_id, 'job_id': self.job_id})
+        log.debug('Publishing response to: %s' % self.backend.zmq_url,
+                  extra={'task_id': self.task_id, 'job_id': self.job_id})
 
         response = self.backend.push_response({
             'result': result,
@@ -78,9 +82,11 @@ class TaskRunner(object):
             'time_started': self.time_started,
             'time_completed': self.time_completed
         })
-        log.debug('Dispatch successful : %s' % response)
+        log.debug('Dispatch successful : %s' % response,
+                  extra={'task_id': self.task_id, 'job_id': self.job_id})
 
     def run(self):
-        log.info('Starting task: %s [%s]' % (self.entry.__name__, self.task_id))
-        t = threading.Thread(target=self.__run)
+        log.info('Starting task: %s [%s]' % (self.entry.__name__, self.task_id),
+                 extra={'task_id': self.task_id, 'job_id': self.job_id})
+        t = threading.Thread(target=self.__run, name='_{}_{}'.format(self.job_id, self.task_id))
         t.start()
