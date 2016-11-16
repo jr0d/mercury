@@ -302,6 +302,10 @@ def provisioning_demo():
 if __name__ == '__main__':
     bb('Mercury Demo v1')
 
+#    import sys
+#    provisioning_demo()
+#    sys.exit()
+
     pause()
     # INVENTORY DEMO
 
