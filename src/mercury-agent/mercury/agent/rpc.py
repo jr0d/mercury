@@ -138,7 +138,8 @@ class AgentService(SimpleRouterReqService):
                                  self.rpc_backend_url,
                                  entry_args=args,
                                  entry_kwargs=kwargs,
-                                 lock=tmp_lock)
+                                 lock=tmp_lock,
+                                 timeout=capability['timeout'])
         task_runner.run()
         return self.sync_response(data=dict(time_started=task_runner.time_started,
                                             message='Hakuna matata'))

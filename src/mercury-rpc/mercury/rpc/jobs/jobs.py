@@ -1,107 +1,13 @@
-import json
 import logging
-import redis
 import time
 import uuid
 
 from mercury.common.exceptions import MercuryUserError, MercuryCritical
-from mercury.rpc.configuration import TASK_QUEUE, get_jobs_collection
 from mercury.rpc.preprocessors import instruction_preprocessors
 
+from mercury.rpc.jobs.tasks import Task, is_completed
+
 log = logging.getLogger(__name__)
-
-
-def update_task_existing_connection(collection, task_id, document):
-    """
-    Helper function that simplifies updating job tasks by constructing tasks.<task_id>.k
-    :param collection:
-    :param task_id: The task
-    :param document: A dictionary that represents the changes to job task
-    :return: return value of pymongo.Collection.insert
-    """
-
-    return collection.update_one(
-        filter={'task_id': task_id},
-        update={
-            '$set': document
-        }
-    )
-
-
-def update_task(task_id, document):
-    """
-    Same as above, but creates a new pool. For short running threads
-    :param task_id:
-    :param document:
-    :return:
-    """
-    collection = get_jobs_collection()
-    return update_task_existing_connection(collection, task_id, document)
-
-
-def get_tasks(tasks_collection, job_id):
-    docs = tasks_collection.find({'job_id': job_id})
-    return docs or []
-
-
-def is_completed(tasks_collection, job_id):
-    """
-    This will likely change once Job statuses are finalized
-    :param tasks_collection:
-    :param job_id:
-    :return:
-    """
-    complete_statuses = ['SUCCESS', 'ERROR', 'EXCEPTION', 'TIMEOUT']  # This will move
-    return tasks_collection.count({'job_id': job_id, 'status': {'$nin': complete_statuses}}) == 0
-
-
-class Task(object):
-    """
-    There is a voice in my head shouting 'JUST SUBCLASS DICT!!!'
-    """
-    def __init__(self, job_id, mercury_id, host, port, method, args=None, kwargs=None):
-        self.job_id = job_id
-        self.mercury_id = mercury_id
-        self.host = host
-        self.port = port
-        self.method = method
-        self.args = args or []
-        self.kwargs = kwargs or {}
-        self.result = {}
-        self.task_id = uuid.uuid4()
-        self.status = 'NEW'
-        self.time_queued = None
-        self.time_started = None
-        self.time_completed = None
-        self.ttl_time_completed = None
-
-    def to_dict(self):
-        return {
-            'method': self.method,
-            'args': self.args,
-            'kwargs': self.kwargs,
-            'mercury_id': self.mercury_id,
-            'job_id': str(self.job_id),
-            'host': self.host,
-            'port': self.port,
-            'task_id': str(self.task_id),
-            'status': self.status,
-            'time_queued': self.time_queued,
-            'time_started': self.time_started,
-            'time_completed': self.time_completed,
-            'result': self.result,
-            'ttl_time_completed': self.ttl_time_completed
-        }
-
-    def __repr__(self):
-        return 'Task: {task_id} <{host}:{port}> ' \
-               '[method: {method} args: {args}, kwargs: {kwargs}]'.format(**self.to_dict())
-
-    def enqueue(self):
-        log.debug('Queuing task: %s' % self.task_id)
-        redis_client = redis.Redis()
-        self.time_queued = time.time()
-        redis_client.lpush(TASK_QUEUE, json.dumps(self.to_dict()))
 
 
 class Job(object):

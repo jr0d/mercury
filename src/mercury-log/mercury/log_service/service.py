@@ -2,7 +2,6 @@ import logging
 import time
 
 from mercury.common.configuration import get_configuration
-from mercury.common.exceptions import MercuryGeneralException
 from mercury.common.mongo import get_collection, get_connection
 from mercury.common.transport import SimpleRouterReqService
 

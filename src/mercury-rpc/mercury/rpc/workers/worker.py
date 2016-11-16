@@ -1,5 +1,5 @@
 import logging
-
+import time
 
 from mercury.common.task_managers.base.manager import Manager
 from mercury.common.task_managers.redis.task import RedisTask
@@ -24,11 +24,11 @@ class RPCTask(RedisTask):
         log.debug('Dispatching task: %s' % self.task)
         # Status insert happens before dispatch because the task COULD complete
         # before write due to connection overhead
-        update_task(self.task['task_id'], {'status': 'DISPATCHING'})
+        update_task(self.task['task_id'], {'status': 'DISPATCHING', 'time_updated': time.time()})
         response = client.transceiver(_payload)
         if response['status'] != 0:
             update_task(self.task['task_id'],
-                       {'status': 'ERROR', 'response': 'Dispatch Error: %s' % response})
+                        {'status': 'ERROR', 'response': 'Dispatch Error: %s' % response})
         return response
 
     @classmethod

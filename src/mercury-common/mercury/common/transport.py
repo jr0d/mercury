@@ -17,7 +17,11 @@ import logging
 import msgpack
 import zmq
 
-from mercury.common.exceptions import parse_exception, fancy_traceback_format
+from mercury.common.exceptions import (
+    fancy_traceback_format,
+    MercuryClientException,
+    parse_exception
+)
 
 log = logging.getLogger(__name__)
 
@@ -141,6 +145,23 @@ class SimpleRouterReqService(object):
     def destroy(self):
         self.context.destroy()
 
+    @staticmethod
+    def get_key(key, data):
+        try:
+            return data[key]
+        except KeyError:
+            raise MercuryClientException('{} is missing from request'.format(key))
+
+    @staticmethod
+    def validate_required(required, data):
+        missing = []
+        for key in required:
+            if key not in data:
+                missing.append(data)
+
+        if missing:
+            raise MercuryClientException('Message is missing required data: {}'.format(missing))
+
     def start(self):
         if not self.bound:
             self.bind()
@@ -157,6 +178,8 @@ class SimpleRouterReqService(object):
             # noinspection PyBroadException
             try:
                 response = self.process(message)
+            except MercuryClientException as mce:
+                self.send_error(address, 'Encountered client error: {}'.format(mce))
             except Exception:
                 exc_dict = parse_exception()
                 log.error('process raised an exception and should not have.')
@@ -165,7 +188,14 @@ class SimpleRouterReqService(object):
                 continue
             # log.debug('Response: %s' % binascii.hexlify(address))
             self.send(address, response)
-        self.destroy()
+        self.cleanup()
 
     def process(self, message):
         raise NotImplementedError
+
+    def cleanup(self):
+        """
+        override for more cleanup fun
+        :return:
+        """
+        self.destroy()

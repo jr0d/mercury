@@ -62,7 +62,8 @@ def update_on_change(f):
             description='Create array on an HP SmartArray Controller',
             kwarg_names=['slot', 'selection', 'raid'],
             serial=True,
-            dependency_callback=has_hp_raid_driver
+            dependency_callback=has_hp_raid_driver,
+            timeout=120
             )
 @update_on_change
 def hpssa_create_array(slot, selection, raid, array_letter=None, array_type='ld', size='max',
@@ -115,7 +116,8 @@ def hpssa_create_array(slot, selection, raid, array_letter=None, array_type='ld'
 
 
 @capability('hpssa_delete_ld', description='Delete a logical drive on a given controller',
-            kwarg_names=['slot', 'logical_drive'], serial=True, dependency_callback=has_hp_raid_driver)
+            kwarg_names=['slot', 'logical_drive'], serial=True,
+            dependency_callback=has_hp_raid_driver, timeout=120)
 @update_on_change
 def hpssa_delete_ld(slot, logical_drive):
     """
@@ -131,7 +133,8 @@ def hpssa_delete_ld(slot, logical_drive):
 
 
 @capability('hpssa_clear_configuration', description='Delete all arrays on a given controller',
-            kwarg_names=['slot'], serial=True, dependency_callback=has_hp_raid_driver)
+            kwarg_names=['slot'], serial=True, dependency_callback=has_hp_raid_driver,
+            timeout=120)
 @update_on_change
 def hpssa_clear_configuration(slot):
     """
@@ -148,7 +151,8 @@ def hpssa_clear_configuration(slot):
 @capability('hpssa_clear_configuration_all_controllers',
             description='Delete all configurations from all RAID controllers',
             serial=True,
-            dependency_callback=has_hp_raid_driver)
+            dependency_callback=has_hp_raid_driver,
+            timeout=120)
 @update_on_change
 def hpssa_clear_configurations_all_controllers():
     """
