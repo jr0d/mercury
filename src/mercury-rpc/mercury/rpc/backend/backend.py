@@ -22,7 +22,7 @@ from mercury.rpc.db import ActiveInventoryDBController
 from mercury.rpc.jobs.monitor import Monitor
 from mercury.rpc.jobs.tasks import (
     complete_task,
-    update_task_existing_connection
+    update_task
 )
 from mercury.rpc.ping import spawn
 
@@ -88,8 +88,7 @@ class BackEndService(SimpleRouterReqService):
         :return:
         """
         task_id = self.get_key('task_id', update_data)
-        self.validate_required(['action'], update_data)
-        update_task_existing_connection(self.tasks_collection, task_id, update_data)
+        update_task(task_id, update_data, tasks_collection=self.tasks_collection)
 
         return dict(message='Accepted')
 
@@ -113,13 +112,13 @@ class BackEndService(SimpleRouterReqService):
         job_id = self.get_key('job_id', response_data)
         task_id = self.get_key('task_id', response_data)
 
-        self.validate_required(['status', 'data', 'traceback_info', 'action'], response_data)
+        self.validate_required(['status', 'message', 'traceback_info'], response_data)
 
-        complete_task(self.jobs_collection,
-                      self.tasks_collection,
-                      job_id,
+        complete_task(job_id,
                       task_id,
-                      response_data)
+                      response_data,
+                      jobs_collection=self.jobs_collection,
+                      tasks_collection=self.tasks_collection)
 
         return dict(message='Accepted')
 
@@ -138,6 +137,7 @@ def rpc_backend_service():
                         format='%(asctime)s : %(levelname)s - %(name)s - %(message)s')
     logging.getLogger('mercury.rpc.ping').setLevel(logging.INFO)
     logging.getLogger('mercury.rpc.ping2').setLevel(logging.INFO)
+    logging.getLogger('mercury.rpc.jobs.monitor').setLevel(logging.INFO)
     db_configuration = rpc_configuration.get('db', {})
 
     connection = get_connection(server_or_servers=db_configuration.get('rpc_mongo_servers',

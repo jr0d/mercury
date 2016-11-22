@@ -43,11 +43,11 @@ class Monitor(object):
                     'traceback': None,
                     'action': 'Task Timeout'
                 }
-                complete_task(self.jobs_collection,
-                              self.tasks_collection,
-                              task['job_id'],
+                complete_task(task['job_id'],
                               task['task_id'],
-                              update_data)
+                              update_data,
+                              jobs_collection=self.jobs_collection,
+                              tasks_collection=self.tasks_collection)
 
     def kill(self):
         self._kill = True

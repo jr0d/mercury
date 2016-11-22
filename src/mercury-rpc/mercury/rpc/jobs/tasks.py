@@ -5,7 +5,7 @@ import redis
 import time
 import uuid
 
-from mercury.rpc.configuration import TASK_QUEUE, get_jobs_collection
+from mercury.rpc.configuration import TASK_QUEUE, get_jobs_collection, get_tasks_collection
 
 
 log = logging.getLogger(__name__)
@@ -14,23 +14,35 @@ log = logging.getLogger(__name__)
 COMPLETED_STATUSES = ['SUCCESS', 'ERROR', 'EXCEPTION', 'TIMEOUT']  # This will move
 
 
-def update_task_existing_connection(collection, task_id, update_data):
+def update_task(task_id, update_data, tasks_collection=None):
     """
-    Helper function that simplifies updating job tasks by constructing tasks.<task_id>.k
-    :param collection:
-    :param task_id: The task
-    :param update_data: A dictionary that represents the changes to job task
-    :return: return value of pymongo.Collection.insert
+    Helper function that simplifies updating job tasks
+    :param tasks_collection:
+    :param task_id:
+    :param update_data:
+    :return:
     """
+    collection = tasks_collection or get_tasks_collection()
 
-    task_update = {
-        'status': 'UPDATED',
-        'action': update_data['action'],
-        'time_updated': time.time()
-    }
+    # We'll be modifying the update data, so make a copy
+    task_update = update_data.copy()
 
-    log.info('Task updated: task_id: {task_id} action: {action}'.format(
-        **update_data
+    # Make sure task_id and job_id are not present
+    task_update.pop('task_id', None)
+    task_update.pop('job_id', None)
+
+    # update the timestamp
+    task_update['time_updated'] = time.time()
+
+    progress = update_data.get('progress')
+    if progress:
+        task_update['progress'] = progress
+
+    log.info('Task updated: task_id: {}, status: {}, action: {}, progress: {}'.format(
+        task_id,
+        update_data.get('status', 'UPDATED'),
+        update_data.get('action', ''),
+        update_data.get('progress', 0)
     ))
 
     return collection.update_one(
@@ -41,19 +53,7 @@ def update_task_existing_connection(collection, task_id, update_data):
     )
 
 
-def update_task(task_id, update_data):
-    """
-    Same as above, but creates a new pool. For short running threads
-    :param task_id:
-    :param update_data:
-    :return:
-    """
-    collection = get_jobs_collection()
-
-    return update_task_existing_connection(collection, task_id, update_data)
-
-
-def complete_task(jobs_collection, tasks_collection, job_id, task_id, response_data):
+def complete_task(job_id, task_id, response_data, jobs_collection=None, tasks_collection=None):
     """
     response_data should include time_started and time_completed from the remote host.
     time_updated and ttl_time_completed are relative to the server.
@@ -64,6 +64,9 @@ def complete_task(jobs_collection, tasks_collection, job_id, task_id, response_d
     :param response_data:
     :return:
     """
+    jobs_collection = jobs_collection or get_jobs_collection()
+    tasks_collection = tasks_collection or get_tasks_collection()
+
     now = time.time()
     ttl_time = datetime.datetime.utcfromtimestamp(now)
 
@@ -75,14 +78,14 @@ def complete_task(jobs_collection, tasks_collection, job_id, task_id, response_d
         'ttl_time_completed': ttl_time,
         'message':  response_data['message'],
         'traceback': response_data['traceback_info'],
-        'action': response_data['action']
+        'action': response_data.get('action', '')
     }
 
-    log.info('Task completed: task_id: {task_id} job: {job_id} result: {result}'.format(
+    log.info('Task completed: task_id: {task_id} job: {job_id} message: {message}'.format(
             **response_data
         ))
 
-    update_task_existing_connection(tasks_collection, task_id, task_update)
+    update_task(task_id, task_update, tasks_collection)
 
     if is_completed(tasks_collection, job_id):
         log.info('Job completed: {}, status: {}'.format(job_id, response_data['status']))
@@ -141,7 +144,7 @@ class Task(object):
         self.method = method
         self.args = args or []
         self.kwargs = kwargs or {}
-        self.result = {}
+        self.message = {}
         self.task_id = uuid.uuid4()
         self.status = 'NEW'
         self.action = 'New Task'
@@ -170,7 +173,7 @@ class Task(object):
             'time_started': self.time_started,
             'time_completed': self.time_completed,
             'time_updated': self.time_updated,
-            'result': self.result,
+            'message': self.message,
             'ttl_time_completed': self.ttl_time_completed,
             'timeout': 0
         }
