@@ -56,6 +56,7 @@ def validate_json(f):
             if not request.json:
                 return http_error('JSON request is missing', code=400)
         except ValueError:
+            log.debug('JSON request is malformed: {}'.format(request.body.read()))
             return http_error('JSON request is malformed', code=400)
 
         return f(*args, **kwargs)

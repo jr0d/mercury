@@ -18,10 +18,11 @@ from hpssa.hpssa import HPSSA
 
 from mercury.hardware import platform_detection
 from mercury.hardware.drivers import driver, PCIDriverBase
+from mercury.hardware.raid.abstration.api import RAIDActions
 
 
 @driver()
-class SmartArrayDriver(PCIDriverBase):
+class SmartArrayDriver(PCIDriverBase, RAIDActions):
     name = 'hpssa'
     driver_type = 'raid'
     _handler = HPSSA
