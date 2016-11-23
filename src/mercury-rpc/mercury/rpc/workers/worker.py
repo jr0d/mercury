@@ -1,10 +1,10 @@
 import logging
-
+import time
 
 from mercury.common.task_managers.base.manager import Manager
 from mercury.common.task_managers.redis.task import RedisTask
 from mercury.common.transport import SimpleRouterReqClient
-from mercury.rpc.jobs import update_task
+from mercury.rpc.jobs.tasks import update_task, complete_task
 
 log = logging.getLogger(__name__)
 
@@ -27,8 +27,8 @@ class RPCTask(RedisTask):
         update_task(self.task['task_id'], {'status': 'DISPATCHING'})
         response = client.transceiver(_payload)
         if response['status'] != 0:
-            update_task(self.task['task_id'],
-                       {'status': 'ERROR', 'response': 'Dispatch Error: %s' % response})
+            complete_task(self.task['job_id'], self.task['task_id'],
+                          {'status': 'ERROR', 'response': 'Dispatch Error: %s' % response})
         return response
 
     @classmethod

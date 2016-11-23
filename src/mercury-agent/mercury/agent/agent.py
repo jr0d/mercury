@@ -35,6 +35,7 @@ from mercury.agent.configuration import (
 )
 from mercury.agent.pong import spawn_pong_process
 from mercury.agent.register import get_dhcp_ip, register
+from mercury.agent.remote_logging import MercuryLogHandler
 from mercury.agent.rpc import AgentService
 from mercury.common.exceptions import MercuryCritical, MercuryGeneralException
 from mercury.inspector import inspect
@@ -48,7 +49,7 @@ log = logging.getLogger(__name__)
 
 
 class Agent(object):
-    def __init__(self, configuration):
+    def __init__(self, configuration, logger):
         """
 
         :param configuration:
@@ -60,6 +61,7 @@ class Agent(object):
         self.pong_bind_address = self.local_config.get('pong_bind_address', 'tcp://0.0.0.0:9004')
 
         self.rpc_backend = agent_configuration.get('remote', {}).get('rpc_service')
+        self.log_handler = logger
 
         if not self.rpc_backend:
             raise MercuryCritical('Missing rpc backend in local configuration')
@@ -86,7 +88,14 @@ class Agent(object):
         log.info('Registering device')
         local_ip = get_dhcp_ip(device_info, method=dhcp_ip_method)
         local_ipv6 = None
+
         register(self.rpc_backend, device_info['mercury_id'], local_ip, local_ipv6, runtime_capabilities)
+
+        # LogHandler
+
+        log.info('Injecting MercuryID for remote logging')
+        self.log_handler.set_mercury_id(device_info['mercury_id'])
+        log.info('Injection completed')
 
         # AsyncInspectors
         try:
@@ -106,6 +115,8 @@ def _parse_args():
 
 
 def main():
+
+    # TODO: SERVICE BASE CLASS
     logging.basicConfig(level=logging.DEBUG)
     fh = logging.FileHandler('mercury-agent.log')
     fh.setLevel(logging.DEBUG)
@@ -117,7 +128,10 @@ def main():
     logging.getLogger('mercury.agent.pong').setLevel(logging.ERROR)
     logging.getLogger('hpssa._cli').setLevel(logging.ERROR)
 
-    agent = Agent(agent_configuration)
+    # TODO: CLEAN THIS UP
+    mh = MercuryLogHandler(agent_configuration.get('remote', {}).get('log_service'))
+    mercury_logger.addHandler(mh)
+    agent = Agent(agent_configuration, mh)
     agent.run('simple')
 
 

@@ -10,6 +10,7 @@ remote:
   rpc_service: tcp://localhost:9002
   rpc_mongo_replica_set: None
   inventory_service: tcp://localhost:9000
+  log_service: tcp://localhost:9006
 
 hardware:
   raid:

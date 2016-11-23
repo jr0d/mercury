@@ -13,17 +13,16 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-import datetime
 import logging
-import time
 
 from mercury.common.transport import SimpleRouterReqService
 from mercury.common.mongo import get_collection, get_connection
 from mercury.rpc.configuration import rpc_configuration, get_jobs_collection, get_tasks_collection
 from mercury.rpc.db import ActiveInventoryDBController
-from mercury.rpc.jobs import (
-    is_completed,
-    update_task_existing_connection
+from mercury.rpc.jobs.monitor import Monitor
+from mercury.rpc.jobs.tasks import (
+    complete_task,
+    update_task
 )
 from mercury.rpc.ping import spawn
 
@@ -50,6 +49,8 @@ class BackEndService(SimpleRouterReqService):
     def process(self, message):
         if message.get('action') == 'register':
             return self.register(data=message.get('client_info'))
+        elif message.get('action') == 'task_update':
+            return self.task_update(message.get('response'))
         elif message.get('action') == 'task_return':
             return self.task_return(message.get('response'))
         return dict(error=True, message='Did not receive appropriate action')
@@ -77,8 +78,22 @@ class BackEndService(SimpleRouterReqService):
 
         return dict(error=False, message='Registration successful')
 
+    def task_update(self, update_data):
+        """
+        Update a task action string and optional progress metric
+        :param update_data: {
+            action: Pretty status
+            progress: value between 0 and 1
+        }
+        :return:
+        """
+        task_id = self.get_key('task_id', update_data)
+        update_task(task_id, update_data, tasks_collection=self.tasks_collection)
+
+        return dict(message='Accepted')
+
     def task_return(self, response_data):
-        """Update Job task with response data and result status
+        """Finish Job task with response data and status status
         :param response_data: {
             job_id:
             task_id:
@@ -88,45 +103,28 @@ class BackEndService(SimpleRouterReqService):
             time_completed:
             data: {
             }
-            result: SUCCESS|ERROR|EXCEPTION|TIMEOUT
+            status: SUCCESS|ERROR|EXCEPTION|TIMEOUT
+            action: Pretty status
         }
         :return:
         """
-        now = time.time()
-        ttl_time = datetime.datetime.utcfromtimestamp(now)
 
-        job_id = response_data['job_id']
-        task_id = response_data['task_id']
-        update = {
-            'status': response_data['result'],  # Naming conventions changed when coding provider
-            'time_started': response_data['time_started'],
-            'time_completed': response_data['time_completed'],
-            'ttl_time_completed': ttl_time,
-            'result': response_data['traceback_info'] or response_data['data']
-        }
+        job_id = self.get_key('job_id', response_data)
+        task_id = self.get_key('task_id', response_data)
 
-        log.info('Task completed: task_id: {task_id} job: {job_id} result: {result}'.format(
-            **response_data
-        ))
+        self.validate_required(['status', 'message', 'traceback_info'], response_data)
 
-        update_task_existing_connection(self.tasks_collection, task_id, update)
-
-        if is_completed(self.tasks_collection, job_id):
-
-            log.info('Job completed: {job_id}'.format(job_id=job_id))
-            self.jobs_collection.update_one(
-                {
-                    'job_id': job_id
-                },
-                {
-                    '$set': {
-                        'time_completed': now,
-                        'ttl_time_completed': ttl_time
-                    }
-                }
-            )
+        complete_task(job_id,
+                      task_id,
+                      response_data,
+                      jobs_collection=self.jobs_collection,
+                      tasks_collection=self.tasks_collection)
 
         return dict(message='Accepted')
+
+    def cleanup(self):
+        super(BackEndService, self).cleanup()
+        # clean up ping threads
 
 
 def rpc_backend_service():
@@ -139,6 +137,7 @@ def rpc_backend_service():
                         format='%(asctime)s : %(levelname)s - %(name)s - %(message)s')
     logging.getLogger('mercury.rpc.ping').setLevel(logging.INFO)
     logging.getLogger('mercury.rpc.ping2').setLevel(logging.INFO)
+    logging.getLogger('mercury.rpc.jobs.monitor').setLevel(logging.INFO)
     db_configuration = rpc_configuration.get('db', {})
 
     connection = get_connection(server_or_servers=db_configuration.get('rpc_mongo_servers',
@@ -157,10 +156,13 @@ def rpc_backend_service():
     jobs_collection.create_index('ttl_time_completed', expireAfterSeconds=3600)
     tasks_collection.create_index('ttl_time_completed', expireAfterSeconds=3600)
 
+    monitor = Monitor(jobs_collection, tasks_collection)
+    monitor.start()
     server = BackEndService(active_db_collection, jobs_collection, tasks_collection)
     server.reacquire()
     server.bind()
     server.start()
+    monitor.kill()
 
 
 if __name__ == '__main__':

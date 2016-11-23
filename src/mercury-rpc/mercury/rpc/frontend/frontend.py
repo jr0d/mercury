@@ -330,7 +330,11 @@ def post_jobs():
 
     active_matches = get_active(query, projection)
 
-    log.debug('Matched %d active computers' % len(active_matches))
+    active_match_count = len(active_matches)
+    log.debug('Matched %d active computers' % active_match_count)
+
+    if not active_match_count:
+        return http_error('query did not match any active records', code=400)
 
     try:
         job = Job(instruction, active_matches, jobs_collection, tasks_collection)

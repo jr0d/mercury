@@ -21,7 +21,7 @@ runtime_capabilities = {}
 
 
 def add_capability(entry, name, description, doc=None, serial=False, num_args=None, kwarg_names=None, no_return=False,
-                   dependency_callback=None):
+                   dependency_callback=None, timeout=1800):
     LOG.info('Adding capability %s' % name)
     runtime_capabilities[name] = {
         'name': name,
@@ -32,15 +32,17 @@ def add_capability(entry, name, description, doc=None, serial=False, num_args=No
         'num_args': num_args,
         'kwarg_names': kwarg_names,
         'no_return': no_return,
-        'dependency_callback': dependency_callback
+        'dependency_callback': dependency_callback,
+        'timeout': timeout
     }
 
 
 def capability(name, description, serial=False, num_args=None, kwarg_names=None, no_return=False,
-               dependency_callback=None):
+               dependency_callback=None, timeout=1800):
     def wrap(entry):
         add_capability(entry, name, description, doc=entry.__doc__, serial=serial, num_args=num_args,
-                       kwarg_names=kwarg_names, no_return=no_return, dependency_callback=dependency_callback)
+                       kwarg_names=kwarg_names, no_return=no_return, dependency_callback=dependency_callback,
+                       timeout=timeout)
         return entry
     return wrap
 
