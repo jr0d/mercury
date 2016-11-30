@@ -18,7 +18,7 @@ from hpssa.hpssa import HPSSA
 
 from mercury.hardware import platform_detection
 from mercury.hardware.drivers import driver, PCIDriverBase
-from mercury.hardware.raid.abstration.api import RAIDActions
+from mercury.hardware.raid.abstraction.api import RAIDActions
 
 
 @driver()
