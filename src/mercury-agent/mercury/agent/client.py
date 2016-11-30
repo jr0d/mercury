@@ -28,9 +28,16 @@ class BackEndClient(SimpleRouterReqClient):
         }
         return self.transceiver(_payload)
 
-    def push_response(self, response_data):
+    def task_return(self, return_data):
         _payload = {
             'action': 'task_return',
-            'response': response_data
+            'return_data': return_data
+        }
+        return self.transceiver(_payload)
+
+    def task_update(self, update_data):
+        _payload = {
+            'action': 'task_update',
+            'update_data': update_data
         }
         return self.transceiver(_payload)

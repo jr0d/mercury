@@ -22,7 +22,7 @@ from mercury.common.exceptions import fancy_traceback_format
 from press.entry import entry_main
 
 from press.plugins import init_plugins
-from press.press_main import Press
+from press.main import Press
 
 
 log = logging.getLogger(__name__)

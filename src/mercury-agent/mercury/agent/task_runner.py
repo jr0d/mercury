@@ -87,7 +87,7 @@ class TaskRunner(object):
         log.debug('Publishing response to: %s' % self.backend.zmq_url,
                   extra={'task_id': self.task_id, 'job_id': self.job_id})
 
-        response = self.backend.push_response({
+        response = self.backend.task_return({
             'status': status,
             'message': return_data,
             'traceback_info': traceback_info,

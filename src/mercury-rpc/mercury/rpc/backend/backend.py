@@ -50,9 +50,9 @@ class BackEndService(SimpleRouterReqService):
         if message.get('action') == 'register':
             return self.register(data=message.get('client_info'))
         elif message.get('action') == 'task_update':
-            return self.task_update(message.get('response'))
+            return self.task_update(message.get('update_data'))
         elif message.get('action') == 'task_return':
-            return self.task_return(message.get('response'))
+            return self.task_return(message.get('return_data'))
         return dict(error=True, message='Did not receive appropriate action')
 
     def spawn_pinger(self, mercury_id, address, port):
@@ -92,9 +92,9 @@ class BackEndService(SimpleRouterReqService):
 
         return dict(message='Accepted')
 
-    def task_return(self, response_data):
+    def task_return(self, return_data):
         """Finish Job task with response data and status status
-        :param response_data: {
+        :param return_data: {
             job_id:
             task_id:
             mercury_id:
@@ -109,14 +109,14 @@ class BackEndService(SimpleRouterReqService):
         :return:
         """
 
-        job_id = self.get_key('job_id', response_data)
-        task_id = self.get_key('task_id', response_data)
+        job_id = self.get_key('job_id', return_data)
+        task_id = self.get_key('task_id', return_data)
 
-        self.validate_required(['status', 'message', 'traceback_info'], response_data)
+        self.validate_required(['status', 'message', 'traceback_info'], return_data)
 
         complete_task(job_id,
                       task_id,
-                      response_data,
+                      return_data,
                       jobs_collection=self.jobs_collection,
                       tasks_collection=self.tasks_collection)
 

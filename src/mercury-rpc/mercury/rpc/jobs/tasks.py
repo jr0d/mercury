@@ -35,6 +35,7 @@ def update_task(task_id, update_data, tasks_collection=None):
     task_update['time_updated'] = time.time()
 
     progress = update_data.get('progress')
+    # We don't want to overwrite existing progress updates
     if progress:
         task_update['progress'] = progress
 
