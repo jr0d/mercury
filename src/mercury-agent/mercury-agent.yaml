@@ -17,4 +17,5 @@ hardware:
     megacli_path: /usr/local/sbin/megacli
 
 press:
-  plugin_dir: press/plugins
+  plugin_dirs:
+    - press/plugins

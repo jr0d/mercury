@@ -33,12 +33,14 @@ class TaskRunner(object):
     # TODO: Implement as a function
     def __init__(self, job_id, task_id, entry, backend_url,
                  entry_args=None, entry_kwargs=None, lock=None,
-                 timeout=0):
+                 timeout=0, task_id_kwargs=False):
         self.job_id = job_id
         self.task_id = task_id
         self.entry = entry
         self.args = entry_args or ()
         self.kwargs = entry_kwargs or {}
+        if task_id_kwargs:
+            self.kwargs['task_id'] = self.task_id
         self.lock = lock
         self.timeout = timeout
 

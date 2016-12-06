@@ -13,8 +13,23 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-from mercury.agent.procedures.press import *
-from mercury.agent.procedures.inspector import *
-from mercury.agent.procedures.misc import *
-from mercury.agent.procedures.hp_raid import *
+import logging
 
+from mercury.agent.capabilities import capability
+from mercury.press.main import entry
+
+log = logging.getLogger(__name__)
+
+def add_mercury_plugin_data(press_configuration, task_id)
+    temp_plugins = press_configuration.get('plugins', [])
+    if 'mercury' not in temp_plugins:
+        temp_plugins.append('mercury')
+        press_configuration['plugins'] = temp_plugins
+
+
+@capability('press', description='Native press support in mercury', serial=True,
+            kwarg_names=['configuration'], task_id_kwargs=True)
+def press_native(**kwargs):
+    press_configuration = kwargs['configuration']
+
+    entry(kwargs['configuration'])

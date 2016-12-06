@@ -64,4 +64,4 @@ def press_static_assets(target, instruction):
 
     configuration = yaml.load(rendered)
 
-    return {'method': 'exec_press', 'kwargs': {'configuration': configuration}}
+    return {'method': 'press', 'kwargs': {'configuration': configuration}}

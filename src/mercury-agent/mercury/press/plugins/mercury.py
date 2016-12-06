@@ -7,8 +7,6 @@
 
 import logging
 
-from press.hooks.hooks import add_hook
-
 from mercury.agent.client import BackEndClient
 
 log = logging.getLogger(__name__)
@@ -39,25 +37,32 @@ def get_mercury_configuration(press_configuration):
     return mercury_configuration
 
 
-# noinspection PyUnusedLocal
-def super_hook(press_config, backend_client, task_id, action, progress):
-    log.debug('Running Hook to update backend task: {} {}'.format(task_id, action))
-    backend_client.task_update({
-        'action': 'Press: ' + action,
-        'task_id': task_id,
-        'progress': progress
-    })
+class MercurySpecialLoggingHandler(logging.Handler):
+    def __init__(self, backend_client, task_id):
+        super(MercurySpecialLoggingHandler, self).__init__()
+        self.backend_client = backend_client
+        self.task_id = task_id
+
+    def emit(self, record):
+        if hasattr(record, 'press_event'):
+            log.debug('Press Event: {}'.format(record.press_event))
+            self.backend_client.task_update(
+                {'task_id': self.task_id,
+                 'action': 'Press: ' + record.press_event,
+                 'progress': 0.5
+                 }
+            )
 
 
-def plugin_init(press_configuration):
-    mc = get_mercury_configuration(press_configuration)
+def plugin_init(configuration):
+    log.info('Mercury plugin initialization')
+    mc = get_mercury_configuration(configuration)
     if not mc:
+        log.info('Mercury configuration missing from Press configuration')
         return
 
     backend_client = BackEndClient(mc['backend_zurl'])
     task_id = mc['task_id']
-    add_hook(super_hook, 'post-press-init', backend_client, task_id, 'Starting', 0.0)
-    add_hook(super_hook, 'pre-apply-layout', backend_client, task_id, 'Preparing Layout', 0.1)
-    add_hook(super_hook, 'pre-image-acquire', backend_client, task_id, 'Downloading', 0.2)
-    add_hook(super_hook, 'post-press-init', backend_client, task_id, '', 0.0)
-    add_hook(super_hook, 'post-press-init', backend_client, task_id, '', 0.0)
+
+    root_logger = logging.getLogger('')
+    root_logger.addHandler(MercurySpecialLoggingHandler(backend_client, task_id))
