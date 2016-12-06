@@ -14,22 +14,36 @@
 #    limitations under the License.
 
 import logging
+import time
 
 from mercury.agent.capabilities import capability
-from mercury.press.main import entry
+from mercury.agent.configuration import remote_configuration
+from mercury.press.entry import entry
 
 log = logging.getLogger(__name__)
 
-def add_mercury_plugin_data(press_configuration, task_id)
+
+def add_mercury_plugin_data(press_configuration, task_id):
     temp_plugins = press_configuration.get('plugins', [])
     if 'mercury' not in temp_plugins:
         temp_plugins.append('mercury')
         press_configuration['plugins'] = temp_plugins
+
+    press_configuration['mercury'] = {
+        'task_id': task_id,
+        'backend_zurl': remote_configuration['rpc_service']
+    }
 
 
 @capability('press', description='Native press support in mercury', serial=True,
             kwarg_names=['configuration'], task_id_kwargs=True)
 def press_native(**kwargs):
     press_configuration = kwargs['configuration']
+    task_id = kwargs['task_id']
 
-    entry(kwargs['configuration'])
+    add_mercury_plugin_data(press_configuration, task_id)
+
+    log.info('Starting press')
+    start = time.time()
+    entry(press_configuration)
+    return {'press_execution_time': time.time() - start}

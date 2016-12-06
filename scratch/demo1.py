@@ -272,14 +272,14 @@ def storage_demo():
 def provisioning_demo():
     import yaml
 
-    with open('/tmp/ubuntu.yaml') as fp:
+    with open('ubuntu.yaml') as fp:
        data = yaml.load(fp)
 
     jq(data)
     pause()
 
     j = JobQuery(URL, {'mercury_id': '0158e25529ef2757e621507069bc4301a605237873'}, instruction={
-       'method': 'exec_press',
+       'method': 'press',
        'kwargs': {
            'configuration': data
        }

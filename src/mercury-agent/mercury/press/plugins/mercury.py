@@ -49,7 +49,7 @@ class MercurySpecialLoggingHandler(logging.Handler):
             self.backend_client.task_update(
                 {'task_id': self.task_id,
                  'action': 'Press: ' + record.press_event,
-                 'progress': 0.5
+                 'progress': 0.5  # TODO: press event to progress map
                  }
             )
 
