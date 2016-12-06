@@ -105,5 +105,5 @@ class TaskRunner(object):
     def run(self):
         log.info('Starting task: %s [%s]' % (self.entry.__name__, self.task_id),
                  extra={'task_id': self.task_id, 'job_id': self.job_id})
-        t = threading.Thread(target=self.__management_thread)
+        t = threading.Thread(target=self.__management_thread, name='_{}_{}'.format(self.job_id, self.task_id))
         t.start()
