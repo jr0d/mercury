@@ -35,7 +35,7 @@ tmux split-window -v
 
 tmux send-keys "$VIRTUALENV_CMD" C-m
 tmux send-keys "pushd mercury-log" C-m
-tmux send-keys "python mercury/log_service/service.py" C-m
+tmux send-keys "python mercury/log_service/server.py" C-m
 tmux send-keys "popd" C-m
 
 tmux new-window -t $SESSION:1 -n 'Workers'

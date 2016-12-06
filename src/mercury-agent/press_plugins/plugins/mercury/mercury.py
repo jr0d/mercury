@@ -38,6 +38,8 @@ def get_mercury_configuration(press_configuration):
 
 
 class MercurySpecialLoggingHandler(logging.Handler):
+    mercury_handler = True
+
     def __init__(self, backend_client, task_id):
         super(MercurySpecialLoggingHandler, self).__init__()
         self.backend_client = backend_client
@@ -46,12 +48,16 @@ class MercurySpecialLoggingHandler(logging.Handler):
     def emit(self, record):
         if hasattr(record, 'press_event'):
             log.debug('Press Event: {}'.format(record.press_event))
-            self.backend_client.task_update(
-                {'task_id': self.task_id,
-                 'action': 'Press: ' + record.press_event,
-                 'progress': 0.5  # TODO: press event to progress map
-                 }
-            )
+            # noinspection PyBroadException
+            try:
+                self.backend_client.task_update(
+                    {'task_id': self.task_id,
+                     'action': 'Press: ' + record.press_event.capitalize(),
+                     'progress': 0.5  # TODO: press event to progress map
+                     }
+                )
+            except:
+                self.handleError(record)
 
 
 def plugin_init(configuration):
@@ -64,5 +70,7 @@ def plugin_init(configuration):
     backend_client = BackEndClient(mc['backend_zurl'])
     task_id = mc['task_id']
 
-    root_logger = logging.getLogger('')
-    root_logger.addHandler(MercurySpecialLoggingHandler(backend_client, task_id))
+    press_logger = logging.getLogger('press')
+
+    log.info('Injecting Mercury logging handler')
+    press_logger.addHandler(MercurySpecialLoggingHandler(backend_client, task_id))

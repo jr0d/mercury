@@ -14,15 +14,11 @@
 #    limitations under the License.
 
 import logging
-import multiprocessing
-import signal
 import time
 import threading
 
 from mercury.agent.client import BackEndClient
-from mercury.common.exceptions import (
-    MercuryTaskTimeout, parse_exception, fancy_traceback_format
-)
+from mercury.common.exceptions import fancy_traceback_short, parse_exception
 
 log = logging.getLogger(__name__)
 
@@ -67,12 +63,11 @@ class TaskRunner(object):
                 status = 'SUCCESS'
         except Exception:
             exc_dict = parse_exception()
-            log.error(fancy_traceback_format(exc_dict,
-                                             'Critical error while running task: %s [%s], elapsed' % (
-                                                 self.entry.__name__,
-                                                 self.task_id)),
+            log.error(fancy_traceback_short(exc_dict, 'Critical error while running task: %s [%s], elapsed' % (
+                                            self.entry.__name__,
+                                            self.task_id)),
                       extra={'task_id': self.task_id, 'job_id': self.job_id})
-            traceback_info = exc_dict
+            traceback_info = parse_exception()
             status = 'ERROR'
             return_data = None
         finally:

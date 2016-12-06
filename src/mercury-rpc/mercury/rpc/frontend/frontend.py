@@ -308,7 +308,7 @@ def get_task(task_id):
 
 @route('/api/rpc/jobs', method='GET')
 def get_jobs():
-    projection = get_projection_from_qsa()
+    projection = get_projection_from_qsa() or {'instruction': 0}
     c = jobs_collection.find({}, projection=projection).sort('time_created', 1)
     count = c.count()
     jobs = []

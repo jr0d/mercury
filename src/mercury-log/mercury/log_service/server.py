@@ -61,8 +61,8 @@ class AgentLogService(SimpleRouterReqService):
         #    raise MercuryGeneralException('Logging controller recieved invalid message')
 
         message.update({'time_created': time.time()})
-        LOG.debug(message)
         self.set_job_info_from_thread(message)
+        LOG.debug(message)
         self.log_collection.insert(message)
         return {'message': 'ok'}
 

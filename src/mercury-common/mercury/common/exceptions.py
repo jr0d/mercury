@@ -53,19 +53,46 @@ class MercuryClientException(MercuryGeneralException):
     pass
 
 
+def tb_to_dict(path, line, scope, code):
+    return {
+        'path': path,
+        'line': line,
+        'scope': scope,
+        'code': code
+    }
+
+
 def parse_exception():
     exc_type, exc_value, exc_traceback = sys.exc_info()
-    path, line, scope, code = traceback.extract_tb(exc_traceback)[-1]
+
     return {
-            'exc_type': str(exc_type),
-            'exc_value': str(exc_value),
-            'scope': str(scope),
-            'path': path,
-            'line': line,
-            'code': code
-            }
+        'exc_type': str(exc_type),
+        'exc_value': str(exc_value),
+        'stack': [tb_to_dict(*tb) for tb in traceback.extract_tb(exc_traceback)]
+    }
 
 
-def fancy_traceback_format(exc_dict, preamble='Exception info: '):
-    return '{preamble} ({exc_type} : {exc_value}): scope={scope}, ' \
-           'path={path}, line={line}, code={code}'.format(preamble=preamble, **exc_dict)
+def find_window(stack):
+    """
+    Using extract_stack vs extract_tb would require use to inspect the relevant entries. Essentially anything
+    :param stack:
+    :return:
+    """
+    return stack[-1]
+
+
+def fancy_traceback_short(exc_dict, preamble='Exception info: '):
+    """
+
+    :param exc_dict:
+    :param preamble:
+    :return:
+    """
+
+    output = '{preamble} ({exc_type} : {exc_value}): '.format(preamble=preamble,
+                                                              exc_type=exc_dict['exc_type'],
+                                                              exc_value=exc_dict['exc_value'])
+
+    current_window = find_window(exc_dict['stack'])
+    output += 'scope={scope}, path={path}, line={line}, code={code}'.format(**current_window)
+    return output
