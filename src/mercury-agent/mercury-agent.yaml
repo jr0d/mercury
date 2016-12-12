@@ -18,4 +18,5 @@ hardware:
 
 press:
   plugin_dirs:
-    - press/plugins
+    - ./press_plugins/plugins
+    - /home/jared/git/rax-press-plugins/rax_press_plugins

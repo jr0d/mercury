@@ -30,7 +30,8 @@ setup(
         'netifaces',
         'pyudev',
         'python-hpssa',
-        'lxml'
+        'lxml',
+        'press'
     ],
     entry_points="""
     [console_scripts]

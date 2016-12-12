@@ -139,7 +139,8 @@ class AgentService(SimpleRouterReqService):
                                  entry_args=args,
                                  entry_kwargs=kwargs,
                                  lock=tmp_lock,
-                                 timeout=capability['timeout'])
+                                 timeout=capability['timeout'],
+                                 task_id_kwargs=capability['task_id_kwargs'])
         task_runner.run()
         return self.sync_response(data=dict(time_started=task_runner.time_started,
                                             message='Hakuna matata'))

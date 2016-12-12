@@ -18,7 +18,7 @@ import msgpack
 import zmq
 
 from mercury.common.exceptions import (
-    fancy_traceback_format,
+    fancy_traceback_short,
     MercuryClientException,
     parse_exception
 )
@@ -167,6 +167,7 @@ class SimpleRouterReqService(object):
             self.bind()
 
         while True:
+            response = None
             try:
                 data = self.receive()
             except KeyboardInterrupt:
@@ -181,9 +182,9 @@ class SimpleRouterReqService(object):
             except MercuryClientException as mce:
                 self.send_error(address, 'Encountered client error: {}'.format(mce))
             except Exception:
-                exc_dict = parse_exception()
+                exec_dict = parse_exception()
                 log.error('process raised an exception and should not have.')
-                log.error(fancy_traceback_format(exc_dict, 'Exception data:'))
+                log.error(fancy_traceback_short(exec_dict))
                 self.send_error(address, 'Encountered server error, sorry')
                 continue
             # log.debug('Response: %s' % binascii.hexlify(address))
