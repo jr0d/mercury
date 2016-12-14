@@ -12,6 +12,7 @@
 #    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
+from __future__ import absolute_import
 
 import logging
 import time
@@ -22,11 +23,8 @@ from mercury.agent.configuration import agent_configuration, remote_configuratio
 
 from mercury.common.exceptions import fancy_traceback_short, parse_exception
 
-# PyCharm does not like press anymore for some reason.. too many names
-# noinspection PyUnresolvedReferences
-from press.main import Press
-
-# noinspection PyUnresolvedReferences
+from press.press import Press
+from press.configuration.util import set_environment
 from press.plugin_init import init_plugins
 
 log = logging.getLogger(__name__)
@@ -34,11 +32,10 @@ log = logging.getLogger(__name__)
 
 # noinspection PyBroadException
 def entry(press_configuration):
+    set_environment(agent_configuration.get('press_environment', {}))
+
     log.info('Initializing plugins')
-
-    plugin_dirs = agent_configuration.get('press', {}).get('plugin_dirs')
-
-    init_plugins(press_configuration, plugin_dirs)
+    init_plugins(press_configuration)
 
     return_data = {}
 

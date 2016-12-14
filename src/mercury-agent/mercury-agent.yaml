@@ -16,7 +16,27 @@ hardware:
   raid:
     megacli_path: /usr/local/sbin/megacli
 
-press:
-  plugin_dirs:
-    - ./press_plugins/plugins
-    - /home/jared/git/rax-press-plugins/rax_press_plugins
+press_environment:
+  paths:
+    parted: /usr/bin/parted
+  plugins:
+    scan_directories:
+      - ./press_plugins/plugins
+      - /home/jared/git/rax-press-plugins/rax_press_plugins
+    enabled:
+      - mercury
+      - server_management
+  press:
+    deployment_root: /mnt/press
+    staging_directory: /.press
+
+    layout:
+      use_fibre_channel: False
+      loop_only: True
+
+    partition_table:
+      partition_start: 1048576,
+      alignment: 1048576
+
+    volume_group:
+      pe_size: 4MiB
