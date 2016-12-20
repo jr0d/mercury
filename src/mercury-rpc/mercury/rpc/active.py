@@ -30,10 +30,10 @@ backoff_queue = Queue()  # Slow workers
 
 
 class PingTask(Task):
-    def __init__(self, ctx):
+    def __init__(self, ctx, timeout):
         super(PingTask, self).__init__()
         self.ctx = ctx
-        self.timeout = self.timeout
+        self.timeout = timeout
 
     def fetch(self):
         return ping_queue.get()
@@ -145,3 +145,6 @@ class ActiveInventoryRuntimeHandler(object):
 
         if not self.exists(record['mercury_id']):
             self.append(record)
+
+    def shutdown(self):
+        pass

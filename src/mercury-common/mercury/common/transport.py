@@ -59,9 +59,14 @@ def get_ctx_and_connect_req_socket(zmq_url):
 
 
 class SimpleRouterReqClient(object):
-    def __init__(self, zmq_url):
+    def __init__(self, zmq_url, linger=-1, response_timeout=0):
         self.zmq_url = zmq_url
         self.ctx, self.socket = get_ctx_and_connect_req_socket(self.zmq_url)
+
+        self.socket.setsockopt(zmq.LINGER, linger)
+        self.poller = zmq.Poller()
+        self.poller.register(self.socket, flags=zmq.POLLIN)
+        self.response_timeout = response_timeout
 
     def transceiver(self, payload):
         # TODO: Harden this
@@ -73,6 +78,9 @@ class SimpleRouterReqClient(object):
         # blocks
         self.socket.send_multipart([packed])
 
+        if self.response_timeout:
+            if not self.poller.poll(self.response_timeout * 1000):
+                raise IOError('Timeout while waiting for server response')
         # blocks
         rep = self.socket.recv()
 
@@ -126,7 +134,7 @@ class SimpleRouterReqService(object):
         try:
             message = msgpack.unpackb(parsed_message['message'], encoding='utf-8')
         except TypeError as type_error:
-            self.send_error(parsed_message['address'], 'Recieved unpacked, non-string type: %s : %s' % (type(packed_message), type_error))
+            self.send_error(parsed_message['address'], 'Recieved unpacked, non-string type: %s : %s' % (type(parsed_message), type_error))
             return
         except msgpack.UnpackException as unpack_exception:
             self.send_error(parsed_message['address'], 'Received invalid request: %s' % str(unpack_exception))
