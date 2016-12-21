@@ -15,6 +15,7 @@ ping_queue = asyncio.Queue()
 async def ping(record, ctx, timeout, retries, backoff):
     """
     ping node until it responds or encounters x timeouts of x*backoff
+    :param timeout:
     :param backoff:
     :param retries:
     :param record:
@@ -28,7 +29,9 @@ async def ping(record, ctx, timeout, retries, backoff):
 
     while failures < retries:
         socket = ctx.socket(zmq.REQ)
+        socket.setsockopt(zmq.LINGER, 0)
         socket.connect(zurl)
+        log.debug(socket)
         payload = {
             'message': 'ping',
             'timestamp': time.time()
@@ -36,16 +39,17 @@ async def ping(record, ctx, timeout, retries, backoff):
         current_timeout = int((timeout + (failures and timeout or 0) * (failures**backoff)))
         log.debug('Pinging %s , payload: %s, timeout: %d' % (zurl, payload, current_timeout))
 
-        socket.send(msgpack.packb(payload))
+        await socket.send(msgpack.packb(payload))
 
-        if await socket.poll(current_timeout):
+        if await socket.poll(current_timeout):  # Success condition
             # TODO: Do something with the payload, it contains the device load average
             # mayhaps put it in the active record and stuff it back into the database?
 
-            # pop the thing (shouldn't block right?)
-            reply = await socket.recv()
+            reply = await socket.recv()  # Data is ready for snarfing
+
             log.debug("ping success: %s : %s" % (zurl, msgpack.unpackb(reply, encoding='utf-8')))
             socket.close()
+
             active_state[record['mercury_id']]['last_ping'] = time.time()
             active_state[record['mercury_id']]['pinging'] = False
             return
@@ -54,8 +58,8 @@ async def ping(record, ctx, timeout, retries, backoff):
             failures, backoff, record['mercury_id'], zurl))
 
         failures += 1
+
         socket.close()
-        continue
 
     log.debug('Ping Failed! <REMOVE>')
     del active_state[record['mercury_id']]
@@ -90,29 +94,37 @@ async def ping_loop(ctx,
 
                 asyncio.ensure_future(ping(data, ctx, initial_ping_timeout, ping_retries, backoff),
                                       loop=loop)
-        await asyncio.sleep(cycle_time)
+        print('Before Sleep')
+        await asyncio.sleep()
+        print('After sleep')
+
 
 if __name__ == '__main__':
+    def load_shit(items=100):
+        for i in range(items):
+            active_state.update(
+                {
+                    str(i): {
+                        'mercury_id': str(i),
+                        'rpc_address': '0.0.0.0',
+                        'ping_port': '9004',
+                        'rpc_address6': None,
+                        'last_ping': 0,
+                        'pinging': False
+                    }
+                }
+            )
 
-    active_state.update(
-        {'12345': {
-            'mercury_id': '12345',
-            'rpc_address': '0.0.0.0',
-            'ping_port': '9004',
-            'rpc_address6': None,
-            'last_ping': 0,
-            'pinging': False
-        }}
-    )
     logging.basicConfig(level=logging.DEBUG)
+    load_shit(1)
     _ctx = zmq.asyncio.Context()
     loop = zmq.asyncio.ZMQEventLoop()
     asyncio.set_event_loop(loop)
-    loop.run_until_complete(ping_loop(_ctx, 30, 10, 2500, 5, .42, loop))
+
     try:
-        loop.run_forever()
+        loop.run_until_complete(ping_loop(_ctx, 30, 10, 2500, 5, .42, loop))
     except KeyboardInterrupt:
         pass
     finally:
         loop.close()
-
+        _ctx.destroy()
