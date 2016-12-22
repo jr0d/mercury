@@ -95,7 +95,7 @@ async def ping_loop(ctx,
                 asyncio.ensure_future(ping(data, ctx, initial_ping_timeout, ping_retries, backoff),
                                       loop=loop)
         print('Before Sleep')
-        await asyncio.sleep()
+        await asyncio.sleep(cycle_time)
         print('After sleep')
 
 
@@ -116,7 +116,7 @@ if __name__ == '__main__':
             )
 
     logging.basicConfig(level=logging.DEBUG)
-    load_shit(1)
+    load_shit(10)
     _ctx = zmq.asyncio.Context()
     loop = zmq.asyncio.ZMQEventLoop()
     asyncio.set_event_loop(loop)
