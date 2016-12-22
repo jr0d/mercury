@@ -11,7 +11,6 @@ log = logging.getLogger(__name__)
 active_state = {}
 ping_queue = asyncio.Queue()
 
-
 async def ping(record, ctx, timeout, retries, backoff):
     """
     ping node until it responds or encounters x timeouts of x*backoff
@@ -119,6 +118,7 @@ if __name__ == '__main__':
     load_shit(10)
     _ctx = zmq.asyncio.Context()
     loop = zmq.asyncio.ZMQEventLoop()
+    loop.set_debug(True)
     asyncio.set_event_loop(loop)
 
     try:
