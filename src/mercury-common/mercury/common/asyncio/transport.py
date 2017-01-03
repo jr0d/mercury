@@ -12,12 +12,6 @@ log = logging.getLogger(__name__)
 
 class AsyncRouterReqService(object):
     def __init__(self, bind_address, loop=None):
-        """
-        Async implementation of the Router/Req service
-
-        :param bind_address: zmq url to bind on, example: tcp://*:9002
-        :param loop: A zmq asyncio loop object
-        """
         self.bind_address = bind_address
         self.loop = loop
         self.context = zmq.asyncio.Context()
@@ -35,24 +29,18 @@ class AsyncRouterReqService(object):
             log.error('Received junk off the wire')
             raise MercuryClientException('Message is malformed')
 
-        address = parsed_message['address']
-        packed_message = parsed_message['message']
-
-        message = None
-        err = None
-
         try:
-            message = msgpack.unpackb(packed_message, encoding='utf-8')
+            message = msgpack.unpackb(parsed_message['message'], encoding='utf-8')
         except TypeError as type_error:
-            err = 'Received unpacked, non-string type: {} : {}'.format(
-                type(packed_message), type_error)
+            log.error('Received unpacked, non-string type: %s : %s' % (type(parsed_message),
+                                                                       type_error))
+            await self.send_error(parsed_message['address'], 'Client error, message is not packed')
+            raise MercuryClientException('Message is malformed')
         except (msgpack.UnpackException, msgpack.ExtraData) as msgpack_exception:
-            err = 'Received invalid request: {}'.format(msgpack_exception)
-
-        if err:
-            self.send_error(address, err)
-            raise MercuryClientException(err)
-
+            log.error('Received invalid request: %s' % str(
+                msgpack_exception))
+            await self.send_error(parsed_message['address'], 'Client error, message is malformed')
+            raise MercuryClientException('Message is malformed')
         return parsed_message['address'], message
 
     async def send_error(self, address, message):

@@ -5,7 +5,7 @@ import uuid
 from mercury.common.exceptions import MercuryUserError, MercuryCritical
 from mercury.rpc.preprocessors import instruction_preprocessors
 
-from mercury.rpc.jobs.tasks import Task, is_completed
+from mercury.rpc.jobs.tasks import Task
 
 log = logging.getLogger(__name__)
 

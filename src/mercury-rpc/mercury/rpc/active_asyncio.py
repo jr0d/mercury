@@ -9,7 +9,7 @@ import zmq.asyncio
 log = logging.getLogger(__name__)
 
 active_state = {}
-
+ping_queue = asyncio.Queue()
 
 async def ping(record, ctx, timeout, retries, backoff):
     """

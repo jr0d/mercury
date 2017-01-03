@@ -8,6 +8,10 @@ import zmq.asyncio
 from mercury.common.transport import parse_multipart_message
 from mercury.common.exceptions import parse_exception, fancy_traceback_short, MercuryClientException
 
+import motor
+import motor.motor_asyncio
+
+
 # ctx = zmq.asyncio.Context()
 # loop = zmq.asyncio.ZMQEventLoop()
 # asyncio.set_event_loop(loop)
@@ -54,6 +58,12 @@ class TestAsync(object):
 
     # noinspection PyMethodMayBeStatic
     async def process(self, message):
+        mc = motor.motor_asyncio.AsyncIOMotorClient()
+        db = mc['test']
+        collection = db['your_mom']
+
+        await collection.insert_one({'apple': 'pen'})
+
         log.info('Message: {!r}'.format(message))
         return {'status': 'AOK'}
 
