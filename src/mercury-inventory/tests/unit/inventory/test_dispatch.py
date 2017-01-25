@@ -15,10 +15,12 @@
 
 import mercury.inventory.dispatch as dispatch
 import mock
-import tests.unit.base as test_base
+
+from ..base import MercuryInventoryUnitTest
 
 
-class MercuryDispatcherUnitTest(test_base.MercuryInventoryUnitTest):
+class MercuryDispatcherUnitTest(MercuryInventoryUnitTest):
+    # noinspection PyMethodOverriding
     @mock.patch('mercury.inventory.dispatch.InventoryController')
     def setUp(self, ic_mock):
         super(MercuryDispatcherUnitTest, self).setUp()
@@ -27,7 +29,7 @@ class MercuryDispatcherUnitTest(test_base.MercuryInventoryUnitTest):
     def test_dispatch_no_endpoint(self):
         fake_message = {
             'args': ['some', 'argument', 'list'],
-            'kwargs': { 'key': 'word' }
+            'kwargs': {'key': 'word'}
         }
 
         result = self.dispatcher.dispatch(fake_message)

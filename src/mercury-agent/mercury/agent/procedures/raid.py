@@ -10,4 +10,6 @@ log = logging.getLevelName(__name__)
 def has_abstraction_handler():
     raid_drivers = get_subsystem_drivers('raid')
     for driver in raid_drivers:
-        if driver.raid_abstraction
+        if hasattr(driver, 'raid_abstraction_handler'):
+            return True
+    return False

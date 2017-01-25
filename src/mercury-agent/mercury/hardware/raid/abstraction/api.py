@@ -1,23 +1,7 @@
-# from mercury.agent.
 from size import PercentString, Size
 
 
-WRITE_POLICY = {
-    'DEFAULT': 0,
-    'WRITE_BACK': 1,
-    'WRITE_THROUGH': 2
-}
-
-
 class RAIDAbstractionException(Exception):
-    pass
-
-
-class RAIDSizeException(RAIDAbstractionException):
-    pass
-
-
-class RAIDIndexException(RAIDAbstractionException):
     pass
 
 
@@ -204,7 +188,7 @@ class RAIDActions(object):
         # TODO: This is a bit silly, perhaps I should store member and enumeration data during get_adapter_info
         adapter = self.get_adapter_info(adapter_index)
         if not adapter:
-            raise RAIDIndexException('The adapter_index {} is not valid'.format(adapter_index))
+            raise RAIDAbstractionException('The adapter_index {} is not valid'.format(adapter_index))
 
         drives = []
 
@@ -227,7 +211,7 @@ class RAIDActions(object):
     def get_unassigned(self, adapter_index):
         adapter = self.get_adapter_info(adapter_index)
         if not adapter:
-            raise RAIDIndexException('The adapter_index {} is not valid'.format(adapter_index))
+            raise RAIDAbstractionException('The adapter_index {} is not valid'.format(adapter_index))
 
         drives = self.get_all_drives(adapter_index)
 
@@ -325,7 +309,7 @@ class RAIDActions(object):
     # These methods can be overridden to support more raid levels
     # TODO: Clean these up...
     @staticmethod
-    def raid_calculator(level, number_of_drives, size_of_drive):
+    def raid_calculator(level, number_of_drives, size_of_drive, span_depth=2):
         if level == '0':
             return size_of_drive * number_of_drives
         if level == '1':
@@ -335,11 +319,11 @@ class RAIDActions(object):
         if level == '6':
             return size_of_drive * (number_of_drives - 2)
         if level == '10' or level == '1+0':
-            return size_of_drive * (number_of_drives / 2)
+            return size_of_drive * (number_of_drives / span_depth)
         if level == '50':
-            return size_of_drive * ((number_of_drives - 1) / 2)
+            return size_of_drive * (number_of_drives - 2)
         if level == '60':
-            return size_of_drive * ((number_of_drives - 2) / 2)
+            return size_of_drive * (number_of_drives - 4)
 
         raise RAIDAbstractionException('Unsupported RAID level')
 
