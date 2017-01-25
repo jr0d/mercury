@@ -133,6 +133,8 @@ class RAIDActions(object):
             else:
                 converted_size = Size(size)
 
+        # We can split the two paths, create logical drive on new array or update existing array, into two functions
+
         if drives is not None:
             # Creating new array, so we need to check that there is enough space (if specified)
             # and that the RAID level is valid

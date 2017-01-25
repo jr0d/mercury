@@ -13,12 +13,9 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-import unittest
-
-import mock
-
-import mercury.tests.unit.base as test_base
 import mercury.inventory.dispatch as dispatch
+import mock
+import tests.unit.base as test_base
 
 
 class MercuryDispatcherUnitTest(test_base.MercuryInventoryUnitTest):

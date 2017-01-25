@@ -17,7 +17,7 @@ from hpssa.hpssa import HPSSA
 
 from mercury.hardware import platform_detection
 from mercury.hardware.drivers import driver, PCIDriverBase
-from mercury.hardware.raid.abstraction.api import RAIDActions, RAIDAbstractionException, WRITE_POLICY
+from mercury.hardware.raid.abstraction.api import RAIDActions, RAIDAbstractionException
 
 
 @driver()
@@ -26,6 +26,7 @@ class SmartArrayDriver(PCIDriverBase):
     driver_type = 'raid'
     _handler = HPSSA
     wants = 'pci'
+    raid_abstraction_handler = SmartArrayActions
 
     PCI_DEVICE_IDS = [
         "3239"  # Smart Array Gen9 Controllers
