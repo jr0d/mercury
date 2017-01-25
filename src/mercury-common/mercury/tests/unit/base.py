@@ -1,4 +1,4 @@
-# Copyright 2015 Jared Rodriguez (jared.rodriguez@rackspace.com)
+# Copyright 2017 Rackspace
 # All Rights Reserved.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,19 +13,8 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-from setuptools import setup
+import unittest
 
-setup(
-    name='mercury-inventory',
-    version='0.0.1',
-    packages=['mercury'],
-    url='https://www.rackspace.com',
-    license='',
-    author='Jared Rodriguez',
-    author_email='jared.rodriguez@rackspace.com',
-    description='',
-    install_requires=[
-        'msgpack-python',
-        'pyzmq',
-    ]
-)
+class MercuryCommonUnitTest(unittest.TestCase):
+    """Base class for mercury-common unit tests."""
+    pass

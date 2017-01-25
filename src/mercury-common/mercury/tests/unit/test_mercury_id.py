@@ -1,4 +1,4 @@
-# Copyright 2015 Jared Rodriguez (jared.rodriguez@rackspace.com)
+# Copyright 2017 Rackspace
 # All Rights Reserved.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,19 +13,15 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-from setuptools import setup
+import unittest
 
-setup(
-    name='mercury-inventory',
-    version='0.0.1',
-    packages=['mercury'],
-    url='https://www.rackspace.com',
-    license='',
-    author='Jared Rodriguez',
-    author_email='jared.rodriguez@rackspace.com',
-    description='',
-    install_requires=[
-        'msgpack-python',
-        'pyzmq',
-    ]
-)
+import mercury.tests.unit.base as test_base
+import mercury.common.mercury_id as m_id
+
+class MercuryIdUnitTest(test_base.MercuryCommonUnitTest):
+    def test_dmi_methods(self):
+        dmi_keys = ('product_uuid', 'chassis_asset_tag', 'chassis_serial',
+                    'board_asset_tag', 'board_serial')
+        fake_dmi = { key : ''.join(['fake_', key]) for key in dmi_keys }
+        result = m_id.dmi_methods(fake_dmi)
+        assert result is not None
