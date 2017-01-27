@@ -148,13 +148,13 @@ class RAIDActions(object):
         # Check to see that the array exists
         try:
             array = adapter_info['configuration']['arrays'][array]
-        except KeyError:
+        except (KeyError, IndexError):
             raise RAIDAbstractionException('The referenced array {}:{} does not exist'.format(adapter, array))
 
         # Check to see if the array has enough free space (or any free space, if size is None)
         free_space = Size(array['free_space'])
         if free_space < Size('1MiB'):
-            raise('The array {}:{} has not free space'.format(adapter, array))
+            raise RAIDAbstractionException('The array {}:{} has not free space'.format(adapter, array))
 
         if size:
             if converted_size:
@@ -187,8 +187,6 @@ class RAIDActions(object):
 
         # TODO: This is a bit silly, perhaps I should store member and enumeration data during get_adapter_info
         adapter = self.get_adapter_info(adapter_index)
-        if not adapter:
-            raise RAIDAbstractionException('The adapter_index {} is not valid'.format(adapter_index))
 
         drives = []
 
@@ -209,10 +207,6 @@ class RAIDActions(object):
         return drives
 
     def get_unassigned(self, adapter_index):
-        adapter = self.get_adapter_info(adapter_index)
-        if not adapter:
-            raise RAIDAbstractionException('The adapter_index {} is not valid'.format(adapter_index))
-
         drives = self.get_all_drives(adapter_index)
 
         pruned = []
@@ -256,15 +250,15 @@ class RAIDActions(object):
             if len(our_range) != 2:
                 raise RAIDAbstractionException(invalid_msg)
 
-            front, back = our_range
+            try:
+                front, back = [int(x) for x in our_range]
+            except ValueError:
+                raise RAIDAbstractionException('Range is nonsense: {}'.format(our_range))
 
             if not back > front:
                 raise RAIDAbstractionException(invalid_msg + ' [Range is negative]')
 
-            try:
-                selection += list(range(int(front), int(back) + 1))
-            except ValueError:
-                raise RAIDAbstractionException(invalid_msg)
+            selection += list(range(front, back + 1))
 
         return selection
 
