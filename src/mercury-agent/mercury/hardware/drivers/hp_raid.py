@@ -20,52 +20,6 @@ from mercury.hardware.drivers import driver, PCIDriverBase
 from mercury.hardware.raid.abstraction.api import RAIDActions, RAIDAbstractionException
 
 
-@driver()
-class SmartArrayDriver(PCIDriverBase):
-    name = 'hpssa'
-    driver_type = 'raid'
-    _handler = HPSSA
-    wants = 'pci'
-    raid_abstraction_handler = SmartArrayActions
-
-    PCI_DEVICE_IDS = [
-        "3239"  # Smart Array Gen9 Controllers
-    ]
-
-    @classmethod
-    def probe(cls, pci_data):
-        raid_pci_devices = platform_detection.get_raid_controllers(pci_data)
-        if not platform_detection.has_smart_array_gen9(pci_data=raid_pci_devices):
-            return
-
-        owns = list()
-        for device in raid_pci_devices:
-            if cls.check(device):
-                owns.append(device['slot'])
-        return owns
-
-    @classmethod
-    def check(cls, pci_device):
-        return pci_device['device_id'] in cls.PCI_DEVICE_IDS
-
-    def inspect(self):
-        smart_array = SmartArrayActions()
-
-        adapters = []
-        for idx in range(len(smart_array.hpssa.adapters)):
-            _a = dict(**smart_array.get_adapter_info(idx))
-            adapter_obj = smart_array.hpssa.adapters[idx]
-            _a.update({
-                'total_drives': adapter_obj.total_drives,
-                'total_size': adapter_obj.total_size,
-                'adapter_handler': self.name
-            })
-
-            adapters.append(_a)
-
-        return adapters
-
-
 class SmartArrayActions(RAIDActions):
     ld_status_map = {
         'OK': 'OK',
@@ -296,3 +250,48 @@ class SmartArrayActions(RAIDActions):
         return self.hpssa.add_spares(slot, array_letter,
                                      ','.join([self.assemble_drive(d) for d in target_drives]))
 
+
+@driver()
+class SmartArrayDriver(PCIDriverBase):
+    name = 'hpssa'
+    driver_type = 'raid'
+    _handler = HPSSA
+    wants = 'pci'
+    raid_abstraction_handler = SmartArrayActions
+
+    PCI_DEVICE_IDS = [
+        "3239"  # Smart Array Gen9 Controllers
+    ]
+
+    @classmethod
+    def probe(cls, pci_data):
+        raid_pci_devices = platform_detection.get_raid_controllers(pci_data)
+        if not platform_detection.has_smart_array_gen9(pci_data=raid_pci_devices):
+            return
+
+        owns = list()
+        for device in raid_pci_devices:
+            if cls.check(device):
+                owns.append(device['slot'])
+        return owns
+
+    @classmethod
+    def check(cls, pci_device):
+        return pci_device['device_id'] in cls.PCI_DEVICE_IDS
+
+    def inspect(self):
+        smart_array = SmartArrayActions()
+
+        adapters = []
+        for idx in range(len(smart_array.hpssa.adapters)):
+            _a = dict(**smart_array.get_adapter_info(idx))
+            adapter_obj = smart_array.hpssa.adapters[idx]
+            _a.update({
+                'total_drives': adapter_obj.total_drives,
+                'total_size': adapter_obj.total_size,
+                'adapter_handler': self.name
+            })
+
+            adapters.append(_a)
+
+        return adapters

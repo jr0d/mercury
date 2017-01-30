@@ -28,7 +28,7 @@ class DummyImplementation(RAIDActions):
     def __init__(self):
         super(DummyImplementation, self).__init__()
 
-        with open(os.path.join(os.path.dirname(__file__), 'dummy.json')) as fp:
+        with open(os.path.join(os.path.dirname(__file__), '../resources/dummy.json')) as fp:
             self.dummy_data = json.load(fp)
 
     def transform_adapter_info(self, adapter_index):
