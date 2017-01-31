@@ -8,13 +8,21 @@ driver_class_cache = dict()
 
 
 class DriverBase(object):
+    """
+    Drivers
+    -------
+
+    """
     name = ''
     driver_type = ''
     _handler = None
     wants = ''
 
     def __init__(self):
-        self.handler = self._handler()
+        if self._handler:
+            self.handler = self._handler()
+        else:
+            self.handler = None
 
     @classmethod
     def probe(cls, context_data):

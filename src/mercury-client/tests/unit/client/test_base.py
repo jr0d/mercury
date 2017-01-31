@@ -1,9 +1,9 @@
-import mock
-
-import mercury.tests.unit.base as test_base
 import mercury.client.base as client_base
 
-class TestClientBase(test_base.MercuryClientUnitTest):
+from ..base import MercuryClientUnitTest
+
+
+class TestClientBase(MercuryClientUnitTest):
     def setUp(self):
         super(TestClientBase, self).setUp()
         self.target = 'test_target'

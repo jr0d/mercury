@@ -15,13 +15,7 @@
 
 import unittest
 
-import mercury.tests.unit.base as test_base
-import mercury.common.mercury_id as m_id
 
-class MercuryIdUnitTest(test_base.MercuryCommonUnitTest):
-    def test_dmi_methods(self):
-        dmi_keys = ('product_uuid', 'chassis_asset_tag', 'chassis_serial',
-                    'board_asset_tag', 'board_serial')
-        fake_dmi = { key : ''.join(['fake_', key]) for key in dmi_keys }
-        result = m_id.dmi_methods(fake_dmi)
-        assert result is not None
+class MercuryRPCUnitTest(unittest.TestCase):
+    """Base class for mercury-inventory unit tests."""
+    pass

@@ -1,6 +1,6 @@
 **Under Construction**
 
-![alt tag](project_mercury.png)
+![alt tag](docs/images/project_mercury.png)
 
 # Welcome
 This is the mercury project repository. Here you will find the full 
