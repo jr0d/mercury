@@ -55,7 +55,6 @@ class RAIDActions(object):
         """
         if adapter_index not in self.adapter_info_cache:
             self.refresh_adapter(adapter_index)
-
         return self.adapter_info_cache[adapter_index]
 
     def create(self, adapter, level, drives=None, size=None, array=None):

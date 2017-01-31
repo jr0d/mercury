@@ -87,7 +87,7 @@ class SmartArrayActions(RAIDActions):
         return _pds
 
     @staticmethod
-    def _get_array_index_from_letter(arrays, letter):
+    def get_array_index_from_letter(arrays, letter):
         for idx in range(len(arrays)):
             if arrays[idx]['extra']['letter'] == letter:
                 return idx
@@ -126,7 +126,7 @@ class SmartArrayActions(RAIDActions):
         for spare in original['spares']:
             array_indices = []
             for ref in spare['arrays']:
-                idx = self._get_array_index_from_letter(configuration['arrays'], ref)
+                idx = self.get_array_index_from_letter(configuration['arrays'], ref)
                 if idx == -1:
                     raise RAIDAbstractionException('A spare is defined with an invalid array reference')
                 array_indices.append(idx)
@@ -160,8 +160,9 @@ class SmartArrayActions(RAIDActions):
         return array['extra']['letter']
 
     def transform_adapter_info(self, adapter_index):
-        adapter = self.hpssa.adapters[adapter_index]
-        if not adapter:
+        try:
+            adapter = self.hpssa.adapters[adapter_index]
+        except IndexError:
             raise RAIDAbstractionException('Adapter does not exist')
 
         adapter_details = {
@@ -207,10 +208,7 @@ class SmartArrayActions(RAIDActions):
             r = self.hpssa.create(slot, selection=','.join(hpsa_targets), raid=level, size=size_mb)
 
         else:
-            try:
-                array_letter = array['extra']['letter']
-            except KeyError:
-                raise RAIDAbstractionException('Could not find array letter for index {}:{}'.format(adapter, array))
+            array_letter = array['extra']['letter']
             r = self.hpssa.create(slot, raid=level, array_letter=array_letter, size=size_mb)
 
         return r
@@ -229,14 +227,14 @@ class SmartArrayActions(RAIDActions):
             raise RAIDAbstractionException(
                 'Logical Drive does not exist at {}:{}:{}'.format(adapter, array, ld))
 
-        self.hpssa.delete_logical_drive(slot, self.assemble_drive(target))
+        return self.hpssa.delete_logical_drive(slot, target['extra']['id'])
 
     def clear_configuration(self, adapter):
         self.hpssa.refresh()
         self.clear_cache()
 
         slot = self.get_slot_by_index(adapter)
-        self.hpssa.delete_all_logical_drives(slot)
+        return self.hpssa.delete_all_logical_drives(slot)
 
     def add_spares(self, adapter, array, drives):
         self.hpssa.refresh()
@@ -255,9 +253,8 @@ class SmartArrayActions(RAIDActions):
 class SmartArrayDriver(PCIDriverBase):
     name = 'hpssa'
     driver_type = 'raid'
-    _handler = HPSSA
+    _handler = SmartArrayActions
     wants = 'pci'
-    raid_abstraction_handler = SmartArrayActions
 
     PCI_DEVICE_IDS = [
         "3239"  # Smart Array Gen9 Controllers
@@ -280,12 +277,10 @@ class SmartArrayDriver(PCIDriverBase):
         return pci_device['device_id'] in cls.PCI_DEVICE_IDS
 
     def inspect(self):
-        smart_array = SmartArrayActions()
-
         adapters = []
-        for idx in range(len(smart_array.hpssa.adapters)):
-            _a = dict(**smart_array.get_adapter_info(idx))
-            adapter_obj = smart_array.hpssa.adapters[idx]
+        for idx in range(len(self.handler.hpssa.adapters)):
+            _a = dict(**self.handler.get_adapter_info(idx))
+            adapter_obj = self.handler.hpssa.adapters[idx]
             _a.update({
                 'total_drives': adapter_obj.total_drives,
                 'total_size': adapter_obj.total_size,
