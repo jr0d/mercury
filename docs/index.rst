@@ -31,6 +31,10 @@ All aspects of the project, be it code, structure, philosophy; are likely to cha
 
    *Use at your own risk, without any warranty, implied or otherwise*
 
+General Reading
+---------------
+:doc:`mercury_in_practice`
+   Book format with Mercury
 
 Installation
 ------------

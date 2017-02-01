@@ -56,7 +56,7 @@ class LSIRaidException(Exception):
     pass
 
 
-class LSIRaid(object):
+class MegaCLI(object):
     def __init__(self, megacli_path=DEFAULT_MEGACLI_PATH,
                  adapter=0):
 
@@ -306,7 +306,7 @@ class LSIRaid(object):
                 break
         if not version:
             raise LSIRaidException('Could not determine firmware package version')
-        return LSIRaid.quantify_version(version)
+        return MegaCLI.quantify_version(version)
 
     def flash_firmware(self, path):
         if not os.path.exists(path):

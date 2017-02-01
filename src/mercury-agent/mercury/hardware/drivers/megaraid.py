@@ -18,11 +18,11 @@
 
 import logging
 
-from mercury.hardware.raid.interfaces.lsi.megaraid.megacli import \
-    LSIRaid, count_adapters
-
 from mercury.hardware import platform_detection
 from mercury.hardware.drivers import driver, PCIDriverBase
+from mercury.hardware.raid.abstraction.api import RAIDActions
+from mercury.hardware.raid.interfaces.megaraid.megacli import \
+    MegaCLI, count_adapters
 
 log = logging.getLogger(__name__)
 
@@ -39,11 +39,22 @@ def get_lsi_object(handler, adapter):
     return handler(**kwargs)
 
 
+class MegaRAIDActions(RAIDActions):
+    """LSI RAIDActions implementation.
+
+      ..note::
+
+        The underlying interface, MegaCLI does not support multiple adapters,
+        some hackery is needed.
+    """
+    pass
+
+
 @driver()
 class MegaRaidSASDriver(PCIDriverBase):
     name = 'megaraid_sas'  # named after the kernel module
     driver_type = 'raid'
-    _handler = LSIRaid
+    _handler = MegaCLI
     wants = 'pci'
 
     @classmethod

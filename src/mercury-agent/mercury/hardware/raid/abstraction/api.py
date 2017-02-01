@@ -80,6 +80,75 @@ class RAIDActions(object):
         """
         raise NotImplementedError
 
+    def create_logical_drive_on_existing_array(self, adapter, adapter_info, level, array, converted_size,
+                                               percent_string):
+        """
+
+        :param adapter:
+        :param adapter_info:
+        :param level:
+        :param array:
+        :param converted_size:
+        :param percent_string:
+        :return:
+        """
+
+        # Check to see that the array exists
+        try:
+            array = adapter_info['configuration']['arrays'][array]
+        except (KeyError, IndexError):
+            raise RAIDAbstractionException('The referenced array {}:{} does not exist'.format(adapter, array))
+
+        # Check to see if the array has enough free space (or any free space, if size is None)
+        free_space = Size(array['free_space'])
+        if free_space < Size('1MiB'):
+            raise RAIDAbstractionException('The array {}:{} has not free space'.format(adapter, array))
+
+        if converted_size:
+            if free_space < converted_size:
+                raise RAIDAbstractionException('Requested size {} exceeds available size {}'.format(
+                    converted_size, free_space))
+        elif percent_string:
+            if percent_string.free:
+                converted_size = Size(percent_string.value * free_space.bytes)
+            else:
+                raise RAIDAbstractionException('only %FREE is supported for RAID abstraction')
+
+        return self.create(adapter_info, level, drives=None, size=converted_size, array=array)
+
+    def create_logical_drive_on_new_array(self, adapter, adapter_info, level, drives, converted_size, percent_string):
+        """
+
+        :param adapter:
+        :param adapter_info:
+        :param level:
+        :param drives:
+        :param converted_size:
+        :param percent_string:
+        :return:
+        """
+        # Creating new array, so we need to check that there is enough space (if specified)
+        # and that the RAID level is valid
+        target_drives = self.get_drives_from_selection(adapter, drives)
+
+        # this will raise an exception if it's invalid
+        self.raid_minimums(level, len(target_drives))
+
+        # Now we have to get the smallest drive (though they all should be the same)
+
+        if converted_size or percent_string:
+            smallest_drive_size = sorted([x['size'] for x in target_drives])[0]
+
+            available_size = self.raid_calculator(level, len(target_drives), smallest_drive_size)
+            if converted_size:
+                if available_size < converted_size.bytes:
+                    raise RAIDAbstractionException('Requested size of {} exceeds available size of {}'.format(
+                        converted_size, Size(available_size)))
+            else:
+                converted_size = Size(percent_string.value * available_size)
+
+        return self.create(adapter_info, level, drives=target_drives, size=converted_size, array=None)
+
     def create_logical_drive(self, adapter, level, drives=None, size=None, array=None):
         """
 
@@ -108,7 +177,8 @@ class RAIDActions(object):
         :return:
         """
 
-        # TODO: Split branch into two functions
+        if not (array is not None or drives is not None):
+            raise RAIDAbstractionException('Either drive targets or an array must be specified')
 
         adapter_info = self.get_adapter_info(adapter)
 
@@ -116,64 +186,27 @@ class RAIDActions(object):
         converted_size = None
 
         if size:
-            if '%' in size:
+            if isinstance(size, str) and '%' in size:
                 percent_string = PercentString(size)
             else:
                 converted_size = Size(size)
 
-        # We can split the two paths, create logical drive on new array or update existing array, into two functions
-
         if drives is not None:
-            # Creating new array, so we need to check that there is enough space (if specified)
-            # and that the RAID level is valid
-            target_drives = self.get_drives_from_selection(adapter, drives)
+            return self.create_logical_drive_on_new_array(adapter,
+                                                          adapter_info,
+                                                          level,
+                                                          drives,
+                                                          converted_size,
+                                                          percent_string)
+        else:
+            return self.create_logical_drive_on_existing_array(adapter,
+                                                               adapter_info,
+                                                               level,
+                                                               array,
+                                                               converted_size,
+                                                               percent_string)
 
-            # this will raise an exception if it's invalid
-            self.raid_minimums(level, len(target_drives))
-
-            # Now we have to get the smallest drive (though they all should be the same)
-
-            if size:
-                smallest_drive_size = sorted([x['size'] for x in target_drives])[0]
-
-                available_size = self.raid_calculator(level, len(target_drives), smallest_drive_size)
-                if converted_size:
-                    if available_size < converted_size.bytes:
-                        raise RAIDAbstractionException('Requested size of {} exceeds available size of {}'.format(
-                            converted_size, Size(available_size)))
-                else:
-                    converted_size = Size(percent_string.value * available_size)
-
-            return self.create(adapter_info, level, drives=target_drives, size=converted_size, array=None)
-
-        if array is None:
-            raise RAIDAbstractionException('Either drive targets or an array must be specified')
-
-        # Check to see that the array exists
-        try:
-            array = adapter_info['configuration']['arrays'][array]
-        except (KeyError, IndexError):
-            raise RAIDAbstractionException('The referenced array {}:{} does not exist'.format(adapter, array))
-
-        # Check to see if the array has enough free space (or any free space, if size is None)
-        free_space = Size(array['free_space'])
-        if free_space < Size('1MiB'):
-            raise RAIDAbstractionException('The array {}:{} has not free space'.format(adapter, array))
-
-        if size:
-            if converted_size:
-                if free_space < converted_size:
-                    raise RAIDAbstractionException('Requested size {} exceeds available size {}'.format(
-                        converted_size, free_space))
-            else:
-                if percent_string.free:
-                    converted_size = Size(percent_string.value * free_space.bytes)
-                else:
-                    raise RAIDAbstractionException('only %FREE is supported for RAID abstraction')
-
-        return self.create(adapter_info, level, drives=None, size=converted_size, array=array)
-
-    def delete_logical_drive(self, adapter, array, ld):
+    def delete_logical_drive(self, adapter, array, logical_drive):
         raise NotImplementedError
 
     def clear_configuration(self, adapter):
@@ -282,7 +315,7 @@ class RAIDActions(object):
     def fetch_selection(self, adapter_index, selection):
         # Build an index of unassigned drives for O(1) matching
         unassigned_drives = {
-                d['index']: d for d in self.get_unassigned(adapter_index)
+            d['index']: d for d in self.get_unassigned(adapter_index)
             }
 
         selected_drives = []

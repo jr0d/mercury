@@ -1,0 +1,49 @@
+
+syntax error, unexpected TOKEN_SIZE, expecting $end
+
+     Storage Command Line Tool  Ver 1.11.03 Mar 26, 2014
+
+     (c)Copyright 2014, LSI Corporation, All Rights Reserved.
+
+
+help - lists all the commands with their usage. E.g. perccli help
+<command> help - gives details about a particular command. E.g. perccli add help
+
+List of commands:
+
+Commands   Description
+-------------------------------------------------------------------
+add        Adds/creates a new element to controller like VD,Spare..etc
+delete     Deletes an element like VD,Spare
+show       Displays information about an element
+set        Set a particular value to a property
+get        Get a particular value to a property
+compare	Compares particular value to a property
+start      Start background operation
+stop       Stop background operation
+pause      Pause background operation
+resume     Resume background operation
+download   Downloads file to given device
+expand     expands size of given drive
+insert     inserts new drive for missing
+transform  downgrades the controller
+/cx        Controller specific commands
+/ex        Enclosure specific commands
+/sx        Slot/PD specific commands
+/vx        Virtual drive specific commands
+/dx        Disk group specific commands
+/fall      Foreign configuration specific commands
+/px        Phy specific commands
+/[bbu|cv]  Battery Backup Unit, Cachevault commands
+
+Other aliases : cachecade, freespace, sysinfo
+
+Use a combination of commands to filter the output of help further.
+E.g. 'perccli cx show help' displays all the show operations on cx.
+Use verbose for detailed description E.g. 'perccli add  verbose help'
+Use 'page=[x]' as the last option in all the commands to set the page break.
+X=lines per page. E.g. 'perccli help page=10'
+
+
+Command options must be entered in the same order as displayed in the help of
+the respective commands.
