@@ -21,14 +21,14 @@ from mercury.hardware.raid.abstraction.api import RAIDActions, RAIDAbstractionEx
 
 
 class SmartArrayActions(RAIDActions):
-    ld_status_map = {
+    logical_drive_status_map = {
         'OK': 'OK',
         'Recovering': 'RECOVERING',
         'Interim Recovery Mode': 'DEGRADED',
         'Failed': 'FAILED'
     }
 
-    pd_status_map = {
+    physical_drive_status_map = {
         'OK': 'OK',
         'Rebuilding': 'REBUILDING',
         'Failed': 'FAILED'
@@ -51,40 +51,38 @@ class SmartArrayActions(RAIDActions):
 
         return vendor_details
 
-    def transform_ld(self, logical_drives):
-        _lds = []
-        for logical_drive in logical_drives:
-            _ld = {
-                'status': self.ld_status_map.get(logical_drive['status'], 'UNKNOWN'),
+    def transform_logical_drive(self, logical_drives):
+            return [{
+                'status': self.logical_drive_status_map.get(logical_drive['status'], 'UNKNOWN'),
                 'size': logical_drive['size'],
                 'level': logical_drive['level'],
                 'extra': {
                     'id': logical_drive['id'],
                     'progress': logical_drive['progress']
                 }
-            }
-            _lds.append(_ld)
+            } for logical_drive in logical_drives]
 
-        return _lds
+    def _convert_physical_drive(self, physical_drive):
+        status = self.physical_drive_status_map.get(physical_drive['status'])
+        if not status:
+            raise RAIDAbstractionException(
+                'Drive {port}:{box}:{bay} is in an unknown state: {status}'.format(
+                    **physical_drive))
 
-    def _convert_pd(self, pd):
-        new_pd = {
-            'size': pd['size'],
-            'status': self.pd_status_map.get(pd['status'], 'UNKNOWN'),
-            'type': pd['type'],
+        new_physical_drive = {
+            'size': physical_drive['size'],
+            'status': status,
+            'type': physical_drive['type'],
             'extra': {
-                'port': pd['port'],
-                'box': pd['box'],
-                'bay': pd['bay'],
+                'port': physical_drive['port'],
+                'box': physical_drive['box'],
+                'bay': physical_drive['bay'],
             }
         }
-        return new_pd
+        return new_physical_drive
 
-    def transform_pd(self, physical_drives):
-        _pds = []
-        for physical_drive in physical_drives:
-            _pds.append(self._convert_pd(physical_drive))
-        return _pds
+    def transform_physical_drive(self, physical_drives):
+        return [self._convert_physical_drive(physical_drive) for physical_drive in physical_drives]
 
     @staticmethod
     def get_array_index_from_letter(arrays, letter):
@@ -106,8 +104,8 @@ class SmartArrayActions(RAIDActions):
                 'extra': {
                     'letter': array['letter']
                 },
-                'logical_drives': self.transform_ld(array['logical_drives']),
-                'physical_drives': self.transform_pd(array['physical_drives'])
+                'logical_drives': self.transform_logical_drive(array['logical_drives']),
+                'physical_drives': self.transform_physical_drive(array['physical_drives'])
             })
 
         #####################################################################################
@@ -131,35 +129,40 @@ class SmartArrayActions(RAIDActions):
                     raise RAIDAbstractionException('A spare is defined with an invalid array reference')
                 array_indices.append(idx)
 
-            spare_pd = self._convert_pd(spare)
-            spare_pd['target'] = array_indices
-            configuration['spares'].append(spare_pd)
+            spare_physical_drive = self._convert_physical_drive(spare)
+            spare_physical_drive['target'] = array_indices
+            configuration['spares'].append(spare_physical_drive)
 
         for unassigned in original['unassigned']:
-            configuration['unassigned'].append(self._convert_pd(unassigned))
+            configuration['unassigned'].append(self._convert_physical_drive(unassigned))
 
         return configuration
 
-    def get_slot_by_index(self, adapter_index):
-        adapter_info = self.get_adapter_info(adapter_index)
+    @staticmethod
+    def get_slot(adapter_info):
         try:
             return int(adapter_info['vendor_info']['slot'])
-        except (KeyError, IndexError) as e:
-            raise RAIDAbstractionException('Cannot retrieve slot info for {} : {}'.format(adapter_index, e))
+        except KeyError:
+            raise RAIDAbstractionException('Adapter is missing HP vendor/slot information')
 
-    def get_letter_from_index(self, adapter_index, array_index):
-        adapter_info = self.get_adapter_info(adapter_index)
+    @staticmethod
+    def get_letter_from_index(adapter_info, array_index):
         arrays = adapter_info['configuration']['arrays']
 
         try:
-            array = arrays[array_index]
+            our_array = arrays[array_index]
         except IndexError:
             raise RAIDAbstractionException('array {} does not exist'.format(array_index))
 
         # noinspection PyTypeChecker
-        return array['extra']['letter']
+        return our_array['extra']['letter']
 
     def transform_adapter_info(self, adapter_index):
+        """Transforms python-hpssa adapter information into the standard format expected
+        by RAIDActions
+        :param adapter_index: list index of the adapter we are targeting
+        :return:
+        """
         try:
             adapter = self.hpssa.adapters[adapter_index]
         except IndexError:
@@ -187,16 +190,25 @@ class SmartArrayActions(RAIDActions):
     def assemble_drive(drive):
         return '{port}:{box}:{bay}'.format(**drive['extra'])
 
-    def create(self, adapter, level=None, drives=None, size=None, array=None):
-        # Refresh the backend object
-        self.hpssa.refresh()
+    def create(self, adapter_info, level=None, drives=None, size=None, array=None):
+        """
+        Implementation of RAIDActions.create
 
-        if size:
-            size_mb = size.megabytes
-        else:
-            size_mb = 'max'
+        Called from RAIDActions.create_logical_drive
 
-        slot = self.get_slot_by_index(adapter)
+        :param adapter_info: transformed adapter_info
+        :param level: RAID level supported by RAIDActions API
+        :param drives: Converted drive target from RAIDActions create_logical_drive
+            or None if array is specified
+        :type drives: list
+        :param size: python-size Size() object or None
+        :param array: If specified, update the array that matches the index
+        :return: result (returncode, stdout, stderr)
+        :return type: AttributeString
+        """
+        size_mb = size and size.megabytes or 'max'
+
+        slot = self.get_slot(adapter_info)
         if level == '10':
             level = '1+0'
 
@@ -205,44 +217,56 @@ class SmartArrayActions(RAIDActions):
             for drive in drives:
                 hpsa_targets.append(self.assemble_drive(drive))
 
-            r = self.hpssa.create(slot, selection=','.join(hpsa_targets), raid=level, size=size_mb)
+            result = self.hpssa.create(slot, selection=','.join(hpsa_targets), raid=level, size=size_mb)
 
         else:
             array_letter = array['extra']['letter']
-            r = self.hpssa.create(slot, raid=level, array_letter=array_letter, size=size_mb)
+            result = self.hpssa.create(slot, raid=level, array_letter=array_letter, size=size_mb)
 
-        return r
+        return result
 
-    def delete_logical_drive(self, adapter, array, ld):
-        # paranoid synchronization
-        self.hpssa.refresh()
-        self.clear_cache()
+    def delete_logical_drive(self, adapter, array, logical_drive):
+        """
+        Implementation for RAIDActions.delete_logical_drive
 
+        :param adapter: adapter index
+        :param array: array index
+        :param logical_drive: logical drive index
+        :return:
+        """
         adapter_info = self.get_adapter_info(adapter)
-        slot = self.get_slot_by_index(adapter)
+        slot = self.get_slot(adapter_info)
         arrays = adapter_info['configuration']['arrays']
         try:
-            target = arrays[array]['logical_drives'][ld]
+            target = arrays[array]['logical_drives'][logical_drive]
         except IndexError:
             raise RAIDAbstractionException(
-                'Logical Drive does not exist at {}:{}:{}'.format(adapter, array, ld))
+                'Logical Drive does not exist at {}:{}:{}'.format(adapter, array, logical_drive))
 
         return self.hpssa.delete_logical_drive(slot, target['extra']['id'])
 
     def clear_configuration(self, adapter):
-        self.hpssa.refresh()
-        self.clear_cache()
-
-        slot = self.get_slot_by_index(adapter)
-        return self.hpssa.delete_all_logical_drives(slot)
+        """
+        Implementation of RAIDActions.clear_configuration
+        :param adapter: adapter index
+        :return:
+        """
+        return self.hpssa.delete_all_logical_drives(
+            self.get_slot(self.get_adapter_info(adapter)))
 
     def add_spares(self, adapter, array, drives):
-        self.hpssa.refresh()
-        self.clear_cache()
+        """
+        Implementation of RAIDActions.add_spares
 
-        slot = self.get_slot_by_index(adapter)
+        :param adapter: adapter index
+        :param array: array index
+        :param drives: RAIDActions drive selection
+        :return:
+        """
+        adapter_info = self.get_adapter_info(adapter)
+        slot = self.get_slot(adapter_info)
 
-        array_letter = self.get_letter_from_index(adapter, array)
+        array_letter = self.get_letter_from_index(adapter_info, array)
         target_drives = self.get_drives_from_selection(adapter, drives)
 
         return self.hpssa.add_spares(slot, array_letter,
