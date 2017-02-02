@@ -51,6 +51,8 @@ def get_embedded(inspected_interfaces):
 
 
 # methods
+DMI_DISQUALIFIED_STRING = 'To Be Filled By O.E.M.'
+
 
 def dmi_methods(dmi):
 
@@ -60,14 +62,13 @@ def dmi_methods(dmi):
     board_asset_tag = dmi.get('board_asset_tag')
     board_serial = dmi.get('board_serial')
 
-    disqualify = 'To Be Filled By O.E.M.'
-
     if product_uuid:
         LOG.debug('Generating mercury ID using product_uuid: %s' % product_uuid)
         return _build_hash(product_uuid, META_TYPE_PRODUCT_UUID)
 
-    if disqualify in [chassis_asset_tag, chassis_serial, board_asset_tag, board_serial]:
-        LOG.debug('Junk in DMI tables: \'%s\'' % disqualify)
+    if DMI_DISQUALIFIED_STRING in [chassis_asset_tag, chassis_serial,
+                                   board_asset_tag, board_serial]:
+        LOG.debug('Junk in DMI tables: \'%s\'' % DMI_DISQUALIFIED_STRING)
         return
 
     if chassis_asset_tag and chassis_serial:
