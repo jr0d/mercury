@@ -263,20 +263,23 @@ class RAIDActions(object):
         return sorted(self.get_selection_from_pattern(drive_selector))
 
     def fetch_selection(self, adapter_index, selection):
-        unassigned_drives = self.get_unassigned(adapter_index)
+        # Build an index of unassigned drives for O(1) matching
+        unassigned_drives = {
+                d['index']: d for d in self.get_unassigned(adapter_index)
+            }
+
         selected_drives = []
+
         for drive in selection:
-            found = False
-            for ud in unassigned_drives:
-                if ud['index'] == drive:
-                    if not ud['status'] == 'OK':
-                        raise RAIDAbstractionException(
-                            'Attempting to initialize a failed drive : {} {}'.format(drive, ud['status']))
-                    selected_drives.append(ud)
-                    found = True
-                    break
-            if not found:
+            ud = unassigned_drives.get(drive)
+            if not ud:
                 raise RAIDAbstractionException('Drive {} is not available'.format(drive))
+
+            if not ud['status'] == 'OK':
+                raise RAIDAbstractionException(
+                    'Attempting to initialize a failed drive : {} {}'.format(
+                        drive, ud['status']))
+            selected_drives.append(ud)
         return selected_drives
 
     def get_drives_from_selection(self, adapter_index, drive_selector):

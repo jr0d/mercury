@@ -51,7 +51,7 @@ class SmartArrayActions(RAIDActions):
 
         return vendor_details
 
-    def transform_logical_drive(self, logical_drives):
+    def transform_logical_drives(self, logical_drives):
             return [{
                 'status': self.logical_drive_status_map.get(logical_drive['status'], 'UNKNOWN'),
                 'size': logical_drive['size'],
@@ -62,7 +62,7 @@ class SmartArrayActions(RAIDActions):
                 }
             } for logical_drive in logical_drives]
 
-    def _convert_physical_drive(self, physical_drive):
+    def convert_physical_drive(self, physical_drive):
         status = self.physical_drive_status_map.get(physical_drive['status'])
         if not status:
             raise RAIDAbstractionException(
@@ -81,8 +81,8 @@ class SmartArrayActions(RAIDActions):
         }
         return new_physical_drive
 
-    def transform_physical_drive(self, physical_drives):
-        return [self._convert_physical_drive(physical_drive) for physical_drive in physical_drives]
+    def transform_physical_drives(self, physical_drives):
+        return [self.convert_physical_drive(physical_drive) for physical_drive in physical_drives]
 
     @staticmethod
     def get_array_index_from_letter(arrays, letter):
@@ -104,8 +104,8 @@ class SmartArrayActions(RAIDActions):
                 'extra': {
                     'letter': array['letter']
                 },
-                'logical_drives': self.transform_logical_drive(array['logical_drives']),
-                'physical_drives': self.transform_physical_drive(array['physical_drives'])
+                'logical_drives': self.transform_logical_drives(array['logical_drives']),
+                'physical_drives': self.transform_physical_drives(array['physical_drives'])
             })
 
         #####################################################################################
@@ -129,12 +129,12 @@ class SmartArrayActions(RAIDActions):
                     raise RAIDAbstractionException('A spare is defined with an invalid array reference')
                 array_indices.append(idx)
 
-            spare_physical_drive = self._convert_physical_drive(spare)
+            spare_physical_drive = self.convert_physical_drive(spare)
             spare_physical_drive['target'] = array_indices
             configuration['spares'].append(spare_physical_drive)
 
         for unassigned in original['unassigned']:
-            configuration['unassigned'].append(self._convert_physical_drive(unassigned))
+            configuration['unassigned'].append(self.convert_physical_drive(unassigned))
 
         return configuration
 

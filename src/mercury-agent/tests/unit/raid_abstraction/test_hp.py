@@ -149,7 +149,7 @@ class MercurySmartArrayActionsTest(MercuryAgentUnitTest):
                 'size': 100
             }
         ]
-        self.assertRaises(RAIDAbstractionException, self.dummy_actions.transform_physical_drive, *(drives, ))
+        self.assertRaises(RAIDAbstractionException, self.dummy_actions.transform_physical_drives, *(drives,))
 
     def test_create(self):
         assert self.dummy_actions.create_logical_drive(0, '10', [10, 11, 12, 13])
