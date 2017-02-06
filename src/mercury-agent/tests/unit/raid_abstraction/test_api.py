@@ -101,14 +101,6 @@ class MercuryRAIDAbstractionAPITest(MercuryAgentUnitTest):
 
         self.assertRaises(RAIDAbstractionException, _min, *('60', 11))
 
-    def test_cache(self):
-        self.dummy.refresh_adapter(0)
-        self.dummy.clear_cache()
-        # load the cache
-        self.dummy.get_adapter_info(0)
-        # use the cache
-        self.dummy.get_adapter_info(0)
-
     def test_create(self):
         # Create new array
         assert self.dummy.create_logical_drive(adapter=0, level='0', drives='9, 10', size='10GiB')

@@ -15,19 +15,6 @@ class RAIDActions(object):
 
     # TODO add RAID constraints class object for use in raid_minimums and raid_calculator
 
-    def __init__(self):
-        """
-        This class should be short lived. The adapter_info_cache is an optimization for single runs. This class
-        does not guarantee synchronization between itself and the underlying adapter objects
-        """
-        self.adapter_info_cache = {}
-
-    def refresh_adapter(self, adapter_index):
-        self.adapter_info_cache[adapter_index] = self.transform_adapter_info(adapter_index)
-
-    def clear_cache(self):
-        self.adapter_info_cache.clear()
-
     def transform_adapter_info(self, adapter_index):
         raise NotImplementedError
 
@@ -53,16 +40,14 @@ class RAIDActions(object):
         :return: A dictionary representing the adapter
 
         """
-        if adapter_index not in self.adapter_info_cache:
-            self.refresh_adapter(adapter_index)
-        return self.adapter_info_cache[adapter_index]
+        return self.transform_adapter_info(adapter_index)
 
-    def create(self, adapter, level, drives=None, size=None, array=None):
+    def create(self, adapter_info, level, drives=None, size=None, array=None):
         """
         This method should only be called from the base classes create_logical_volume method.
         This method will be implemented by all Actions classes.
 
-        :param adapter: Adapter index
+        :param adapter_info: Transformed adapter data
         :param level: A supported RAID level
         :type level: str
         :param drives: A zero based, expanded list of participating drive indexes.
@@ -102,8 +87,7 @@ class RAIDActions(object):
         :return:
         """
 
-        # Refresh the cache
-        self.refresh_adapter(adapter)
+        # TODO: Split branch into two functions
 
         adapter_info = self.get_adapter_info(adapter)
 
@@ -139,7 +123,7 @@ class RAIDActions(object):
                 else:
                     converted_size = Size(percent_string.value * available_size)
 
-            return self.create(adapter, level, drives=target_drives, size=converted_size, array=None)
+            return self.create(adapter_info, level, drives=target_drives, size=converted_size, array=None)
 
         if array is None:
             raise RAIDAbstractionException('Either drive targets or an array must be specified')
@@ -166,7 +150,7 @@ class RAIDActions(object):
                 else:
                     raise RAIDAbstractionException('only %FREE is supported for RAID abstraction')
 
-        return self.create(adapter, level, drives=None, size=converted_size, array=array)
+        return self.create(adapter_info, level, drives=None, size=converted_size, array=array)
 
     def delete_logical_drive(self, adapter, array, ld):
         raise NotImplementedError
@@ -279,20 +263,23 @@ class RAIDActions(object):
         return sorted(self.get_selection_from_pattern(drive_selector))
 
     def fetch_selection(self, adapter_index, selection):
-        unassigned_drives = self.get_unassigned(adapter_index)
+        # Build an index of unassigned drives for O(1) matching
+        unassigned_drives = {
+                d['index']: d for d in self.get_unassigned(adapter_index)
+            }
+
         selected_drives = []
+
         for drive in selection:
-            found = False
-            for ud in unassigned_drives:
-                if ud['index'] == drive:
-                    if not ud['status'] == 'OK':
-                        raise RAIDAbstractionException(
-                            'Attempting to initialize a failed drive : {} {}'.format(drive, ud['status']))
-                    selected_drives.append(ud)
-                    found = True
-                    break
-            if not found:
+            ud = unassigned_drives.get(drive)
+            if not ud:
                 raise RAIDAbstractionException('Drive {} is not available'.format(drive))
+
+            if not ud['status'] == 'OK':
+                raise RAIDAbstractionException(
+                    'Attempting to initialize a failed drive : {} {}'.format(
+                        drive, ud['status']))
+            selected_drives.append(ud)
         return selected_drives
 
     def get_drives_from_selection(self, adapter_index, drive_selector):

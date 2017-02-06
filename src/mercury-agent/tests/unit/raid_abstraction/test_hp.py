@@ -73,20 +73,20 @@ class MercurySmartArrayActionsTest(MercuryAgentUnitTest):
         self.assertRaises(RAIDAbstractionException,
                           dummy_actions.transform_configuration, *(modified['configuration'], ))
 
-    def test_get_slot_by_index(self):
-        assert isinstance(self.dummy_actions.get_slot_by_index(0), int)
-        self.assertRaises(RAIDAbstractionException, self.dummy_actions.get_slot_by_index, *(100, ))
+    def test_get_slot(self):
+        assert isinstance(self.dummy_actions.get_slot(self.dummy_actions.get_adapter_info(0)), int)
 
         # Code (Jared) is paranoid and tests for missing vendor info
         temp_actions = DummySmartArrayActions()
         adapter_info = temp_actions.get_adapter_info(2)
         del adapter_info['vendor_info']['slot']
 
-        self.assertRaises(RAIDAbstractionException, temp_actions.get_slot_by_index, *(2,))
+        self.assertRaises(RAIDAbstractionException, temp_actions.get_slot, *(adapter_info,))
 
     def test_get_letter_from_index(self):
-        assert self.dummy_actions.get_letter_from_index(0, 0) == 'A'
-        self.assertRaises(RAIDAbstractionException, self.dummy_actions.get_letter_from_index, *(0, 100))
+        assert self.dummy_actions.get_letter_from_index(self.dummy_actions.get_adapter_info(0), 0) == 'A'
+        self.assertRaises(RAIDAbstractionException, self.dummy_actions.get_letter_from_index, *(
+            self.dummy_actions.get_adapter_info(0), 100))
 
     def test_sort_drives(self):
         drives = [
@@ -137,6 +137,20 @@ class MercurySmartArrayActionsTest(MercuryAgentUnitTest):
         for idx in range(5):
             assert drives[idx]['index'] == idx
 
+        # Free test here testing for missing status
+
+    def test_drive_status_failure(self):
+        drives = [
+            {
+                'port': '2I',
+                'box': '2',
+                'bay': '1',
+                'status': '????',
+                'size': 100
+            }
+        ]
+        self.assertRaises(RAIDAbstractionException, self.dummy_actions.transform_physical_drives, *(drives,))
+
     def test_create(self):
         assert self.dummy_actions.create_logical_drive(0, '10', [10, 11, 12, 13])
         assert self.dummy_actions.create_logical_drive(0, '10', [10, 11, 12, 13], size='10GiB')
@@ -151,3 +165,6 @@ class MercurySmartArrayActionsTest(MercuryAgentUnitTest):
 
     def test_add_spares(self):
         assert self.dummy_actions.add_spares(0, 0, [10, 11])
+
+    def test_get_bad_adapter_info(self):
+        self.assertRaises(RAIDAbstractionException, self.dummy_actions.get_adapter_info, *(100, ))
