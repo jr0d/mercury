@@ -15,16 +15,19 @@
 
 import logging
 
-from mercury.common.transport import SimpleRouterReqService
-from mercury.common.mongo import get_collection, get_connection
+import motor.motor_asyncio
+import zmq
+import zmq.asyncio
+
+from mercury.common.asyncio.transport import AsyncRouterReqService
+from mercury.common.inventory_client import InventoryClient
+from mercury.rpc.active_asyncio import active_state, ping_loop
 from mercury.rpc.configuration import rpc_configuration, get_jobs_collection, get_tasks_collection
-from mercury.rpc.db import ActiveInventoryDBController
 from mercury.rpc.jobs.monitor import Monitor
 from mercury.rpc.jobs.tasks import (
     complete_task,
     update_task
 )
-from mercury.rpc.ping import spawn
 
 log = logging.getLogger(__name__)
 
@@ -34,15 +37,14 @@ RPC_CONFIG_FILE = 'mercury-rpc.yaml'
 # TODO: Rewrite BackEndService as a general purpose message router
 
 
-class BackEndService(SimpleRouterReqService):
-    def __init__(self, active_db_collection, jobs_collection, tasks_collection):
+class BackEndService(AsyncRouterReqService):
+    def __init__(self, inventory_router_url, jobs_collection, tasks_collection):
         registration_service_bind_address = rpc_configuration.get('backend',
                                                                   {}).get('service_url',
                                                                           'tcp://0.0.0.0:9002')
         super(BackEndService, self).__init__(registration_service_bind_address)
 
-        self.active_db_controller = ActiveInventoryDBController(active_db_collection)
-
+        self.inventory_client = InventoryClient(inventory_router_url)
         self.jobs_collection = jobs_collection
         self.tasks_collection = tasks_collection
 
@@ -54,10 +56,6 @@ class BackEndService(SimpleRouterReqService):
         elif message.get('action') == 'task_return':
             return self.task_return(message.get('return_data'))
         return dict(error=True, message='Did not receive appropriate action')
-
-    def spawn_pinger(self, mercury_id, address, port):
-        endpoint = 'tcp://%s:%s' % (address, port)
-        spawn(endpoint, mercury_id, self.active_db_controller)
 
     def reacquire(self):
         existing_documents = self.active_db_controller.query({}, projection={'mercury_id': 1,
@@ -143,12 +141,6 @@ def rpc_backend_service():
     connection = get_connection(server_or_servers=db_configuration.get('rpc_mongo_servers',
                                                                        'localhost'),
                                 replica_set=db_configuration.get('replica_set'))
-
-    active_db_collection = get_collection(db_configuration.get('rpc_mongo_db',
-                                                               'test'),
-                                          db_configuration.get('rpc_mongo_collection',
-                                                               'rpc'),
-                                          connection)
 
     jobs_collection = get_jobs_collection(connection)
     tasks_collection = get_tasks_collection(connection)
