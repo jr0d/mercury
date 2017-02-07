@@ -36,11 +36,13 @@ META_TYPE_BOARD_ASSET_SERIAL = '03'
 
 
 def _build_hash(target, meta_type):
+    """Builds hash from target data and meta_type"""
     digest = hashlib.sha1(target.encode('ascii')).hexdigest()
     return meta_type + digest
 
 
-def get_embedded(inspected_interfaces):
+def _get_embedded(inspected_interfaces):
+    """Gets embedded interfaces from inspected interfaces."""
     embedded_interfaces = []
     for interface in inspected_interfaces:
         _biosdevname = interface['predictable_names'].get('biosdevname', '')
@@ -50,12 +52,15 @@ def get_embedded(inspected_interfaces):
     return embedded_interfaces
 
 
-# methods
 DMI_DISQUALIFIED_STRING = 'To Be Filled By O.E.M.'
 
 
-def dmi_methods(dmi):
+def _dmi_methods(dmi):
+    """Builds a mercury ID for DMI information if possible.
 
+    :param dmi: A dictionary of DMI information from a system.
+    :returns: A string if the right DMI is present, None otherwise.
+    """
     product_uuid = dmi.get('product_uuid')
     chassis_asset_tag = dmi.get('chassis_asset_tag')
     chassis_serial = dmi.get('chassis_serial')
@@ -83,12 +88,22 @@ def dmi_methods(dmi):
 
 
 def generate_mercury_id(inspected_dmi, inspected_interfaces):
-    mercury_id = dmi_methods(inspected_dmi)
+    """Generates a mercury ID based on gathered system information.
+
+    :param inspected_dmi: A dictionary containing DMI information about
+        the system in question.
+    :param inspected_interfaces: A dictionary containing information about
+        interfaces present in the system.
+    :returns: A string representing the mercury ID.
+    :raises MercuryIdException: If not enough information is present to
+        generate an ID.
+    """
+    mercury_id = _dmi_methods(inspected_dmi)
     if mercury_id:
         return mercury_id
     else:
         meta_type = META_TYPE_MAC
-        embedded = get_embedded(inspected_interfaces)
+        embedded = _get_embedded(inspected_interfaces)
         if embedded:
             LOG.debug('Generating mercury ID using embedded interfaces ')
             inspected_interfaces = embedded
@@ -105,14 +120,3 @@ def generate_mercury_id(inspected_dmi, inspected_interfaces):
         raise MercuryIdException('Could not generate MercuryId')
 
     return _build_hash(target, meta_type)
-
-
-if __name__ == '__main__':
-    logging.basicConfig(level=logging.DEBUG)
-    from mercury.inspector.inspectors.dmi import dmi_inspector
-    from mercury.inspector.inspectors.interfaces import interface_inspector
-
-    _dmi = dmi_inspector()
-    _interfaces = interface_inspector()
-
-    print((generate_mercury_id(_dmi, _interfaces)))
