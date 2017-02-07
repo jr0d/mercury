@@ -38,10 +38,9 @@ class Manager(object):
         for idx in range(len(self.workers)):
             if self.workers[idx]['thread'].is_alive():
                 active.append(self.workers[idx])
-            else:
-                # An optimization that usually should be present in a property
-                # "I'm sure you can find a better way to implement this" - Hussam
-                self.workers.pop(idx)
+        # An optimization that usually should be present in a property
+        # "I'm sure you can find a better way to implement this" - Hussam
+        self.workers = active
         return active
 
     def spawn_threads(self):
