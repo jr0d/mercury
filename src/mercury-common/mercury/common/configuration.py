@@ -12,29 +12,58 @@
 #    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
+"""Provides YAML configuration loading functionality for mercury."""
+
 import logging
 import os
 import yaml
 
+
 LOG = logging.getLogger(__name__)
 
-default_search_dirs = ['.', '~/.mercury', '/etc/mercury']
+
+DEFAULT_SEARCH_DIRS = ['.', '~/.mercury', '/etc/mercury']
 
 
-def find_config(f, dirs=None):
-    dirs = dirs or list() + default_search_dirs
+def find_config(filename, dirs=None):
+    """Searches for configuration files.
+
+    :param filename: The filename of the configuration file.
+    :param dirs: A list of filesystem directories to search for the
+        configuration file. Parameter defaults to None, which means a set
+        of default locations will be searched.
+    :returns: string or None -- The full path of the configuration file if
+        found.  None otherwise.
+    """
+    dirs = dirs or list() + DEFAULT_SEARCH_DIRS
     for directory in dirs:
-        full_path = os.path.join(os.path.expanduser(directory), f)
+        full_path = os.path.join(os.path.expanduser(directory), filename)
         if os.path.isfile(full_path):
             return full_path
 
 
-def configuration_from_yaml(path):
-    with open(path) as fp:
-        return yaml.load(fp.read())
+def configuration_from_yaml(filename):
+    """Loads a YAML configuration file.
+
+    :param filename: The filename of the file to load.
+    :returns: dict -- A dictionary representing the YAML configuration file
+        loaded. If the file can't be loaded, then the empty dict is returned.
+    """
+    try:
+        with open(filename) as infile:
+            return yaml.load(infile.read())
+    except IOError:
+        return {}
 
 
 def get_configuration(filename):
+    """Gets and returns the contents of the configuration file as a dict.
+
+    :param filename: The filename of the configuration file to load.
+    :returns: dict -- A dictionary representing the YAML configuration file
+        loaded. If the file was not found or loaded, then returns an empty
+        dict.
+    """
     config_file = find_config(filename)
     if not config_file:
         LOG.warning('%s not found' % filename)
