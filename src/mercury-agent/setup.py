@@ -13,18 +13,18 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-from setuptools import setup
+from setuptools import setup, find_packages
 
-setup(
-    name='mercury-agent',
-    version='0.0.1',
-    packages=['mercury'],
-    url='https://www.rackspace.com',
-    license='',
-    author='Jared Rodriguez',
-    author_email='jared.rodriguez@rackspace.com',
-    description='',
-    install_requires=[
+config = {
+    'name': 'mercury-agent',
+    'version': '0.0.1',
+    'packages': find_packages(),
+    'url': 'https://www.rackspace.com',
+    'license': '',
+    'author': 'Jared Rodriguez',
+    'author_email': 'jared.rodriguez@rackspace.com',
+    'description': '',
+    'install_requires': [
         'pyzmq',
         'msgpack-python',
         'netifaces',
@@ -33,8 +33,11 @@ setup(
         'lxml',
         'press'
     ],
-    entry_points="""
+    'entry_points': """
     [console_scripts]
     mercury_agent = mercury.agent.agent:main
     """,
-)
+}
+
+if __name__ == 'main':
+    setup(**config)
