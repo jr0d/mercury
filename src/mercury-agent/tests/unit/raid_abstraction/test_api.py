@@ -143,3 +143,9 @@ class MercuryRAIDAbstractionAPITest(MercuryAgentUnitTest):
 
         self.assertRaises(RAIDAbstractionException,
                           self.dummy.get_unassigned, *(100, ))  # invalid adapter
+
+    def test_add_index(self):
+        # Tests that indexes are added to drives
+        drives = self.dummy.get_all_drives(0)
+        for idx in range(len(drives)):
+            assert idx == drives[idx]['index']

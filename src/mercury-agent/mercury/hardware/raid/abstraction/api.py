@@ -18,6 +18,25 @@ class RAIDActions(object):
     def transform_adapter_info(self, adapter_index):
         raise NotImplementedError
 
+    def _add_indexes(self, configuration):
+        """
+        This method is called to add drive indexes to transformed configuration. This is necessary
+        because drives are now only present within an adapter configuration, but we need still
+        need abstractly map drives physical location. This is achieved by calling instance.sort_drives
+        on a list of aggregate drives, enumerating them, and storing the enumeration as drive.index
+
+        :param configuration: configuration reference of instance.transform_adapter_info output
+        :return: None
+        """
+
+        drives = [pd for array in configuration['arrays'] for pd in array['physical_drives']]
+
+        drives += (configuration['spares'] + configuration['unassigned'])
+        self.sort_drives(drives)
+
+        for idx, drive in enumerate(drives):
+            drive.update({'index': idx})
+
     def get_adapter_info(self, adapter_index):
         """
         Returns adapter details in a standard format. The driver is responsible for finding
@@ -40,7 +59,9 @@ class RAIDActions(object):
         :return: A dictionary representing the adapter
 
         """
-        return self.transform_adapter_info(adapter_index)
+        adapter_info = self.transform_adapter_info(adapter_index)
+        self._add_indexes(adapter_info['configuration'])
+        return adapter_info
 
     def create(self, adapter_info, level, drives=None, size=None, array=None):
         """
@@ -163,12 +184,11 @@ class RAIDActions(object):
 
     def get_all_drives(self, adapter_index):
         """
-        Get drives while preserving array membership and sort index
-        :param adapter_index:
-        :return:
+        Get drives while preserving array membership
+        :param adapter_index: target adapter
+        :return: drives
+        :return type: list
         """
-
-        # TODO: This is a bit silly, perhaps I should store member and enumeration data during get_adapter_info
         adapter = self.get_adapter_info(adapter_index)
 
         drives = []
@@ -183,9 +203,6 @@ class RAIDActions(object):
         drives += adapter['configuration']['spares'] + adapter['configuration']['unassigned']
 
         self.sort_drives(drives)
-
-        for idx, drive in enumerate(drives):
-            drive.update({'index': idx})
 
         return drives
 
