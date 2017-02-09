@@ -27,7 +27,8 @@ setup(
     install_requires=[
         'PyYAML',
         'msgpack-python',
+        'pymongo',
         'pyzmq',
-        'pymongo'
+        'redis'
     ]
 )
