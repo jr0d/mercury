@@ -10,6 +10,10 @@ log = logging.getLogger(__name__)
 
 class RedisTask(Task):
     def __init__(self, queue_name):
+        """Create a new RedisTask task handler.
+
+        :param queue_name: Name of the queue to fetch the tasks from.
+        """
         super(RedisTask, self).__init__()
 
         self.queue_name = queue_name
@@ -18,6 +22,14 @@ class RedisTask(Task):
         self.redis = redis.Redis()
 
     def fetch(self):
+        """Fetch a task from the queue.
+
+        The format of the message retrieved from the queue is:
+            [queue_name, task_json]
+
+        :returns: dict or None. A dictionary representing the task,
+            or None if no task was found or its format is incorrect.
+        """
         message = self.redis.blpop(self.queue_name, timeout=1)
         if not message:
             return

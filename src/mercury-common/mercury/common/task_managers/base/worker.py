@@ -5,8 +5,15 @@ log = logging.getLogger(__name__)
 
 
 class Worker(object):
-
+    """Worker executing tasks"""
     def __init__(self, task_handler, maximum_requests, maximum_age):
+        """Create a new Worker to execute tasks.
+
+        :param task_handler: Task handler to fetch and execute tasks.
+        :param maximum_requests: Maximum number of tasks this worker can
+            execute.
+        :param maximum_age: Maximum age of the worker.
+        """
         self.maximum_requests = maximum_requests
         self.maximum_age = maximum_age
         self.birth = None
@@ -16,6 +23,11 @@ class Worker(object):
         self.task = task_handler.create()
 
     def start(self):
+        """Start the worker.
+
+        The worker fetches and executes tasks as long as its maximum number
+        of tasks is not reached.
+        """
         self.birth = time.time()
         while self.handled_tasks < self.maximum_requests:
             if self.kill_signal:

@@ -23,6 +23,7 @@ from tests.unit.base import MercuryCommonUnitTest
 
 
 class ManagerTest(MercuryCommonUnitTest):
+    """Tests for the mercury.common.task_managers.base.manager"""
     def setUp(self):
         self.task_handler = task.Task()
         self.fake_manager = manager.Manager(self.task_handler)
@@ -90,3 +91,37 @@ class ManagerTest(MercuryCommonUnitTest):
 
         active = self.fake_manager.active_workers
         self.assertEqual([], active)
+
+    @mock.patch.object(task.Task, 'create')
+    @mock.patch.object(threading.Thread, 'start')
+    @mock.patch.object(threading.Thread, "is_alive")
+    def test_spawn_threads(self, mock_alive, mock_start, mock_task_create):
+        """Test that spawn_threads() creates new workers.
+
+        Total number of workers (existing and created) should be equal
+        to number_of_workers
+        """
+        self.set_active_workers()
+        mock_alive.side_effect = [True, True]
+        expected_call_count = self.fake_manager.number_of_workers - 2
+
+        self.fake_manager.spawn_threads()
+
+        print(len(self.fake_manager.workers))
+        self.assertEqual(self.fake_manager.number_of_workers,
+                         len(self.fake_manager.workers))
+        self.assertEqual(expected_call_count, mock_task_create.call_count)
+        self.assertEqual(expected_call_count, mock_start.call_count)
+
+    @mock.patch.object(manager.Manager, 'kill_all')
+    @mock.patch.object(manager.Manager, 'spawn_threads')
+    def test_manage(self, mock_spawn_threads, mock_kill):
+        """Test manage() method:
+
+        spawn_threads() should be called until KeyboardInterrupt is raised
+        """
+        mock_spawn_threads.side_effect = [None, KeyboardInterrupt]
+        self.fake_manager.manage()
+
+        self.assertEqual(2, mock_spawn_threads.call_count)
+        mock_kill.assert_called_once()

@@ -54,3 +54,11 @@ class WorkerTest(MercuryCommonUnitTest):
         self.fake_worker.task.fetch.assert_not_called()
         self.fake_worker.task.execute.assert_not_called()
         self.assertEqual(1, self.fake_worker.handled_tasks)
+
+    def test_start_no_more_task(self):
+        """Test start() continue fetching tasks if none found at first"""
+        self.fake_worker.task.fetch.side_effect = [None, 'fake_task']
+        self.fake_worker.start()
+        self.assertEqual(2, self.fake_worker.task.fetch.call_count)
+        self.fake_worker.task.execute.assert_called_once()
+        self.assertEqual(1, self.fake_worker.handled_tasks)
