@@ -1,1 +1,379 @@
-[{"configuration": {"arrays": [{"logical_drives": [{"status": "OK", "level": 6, "extra": {"progress": null, "id": 1}, "size": 9800000000}, {"status": "OK", "level": 6, "extra": {"progress": null, "id": 2}, "size": 9800000000}], "extra": {"letter": "A"}, "physical_drives": [{"status": "OK", "extra": {"box": "1", "port": "1I", "bay": "1"}, "type": "SAS", "size": 300000000000}, {"status": "OK", "extra": {"box": "1", "port": "1I", "bay": "2"}, "type": "SAS", "size": 300000000000}, {"status": "OK", "extra": {"box": "1", "port": "1I", "bay": "3"}, "type": "SAS", "size": 300000000000}, {"status": "OK", "extra": {"box": "1", "port": "1I", "bay": "4"}, "type": "SAS", "size": 300000000000}, {"status": "OK", "extra": {"box": "1", "port": "1I", "bay": "5"}, "type": "SAS", "size": 300000000000}, {"status": "OK", "extra": {"box": "1", "port": "1I", "bay": "6"}, "type": "SAS", "size": 300000000000}], "free_space": 1686431000000}], "unassigned": [{"status": "OK", "extra": {"box": "1", "port": "1I", "bay": "7"}, "type": "SAS", "size": 300000000000}, {"status": "OK", "extra": {"box": "1", "port": "1I", "bay": "10"}, "type": "SAS", "size": 300000000000}, {"status": "OK", "extra": {"box": "1", "port": "1I", "bay": "11"}, "type": "SAS", "size": 300000000000}, {"status": "OK", "extra": {"box": "1", "port": "1I", "bay": "12"}, "type": "SAS", "size": 300000000000}, {"status": "OK", "extra": {"box": "1", "port": "1I", "bay": "13"}, "type": "SAS", "size": 300000000000}, {"status": "OK", "extra": {"box": "1", "port": "1I", "bay": "14"}, "type": "SAS", "size": 300000000000}, {"status": "OK", "extra": {"box": "1", "port": "1I", "bay": "15"}, "type": "SAS", "size": 300000000000}, {"status": "OK", "extra": {"box": "1", "port": "1I", "bay": "16"}, "type": "SAS", "size": 300000000000}, {"status": "OK", "extra": {"box": "1", "port": "1I", "bay": "17"}, "type": "SAS", "size": 300000000000}, {"status": "OK", "extra": {"box": "1", "port": "1I", "bay": "18"}, "type": "SAS", "size": 300000000000}, {"status": "OK", "extra": {"box": "1", "port": "1I", "bay": "19"}, "type": "SAS", "size": 300000000000}, {"status": "OK", "extra": {"box": "1", "port": "1I", "bay": "20"}, "type": "SAS", "size": 300000000000}, {"status": "OK", "extra": {"box": "1", "port": "1I", "bay": "21"}, "type": "SAS", "size": 300000000000}, {"status": "OK", "extra": {"box": "1", "port": "1I", "bay": "22"}, "type": "SAS", "size": 300000000000}, {"status": "OK", "extra": {"box": "1", "port": "1I", "bay": "23"}, "type": "SAS", "size": 300000000000}, {"status": "OK", "extra": {"box": "1", "port": "1I", "bay": "24"}, "type": "SAS", "size": 300000000000}, {"status": "OK", "extra": {"box": "1", "port": "1I", "bay": "25"}, "type": "SAS", "size": 300000000000}, {"status": "FAILED", "extra": {"box": "1", "port": "1I", "bay": "26"}, "type": "SAS", "size": 300000000000}], "spares": [{"status": "OK", "extra": {"box": "1", "port": "1I", "bay": "8"}, "type": "SAS", "target": [0], "size": 300000000000}, {"status": "OK", "extra": {"box": "1", "port": "1I", "bay": "9"}, "type": "SAS", "target": [0], "size": 300000000000}]}, "name": "Smart Array P440ar", "vendor_info": {"raid_6_adg_status": "Enabled", "wait_for_cache_room": "Disabled", "express_local_encryption": "False", "controller_mode": "RAID", "negotiated_pcie_data_rate": "PCIe 3.0 x8 (7880 MB/s)", "driver_version": "3.4.4", "cache_module_temperature_c": "32", "surface_analysis_inconsistency_notification": "Disabled", "degraded_performance_optimization": "Disabled", "firmware_version": "4.52", "number_of_ports": "2 Internal only", "latency_scheduler_setting": "Disabled", "slot": "0", "battery/capacitor_count": "1", "inconsistency_repair_policy": "Disabled", "primary_boot_volume": "None", "hardware_revision": "B", "max_parallel_surface_scan_count": "16", "driver_name": "hpsa", "current_parallel_surface_scan_count": "1", "serial_number": "PDNLH0BRH7X32P", "cache_status": "OK", "queue_depth": "Automatic", "total_cache_memory_available": "1.8 GB", "cache_backup_power_source": "Batteries", "secondary_boot_volume": "None", "rebuild_priority": "High", "surface_scan_delay": "3 secs", "monitor_and_performance_delay": "60  min", "parallel_surface_scan_supported": "Yes", "controller_status": "OK", "controller_temperature_c": "44", "post_prompt_timeout": "15 secs", "sanitize_erase_supported": "False", "cache_serial_number": "PDNLH0BRH7X32P", "expand_priority": "Medium", "battery/capacitor_status": "OK", "cache_board_present": "True", "driver_supports_hp_ssd_smart_path": "True", "bus_interface": "PCI", "sata_ncq_supported": "True", "no-battery_write_cache": "Disabled", "spare_activation_mode": "Activate on physical drive failure (default)", "pci_address": "0000:03:00.0", "host_serial_number": "TC51NR9952", "controller_mode_reboot": "Not Required", "drive_write_cache": "Disabled", "current_power_mode": "MaxPerformance", "cache_ratio": "10% Read / 90% Write", "ssd_caching_version": "2", "encryption": "Disabled", "elevator_sort": "Enabled", "ssd_caching_raid5_writeback_enabled": "True", "total_cache_size": "2.0 GB", "surface_scan_mode": "Idle"}, "provider": "hspa"}, {"name": "Dummy #1", "configuration": {"spares": [], "unassigned": [], "arrays": [{"free_space": 1, "logical_drives": [], "physical_drives": []}]}}]
+[
+  {
+    "configuration": {
+      "arrays": [
+        {
+          "logical_drives": [
+            {
+              "status": "OK",
+              "level": 6,
+              "extra": {
+                "progress": null,
+                "id": 1
+              },
+              "size": 9800000000
+            },
+            {
+              "status": "OK",
+              "level": 6,
+              "extra": {
+                "progress": null,
+                "id": 2
+              },
+              "size": 9800000000
+            }
+          ],
+          "extra": {
+            "letter": "A"
+          },
+          "physical_drives": [
+            {
+              "status": "OK",
+              "extra": {
+                "box": "1",
+                "port": "1I",
+                "bay": "1"
+              },
+              "type": "SAS",
+              "size": 300000000000
+            },
+            {
+              "status": "OK",
+              "extra": {
+                "box": "1",
+                "port": "1I",
+                "bay": "2"
+              },
+              "type": "SAS",
+              "size": 300000000000
+            },
+            {
+              "status": "OK",
+              "extra": {
+                "box": "1",
+                "port": "1I",
+                "bay": "3"
+              },
+              "type": "SAS",
+              "size": 300000000000
+            },
+            {
+              "status": "OK",
+              "extra": {
+                "box": "1",
+                "port": "1I",
+                "bay": "4"
+              },
+              "type": "SAS",
+              "size": 300000000000
+            },
+            {
+              "status": "OK",
+              "extra": {
+                "box": "1",
+                "port": "1I",
+                "bay": "5"
+              },
+              "type": "SAS",
+              "size": 300000000000
+            },
+            {
+              "status": "OK",
+              "extra": {
+                "box": "1",
+                "port": "1I",
+                "bay": "6"
+              },
+              "type": "SAS",
+              "size": 300000000000
+            }
+          ],
+          "free_space": 1686431000000
+        }
+      ],
+      "unassigned": [
+        {
+          "status": "OK",
+          "extra": {
+            "box": "1",
+            "port": "1I",
+            "bay": "7"
+          },
+          "type": "SAS",
+          "size": 300000000000
+        },
+        {
+          "status": "OK",
+          "extra": {
+            "box": "1",
+            "port": "1I",
+            "bay": "10"
+          },
+          "type": "SAS",
+          "size": 300000000000
+        },
+        {
+          "status": "OK",
+          "extra": {
+            "box": "1",
+            "port": "1I",
+            "bay": "11"
+          },
+          "type": "SAS",
+          "size": 300000000000
+        },
+        {
+          "status": "OK",
+          "extra": {
+            "box": "1",
+            "port": "1I",
+            "bay": "12"
+          },
+          "type": "SAS",
+          "size": 300000000000
+        },
+        {
+          "status": "OK",
+          "extra": {
+            "box": "1",
+            "port": "1I",
+            "bay": "13"
+          },
+          "type": "SAS",
+          "size": 300000000000
+        },
+        {
+          "status": "OK",
+          "extra": {
+            "box": "1",
+            "port": "1I",
+            "bay": "14"
+          },
+          "type": "SAS",
+          "size": 300000000000
+        },
+        {
+          "status": "OK",
+          "extra": {
+            "box": "1",
+            "port": "1I",
+            "bay": "15"
+          },
+          "type": "SAS",
+          "size": 300000000000
+        },
+        {
+          "status": "OK",
+          "extra": {
+            "box": "1",
+            "port": "1I",
+            "bay": "16"
+          },
+          "type": "SAS",
+          "size": 300000000000
+        },
+        {
+          "status": "OK",
+          "extra": {
+            "box": "1",
+            "port": "1I",
+            "bay": "17"
+          },
+          "type": "SAS",
+          "size": 300000000000
+        },
+        {
+          "status": "OK",
+          "extra": {
+            "box": "1",
+            "port": "1I",
+            "bay": "18"
+          },
+          "type": "SAS",
+          "size": 300000000000
+        },
+        {
+          "status": "OK",
+          "extra": {
+            "box": "1",
+            "port": "1I",
+            "bay": "19"
+          },
+          "type": "SAS",
+          "size": 300000000000
+        },
+        {
+          "status": "OK",
+          "extra": {
+            "box": "1",
+            "port": "1I",
+            "bay": "20"
+          },
+          "type": "SAS",
+          "size": 300000000000
+        },
+        {
+          "status": "OK",
+          "extra": {
+            "box": "1",
+            "port": "1I",
+            "bay": "21"
+          },
+          "type": "SAS",
+          "size": 300000000000
+        },
+        {
+          "status": "OK",
+          "extra": {
+            "box": "1",
+            "port": "1I",
+            "bay": "22"
+          },
+          "type": "SAS",
+          "size": 300000000000
+        },
+        {
+          "status": "OK",
+          "extra": {
+            "box": "1",
+            "port": "1I",
+            "bay": "23"
+          },
+          "type": "SAS",
+          "size": 300000000000
+        },
+        {
+          "status": "OK",
+          "extra": {
+            "box": "1",
+            "port": "1I",
+            "bay": "24"
+          },
+          "type": "SAS",
+          "size": 300000000000
+        },
+        {
+          "status": "OK",
+          "extra": {
+            "box": "1",
+            "port": "1I",
+            "bay": "25"
+          },
+          "type": "SAS",
+          "size": 300000000000
+        },
+        {
+          "status": "FAILED",
+          "extra": {
+            "box": "1",
+            "port": "1I",
+            "bay": "26"
+          },
+          "type": "SAS",
+          "size": 300000000000
+        }
+      ],
+      "spares": [
+        {
+          "status": "OK",
+          "extra": {
+            "box": "1",
+            "port": "1I",
+            "bay": "8"
+          },
+          "type": "SAS",
+          "target": [
+            0
+          ],
+          "size": 300000000000
+        },
+        {
+          "status": "OK",
+          "extra": {
+            "box": "1",
+            "port": "1I",
+            "bay": "9"
+          },
+          "type": "SAS",
+          "target": [
+            0
+          ],
+          "size": 300000000000
+        }
+      ]
+    },
+    "name": "Smart Array P440ar",
+    "vendor_info": {
+      "raid_6_adg_status": "Enabled",
+      "wait_for_cache_room": "Disabled",
+      "express_local_encryption": "False",
+      "controller_mode": "RAID",
+      "negotiated_pcie_data_rate": "PCIe 3.0 x8 (7880 MB/s)",
+      "driver_version": "3.4.4",
+      "cache_module_temperature_c": "32",
+      "surface_analysis_inconsistency_notification": "Disabled",
+      "degraded_performance_optimization": "Disabled",
+      "firmware_version": "4.52",
+      "number_of_ports": "2 Internal only",
+      "latency_scheduler_setting": "Disabled",
+      "slot": "0",
+      "battery/capacitor_count": "1",
+      "inconsistency_repair_policy": "Disabled",
+      "primary_boot_volume": "None",
+      "hardware_revision": "B",
+      "max_parallel_surface_scan_count": "16",
+      "driver_name": "hpsa",
+      "current_parallel_surface_scan_count": "1",
+      "serial_number": "PDNLH0BRH7X32P",
+      "cache_status": "OK",
+      "queue_depth": "Automatic",
+      "total_cache_memory_available": "1.8 GB",
+      "cache_backup_power_source": "Batteries",
+      "secondary_boot_volume": "None",
+      "rebuild_priority": "High",
+      "surface_scan_delay": "3 secs",
+      "monitor_and_performance_delay": "60  min",
+      "parallel_surface_scan_supported": "Yes",
+      "controller_status": "OK",
+      "controller_temperature_c": "44",
+      "post_prompt_timeout": "15 secs",
+      "sanitize_erase_supported": "False",
+      "cache_serial_number": "PDNLH0BRH7X32P",
+      "expand_priority": "Medium",
+      "battery/capacitor_status": "OK",
+      "cache_board_present": "True",
+      "driver_supports_hp_ssd_smart_path": "True",
+      "bus_interface": "PCI",
+      "sata_ncq_supported": "True",
+      "no-battery_write_cache": "Disabled",
+      "spare_activation_mode": "Activate on physical drive failure (default)",
+      "pci_address": "0000:03:00.0",
+      "host_serial_number": "TC51NR9952",
+      "controller_mode_reboot": "Not Required",
+      "drive_write_cache": "Disabled",
+      "current_power_mode": "MaxPerformance",
+      "cache_ratio": "10% Read / 90% Write",
+      "ssd_caching_version": "2",
+      "encryption": "Disabled",
+      "elevator_sort": "Enabled",
+      "ssd_caching_raid5_writeback_enabled": "True",
+      "total_cache_size": "2.0 GB",
+      "surface_scan_mode": "Idle"
+    },
+    "provider": "hspa"
+  },
+  {
+    "name": "Dummy #1",
+    "configuration": {
+      "spares": [],
+      "unassigned": [],
+      "arrays": [
+        {
+          "free_space": 1,
+          "logical_drives": [],
+          "physical_drives": []
+        }
+      ]
+    }
+  }
+]
