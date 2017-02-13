@@ -45,8 +45,14 @@ class SmartArrayActions(RAIDActions):
         :return: vendor_details
         """
         vendor_details = adapter.copy()
+
+        # Configuration is transformed and top level, so remove the vendor configuration
         del vendor_details['configuration']
+
+        # Drives can be found in the top level configuration
         del vendor_details['drives']
+
+        # name is stored top level
         del vendor_details['name']
 
         return vendor_details
