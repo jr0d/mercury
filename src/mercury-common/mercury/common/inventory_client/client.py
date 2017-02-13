@@ -23,19 +23,37 @@ LOG = logging.getLogger(__name__)
 
 
 class InventoryClient(SimpleRouterReqClient):
+    """Client to interact with inventory."""
     @staticmethod
     def raise_reply_error(reply):
-        raise MercuryCritical('Problem talking to inventory service: message = %s, tb = %s' % (
-            reply.get('message'),
-            '\n'.join(reply.get('tb', []))
-        ))
+        """Raise a MercuryCritical exception.
+
+        Called when the client cannot talk to the inventory service.
+        :raises: MercuryCritical.
+        """
+        raise MercuryCritical('Problem talking to inventory service: '
+                              'message = %s, tb = %s' % (
+                                  reply.get('message'),
+                                  '\n'.join(reply.get('tb', []))
+                              ))
 
     def check_and_return(self, reply):
+        """Check a transceiver's reply for errors.
+
+        :param reply: A dictionary containing the transceiver's reply.
+        :returns: The 'response' field of the transceiver's reply.
+        """
         if reply.get('error'):
             self.raise_reply_error(reply)
         return reply['response']
 
     def insert_one(self, device_info):
+        """Insert a new device in inventory.
+
+        :param device_info: A dict containing the new device info.
+        :returns: The 'response' field of the transceiver's reply.
+        :raises: MercuryCritical if 'mercury_id' is missing.
+        """
         mercury_id = device_info.get('mercury_id')
         if not mercury_id:
             raise MercuryCritical('device_info is missing mercury_id')
@@ -47,7 +65,12 @@ class InventoryClient(SimpleRouterReqClient):
         return self.check_and_return(self.transceiver(payload))
 
     def update_one(self, mercury_id, update_data):
+        """Update a device in inventory.
 
+        :param mercury_id: The ID of the device to update.
+        :param update_data: A dict containing the data to update.
+        :returns: The 'response' field of the transceiver's reply.
+        """
         payload = {
             'endpoint': 'update_one',
             'args': [mercury_id],
@@ -57,6 +80,13 @@ class InventoryClient(SimpleRouterReqClient):
         return self.check_and_return(self.transceiver(payload))
 
     def get_one(self, mercury_id, projection=None):
+        """Get a device from inventory.
+
+        :param mercury_id: The ID of the device.
+        :param projection: A dict specifying which fields should be included
+            in the results.
+        :returns: The 'response' field of the transceiver's reply.
+        """
         payload = {
             'endpoint': 'get_one',
             'args': [mercury_id],
@@ -67,6 +97,15 @@ class InventoryClient(SimpleRouterReqClient):
         return self.check_and_return(self.transceiver(payload))
 
     def query(self, query_data, projection=None, limit=0, sort_direction=1):
+        """Query inventory for devices matching query_data.
+
+        :param query_data: A dict to filter the results.
+        :param projection: A dict specifying which fields should be included
+            in the results.
+        :param limit: The maximum number of results to return.
+        :param sort_direction: The sort direction.
+        :returns: The 'response' field of the transceiver's reply.
+        """
         payload = {
             'endpoint': 'query',
             'args': [query_data],
@@ -79,6 +118,11 @@ class InventoryClient(SimpleRouterReqClient):
         return self.check_and_return(self.transceiver(payload))
 
     def delete(self, mercury_id):
+        """Delete a device from inventory.
+
+        :param mercury_id: The ID of the device.
+        :returns: The 'response' field of the transceiver's reply.
+        """
         payload = {
             'endpoint': 'delete',
             'args': [mercury_id]
@@ -86,9 +130,13 @@ class InventoryClient(SimpleRouterReqClient):
         return self.check_and_return(self.transceiver(payload))
 
     def count(self, query_data):
+        """Count how many devices match query_data.
+
+        :param query_data: A dict to filter the results.
+        :returns: The 'response' field of the transceiver's reply.
+        """
         payload = {
             'endpoint': 'count',
             'args': [query_data]
         }
         return self.check_and_return(self.transceiver(payload))
-
