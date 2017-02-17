@@ -21,29 +21,38 @@ from mercury.common.helpers import cli
 
 
 class IPRoute2(object):
+    """Parses IPRoute2 information to allow easy programmatic access."""
     def __init__(self, path='ip'):
-        self.ip_path = cli.find_in_path(path)
-        self.raw_table = self.get_table()
-        self.table = []
-        self.parse_table()
+        """Inspects the ip routing table and stores it for easy access.
 
-    def ip(self, args):
-        command = '%s %s' % (self.ip_path, args)
-        return cli.run(command)
+        :parameter path: A string representing the full path (including the
+            binary/executable name of the `ip` command. Defaults to `ip`.
+
+        :raises Exception: if the output of ip appears to be malformed.
+        """
+        self._ip_path = cli.find_in_path(path)
+        self._raw_table = self._get_table()
+        self._table = []
+        self._parse_table()
+
+    def _get_table(self):
+        return self.ip('route show')
 
     @staticmethod
     def _dzip(l):
         _d = {}
         length = len(l)
         if length % 2:
-            raise Exception('The list length is ODD, cannot unzip')
+            raise Exception('Unexpected output from `ip route` command: %s' %
+                            ' '.join(l))
         for idx in range(0, len(l), 2):
             _d[l[idx]] = l[idx+1]
         return _d
 
-    def parse_table(self):
-        singletons = ['dead', 'onlink', 'pervasive', 'offload', 'notify', 'linkdown']
-        for line in self.raw_table.splitlines():
+    def _parse_table(self):
+        singletons = ['dead', 'onlink', 'pervasive', 'offload', 'notify',
+                      'linkdown']
+        for line in self._raw_table.splitlines():
             if line:
                 line = line.split()
                 route = {'destination': line[0]}
@@ -53,13 +62,22 @@ class IPRoute2(object):
                         line.remove(singleton)
 
                 route.update(self._dzip(line[1:]))
-                self.table.append(route)
+                self._table.append(route)
 
-    def get_table(self):
-        return self.ip('route show')
+    def ip(self, args):
+        """Runs the `ip` command with the supplied args and returns the result.
 
+        :parameter args: A string representing the arguments to pass to the
+            `ip` command.
+        """
+        command = '%s %s' % (self._ip_path, args)
+        return cli.run(command)
 
-if __name__ == '__main__':
-    ip_route = IPRoute2()
-    from pprint import pprint
-    pprint(ip_route.table)
+    @property
+    def table(self):
+        """Gets the ip route table stored by this object.
+
+        :returns: A dict containing the routing table returned by
+            `ip route show`.
+        """
+        return self._table
