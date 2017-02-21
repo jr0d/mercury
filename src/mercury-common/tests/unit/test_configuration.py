@@ -17,6 +17,8 @@
 import os
 import mock
 
+import six
+
 import mercury.common.configuration as config
 from tests.unit.base import MercuryCommonUnitTest
 
@@ -33,7 +35,7 @@ class MercuryConfigurationUnitTests(MercuryCommonUnitTest):
         isfile_mock.side_effect = isfile_return_values
         full_path = config.find_config("test.yaml")
         assert full_path is not None
-        assert isinstance(full_path, basestring)
+        assert isinstance(full_path, six.string_types)
         assert full_path == os.path.join(config.DEFAULT_SEARCH_DIRS[-1],
                                          "test.yaml")
 

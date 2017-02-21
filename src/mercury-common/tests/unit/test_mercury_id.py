@@ -17,6 +17,7 @@
 import itertools
 
 import pytest
+import six
 
 import mercury.common.exceptions as m_exc
 import mercury.common.mercury_id as m_id
@@ -51,16 +52,17 @@ def get_fake_inspected_interfaces(num_interfaces=3):
              range(0, num_interfaces)]]
 
 
+# noinspection PyMethodMayBeStatic
 class MercuryIdUnitTest(MercuryCommonUnitTest):
     """Unit tests for mercury.common.mercury_id module."""
     def test__get_embedded(self):
         """Test _get_embedded()"""
         inspected_interfaces = get_fake_inspected_interfaces()
-        print inspected_interfaces
+        print(inspected_interfaces)
         embedded_interfaces = m_id._get_embedded(inspected_interfaces)
 
         inspected_interfaces[0]['predictable_names']['biosdevname'] = 'what'
-        print inspected_interfaces
+        print(inspected_interfaces)
         should_be_changed_ei = m_id._get_embedded(inspected_interfaces)
 
         assert embedded_interfaces != should_be_changed_ei
@@ -70,13 +72,13 @@ class MercuryIdUnitTest(MercuryCommonUnitTest):
         fake_dmi = get_fake_dmi_dict()
         result = m_id._dmi_methods(fake_dmi)
         assert result is not None
-        assert isinstance(result, basestring)
+        assert isinstance(result, six.string_types)
 
         # Make sure the ID changes given different information.
         fake_dmi['product_uuid'] = 'some_other_uuid'
         new_result = m_id._dmi_methods(fake_dmi)
         assert new_result is not None
-        assert isinstance(result, basestring)
+        assert isinstance(result, six.string_types)
         assert result != new_result
 
     def test__dmi_methods_disqualified(self):
@@ -94,13 +96,12 @@ class MercuryIdUnitTest(MercuryCommonUnitTest):
         fake_dmi['product_uuid'] = None
         result = m_id._dmi_methods(fake_dmi)
         assert result is not None
-        assert isinstance(result, basestring)
+        assert isinstance(result, six.string_types)
 
         fake_dmi['chassis_asset_tag'] = None
         second_result = m_id._dmi_methods(fake_dmi)
         assert second_result is not None
-        assert isinstance(second_result, basestring)
-
+        assert isinstance(second_result, six.string_types)
         assert result != second_result
 
         fake_dmi['board_asset_tag'] = None
@@ -110,10 +111,9 @@ class MercuryIdUnitTest(MercuryCommonUnitTest):
         """Test generate_mercury_id(): Normal cases."""
         inspected_dmi = get_fake_dmi_dict()
         inspected_interfaces = get_fake_inspected_interfaces(3)
-        results = []
+        results = [m_id.generate_mercury_id(inspected_dmi,
+                                            inspected_interfaces)]
         # Should key off of product_uuid
-        results.append(m_id.generate_mercury_id(inspected_dmi,
-                                                inspected_interfaces))
 
         # Same, but with a different result.
         inspected_dmi['product_uuid'] = 'something_else'
@@ -139,7 +139,7 @@ class MercuryIdUnitTest(MercuryCommonUnitTest):
         # Make sure each result looks sane.
         for result in results:
             assert result is not None
-            assert isinstance(result, basestring)
+            assert isinstance(result, six.string_types)
 
         # Make each mercury ID is unique.
         for first, second in itertools.combinations(results, 2):
