@@ -27,12 +27,11 @@ log = logging.getLogger(__name__)
 
 
 def full_req_transceiver(zmq_url, data):
-    """
-    Used when you want to send and close
+    """Used to send data and close connection.
 
-    :param zmq_url:
-    :param data:
-    :return:
+    :param zmq_url: URL for the socket to connect to.
+    :param data: The data to send.
+    :returns: The unpacked response.
     """
     # TODO: Harden this
     # TODO: Add linger and POLLIN support : https://github.com/zeromq/pyzmq/issues/132
@@ -50,6 +49,11 @@ def full_req_transceiver(zmq_url, data):
 
 
 def get_ctx_and_connect_req_socket(zmq_url):
+    """Creates a ZMQ context and a REQ socket.
+
+    :param zmq_url: URL for the socket to connect to.
+    :returns: A tuple containing the ZMQ context and the socket.
+    """
     ctx = zmq.Context()
     # noinspection PyUnresolvedReferences
     socket = ctx.socket(zmq.REQ)
@@ -59,11 +63,17 @@ def get_ctx_and_connect_req_socket(zmq_url):
 
 
 class SimpleRouterReqClient(object):
+    """Base class for a message router client."""
     def __init__(self, zmq_url):
         self.zmq_url = zmq_url
         self.ctx, self.socket = get_ctx_and_connect_req_socket(self.zmq_url)
 
     def transceiver(self, payload):
+        """Sends and receives messages.
+
+        :param payload: A dict representing the message to send.
+        :returns: A string representing the unpacked response.
+        """
         # TODO: Harden this
         # TODO: Add linger and POLLIN support :
         # https://github.com/zeromq/pyzmq/issues/132
@@ -83,8 +93,16 @@ class SimpleRouterReqClient(object):
 
 
 def parse_multipart_message(message):
+    """Parses a ZMQ multipart message.
+
+    Expected format of received message: ['address', '', 'data']
+
+    :param message: The multipart message.
+    :returns: A dict containing the 'address' and 'message' parts
+        of the multipart message, or an empty dict.
+    """
     if len(message) < 3:
-        log.error('Recieved non-multipart message')
+        log.error('Received non-multipart message')
         return {}
 
     address_segment = message[:-1]
@@ -94,16 +112,19 @@ def parse_multipart_message(message):
 
 
 def serialize_addresses(multipart_address):
-    addresses = []
-    for el in multipart_address:
-        if el:
-            addresses.append(el)
+    """Get the addresses from the address segment of a multipart message.
 
-    return addresses
+    :param multipart_address: A list representing the address part of a
+        multipart message (including an empty delimiter).
+    :returns: The list of non-empty addresses.
+    """
+    return [x for x in multipart_address if x]
 
 
 class SimpleRouterReqService(object):
+    """Base class for a message router service."""
     def __init__(self, bind_address):
+        """Creates a new ZMQ context with a ROUTER socket."""
         self.bind_address = bind_address
         self.context = zmq.Context()
         # noinspection PyUnresolvedReferences
@@ -116,6 +137,13 @@ class SimpleRouterReqService(object):
         self.bound = True
 
     def receive(self):
+        """Receives, parses, and unpacks client's messages.
+
+        Format of received message: ['address', '', 'packed_message']
+
+        :returns: A tuple containing the address and the unpacked
+            message parts of the original message.
+        """
         multipart = self.socket.recv_multipart()
 
         parsed_message = parse_multipart_message(multipart)
@@ -124,45 +152,86 @@ class SimpleRouterReqService(object):
             return
 
         try:
-            message = msgpack.unpackb(parsed_message['message'], encoding='utf-8')
+            message = msgpack.unpackb(parsed_message['message'],
+                                      encoding='utf-8')
         except TypeError as type_error:
-            self.send_error(parsed_message['address'], 'Recieved unpacked, non-string type: %s : %s' % (type(packed_message), type_error))
+            self.send_error(parsed_message['address'],
+                            'Received unpacked, non-string type: %s : %s' %
+                            (type(parsed_message), type_error))
             return
         except msgpack.UnpackException as unpack_exception:
-            self.send_error(parsed_message['address'], 'Received invalid request: %s' % str(unpack_exception))
+            self.send_error(parsed_message['address'],
+                            'Received invalid request: %s' %
+                            str(unpack_exception))
             return
 
         return parsed_message['address'], message
 
     def send_error(self, address, message):
+        """Sends an error to a client.
+
+        :param address: A list containing the identity of the client
+            and an empty delimiter.
+        :param message: The error message.
+        """
         data = {'error': True, 'message': message}
         log.error(message)
         self.send(address, data)
 
     def send(self, address, message):
+        """Sends a message to a client.
+
+        Format of sent message: ['address', '', 'packed_message']
+
+        :param address: A list containing the identity of the client
+            and an empty delimiter.
+        :param message: The message.
+        """
         self.socket.send_multipart(address + [msgpack.packb(message)])
 
     def destroy(self):
+        """Terminate a ZMQ context."""
         self.context.destroy()
 
     @staticmethod
     def get_key(key, data):
+        """Gets an item from a dictionary.
+
+        :param key: The key.
+        :param data: A dictionary to search for the key.
+        :returns: The value associated with the key, if it exists.
+        :raises: MercuryClientException if the key is not present.
+        """
         try:
             return data[key]
         except KeyError:
-            raise MercuryClientException('{} is missing from request'.format(key))
+            raise MercuryClientException('{} is missing from request'
+                                         .format(key))
 
     @staticmethod
     def validate_required(required, data):
+        """Validates that a message contains the required data.
+
+        :param required: A list of required keys.
+        :param data: A dict representing the message.
+        :raises: MercuryClientException if the message is missing
+            required data.
+        """
         missing = []
         for key in required:
             if key not in data:
-                missing.append(data)
+                missing.append(key)
 
         if missing:
-            raise MercuryClientException('Message is missing required data: {}'.format(missing))
+            raise MercuryClientException('Message is missing required data: {}'
+                                         .format(missing))
 
     def start(self):
+        """Starts SimpleRouterReqService.
+
+        Format of received messages: ['address', '', 'packed_payload']
+        Format of responses being sent: ['address', '', 'packed_response']
+        """
         if not self.bound:
             self.bind()
 
@@ -180,7 +249,9 @@ class SimpleRouterReqService(object):
             try:
                 response = self.process(message)
             except MercuryClientException as mce:
-                self.send_error(address, 'Encountered client error: {}'.format(mce))
+                self.send_error(address,
+                                'Encountered client error: {}'.format(mce))
+                continue
             except Exception:
                 exec_dict = parse_exception()
                 log.error('process raised an exception and should not have.')
@@ -195,8 +266,5 @@ class SimpleRouterReqService(object):
         raise NotImplementedError
 
     def cleanup(self):
-        """
-        override for more cleanup fun
-        :return:
-        """
+        """Base cleanup() method."""
         self.destroy()
