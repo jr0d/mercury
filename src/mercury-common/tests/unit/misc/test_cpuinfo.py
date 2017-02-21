@@ -434,7 +434,7 @@ class MercuryMiscCpuinfoUnitTests(MercuryCommonUnitTest):
         for core in cores_zero:
             assert isinstance(core, dict)
 
-        assert self.cpuinfo_obj.processor_ids == range(0, 12)
+        assert self.cpuinfo_obj.processor_ids == list(range(0, 12))
         assert self.cpuinfo_obj.logical_core_count == 12
         assert self.cpuinfo_obj.total_physical_core_count == 6
         assert self.cpuinfo_obj.cores_per_processor == 6
@@ -442,7 +442,7 @@ class MercuryMiscCpuinfoUnitTests(MercuryCommonUnitTest):
         lpi = self.cpuinfo_obj.logical_processor_index
         assert isinstance(lpi, dict)
         assert len(lpi.keys()) == 12
-        assert lpi.keys() == range(0, 12)
+        assert list(lpi.keys()) == list(range(0, 12))
 
         core_zi = self.cpuinfo_obj.core_zero_index
         assert isinstance(core_zi, dict)
