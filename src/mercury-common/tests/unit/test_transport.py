@@ -197,8 +197,12 @@ class SimpleRouterReqServiceUnitTest(MercuryCommonUnitTest):
 
         with pytest.raises(MercuryClientException) as exc_info:
             self.req_service.validate_required(required, data)
-        assert exc_info.value.message == (
-            "Message is missing required data: ['key2']")
+            if hasattr(exc_info.value, 'message'):
+                assert exc_info.value.message == (
+                    "Message is missing required data: ['key2']")
+            else:
+                assert exc_info.value.msg == \
+                       "Message is missing required data: ['key2']"
 
     def test_start_with_exceptions(self):
         """Test start().
