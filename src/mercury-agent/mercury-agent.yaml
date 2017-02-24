@@ -14,7 +14,8 @@ remote:
 
 hardware:
   raid:
-    megacli_path: /usr/local/sbin/megacli
+    storcli_path: storcli64
+    hpssacli_path: hpssacli
 
 press_environment:
   paths:

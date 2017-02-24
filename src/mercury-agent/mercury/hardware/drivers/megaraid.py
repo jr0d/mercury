@@ -18,43 +18,62 @@
 
 import logging
 
+from mercury.agent.configuration import agent_configuration
+
 from mercury.hardware import platform_detection
 from mercury.hardware.drivers import driver, PCIDriverBase
-from mercury.hardware.raid.abstraction.api import RAIDActions
-from mercury.hardware.raid.interfaces.megaraid.megacli import \
-    MegaCLI, count_adapters
+from mercury.hardware.raid.abstraction.api import RAIDActions, RAIDAbstractionException
+from mercury.hardware.raid.interfaces.megaraid.storcli import Storcli, StorcliException
 
 log = logging.getLogger(__name__)
 
 
-def get_lsi_object(handler, adapter):
-    from mercury.agent.configuration import agent_configuration
-
-    kwargs = {'adapter': adapter}
-    megacli_path = agent_configuration.get('hardware', {}).get('raid', {}).get('megacli_path')
-    if megacli_path:
-        log.debug('Using megacli_path: %s' % megacli_path)
-        kwargs['megacli_path'] = megacli_path
-
-    return handler(**kwargs)
-
-
 class MegaRAIDActions(RAIDActions):
-    """LSI RAIDActions implementation.
+    def __init__(self):
+        """ MegaRAID support for RAID abstraction.
+        This class is using the mercury native storcli interface. The interface is very thin.
+        As such, vendor_info may need a little more cleanup in comparison to SmartArray
+        """
+        super(MegaRAIDActions, self).__init__()
+        self.storcli = Storcli(binary_path=agent_configuration.get(
+            'hardware', {}).get(
+            'raid', {}).get(
+            'storcli_path') or 'storcli')
 
-      ..note::
+    def get_vendor_info(self, adapter):
+        vendor_info = {
+            'general': adapter['Basics'],
+            'version_info': adapter['Version'],
+            'bus': adapter['Bus'],
+            'status': adapter['status'],
+            'supported_adapter_ops': adapter['Supported Adapter Operations'],
+            'supported_pd_ops': adapter['Supported PD Operations'],
+            'supported_vd_ops': adapter['Supported VD Operations']
+        }
 
-        The underlying interface, MegaCLI does not support multiple adapters,
-        some hackery is needed.
-    """
-    pass
+    def transform_adapter_info(self, adapter_index):
+        """
+        Transforms Storcli.controllers[adapter_index] into standard form
+        :param adapter_index:
+        :return: Adapter details in standard from
+        """
+        try:
+            adapter = self.storcli.controllers[adapter_index]
+        except IndexError:
+            raise RAIDAbstractionException('Controller does not exist')
+
+        adapter_details = {
+            'name': adapter['Basics']['Model'],
+            'provider': 'megaraid',
+            'vendor_info': self.get_vendor_info(adapter)
+        }
 
 
 @driver()
 class MegaRaidSASDriver(PCIDriverBase):
     name = 'megaraid_sas'  # named after the kernel module
     driver_type = 'raid'
-    _handler = MegaCLI
+    _handler = Storcli
     wants = 'pci'
 
     @classmethod
@@ -72,16 +91,10 @@ class MegaRaidSASDriver(PCIDriverBase):
         return pci_device['driver'] == cls.name
 
     def inspect(self):
-        adapters = list()
-        for a in range(count_adapters()):
-            raid_handler = get_lsi_object(self._handler, adapter=a)
-            _a = {
-                    'adapter_handler': self.name,
-                    'drives': raid_handler.pdisks,
-                    'total_drives': raid_handler.count_physical_disks(),
-                    'total_size': 0,  # This field is mostly useless, see spec
-                    'configuration': {'arrays': raid_handler.vdisks}
-            }
-            adapters.append(_a)
+        adapters = []
+        for controller in self.handler.controllers:
+            adapters.append({
+
+            })
 
         return adapters

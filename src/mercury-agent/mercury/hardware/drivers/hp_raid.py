@@ -15,6 +15,8 @@
 
 from hpssa.hpssa import HPSSA
 
+from mercury.agent.configuration import agent_configuration
+
 from mercury.hardware import platform_detection
 from mercury.hardware.drivers import driver, PCIDriverBase
 from mercury.hardware.raid.abstraction.api import RAIDActions, RAIDAbstractionException
@@ -36,7 +38,10 @@ class SmartArrayActions(RAIDActions):
 
     def __init__(self):
         super(SmartArrayActions, self).__init__()
-        self.hpssa = HPSSA()
+        self.hpssa = HPSSA(hpssa_path=agent_configuration.get(
+            'hardware', {}).get(
+            'raid', {}).get(
+            'hpssacli_path') or 'hpssacli')
 
     @staticmethod
     def get_vendor_info(adapter):
@@ -164,10 +169,11 @@ class SmartArrayActions(RAIDActions):
         return our_array['extra']['letter']
 
     def transform_adapter_info(self, adapter_index):
-        """Transforms python-hpssa adapter information into the standard format expected
+        """
+        Transforms python-hpssa adapter information into the standard format expected
         by RAIDActions
         :param adapter_index: list index of the adapter we are targeting
-        :return:
+        :return: Adapter details in standard form
         """
         try:
             adapter = self.hpssa.adapters[adapter_index]
