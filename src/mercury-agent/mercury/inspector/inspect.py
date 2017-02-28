@@ -46,8 +46,9 @@ def inspect():
     for driver in registered_drivers:
         _wants = driver['class'].wants
 
-        if driver['class'].probe(_wants and collected[_wants] or collected):
-            set_driver_cache(driver)
+        devices = driver['class'].probe(_wants and collected[_wants] or collected)
+        if devices:
+            set_driver_cache(driver, devices)
 
     for inspector, f in late_inspectors:
         collected[inspector] = f(collected)

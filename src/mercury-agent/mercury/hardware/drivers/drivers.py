@@ -18,7 +18,12 @@ class DriverBase(object):
     _handler = None
     wants = ''
 
-    def __init__(self):
+    def __init__(self, devices):
+        """
+        :param devices: Devices handled by the driver
+        """
+        self.devices = devices
+
         if self._handler:
             self.handler = self._handler()
         else:
@@ -77,7 +82,13 @@ def get_subsystem_drivers(subsystem):
     return drivers
 
 
-def set_driver_cache(d):
+def set_driver_cache(d, devices):
+    """
+    Instantiate the driver and store it for later
+    :param d: The driver to instantiate
+    :param devices: return of the probe
+    :return:
+    """
     if not driver_class_cache.get(d['name']):
-        log.info('Initializing driver: %s' % d['name'])
-        driver_class_cache[d['name']] = d['class']()
+        log.info('Initializing d: %s' % d['name'])
+        driver_class_cache[d['name']] = d['class'](devices)
