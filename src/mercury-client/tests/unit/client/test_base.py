@@ -1,3 +1,19 @@
+# Copyright 2017 Rackspace
+# All Rights Reserved.
+#
+#    Licensed under the Apache License, Version 2.0 (the "License");
+#    you may not use this file except in compliance with the License.
+#    You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS,
+#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#    See the License for the specific language governing permissions and
+#    limitations under the License.
+"""Module to unit test mercury.client.base"""
+
 import mock
 import requests
 
@@ -6,7 +22,7 @@ from tests.unit import base as test_base
 
 
 class TestClientBase(test_base.MercuryClientUnitTest):
-    
+
     def setUp(self):
         super(TestClientBase, self).setUp()
         self.target = 'test_target'
@@ -80,8 +96,42 @@ class TestClientBase(test_base.MercuryClientUnitTest):
     def test_query_projections(self):
         self.interface_base.post = mock.Mock()
         result = self.interface_base.query('<<insert_query_here>>',
-            projection=['some', 'test', 'data'])
+                                           projection=['some', 'test', 'data'])
 
         self.interface_base.post.assert_called_with(
             '/query', data={'query': '<<insert_query_here>>'},
             params={'projection': 'some,test,data'}, extra_headers=None)
+
+    def test_check_error(self):
+        expected_data = {'response': 'json'}
+        expected_code = 404
+        expected_return_value = {
+            'code': expected_code,
+            'data': expected_data,
+            'error': True
+        }
+
+        @client_base.check_error
+        def _check_error_raises_HTTPError():
+            mocked_httperror = requests.exceptions.HTTPError("Mocked error.")
+            mocked_httperror.response = mock.Mock()
+            mocked_httperror.response.status_code = expected_code
+            mocked_httperror.response.json.return_value = expected_data
+            raise mocked_httperror
+
+        assert _check_error_raises_HTTPError() == expected_return_value
+
+        expected_text = 'hello'
+
+        @client_base.check_error
+        def _check_error_raises_ValueError():
+            mocked_httperror = requests.exceptions.HTTPError("Mocked error.")
+            mocked_httperror.response = mock.Mock()
+            mocked_httperror.response.status_code = expected_code
+            mocked_httperror.response.json.side_effect = ValueError("Crud.")
+            mocked_httperror.response.text = expected_text
+            raise mocked_httperror
+
+        expected_return_value['data'] = expected_text
+
+        assert _check_error_raises_ValueError() == expected_return_value
