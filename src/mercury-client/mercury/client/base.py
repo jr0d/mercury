@@ -4,6 +4,7 @@ import requests
 
 
 def check_error(f):
+    """Decorator provides consistent formatting for client http errors."""
     def wrapper(*args, **kwargs):
         try:
             return f(*args, **kwargs)
