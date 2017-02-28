@@ -40,15 +40,17 @@ class MegaRAIDActions(RAIDActions):
             'raid', {}).get(
             'storcli_path') or 'storcli')
 
-    def get_vendor_info(self, adapter):
-        vendor_info = {
+    @staticmethod
+    def get_vendor_info(adapter):
+        return {
             'general': adapter['Basics'],
             'version_info': adapter['Version'],
             'bus': adapter['Bus'],
-            'status': adapter['status'],
+            'status': adapter['Status'],
             'supported_adapter_ops': adapter['Supported Adapter Operations'],
             'supported_pd_ops': adapter['Supported PD Operations'],
-            'supported_vd_ops': adapter['Supported VD Operations']
+            'supported_vd_ops': adapter['Supported VD Operations'],
+            'bbu_info': adapter['BBU_Info']
         }
 
     def transform_adapter_info(self, adapter_index):
@@ -68,12 +70,14 @@ class MegaRAIDActions(RAIDActions):
             'vendor_info': self.get_vendor_info(adapter)
         }
 
+        return adapter_details
+
 
 @driver()
 class MegaRaidSASDriver(PCIDriverBase):
     name = 'megaraid_sas'  # named after the kernel module
     driver_type = 'raid'
-    _handler = Storcli
+    _handler = MegaRAIDActions
     wants = 'pci'
 
     @classmethod
@@ -92,9 +96,8 @@ class MegaRaidSASDriver(PCIDriverBase):
 
     def inspect(self):
         adapters = []
-        for controller in self.handler.controllers:
-            adapters.append({
 
-            })
+        for idx in range(len(self.devices)):
+            adapters.append(self.handler.get_adapter_info(idx))
 
         return adapters
