@@ -29,6 +29,24 @@ log = logging.getLogger(__name__)
 
 
 class MegaRAIDActions(RAIDActions):
+    # Drives have many more statuses than we care about
+    # This information will be preserved in extra
+    drive_status_map = {
+        'DHS': 'OK',  # Dedicated Hotspare
+        'UGood': 'OK',
+        'GHS': 'OK',  # Global Hotspare
+        'UBad': 'Failed',
+        'Onln': 'OK',
+        'Offln': 'Failed'
+    }
+
+    logical_drive_map = {
+        'Rec': 'RECOVERING',
+        'Pdgd': 'DEGRADED',
+        'dgrd': 'DEGRADED',
+        'OPtl': 'OK'
+    }
+
     def __init__(self):
         """ MegaRAID support for RAID abstraction.
         This class is using the mercury native storcli interface. The interface is very thin.
@@ -52,6 +70,12 @@ class MegaRAIDActions(RAIDActions):
             'supported_vd_ops': adapter['Supported VD Operations'],
             'bbu_info': adapter['BBU_Info']
         }
+
+    def parse_topology(self, topology):
+        pass
+
+    def parse_vd_list(self, vd_list):
+        pass
 
     def transform_adapter_info(self, adapter_index):
         """

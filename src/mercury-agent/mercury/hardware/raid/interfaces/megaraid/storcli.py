@@ -20,6 +20,8 @@ class Storcli(object):
         :param binary_path: Location (relative, in shell path, or absolute) of storcli binary
         """
         self.storecli_path = cli.find_in_path(binary_path)
+        if not self.storecli_path:
+            raise StorcliException('storcli binary is missing')
 
     def run(self, cmd, ignore_error=False):
         """ Run a storecli command
