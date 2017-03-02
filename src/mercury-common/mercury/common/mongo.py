@@ -12,6 +12,7 @@
 #    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
+"""Provides MongoDB connection functionalities for Mercury."""
 
 import logging
 import pymongo
@@ -21,6 +22,13 @@ log = logging.getLogger(__name__)
 
 
 def get_connection(server_or_servers=None, replica_set=None):
+    """Creates a new MongoDB client.
+
+    :param server_or_servers: Hostname / MongoDB URI or list of hostnames /
+        URIs for the client to connect to.
+    :param replica_set: The name of the replica set to connect to.
+    :returns: A MongoClient instance.
+    """
     servers = server_or_servers
     if servers is not None:
         if not isinstance(servers, list):
@@ -36,7 +44,15 @@ class MongoCollection(object):
                  collection,
                  server_or_servers=None,
                  replica_set=None):
+        """Get a collection from a Mongo database.
 
+        :param database: The name of the database containing the collection.
+        :param collection: The name of the collection.
+        :param server_or_servers: Hostname / MongoDB URI or list of hostnames /
+            URIs for the client to connect to.
+        :param replica_set: The name of the replica set to connect to.
+        :raises: InvalidName if the database or collection name is invalid.
+        """
         self.servers = server_or_servers
         self.replica_set = replica_set
         self.database_name = database
@@ -50,14 +66,29 @@ class MongoCollection(object):
         self.collection = self.db[self.collection_name]
 
 
-def get_collection(database, collection, connection=None, server_or_servers=None, replica_set=None):
-        database_name = database
-        collection_name = collection
+def get_collection(database,
+                   collection,
+                   connection=None,
+                   server_or_servers=None,
+                   replica_set=None):
+    """Get a collection from a Mongo database.
 
-        if not connection:
-            connection = get_connection(server_or_servers, replica_set)
+    :param database: The name of the database containing the collection.
+    :param collection: The name of the collection.
+    :param connection: A MongoClient instance.
+    :param server_or_servers: Hostname / MongoDB URI or list of hostnames /
+        URIs for the client to connect to.
+    :param replica_set: The name of the replica set to connect to.
+    :returns: A MongoDB collection.
+    :raises: InvalidName if the database or collection name is invalid.
+    """
+    database_name = database
+    collection_name = collection
 
-        log.info('database: %s' % database_name)
-        db = connection[database_name]
-        log.info('collection: %s' % collection_name)
-        return db[collection_name]
+    if not connection:
+        connection = get_connection(server_or_servers, replica_set)
+
+    log.info('database: %s' % database_name)
+    db = connection[database_name]
+    log.info('collection: %s' % collection_name)
+    return db[collection_name]
