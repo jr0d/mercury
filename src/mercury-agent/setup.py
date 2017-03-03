@@ -31,7 +31,8 @@ setup(
         'pyudev',
         'python-hpssa',
         'lxml',
-        'press'
+        'press',
+        'six'
     ],
     entry_points="""
     [console_scripts]
