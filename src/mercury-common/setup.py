@@ -27,10 +27,8 @@ setup(
     install_requires=[
         'PyYAML',
         'msgpack-python',
-        'netifaces',
         'pymongo',
         'pyzmq',
         'redis'
-        'six'
     ]
 )

@@ -12,37 +12,67 @@
 #    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
-
+"""Provides functionality for parsing output from `lspci`."""
 import shlex
+import six
 import subprocess
 
-
+# Class codes used by lspci.
 ETHERNET_CONTROLLER = '0200'
 NETWORK_CONTROLLER = '0280'
 FIBRE_CHANNEL = '0c04'
 RAID_CONTROLLER = '0104'
 
 
+# TODO: Move to mercury.common.exceptions
 class LSPCIError(Exception):
+    """Raised when something goes wrong related to the `lspci` command."""
     pass
 
 
 def lspci_run(arguments='-mm'):
-    """
-    Runs lspci and returns the output.
+    """Runs lspci and returns the output.
+
     :param arguments: Arguments you want to pass to lspci default = '-mm'
     :return: stdout from lspci command
     :except: LSPCIException on non-zero return code
     """
     cmd = shlex.split('lspci ' + arguments)
 
-    p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    out, err = p.communicate()
+    sub_proc = subprocess.Popen(cmd, stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE)
+    out, err = sub_proc.communicate()
 
-    if p.returncode:
-        raise LSPCIError('[%d] %s' % (p.returncode, err))
+    if sub_proc.returncode:
+        raise LSPCIError('[%d] %s' % (sub_proc.returncode, err))
+
+    if isinstance(out, six.binary_type):
+        # noinspection PyUnresolvedReferences
+        out = out.decode('utf-8')
 
     return out
+
+
+def _get_lspci_id(line):
+    """Read a hex ID of the form [nnnn] from an `lspci` line.
+
+    Gets an id from a line that looks like this:
+        Intel Corporation [8086]
+    where 8086 is the id
+    It should also work if something like this happens:
+    2nd Generation Core Processor Family DRAM [not_and_id] Controller [0104]
+
+    :param line: A string representing a line of lspci output.
+    :return: A string representing the ID.
+    """
+    hush = line.split('[')
+    return hush[-1].strip(']')
+
+
+def _get_lspci_name(line):
+    """Reads and returns a 'name' from a line of `lspci` output."""
+    hush = line.split('[')
+    return '['.join(hush[0:-1]).strip()
 
 
 def parse_nnvmmk():
@@ -64,29 +94,8 @@ def parse_nnvmmk():
     :except:
     """
     out = lspci_run('-nnvmmk')
-
     pcibus = list()
 
-    def get_id(line):
-        """
-        Gets an id from a line that looks like this:
-            Intel Corporation [8086]
-        where 8086 is the id
-        It should also work if something like this happens:
-        2nd Generation Core Processor Family DRAM [not_and_id] Controller [0104]
-        :param line:
-        :return:
-        """
-        hush = line.split('[')
-        if not len(hush):
-            return None
-        return hush[-1].strip(']')
-
-    def get_name(line):
-        hush = line.split('[')
-        return '['.join(hush[0:-1]).strip()
-
-    out = out.decode()
     blocks = out.split('\n\n')
 
     for block in blocks:
@@ -95,38 +104,17 @@ def parse_nnvmmk():
             split_element = element.split(':')
             key = split_element[0]
             data = ':'.join(split_element[1:]).strip()
-            if key == 'Slot':
-                device['slot'] = data
+            if key in ('Slot', 'ProgIf', 'Driver'):
+                device[key.lower()] = data
                 continue
-            if key == 'Class':
-                device['class_name'] = get_name(data)
-                device['class_id'] = get_id(data)
-                continue
-            if key == 'Vendor':
-                device['vendor_name'] = get_name(data)
-                device['vendor_id'] = get_id(data)
-                continue
-            if key == 'Device':
-                device['device_name'] = get_name(data)
-                device['device_id'] = get_id(data)
-                continue
-            if key == 'SVendor':
-                device['svendor_name'] = get_name(data)
-                device['svendor_id'] = get_id(data)
-                continue
-            if key == 'SDevice':
-                device['sdevice_name'] = get_name(data)
-                device['sdevice_id'] = get_id(data)
+            if key in ('Class', 'Vendor', 'Device', 'SVendor', 'SDevice'):
+                key_prefix = key.lower()
+                device[key_prefix + '_name'] = _get_lspci_name(data)
+                device[key_prefix + '_id'] = _get_lspci_id(data)
                 continue
             if key == 'Rev':
                 device['revision'] = data
                 continue
-            if key == 'ProgIf':
-                device['progif'] = data
-                continue
-            if key == 'Driver':
-                device['driver'] = data
-
         if not device:
             continue
         pcibus.append(device)
@@ -135,6 +123,7 @@ def parse_nnvmmk():
 
 
 class PCIDevice(dict):
+    """Represents information about a PCI Device as returned by `lspci`."""
     def __init__(self,
                  slot=None,
                  class_id=None,
@@ -150,6 +139,7 @@ class PCIDevice(dict):
                  revision=None,
                  progif=None,
                  driver=None):
+        """Create a PCIDevice. Checks for a few required fields."""
         if None in [slot, class_id, vendor_id, device_id]:
             raise LSPCIError(
                 'slot, class_id, vendor_id, and device_id are required.')
@@ -172,7 +162,7 @@ class PCIDevice(dict):
     def __getattr__(self, key):
         try:
             return self[key]
-        except AttributeError:
+        except (KeyError, AttributeError):
             return None
 
     def __setattr__(self, key, value):
@@ -214,11 +204,17 @@ class PCIBus(list):
     def get_ethernet_devices(self):
         return self.get_devices_by_class(ETHERNET_CONTROLLER)
 
+    def has_ethernet(self):
+        return self.has_device_class(ETHERNET_CONTROLLER)
+
     def get_network_devices(self):
         return self.get_devices_by_class(NETWORK_CONTROLLER)
 
+    def has_network(self):
+        return self.has_device_class(NETWORK_CONTROLLER)
+
+    def get_raid_bus_controller_devices(self):
+        return self.get_devices_by_class(RAID_CONTROLLER)
+
     def has_raid_bus_controller(self):
         return self.has_device_class(RAID_CONTROLLER)
-
-    def get_raid_bus_controllers(self):
-        return self.get_devices_by_class(RAID_CONTROLLER)
