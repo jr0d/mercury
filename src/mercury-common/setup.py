@@ -30,5 +30,6 @@ setup(
         'pymongo',
         'pyzmq',
         'redis'
+        'six'
     ]
 )
