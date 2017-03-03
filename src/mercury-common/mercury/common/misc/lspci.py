@@ -14,8 +14,8 @@
 #    limitations under the License.
 """Provides functionality for parsing output from `lspci`."""
 import shlex
+import six
 import subprocess
-
 
 # Class codes used by lspci.
 ETHERNET_CONTROLLER = '0200'
@@ -45,6 +45,10 @@ def lspci_run(arguments='-mm'):
 
     if sub_proc.returncode:
         raise LSPCIError('[%d] %s' % (sub_proc.returncode, err))
+
+    if isinstance(out, six.binary_type):
+        # noinspection PyUnresolvedReferences
+        out = out.decode('utf-8')
 
     return out
 
@@ -90,7 +94,6 @@ def parse_nnvmmk():
     :except:
     """
     out = lspci_run('-nnvmmk')
-
     pcibus = list()
 
     blocks = out.split('\n\n')
