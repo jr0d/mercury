@@ -13,8 +13,8 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-import os
 import logging
+import os
 import shlex
 import subprocess
 
@@ -28,6 +28,7 @@ class CLIResult(str):
         return str.__new__(cls, object=cls.__decode(args[0]))
 
     def __init__(self, stdout='', stderr='', returncode=None):
+        """Constructs a new CLIResult containing a command result."""
         self._stdout = stdout
         self._stderr = stderr
         self.returncode = returncode
@@ -64,61 +65,70 @@ class CLIResult(str):
 
 
 class CLIException(Exception):
-    """
-    Exception used by cli.run function
-    """
+    """Exception used by cli.run function."""
     pass
 
 
-def run(command, bufsize=1048567, dry_run=False, raise_exception=False, ignore_error=False,
-        quiet=False, env=None, _input=''):
-    """Runs a command and stores the important bits in an attribute string.
+def run(command,
+        bufsize=1048567,
+        dry_run=False,
+        raise_exception=False,
+        ignore_error=False,
+        quiet=False,
+        env=None,
+        _input=None):
+    """Runs a command and returns its result.
 
+    The command result (stdout, stderr, and return code) is stored
+    in a CLIResult instance.
 
     :param command: Command to execute.
     :type command: str.
-    :param raise_exception:
-    :param ignore_error:
-    :param env:
-    :param quiet:
     :param bufsize: Buffer line size.
     :type bufsize: int.
-    :param _input: Pass data into stdin fd
-
     :param dry_run: Should we perform a dry run of the command.
     :type dry_run: bool.
+    :param raise_exception: Boolean indicating whether to raise an exception
+        when an error occurs.
+    :param ignore_error: Boolean indicating if errors should be ignored.
+    :param env: Dict containing variables to add to the environment.
+    :param quiet: Boolean indicating if debug logs should be silenced.
+    :param _input: Pass data into stdin fd
 
     :returns: :func:`mercury_CLIResult`.
-
     """
     if not quiet:
-        log.debug('Running: %s' % command)
+        log.debug('Running: {}'.format(command))
     our_env = os.environ.copy()
     our_env.update(env or dict())
     cmd = shlex.split(str(command))
     stdin = _input and subprocess.PIPE or None
     if not dry_run:
-        p = subprocess.Popen(cmd,
-                             stdin=stdin,
-                             stdout=subprocess.PIPE,
-                             stderr=subprocess.PIPE,
-                             bufsize=bufsize,
-                             env=our_env)
-        out, err = p.communicate()
-
-        ret = p.returncode
+        try:
+            p = subprocess.Popen(cmd,
+                                 stdin=stdin,
+                                 stdout=subprocess.PIPE,
+                                 stderr=subprocess.PIPE,
+                                 bufsize=bufsize,
+                                 env=our_env)
+            out, err = p.communicate(input=_input)
+            ret = p.returncode
+        except (OSError, ValueError) as e:
+            error = "Failed while executing '{}': {}".format(' '.join(cmd), e)
+            log.error(error)
+            if raise_exception:
+                raise CLIException(error)
+            return CLIResult('', error, 1)
     else:
         out, err, ret = '', '', 0
 
     if not quiet:
-        log.debug('Return Code: %d' % ret)
+        log.debug('Return Code: {}'.format(ret))
         if out:
-            log.debug('stdout: \n%s' % out.strip())
+            log.debug('stdout: \n{}'.format(out.strip()))
     if ret and not ignore_error:
-        log.error('Return: %d running: %s stdout: %s\nstderr: \n%s' % (ret,
-                                                                       command,
-                                                                       out.strip(),
-                                                                       err.strip()))
+        log.error('Return: {} running: {} stdout: {}\nstderr: \n{}'
+                  .format(ret, command, out.strip(), err.strip()))
         if raise_exception:
             raise CLIException(err)
 
@@ -128,6 +138,13 @@ def run(command, bufsize=1048567, dry_run=False, raise_exception=False, ignore_e
 
 
 def find_in_path(filename):
+    """Find a file by its absolute path or in $PATH.
+
+    :param filename: The name of the file to find. If filename is an absolute
+        path, this will check the file exists. Otherwise, this will look for
+        the file in $PATH.
+    :returns: The absolute path of the file if it's found, None if not found.
+    """
     if os.path.split(filename)[0]:
         _temp_path = os.path.realpath(os.path.expanduser(filename))
         if os.path.exists(_temp_path):
