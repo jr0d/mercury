@@ -12,13 +12,13 @@
 #    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
-"""Module to unit test mercury.common.misc.lspci"""
+"""Module to unit test mercury.inspector.hwlib.lspci"""
 
 import mock
 import pytest
 
-import mercury.common.misc.lspci as lspci
-from tests.unit.base import MercuryCommonUnitTest
+import mercury.inspector.hwlib.lspci as lspci
+from tests.unit.base import MercuryAgentUnitTest
 
 EXAMPLE_LSPCI_OUTPUT = """Slot:	00:00.0
 Class:	Host bridge [0600]
@@ -218,9 +218,9 @@ def get_fake_pcidevice_required_args(slot='00:00.0', class_id='beef',
     }
 
 
-class MercuryMiscLspciUnitTests(MercuryCommonUnitTest):
-    """Unit tests for mercury.common.misc.lspci"""
-    @mock.patch('mercury.common.misc.lspci.subprocess.Popen')
+class MercuryMiscLspciUnitTests(MercuryAgentUnitTest):
+    """Unit tests for mercury.inspector.hwlib.lspci"""
+    @mock.patch('mercury.inspector.hwlib.lspci.subprocess.Popen')
     def setUp(self, popen_mock):
         """Setup a PCIBus object for each test."""
         popen_mock.return_value.communicate.return_value = (
@@ -235,7 +235,7 @@ class MercuryMiscLspciUnitTests(MercuryCommonUnitTest):
         for device in self.pci_bus:
             assert device in EXPECTED_PARSED_EXAMPLE_LSPCI_OUTPUT
 
-    @mock.patch('mercury.common.misc.lspci.subprocess.Popen')
+    @mock.patch('mercury.inspector.hwlib.lspci.subprocess.Popen')
     def test_lscpi_run_raises(self, popen_mock):
         """Test what happens when lspci returns non-zero error."""
         popen_mock.return_value.communicate.return_value = (

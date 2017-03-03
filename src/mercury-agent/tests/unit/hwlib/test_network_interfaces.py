@@ -12,15 +12,15 @@
 #    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
-"""Module to unit test mercury.common.misc.network_interfaces"""
+"""Module to unit test mercury.inspector.hwlib.network_interfaces"""
 
 import mock
 import pytest
 
 import netifaces
 
-import mercury.common.misc.network_interfaces as net_ifs
-from tests.unit.base import MercuryCommonUnitTest
+import mercury.inspector.hwlib.network_interfaces as net_ifs
+from tests.unit.base import MercuryAgentUnitTest
 
 
 FAKE_INTERFACE_LIST = ['lo', 'eno1', 'br0', 'virbr0', 'virbr0-nic', 'vnet0']
@@ -48,8 +48,8 @@ def fake_ifaddresses_func(interface):
     return ifaddresses.get(interface, {})
 
 
-class MercuryMiscNetworkInterfacesUnitTests(MercuryCommonUnitTest):
-    """Unit tests for mercury.common.misc.network_interfaces"""
+class MercuryMiscNetworkInterfacesUnitTests(MercuryAgentUnitTest):
+    """Unit tests for mercury.inspector.hwlib.network_interfaces"""
     def setUp(self):
         super(MercuryMiscNetworkInterfacesUnitTests, self).setUp()
 
