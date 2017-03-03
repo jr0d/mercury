@@ -15,37 +15,35 @@
 """Module to unit test mercury.client.base"""
 
 import mock
-import requests
 
 import mercury.client.rpc as client_rpc
-from tests.unit import base as test_base
+from ..base import MercuryClientUnitTest
 
 
-class TestClientRPC(test_base.MercuryClientUnitTest):
-    
+class TestClientRPC(MercuryClientUnitTest):
     def setUp(self):
         super(TestClientRPC, self).setUp()
         self.target = 'test_target'
         self.JobQuery = client_rpc.JobQuery(
-        	self.target, 'some_query', 'some_instructions')
+            self.target, 'some_query', 'some_instructions')
 
     def test_jobs_base_uri(self):
-    	assert self.JobQuery.SERVICE_URI == 'api/rpc/jobs'
+        assert self.JobQuery.SERVICE_URI == 'api/rpc/jobs'
 
     def test_task_uri(self):
-    	task_interface = client_rpc.TaskInterface(self.target)
-    	assert task_interface.SERVICE_URI == 'api/rpc/tasks'
+        task_interface = client_rpc.TaskInterface(self.target)
+        assert task_interface.SERVICE_URI == 'api/rpc/tasks'
 
     def test_active_computers_uri(self):
-    	active_computers = client_rpc.ActiveComputers(self.target)
-    	assert active_computers.SERVICE_URI == 'api/active/computers'
+        active_computers = client_rpc.ActiveComputers(self.target)
+        assert active_computers.SERVICE_URI == 'api/active/computers'
 
     def test_post_job(self):
-    	job_query = client_rpc.JobQuery(
+        job_query = client_rpc.JobQuery(
             self.target, 'some_query', 'some_instruction')
         job_query.post = mock.Mock(return_value={'job_id': 'some_id'})
         job_query.post_job()
 
         job_query.post.assert_called_with(data=
-            {'query': 'some_query', 'instruction': 'some_instruction'})
+                                          {'query': 'some_query', 'instruction': 'some_instruction'})
         assert job_query.job_id == 'some_id'
