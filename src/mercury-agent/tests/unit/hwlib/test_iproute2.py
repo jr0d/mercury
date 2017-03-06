@@ -17,8 +17,8 @@
 import mock
 import pytest
 
-import mercury.common.misc.iproute2 as ipr2
-from tests.unit.base import MercuryCommonUnitTest
+import mercury.inspector.hwlib.iproute2 as ipr2
+from tests.unit.base import MercuryAgentUnitTest
 
 
 IPROUTE2_EXAMPLE_OUTPUT_LINES = [
@@ -64,7 +64,7 @@ def construct_ipr2_with_fake_output(ipr_output, ip_path='/usr/sbin/ip'):
             return ipr2.IPRoute2()
 
 
-class MercuryMiscIPRoute2UnitTests(MercuryCommonUnitTest):
+class MercuryHwlibIPRoute2UnitTests(MercuryAgentUnitTest):
     """Unit tests for mercury.common.misc.iproute2"""
     def test_example_output_parsing(self):
         """Test if IPRoute2 parsed the example output correctly."""

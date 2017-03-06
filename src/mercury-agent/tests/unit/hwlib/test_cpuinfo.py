@@ -12,13 +12,13 @@
 #    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
-"""Module to unit test mercury.common.misc.cpuinfo"""
+"""Module to unit test mercury.inspector.hwlib.cpuinfo"""
 
 import mock
 import pytest
 
-import mercury.common.misc.cpuinfo as cpuinfo
-from tests.unit.base import MercuryCommonUnitTest
+import mercury.inspector.hwlib.cpuinfo as cpuinfo
+from tests.unit.base import MercuryAgentUnitTest
 
 
 EXAMPLE_PROC_CPUINFO_OUTPUT = """processor	: 0
@@ -400,19 +400,19 @@ def get_fake_cpuinfo_output(num_logical_processors=2,
     return fake_output
 
 
-class MercuryMiscCpuinfoUnitTests(MercuryCommonUnitTest):
-    """Unit tests for mercury.common.misc.cpuinfo"""
-    @mock.patch("mercury.common.misc.cpuinfo.os.path.exists")
-    @mock.patch("mercury.common.misc.cpuinfo.open")
+class MercuryHwlibCpuinfoUnitTests(MercuryAgentUnitTest):
+    """Unit tests for mercury.inspector.hwlib.cpuinfo"""
+    @mock.patch("mercury.inspector.hwlib.cpuinfo.os.path.exists")
+    @mock.patch("mercury.inspector.hwlib.cpuinfo.open")
     def setUp(self, open_mock, os_path_exists_mock):
         """Setup a CPUInfo object to use for further tests."""
-        super(MercuryMiscCpuinfoUnitTests, self).setUp()
+        super(MercuryHwlibCpuinfoUnitTests, self).setUp()
         os_path_exists_mock.return_value = True
         open_mock.return_value.__enter__.return_value.read.return_value = \
             EXAMPLE_PROC_CPUINFO_OUTPUT
         self.cpuinfo_obj = cpuinfo.CPUInfo()
 
-    @mock.patch("mercury.common.misc.cpuinfo.os.path.exists")
+    @mock.patch("mercury.inspector.hwlib.cpuinfo.os.path.exists")
     def test_proc_cpuinfo_absent(self, os_path_exists_mock):
         """Test what happens if /proc/cpuinfo doesn't exist.
 
@@ -455,8 +455,8 @@ class MercuryMiscCpuinfoUnitTests(MercuryCommonUnitTest):
         assert isinstance(result, dict)
         assert len(result.keys()) == 1
 
-    @mock.patch("mercury.common.misc.cpuinfo.os.path.exists")
-    @mock.patch("mercury.common.misc.cpuinfo.open")
+    @mock.patch("mercury.inspector.hwlib.cpuinfo.os.path.exists")
+    @mock.patch("mercury.inspector.hwlib.cpuinfo.open")
     def test_get_cpufreq_info(self, open_mock, os_path_exists_mock):
         """Test get_cpufreq_info()."""
         # Test normal, expected operation.
@@ -485,7 +485,7 @@ class MercuryMiscCpuinfoUnitTests(MercuryCommonUnitTest):
         result = cpuinfo.get_cpufreq_info("0")
         assert result == {}
 
-    @mock.patch("mercury.common.misc.cpuinfo.get_cpufreq_info")
+    @mock.patch("mercury.inspector.hwlib.cpuinfo.get_cpufreq_info")
     def test_get_speed_info(self, cpufreq_info_mock):
         """Test CPUInfo.get_physical_speed_info() operation."""
         cpufreq_info_mock.side_effect = [
