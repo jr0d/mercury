@@ -20,8 +20,24 @@ LOG = logging.getLogger(__name__)
 runtime_capabilities = {}
 
 
-def add_capability(entry, name, description, doc=None, serial=False, num_args=None, kwarg_names=None, no_return=False,
-                   dependency_callback=None, timeout=1800, task_id_kwargs=False):
+def add_capability(entry, name, description, doc=None, serial=False,
+                   num_args=None, kwarg_names=None, no_return=False,
+                   dependency_callback=None, timeout=1800,
+                   task_id_kwargs=False):
+    """Add a new capability to the runtime capabilities.
+
+    :param entry: The new capability.
+    :param name: Name of the new capability.
+    :param description: Description of the new capability.
+    :param doc: Function docstring.
+    :param serial: Boolean indication if the task is serial.
+    :param num_args: Number of expected arguments.
+    :param kwarg_names: Named arguments.
+    :param no_return: True if the task doesn't return any value.
+    :param dependency_callback: Callback to check dependency.
+    :param timeout: Timeout for the new capability.
+    :param task_id_kwargs: Whether to put task_id in kwargs.
+    """
     LOG.info('Adding capability %s' % name)
     runtime_capabilities[name] = {
         'name': name,
@@ -38,12 +54,26 @@ def add_capability(entry, name, description, doc=None, serial=False, num_args=No
     }
 
 
-def capability(name, description, serial=False, num_args=None, kwarg_names=None, no_return=False,
+def capability(name, description, serial=False, num_args=None,
+               kwarg_names=None, no_return=False,
                dependency_callback=None, timeout=1800, task_id_kwargs=False):
+    """Decorator to add a new capability.
+
+    :param name: Name of the new capability.
+    :param description: Description of the new capability.
+    :param serial: Boolean indication if the task is serial.
+    :param num_args: Number of expected arguments.
+    :param kwarg_names: Named arguments.
+    :param no_return: True if the task doesn't return any value.
+    :param dependency_callback: Callback to check dependency.
+    :param timeout: Timeout for the new capability.
+    :param task_id_kwargs: Whether to put task_id in kwargs.
+    """
     def wrap(entry):
-        add_capability(entry, name, description, doc=entry.__doc__, serial=serial, num_args=num_args,
-                       kwarg_names=kwarg_names, no_return=no_return, dependency_callback=dependency_callback,
+        add_capability(entry, name, description, doc=entry.__doc__,
+                       serial=serial, num_args=num_args,
+                       kwarg_names=kwarg_names, no_return=no_return,
+                       dependency_callback=dependency_callback,
                        timeout=timeout, task_id_kwargs=task_id_kwargs)
         return entry
     return wrap
-
