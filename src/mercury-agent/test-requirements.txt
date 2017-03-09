@@ -1,0 +1,5 @@
+mock
+pytest
+pytest-cov
+-e git+ssh://git@github.rackspace.com/jared-rodriguez/press@foss#egg=press
+-e file:../mercury-common#egg=mercury-common
