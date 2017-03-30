@@ -13,19 +13,22 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-from setuptools import setup
+from setuptools import setup, find_packages
 
-setup(
-    name='mercury-client',
-    version='0.0.1',
-    packages=['mercury'],
-    url='https://www.rackspace.com',
-    license='',
-    author='Jared Rodriguez',
-    author_email='jared.rodriguez@rackspace.com',
-    description='Throw away client',
-    install_requires=[
+config = {
+    'name': 'mercury-client',
+    'version': '0.0.1',
+    'packages': find_packages(),
+    'url': 'https://www.rackspace.com',
+    'license': '',
+    'author': 'Jared Rodriguez',
+    'author_email': 'jared.rodriguez@rackspace.com',
+    'description': 'Throw away client',
+    'install_requires': [
         'PyYAML',
         'requests'
     ]
-)
+}
+
+if __name__ == 'main':
+    setup(**config)
