@@ -162,7 +162,7 @@ class SimpleRouterReqService(object):
             message = msgpack.unpackb(parsed_message['message'],
                                       encoding='utf-8')
         except TypeError as type_error:
-            self.send_error(parsed_message['address'], 'Recieved unpacked, non-string type: %s : %s' % (type(parsed_message), type_error))
+            self.send_error(parsed_message['address'], 'Received unpacked, non-string type: %s : %s' % (type(parsed_message), type_error))
             return
         except msgpack.UnpackException as unpack_exception:
             self.send_error(parsed_message['address'],
