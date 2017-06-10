@@ -94,38 +94,4 @@ async def ping_loop(ctx,
 
                 asyncio.ensure_future(ping(data, ctx, initial_ping_timeout, ping_retries, backoff),
                                       loop=loop)
-        print('Before Sleep')
         await asyncio.sleep(cycle_time)
-        print('After sleep')
-
-
-if __name__ == '__main__':
-    def load_shit(items=100):
-        for i in range(items):
-            active_state.update(
-                {
-                    str(i): {
-                        'mercury_id': str(i),
-                        'rpc_address': '0.0.0.0',
-                        'ping_port': '9004',
-                        'rpc_address6': None,
-                        'last_ping': 0,
-                        'pinging': False
-                    }
-                }
-            )
-
-    logging.basicConfig(level=logging.DEBUG)
-    load_shit(10)
-    _ctx = zmq.asyncio.Context()
-    loop = zmq.asyncio.ZMQEventLoop()
-    loop.set_debug(True)
-    asyncio.set_event_loop(loop)
-
-    try:
-        loop.run_until_complete(ping_loop(_ctx, 30, 10, 2500, 5, .42, loop))
-    except KeyboardInterrupt:
-        pass
-    finally:
-        loop.close()
-        _ctx.destroy()

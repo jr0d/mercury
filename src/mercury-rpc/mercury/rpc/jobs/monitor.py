@@ -1,7 +1,7 @@
+import asyncio
 import datetime
 import logging
 import time
-import threading
 
 from mercury.rpc.jobs.tasks import (
     COMPLETED_STATUSES, complete_task
@@ -24,13 +24,14 @@ class Monitor(object):
 
         self._kill = False
 
-    def process(self):
+    async def process(self):
+        log.debug('Processing')
         now = time.time()
         c = self.tasks_collection.find({'status': {'$nin': COMPLETED_STATUSES},
                                         'timeout': {'$gt': 0}})  # A timeout of 0 means no timeout
 
-        log.debug('Matched {} active tasks'.format(c.count()))
-        for task in c:
+        log.debug('Matched {} active tasks'.format(await c.count()))
+        async for task in c:
             if task['time_updated'] < now - task['timeout']:
                 log.error('Timeout Error: Job: {job_id}, Task: {task_id}, Timeout: {timeout}'.format(**task))
                 update_data = {
@@ -52,15 +53,11 @@ class Monitor(object):
     def kill(self):
         self._kill = True
 
-    def loop(self):
-        while 1:
+    async def loop(self):
+        while True:
             if self._kill:
                 log.info('Kill signal received, shutting down')
                 break
-            self.process()
-            time.sleep(self.cycle_time)
+            await self.process()
+            await asyncio.sleep(self.cycle_time)
 
-    def start(self):
-        t = threading.Thread(target=self.loop, name='MercuryMonitor')
-        log.info('Starting monitor service')
-        t.start()

@@ -21,10 +21,9 @@ import zmq
 import zmq.asyncio
 
 from mercury.common.asyncio.transport import AsyncRouterReqService
-from mercury.common.mongo import get_collection
+from mercury.common.inventory_client.client import InventoryClient
 from mercury.rpc.active_asyncio import active_state, ping_loop
 from mercury.rpc.configuration import rpc_configuration, get_jobs_collection, get_tasks_collection
-from mercury.rpc.db import ActiveInventoryDBController
 from mercury.rpc.jobs.monitor import Monitor
 from mercury.rpc.jobs.tasks import (
     complete_task,
@@ -41,18 +40,36 @@ RPC_CONFIG_FILE = 'mercury-rpc.yaml'
 
 
 class BackEndService(AsyncRouterReqService):
-    def __init__(self, active_db_collection, jobs_collection, tasks_collection):
+    active_keys = ['mercury_id',
+                   'rpc_address',
+                   'rpc_address6',
+                   'rpc_port',
+                   'ping_port',
+                   'capabilities']
+
+    def __init__(self, inventory_router_url, jobs_collection, tasks_collection):
         registration_service_bind_address = rpc_configuration.get('backend',
                                                                   {}).get('service_url',
                                                                           'tcp://0.0.0.0:9002')
         super(BackEndService, self).__init__(registration_service_bind_address)
 
-        self.active_db_controller = ActiveInventoryDBController(active_db_collection)
-
+        self.inventory_client = InventoryClient(inventory_router_url)
         self.jobs_collection = jobs_collection
         self.tasks_collection = tasks_collection
 
+    @classmethod
+    def validate(cls, data):
+        for k in cls.active_keys:
+            if k not in data:
+                return False
+        return True
+
     async def process(self, message):
+        """
+        TODO: Create dispatcher
+        :param message:
+        :return:
+        """
         if message.get('action') == 'register':
             return await self.register(data=message.get('client_info'))
         elif message.get('action') == 'task_update':
@@ -61,25 +78,23 @@ class BackEndService(AsyncRouterReqService):
             return await self.task_return(message.get('return_data'))
         return dict(error=True, message='Did not receive appropriate action')
 
-    def spawn_pinger(self, mercury_id, address, port):
-        endpoint = 'tcp://%s:%s' % (address, port)
-        spawn(endpoint, mercury_id, self.active_db_controller)
-
     def reacquire(self):
-        existing_documents = self.active_db_controller.query({}, projection={'mercury_id': 1,
-                                                                             'rpc_address': 1,
-                                                                             'ping_port': 1})
-        for doc in existing_documents:
-            log.info('Attempting to reacquire %s : %s' % (doc['mercury_id'], doc['rpc_address']))
+        existing_documents = self.inventory_client.query({'active': {'$ne': None}},
+                                                         projection={'mercury_id': 1, 'active': 1})
+        for doc in existing_documents['items']:
+            if not self.validate(doc['active']):
+                log.error('Found junk in document {} expunging'.format(doc['mercury_id']))
+                self.inventory_client.update_one(doc['mercury_id'], {'active': None})
+
+            log.info('Attempting to reacquire %s : %s' % (doc['mercury_id'], doc['active']['rpc_address']))
             self.update_state(doc)
 
     async def register(self, data):
-        if not self.active_db_controller.validate(data):
-            log.error('Recieved invalid data')
+        if not self.validate(data):
+            log.error('Received invalid data')
             return dict(error=True, message='Invalid request')
 
-        await self.active_db_controller.insert(data)
-
+        await self.inventory_client.update_one(data['mercury_id'], {'active': data})
         self.update_state(data)
 
         return dict(error=False, message='Registration successful')
@@ -162,7 +177,7 @@ def rpc_backend_service():
                         format='%(asctime)s : %(levelname)s - %(name)s - %(message)s')
     logging.getLogger('mercury.rpc.ping').setLevel(logging.INFO)
     logging.getLogger('mercury.rpc.ping2').setLevel(logging.INFO)
-    logging.getLogger('mercury.rpc.jobs.monitor').setLevel(logging.INFO)
+    logging.getLogger('mercury.rpc.jobs.monitor').setLevel(logging.DEBUG)
     db_configuration = rpc_configuration.get('db', {})
 
     loop = zmq.asyncio.ZMQEventLoop()
@@ -173,24 +188,24 @@ def rpc_backend_service():
                                                                              'localhost'),
                                       replica_set=db_configuration.get('replica_set'))
 
-    active_db_collection = get_collection(db_configuration.get('rpc_mongo_db',
-                                                               'test'),
-                                          db_configuration.get('rpc_mongo_collection',
-                                                               'rpc'),
-                                          connection)
-
     jobs_collection = get_jobs_collection(connection)
     tasks_collection = get_tasks_collection(connection)
 
     jobs_collection.create_index('ttl_time_completed', expireAfterSeconds=3600)
     tasks_collection.create_index('ttl_time_completed', expireAfterSeconds=3600)
 
+    # Inject the monitor loop
     monitor = Monitor(jobs_collection, tasks_collection)
-    monitor.start()
+    asyncio.ensure_future(monitor.loop(), loop=loop)
 
-    server = BackEndService(active_db_collection, jobs_collection, tasks_collection)
+    inventory_router = rpc_configuration['inventory']['inventory_router']
+    server = BackEndService(inventory_router, jobs_collection, tasks_collection)
     server.reacquire()
+
+    # Inject ping loop
     asyncio.ensure_future(ping_loop(server.context, 30, 10, 2500, 5, .42, loop), loop=loop)
+
+    # Start main loop
     try:
         loop.run_until_complete(server.start())
     finally:
