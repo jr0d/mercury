@@ -27,7 +27,7 @@ class Dispatcher(object):
     def __init__(self):
         self.ic = InventoryController()
 
-    def dispatch(self, message):
+    async def dispatch(self, message):
         endpoint = message.get('endpoint')
         args = message.get('args', [])
         kwargs = message.get('kwargs', {})
@@ -41,7 +41,7 @@ class Dispatcher(object):
             return dict(error=True, message='Endpoint is not supported')
 
         try:
-            response = self.ic.endpoints[endpoint](self.ic, *args, **kwargs)
+            response = await self.ic.endpoints[endpoint](self.ic, *args, **kwargs)
         except EndpointError as endpoint_error:
             tb = traceback.format_exception(*sys.exc_info())
             LOG.error('Endpoint Error: endpoint=%s, message=%s, traceback=%s' % (

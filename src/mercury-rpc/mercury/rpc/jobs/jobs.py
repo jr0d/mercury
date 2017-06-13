@@ -55,8 +55,8 @@ class Job(object):
         # TODO: add yaml option: prefer_ipv6 (bool)
         try:
             mercury_id = target['mercury_id']
-            host = target['rpc_address']
-            port = target['rpc_port']
+            host = target['active']['rpc_address']
+            port = target['active']['rpc_port']
         except KeyError:
             raise MercuryCritical('Encountered malformed target, the database is corrupted')
 

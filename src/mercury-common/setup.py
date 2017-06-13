@@ -29,6 +29,7 @@ setup(
         'msgpack-python',
         'pymongo',
         'pyzmq',
-        'redis'
+        'redis',
+        'motor'
     ]
 )

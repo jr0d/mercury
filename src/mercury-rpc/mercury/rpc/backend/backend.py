@@ -16,10 +16,10 @@
 import asyncio
 import logging
 
-import motor.motor_asyncio
 import zmq
 import zmq.asyncio
 
+from mercury.common.asyncio.mongo import get_connection
 from mercury.common.asyncio.transport import AsyncRouterReqService
 from mercury.common.inventory_client.client import InventoryClient
 from mercury.rpc.active_asyncio import active_state, ping_loop
@@ -29,7 +29,6 @@ from mercury.rpc.jobs.tasks import (
     complete_task,
     update_task
 )
-from mercury.rpc.ping import spawn
 
 log = logging.getLogger(__name__)
 
@@ -158,13 +157,13 @@ class BackEndService(AsyncRouterReqService):
         })
 
 
-def get_connection_async(server_or_servers=None, replica_set=None):
-    servers = server_or_servers
-    if servers is not None:
-        if not isinstance(servers, list):
-            servers = [servers]
-    log.info('Connecting to %s : replicaSet: %s' % (servers, replica_set))
-    return motor.motor_asyncio.AsyncIOMotorClient(servers, replicaset=replica_set)
+def configure_logging():
+    # TODO: get these from the configuration
+    logging.basicConfig(level=logging.DEBUG,
+                        format='%(asctime)s : %(levelname)s - %(name)s - %(message)s')
+    logging.getLogger('mercury.rpc.ping').setLevel(logging.INFO)
+    logging.getLogger('mercury.rpc.ping2').setLevel(logging.INFO)
+    logging.getLogger('mercury.rpc.jobs.monitor').setLevel(logging.DEBUG)
 
 
 def rpc_backend_service():
@@ -173,20 +172,19 @@ def rpc_backend_service():
 
     :return:
     """
-    logging.basicConfig(level=logging.DEBUG,
-                        format='%(asctime)s : %(levelname)s - %(name)s - %(message)s')
-    logging.getLogger('mercury.rpc.ping').setLevel(logging.INFO)
-    logging.getLogger('mercury.rpc.ping2').setLevel(logging.INFO)
-    logging.getLogger('mercury.rpc.jobs.monitor').setLevel(logging.DEBUG)
+
+    configure_logging()
     db_configuration = rpc_configuration.get('db', {})
 
+    # Create the event loop
     loop = zmq.asyncio.ZMQEventLoop()
     loop.set_debug(True)
     asyncio.set_event_loop(loop)
 
-    connection = get_connection_async(server_or_servers=db_configuration.get('rpc_mongo_servers',
-                                                                             'localhost'),
-                                      replica_set=db_configuration.get('replica_set'))
+    # Ready the DB
+    connection = get_connection(server_or_servers=db_configuration.get('rpc_mongo_servers',
+                                                                       'localhost'),
+                                replica_set=db_configuration.get('replica_set'))
 
     jobs_collection = get_jobs_collection(connection)
     tasks_collection = get_tasks_collection(connection)
@@ -198,6 +196,7 @@ def rpc_backend_service():
     monitor = Monitor(jobs_collection, tasks_collection)
     asyncio.ensure_future(monitor.loop(), loop=loop)
 
+    # Create a backend instance
     inventory_router = rpc_configuration['inventory']['inventory_router']
     server = BackEndService(inventory_router, jobs_collection, tasks_collection)
     server.reacquire()

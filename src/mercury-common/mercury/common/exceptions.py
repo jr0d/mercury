@@ -53,6 +53,20 @@ class MercuryClientException(MercuryGeneralException):
     pass
 
 
+class EndpointError(MercuryGeneralException):
+    def __init__(self, message, endpoint, request):
+        """
+        Raised when an exception is encountered while processing an endpoint
+        request
+        :param message: Description of the error
+        :param endpoint: The called endpoint
+        :param request: The data used to trigger the exception
+        """
+        self.message = message
+        self.endpoint = endpoint
+        self.request = request
+
+
 def tb_to_dict(path, line, scope, code):
     return {
         'path': path,

@@ -13,27 +13,38 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-
+import asyncio
 import logging
+import zmq.asyncio
 
-from mercury.common import transport
+from mercury.common.asyncio import transport
 from mercury.inventory.dispatch import Dispatcher
 
 log = logging.getLogger(__name__)
 
 
-class InventoryServer(transport.SimpleRouterReqService):
+class InventoryServer(transport.AsyncRouterReqService):
     def __init__(self, bind_address):
         super(InventoryServer, self).__init__(bind_address)
 
         self.dispatcher = Dispatcher()
 
-    def process(self, message):
-        return self.dispatcher.dispatch(message)
+    async def process(self, message):
+        return await self.dispatcher.dispatch(message)
 
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
+    loop = zmq.asyncio.ZMQEventLoop()
+    loop.set_debug(True)
+    asyncio.set_event_loop(loop)
+
     s = InventoryServer('tcp://0.0.0.0:9000')
-    s.bind()
-    s.start()
+
+    try:
+        loop.run_until_complete(s.start())
+    except KeyboardInterrupt:
+        pass
+    finally:
+        s.socket.close(0)
+        s.context.destroy()
