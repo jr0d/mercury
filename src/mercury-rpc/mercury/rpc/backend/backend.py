@@ -208,6 +208,8 @@ def rpc_backend_service():
     # Start main loop
     try:
         loop.run_until_complete(server.start())
+    except KeyboardInterrupt:
+        pass
     finally:
         server.socket.close(0)
         server.context.destroy()
