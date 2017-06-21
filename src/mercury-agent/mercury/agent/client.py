@@ -21,10 +21,19 @@ log = logging.getLogger(__name__)
 
 
 class BackEndClient(SimpleRouterReqClient):
-    def register(self, client_info):
+    _service_name = 'Backend'
+
+    def register(self, device_info, agent_info):
         _payload = {
-            'action': 'register',
-            'client_info': client_info
+            'endpoint': 'register',
+            'args': [device_info, agent_info]
+        }
+        return self.transceiver(_payload)
+
+    def update(self, mercury_id, update_data):
+        _payload = {
+            'endpoint': 'update',
+            'args': [mercury_id, update_data]
         }
         return self.transceiver(_payload)
 

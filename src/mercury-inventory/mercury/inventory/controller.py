@@ -16,8 +16,8 @@
 import bson
 import logging
 
+from mercury.common.asyncio.endpoints import async_endpoint, StaticEndpointController
 from mercury.common.asyncio.mongo import get_connection
-from mercury.common.asyncio.endpoints import async_endpoint, async_endpoints
 from mercury.common.mongo import get_collection
 from mercury.common.exceptions import EndpointError
 from mercury.inventory.db import InventoryDBController
@@ -30,7 +30,7 @@ LOG = logging.getLogger(__name__)
 __all__ = ['InventoryController']
 
 
-class InventoryController(object):
+class InventoryController(StaticEndpointController):
     def __init__(self):
         self.db_configuration = inventory_configuration.get('inventory', {}).get('db', {})
         LOG.debug('DB Configuration: %s' % self.db_configuration)
@@ -49,14 +49,8 @@ class InventoryController(object):
             connection=connection
         )
         self.db = InventoryDBController(self.collection)
-        # self.endpoints = async_endpoints
-        self.endpoints = {
-            'insert_one': self.insert_one,
-            'update_one': self.update_one,
-            'delete': self.delete,
-            'get_one': self.get_one,
-            ''
-        }
+
+        super(InventoryController, self).__init__()
 
     @staticmethod
     def __serialize_object_id(obj):

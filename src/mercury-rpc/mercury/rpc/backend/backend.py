@@ -21,8 +21,10 @@ import zmq.asyncio
 
 from mercury.common.asyncio.mongo import get_connection
 from mercury.common.asyncio.transport import AsyncRouterReqService
+from mercury.common.asyncio.dispatcher import AsyncDispatcher
 from mercury.common.inventory_client.client import InventoryClient
-from mercury.rpc.active_asyncio import active_state, ping_loop
+from mercury.rpc.active_asyncio import add_record, ping_loop
+from mercury.rpc.backend.controller import BackendController
 from mercury.rpc.configuration import rpc_configuration, get_jobs_collection, get_tasks_collection
 from mercury.rpc.jobs.monitor import Monitor
 from mercury.rpc.jobs.tasks import (
@@ -39,64 +41,41 @@ RPC_CONFIG_FILE = 'mercury-rpc.yaml'
 
 
 class BackEndService(AsyncRouterReqService):
-    active_keys = ['mercury_id',
-                   'rpc_address',
-                   'rpc_address6',
-                   'rpc_port',
-                   'ping_port',
-                   'capabilities']
 
     def __init__(self, inventory_router_url, jobs_collection, tasks_collection):
         registration_service_bind_address = rpc_configuration.get('backend',
                                                                   {}).get('service_url',
                                                                           'tcp://0.0.0.0:9002')
+        service_info = rpc_configuration.get('info', {})
         super(BackEndService, self).__init__(registration_service_bind_address)
 
         self.inventory_client = InventoryClient(inventory_router_url)
         self.jobs_collection = jobs_collection
         self.tasks_collection = tasks_collection
 
-    @classmethod
-    def validate(cls, data):
-        for k in cls.active_keys:
-            if k not in data:
-                return False
-        return True
+        self.controller = BackendController(service_info,
+                                            self.inventory_client,
+                                            self.jobs_collection,
+                                            self.tasks_collection)
+        self.dispatcher = AsyncDispatcher(self.controller)
 
     async def process(self, message):
         """
-        TODO: Create dispatcher
         :param message:
         :return:
         """
-        if message.get('action') == 'register':
-            return await self.register(data=message.get('client_info'))
-        elif message.get('action') == 'task_update':
-            return await self.task_update(message.get('update_data'))
-        elif message.get('action') == 'task_return':
-            return await self.task_return(message.get('return_data'))
-        return dict(error=True, message='Did not receive appropriate action')
+        return await self.dispatcher.dispatch(message)
 
     def reacquire(self):
         existing_documents = self.inventory_client.query({'active': {'$ne': None}},
                                                          projection={'mercury_id': 1, 'active': 1})
         for doc in existing_documents['items']:
-            if not self.validate(doc['active']):
+            if not self.controller.validate_agent_info(doc['active']):
                 log.error('Found junk in document {} expunging'.format(doc['mercury_id']))
                 self.inventory_client.update_one(doc['mercury_id'], {'active': None})
 
             log.info('Attempting to reacquire %s : %s' % (doc['mercury_id'], doc['active']['rpc_address']))
-            self.update_state(doc)
-
-    async def register(self, data):
-        if not self.validate(data):
-            log.error('Received invalid data')
-            return dict(error=True, message='Invalid request')
-
-        await self.inventory_client.update_one(data['mercury_id'], {'active': data})
-        self.update_state(data)
-
-        return dict(error=False, message='Registration successful')
+            add_record(doc)
 
     async def task_update(self, update_data):
         """
@@ -141,20 +120,6 @@ class BackEndService(AsyncRouterReqService):
                       tasks_collection=self.tasks_collection)
 
         return dict(message='Accepted')
-
-    @staticmethod
-    def update_state(record):
-        log.debug('Adding record, {mercury_id}, to active state'.format(**record))
-        active_state.update({
-            record['mercury_id']: {
-                'mercury_id': record['mercury_id'],
-                'rpc_address': record['rpc_address'],
-                'rpc_address6': record['rpc_address6'],
-                'ping_port': record['ping_port'],
-                'last_ping': 0,
-                'pinging': False
-            }
-        })
 
 
 def configure_logging():

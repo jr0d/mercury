@@ -30,8 +30,13 @@ fontend:
 
 backend:
   service_url: tcp://0.0.0.0:9002
-  max_ping_threads: 10000
 
 workers:
   queue_runners: 10
 
+info:
+  name: be1-local1
+  datacenter: local1
+  address: localhost
+  frontend_port: 9001
+  backend_port: 9002

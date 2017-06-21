@@ -22,7 +22,7 @@ class AsyncDispatcher(object):
         kwargs = message.get('kwargs', {})
 
         if not endpoint:
-            log.debug('Recieved message with no endpoint')
+            log.debug('Received message with no endpoint')
             return dict(error=True, message='Endpoint not specified in message')
 
         if endpoint not in self.controller.endpoints:

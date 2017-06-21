@@ -1,0 +1,16 @@
+#%RAML 1.0
+--
+title: Mercury
+version: 0.0.1
+protocols: [HTTPS]
+baseUri: https://mercury.dcx.rackspace.com
+documentation:
+    - title: Overview
+      content: |
+      The front end HTTP API for mercury provides access to the inventory, tasks, and jobs interfaces.
+
+/inventory/computers:
+    get:
+        description:
+            Returns inventory
+

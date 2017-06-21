@@ -16,7 +16,7 @@
 import logging
 
 from mercury.agent.capabilities import capability
-from mercury.agent.configuration import get_inventory_client
+from mercury.agent.configuration import get_backend_client
 from mercury.common.exceptions import MercuryUserError
 from mercury.hardware.drivers.drivers import driver_class_cache
 from mercury.inspector.inspect import global_device_info
@@ -40,12 +40,12 @@ def has_hp_raid_driver():
 
 
 def update_inventory():
-    inventory_client = get_inventory_client()
+    backend_client = get_backend_client()
     raid_info = raid_inspector(global_device_info)
     mercury_id = global_device_info['mercury_id']
 
     log.debug('RAID configuration changed, updating inventory')
-    inventory_client.update_one(mercury_id, {'raid': raid_info})
+    backend_client.update(mercury_id, {'raid': raid_info})
 
 
 def update_on_change(f):

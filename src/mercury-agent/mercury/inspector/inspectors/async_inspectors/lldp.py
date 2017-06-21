@@ -11,9 +11,9 @@ LLDPLITE_DEFAULT_PATH = 'lldplite'
 class LLDPInspector(object):
     __key__ = 'lldplite'
 
-    def __init__(self, device_info, inventory_client, lldplite_path=LLDPLITE_DEFAULT_PATH):
+    def __init__(self, device_info, backend_client, lldplite_path=LLDPLITE_DEFAULT_PATH):
         self.device_info = device_info
-        self.inventory_client = inventory_client
+        self.backend_client = backend_client
         self.lldplite_path = lldplite_path
         self.lldplite = cli.find_in_path(lldplite_path)
         if not self.lldplite:
@@ -49,7 +49,7 @@ class LLDPInspector(object):
             self.pids[interface]['result'] = {'missing': True}
             return
 
-        self.inventory_client.update_one(
+        self.backend_client.update(
             self.device_info['mercury_id'],
             {'interfaces.{}.lldp'.format(self.get_interface_index(interface)): switch_info})
         self.pids[interface]['result'] = switch_info

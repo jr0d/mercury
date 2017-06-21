@@ -17,8 +17,8 @@ import asyncio
 import logging
 import zmq.asyncio
 
-from mercury.common.asyncio import transport
-from mercury.inventory.dispatch import Dispatcher
+from mercury.common.asyncio import dispatcher, transport
+from mercury.inventory.controller import InventoryController
 
 log = logging.getLogger(__name__)
 
@@ -27,7 +27,8 @@ class InventoryServer(transport.AsyncRouterReqService):
     def __init__(self, bind_address):
         super(InventoryServer, self).__init__(bind_address)
 
-        self.dispatcher = Dispatcher()
+        inventory_controller = InventoryController()
+        self.dispatcher = dispatcher.AsyncDispatcher(inventory_controller)
 
     async def process(self, message):
         return await self.dispatcher.dispatch(message)

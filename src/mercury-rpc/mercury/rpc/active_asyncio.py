@@ -11,6 +11,21 @@ log = logging.getLogger(__name__)
 active_state = {}
 ping_queue = asyncio.Queue()
 
+
+def add_record(record):
+    log.debug('Adding record, {mercury_id}, to active state'.format(**record))
+    active_state.update({
+        record['mercury_id']: {
+            'mercury_id': record['mercury_id'],
+            'rpc_address': record['rpc_address'],
+            'rpc_address6': record['rpc_address6'],
+            'ping_port': record['ping_port'],
+            'last_ping': 0,
+            'pinging': False
+        }
+    })
+
+
 async def ping(record, ctx, timeout, retries, backoff):
     """
     ping node until it responds or encounters x timeouts of x*backoff
