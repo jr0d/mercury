@@ -13,14 +13,17 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
+import logging
+
 from mercury.common.configuration import get_configuration
-from mercury.common.exceptions import MercuryConfigurationError
 from mercury.common.inventory_client import InventoryClient
 
 __all__ = ['AGENT_CONFIG_FILE', 'agent_configuration']
 
 # Private
 __backend_client = None
+
+log = logging.getLogger(__name__)
 
 # Helpers
 AGENT_CONFIG_FILE = 'mercury-agent.yaml'
@@ -30,7 +33,7 @@ remote_configuration = agent_configuration.get('remote', {})
 try:
     inventory_url = remote_configuration['inventory_service']
 except KeyError:
-    raise MercuryConfigurationError('Missing inventory service url')
+    log.warning('Missing inventory service url')
 
 
 def get_backend_client():

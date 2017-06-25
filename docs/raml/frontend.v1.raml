@@ -1,16 +1,3934 @@
 #%RAML 1.0
---
 title: Mercury
 version: 0.0.1
 protocols: [HTTPS]
-baseUri: https://mercury.dcx.rackspace.com
+# baseUri: /api
 documentation:
-    - title: Overview
-      content: |
-      The front end HTTP API for mercury provides access to the inventory, tasks, and jobs interfaces.
+  - title: Overview
+    content: |
+      The frontend mercury HTTP API allows us to query the inventory datatbase, inject RPC tasks, view task status,
+      and retrieve RPC outputs
 
 /inventory/computers:
-    get:
-        description:
-            Returns inventory
+  description: |
+    Gets the current inventory with support for pagenation and custom projections
+  get:
+    responses:
+      200:
+        body:
+          application/json:
+            example: |
+              {
+                    "limit": 5,
+                    "total": 104,
+                    "direction": "ASCENDING",
+                    "items": [
+                        {
+                            "_id": "56eae51c5742ee76aa83677f",
+                            "mercury_id": "001183c41825ed761ceddab91e8fdb2a88d4943006"
+                        },
+                        {
+                            "_id": "56eb6df75742ee76aa836780",
+                            "mercury_id": "018baf9b8936161a5a954e470afcb781298d2448d9"
+                        },
+                        {
+                            "_id": "56f039d15742ee76aa836781",
+                            "mercury_id": "0137c992d1988be7b154a7633d3514a59718ca5104"
+                        },
+                        {
+                            "_id": "56f04b0a5742ee76aa836782",
+                            "mercury_id": "019ffb80cddf6a99aa4e401dc2ab5d749fae13b3ec"
+                        },
+                        {
+                            "_id": "56f066cb5742ee76aa836783",
+                            "mercury_id": "00be1514caff0518640530e749d4da5f1049ec5221"
+                        }
+                    ]
+              }
+    queryParameters:
+      limit:
+        required: false
+        type: int
+        description: Maximum number of elements to return
+        default: 250
+      offset_id:
+        required: false
+        type: string
+        description: ObjectID to act as the offset (for pagenation)
+        example: 56f04b0a5742ee76aa836782
+      sort_direction:
+        description: ASCENDING or DESCENDING (by objectID)
+        required: false
+        type: string
+        example: ASCENDING
+        default: ASCENDING
+      projection:
+        required: false
+        description: Which fields to return or omit
+        default: mercury_id=1,_id=1
+        example: |
+          cpu.frequency.max=1,raid.total_drives=1
+          interfaces.lldp.switch_name=1
 
+
+/inventory/computers/{mercury_id}:
+  description: Gets a single inventory object by mercury_id
+  get:
+    queryParameters:
+      projection:
+        required: false
+        description: Which fields to return or omit
+        default: null
+        example: |
+          raid,os_storage
+          interfaces.lldp.switch_name
+    responses:
+      404:
+      200:
+        body:
+          application/json:
+            example: |
+              {
+                "mercury_id": "0110a1628669e487f48b3f8de13bebeafe2933c875",
+                "time_updated": 1498412545.7720537,
+                "pci": [
+                    {
+                        "slot": "00:00.0",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0600",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 DMI2",
+                        "class_name": "Host bridge",
+                        "device_id": "2f00",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "00:01.0",
+                        "class_name": "PCI bridge",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "vendor_name": "Intel Corporation",
+                        "class_id": "0604",
+                        "device_id": "2f02",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 PCI Express Root Port 1",
+                        "driver": "pcieport"
+                    },
+                    {
+                        "slot": "00:01.1",
+                        "class_name": "PCI bridge",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "vendor_name": "Intel Corporation",
+                        "class_id": "0604",
+                        "device_id": "2f03",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 PCI Express Root Port 1",
+                        "driver": "pcieport"
+                    },
+                    {
+                        "slot": "00:02.0",
+                        "class_name": "PCI bridge",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "vendor_name": "Intel Corporation",
+                        "class_id": "0604",
+                        "device_id": "2f04",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 PCI Express Root Port 2",
+                        "driver": "pcieport"
+                    },
+                    {
+                        "slot": "00:02.1",
+                        "class_name": "PCI bridge",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "vendor_name": "Intel Corporation",
+                        "class_id": "0604",
+                        "device_id": "2f05",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 PCI Express Root Port 2",
+                        "driver": "pcieport"
+                    },
+                    {
+                        "slot": "00:02.2",
+                        "class_name": "PCI bridge",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "vendor_name": "Intel Corporation",
+                        "class_id": "0604",
+                        "device_id": "2f06",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 PCI Express Root Port 2",
+                        "driver": "pcieport"
+                    },
+                    {
+                        "slot": "00:02.3",
+                        "class_name": "PCI bridge",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "vendor_name": "Intel Corporation",
+                        "class_id": "0604",
+                        "device_id": "2f07",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 PCI Express Root Port 2",
+                        "driver": "pcieport"
+                    },
+                    {
+                        "slot": "00:03.0",
+                        "class_name": "PCI bridge",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "vendor_name": "Intel Corporation",
+                        "class_id": "0604",
+                        "device_id": "2f08",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 PCI Express Root Port 3",
+                        "driver": "pcieport"
+                    },
+                    {
+                        "slot": "00:03.1",
+                        "class_name": "PCI bridge",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "vendor_name": "Intel Corporation",
+                        "class_id": "0604",
+                        "device_id": "2f09",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 PCI Express Root Port 3",
+                        "driver": "pcieport"
+                    },
+                    {
+                        "slot": "00:03.2",
+                        "class_name": "PCI bridge",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "vendor_name": "Intel Corporation",
+                        "class_id": "0604",
+                        "device_id": "2f0a",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 PCI Express Root Port 3",
+                        "driver": "pcieport"
+                    },
+                    {
+                        "slot": "00:03.3",
+                        "class_name": "PCI bridge",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "vendor_name": "Intel Corporation",
+                        "class_id": "0604",
+                        "device_id": "2f0b",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 PCI Express Root Port 3",
+                        "driver": "pcieport"
+                    },
+                    {
+                        "slot": "00:04.0",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 DMA Channel 0",
+                        "class_name": "System peripheral",
+                        "device_id": "2f20",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "00:04.1",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 DMA Channel 1",
+                        "class_name": "System peripheral",
+                        "device_id": "2f21",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "00:04.2",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 DMA Channel 2",
+                        "class_name": "System peripheral",
+                        "device_id": "2f22",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "00:04.3",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 DMA Channel 3",
+                        "class_name": "System peripheral",
+                        "device_id": "2f23",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "00:04.4",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 DMA Channel 4",
+                        "class_name": "System peripheral",
+                        "device_id": "2f24",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "00:04.5",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 DMA Channel 5",
+                        "class_name": "System peripheral",
+                        "device_id": "2f25",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "00:04.6",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 DMA Channel 6",
+                        "class_name": "System peripheral",
+                        "device_id": "2f26",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "00:04.7",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 DMA Channel 7",
+                        "class_name": "System peripheral",
+                        "device_id": "2f27",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "00:05.0",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Address Map, VTd_Misc, System Management",
+                        "class_name": "System peripheral",
+                        "device_id": "2f28",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "00:05.1",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Hot Plug",
+                        "class_name": "System peripheral",
+                        "device_id": "2f29",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "00:05.2",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 RAS, Control Status and Global Errors",
+                        "class_name": "System peripheral",
+                        "device_id": "2f2a",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "00:05.4",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0800",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 I/O APIC",
+                        "class_name": "PIC",
+                        "device_id": "2f2c",
+                        "progif": "20",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "00:11.0",
+                        "revision": "05",
+                        "vendor_id": "8086",
+                        "class_id": "ff00",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "C610/X99 series chipset SPSR",
+                        "class_name": "Unassigned class",
+                        "device_id": "8d7c",
+                        "sdevice_id": "8030",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "00:14.0",
+                        "revision": "05",
+                        "vendor_id": "8086",
+                        "driver": "xhci_hcd",
+                        "class_id": "0c03",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "C610/X99 series chipset USB xHCI Host Controller",
+                        "vendor_name": "Intel Corporation",
+                        "class_name": "USB controller",
+                        "device_id": "8d31",
+                        "progif": "30",
+                        "sdevice_id": "8030",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "00:1a.0",
+                        "revision": "05",
+                        "vendor_id": "8086",
+                        "driver": "ehci-pci",
+                        "class_id": "0c03",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "C610/X99 series chipset USB Enhanced Host Controller #2",
+                        "vendor_name": "Intel Corporation",
+                        "class_name": "USB controller",
+                        "device_id": "8d2d",
+                        "progif": "20",
+                        "sdevice_id": "8030",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "00:1c.0",
+                        "class_name": "PCI bridge",
+                        "revision": "d5",
+                        "vendor_id": "8086",
+                        "vendor_name": "Intel Corporation",
+                        "class_id": "0604",
+                        "device_id": "8d10",
+                        "progif": "01",
+                        "device_name": "C610/X99 series chipset PCI Express Root Port #1"
+                    },
+                    {
+                        "slot": "00:1c.2",
+                        "class_name": "PCI bridge",
+                        "revision": "d5",
+                        "vendor_id": "8086",
+                        "vendor_name": "Intel Corporation",
+                        "class_id": "0604",
+                        "device_id": "8d14",
+                        "device_name": "C610/X99 series chipset PCI Express Root Port #3",
+                        "driver": "pcieport"
+                    },
+                    {
+                        "slot": "00:1c.4",
+                        "class_name": "PCI bridge",
+                        "revision": "d5",
+                        "vendor_id": "8086",
+                        "vendor_name": "Intel Corporation",
+                        "class_id": "0604",
+                        "device_id": "8d18",
+                        "device_name": "C610/X99 series chipset PCI Express Root Port #5",
+                        "driver": "pcieport"
+                    },
+                    {
+                        "slot": "00:1c.6",
+                        "class_name": "PCI bridge",
+                        "revision": "d5",
+                        "vendor_id": "8086",
+                        "vendor_name": "Intel Corporation",
+                        "class_id": "0604",
+                        "device_id": "8d1c",
+                        "device_name": "C610/X99 series chipset PCI Express Root Port #7",
+                        "driver": "pcieport"
+                    },
+                    {
+                        "slot": "00:1c.7",
+                        "class_name": "PCI bridge",
+                        "revision": "d5",
+                        "vendor_id": "8086",
+                        "vendor_name": "Intel Corporation",
+                        "class_id": "0604",
+                        "device_id": "8d1e",
+                        "device_name": "C610/X99 series chipset PCI Express Root Port #8",
+                        "driver": "pcieport"
+                    },
+                    {
+                        "slot": "00:1d.0",
+                        "revision": "05",
+                        "vendor_id": "8086",
+                        "driver": "ehci-pci",
+                        "class_id": "0c03",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "C610/X99 series chipset USB Enhanced Host Controller #1",
+                        "vendor_name": "Intel Corporation",
+                        "class_name": "USB controller",
+                        "device_id": "8d26",
+                        "progif": "20",
+                        "sdevice_id": "8030",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "00:1f.0",
+                        "revision": "05",
+                        "vendor_id": "8086",
+                        "driver": "lpc_ich",
+                        "class_id": "0601",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "C610/X99 series chipset LPC Controller",
+                        "vendor_name": "Intel Corporation",
+                        "class_name": "ISA bridge",
+                        "device_id": "8d44",
+                        "sdevice_id": "8030",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "00:1f.3",
+                        "revision": "05",
+                        "vendor_id": "8086",
+                        "driver": "i801_smbus",
+                        "class_id": "0c05",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "C610/X99 series chipset SMBus Controller",
+                        "vendor_name": "Intel Corporation",
+                        "class_name": "SMBus",
+                        "device_id": "8d22",
+                        "sdevice_id": "8030",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "01:00.0",
+                        "revision": "06",
+                        "vendor_id": "103c",
+                        "class_id": "0880",
+                        "vendor_name": "Hewlett-Packard Company",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Integrated Lights-Out Standard Slave Instrumentation & System Support",
+                        "class_name": "System peripheral",
+                        "device_id": "3306",
+                        "sdevice_id": "3381",
+                        "sdevice_name": "iLO4"
+                    },
+                    {
+                        "slot": "01:00.1",
+                        "revision": "01",
+                        "vendor_id": "102b",
+                        "class_id": "0300",
+                        "vendor_name": "Matrox Electronics Systems Ltd.",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "MGA G200EH",
+                        "class_name": "VGA compatible controller",
+                        "device_id": "0533",
+                        "sdevice_id": "3381",
+                        "sdevice_name": "iLO4"
+                    },
+                    {
+                        "slot": "01:00.2",
+                        "revision": "06",
+                        "vendor_id": "103c",
+                        "driver": "hpilo",
+                        "class_id": "0880",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Integrated Lights-Out Standard Management Processor Support and Messaging",
+                        "vendor_name": "Hewlett-Packard Company",
+                        "class_name": "System peripheral",
+                        "device_id": "3307",
+                        "sdevice_id": "3381",
+                        "sdevice_name": "iLO4"
+                    },
+                    {
+                        "slot": "01:00.4",
+                        "revision": "03",
+                        "vendor_id": "103c",
+                        "driver": "uhci_hcd",
+                        "class_id": "0c03",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Integrated Lights-Out Standard Virtual USB Controller",
+                        "vendor_name": "Hewlett-Packard Company",
+                        "class_name": "USB controller",
+                        "device_id": "3300",
+                        "sdevice_id": "3381",
+                        "sdevice_name": "iLO4"
+                    },
+                    {
+                        "slot": "02:00.0",
+                        "revision": "01",
+                        "vendor_id": "14e4",
+                        "driver": "tg3",
+                        "class_id": "0200",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "NetXtreme BCM5719 Gigabit Ethernet PCIe",
+                        "vendor_name": "Broadcom Corporation",
+                        "class_name": "Ethernet controller",
+                        "device_id": "1657",
+                        "sdevice_id": "22be",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "02:00.1",
+                        "revision": "01",
+                        "vendor_id": "14e4",
+                        "driver": "tg3",
+                        "class_id": "0200",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "NetXtreme BCM5719 Gigabit Ethernet PCIe",
+                        "vendor_name": "Broadcom Corporation",
+                        "class_name": "Ethernet controller",
+                        "device_id": "1657",
+                        "sdevice_id": "22be",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "02:00.2",
+                        "revision": "01",
+                        "vendor_id": "14e4",
+                        "driver": "tg3",
+                        "class_id": "0200",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "NetXtreme BCM5719 Gigabit Ethernet PCIe",
+                        "vendor_name": "Broadcom Corporation",
+                        "class_name": "Ethernet controller",
+                        "device_id": "1657",
+                        "sdevice_id": "22be",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "02:00.3",
+                        "revision": "01",
+                        "vendor_id": "14e4",
+                        "driver": "tg3",
+                        "class_id": "0200",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "NetXtreme BCM5719 Gigabit Ethernet PCIe",
+                        "vendor_name": "Broadcom Corporation",
+                        "class_name": "Ethernet controller",
+                        "device_id": "1657",
+                        "sdevice_id": "22be",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "03:00.0",
+                        "revision": "01",
+                        "vendor_id": "103c",
+                        "driver": "hpsa",
+                        "class_id": "0104",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Smart Array Gen9 Controllers",
+                        "vendor_name": "Hewlett-Packard Company",
+                        "class_name": "RAID bus controller",
+                        "device_id": "3239",
+                        "sdevice_id": "21c0",
+                        "sdevice_name": "P440ar"
+                    },
+                    {
+                        "slot": "04:00.0",
+                        "revision": "01",
+                        "vendor_id": "8086",
+                        "driver": "ixgbe",
+                        "class_id": "0200",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Ethernet Controller 10-Gigabit X540-AT2",
+                        "vendor_name": "Intel Corporation",
+                        "class_name": "Ethernet controller",
+                        "device_id": "1528",
+                        "sdevice_id": "192d",
+                        "sdevice_name": "561FLR-T 2-port 10Gb Ethernet Adapter"
+                    },
+                    {
+                        "slot": "04:00.1",
+                        "revision": "01",
+                        "vendor_id": "8086",
+                        "driver": "ixgbe",
+                        "class_id": "0200",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Ethernet Controller 10-Gigabit X540-AT2",
+                        "vendor_name": "Intel Corporation",
+                        "class_name": "Ethernet controller",
+                        "device_id": "1528",
+                        "sdevice_id": "192d",
+                        "sdevice_name": "561FLR-T 2-port 10Gb Ethernet Adapter"
+                    },
+                    {
+                        "slot": "7f:08.0",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "8086",
+                        "svendor_name": "Intel Corporation",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 QPI Link 0",
+                        "class_name": "System peripheral",
+                        "device_id": "2f80",
+                        "sdevice_id": "2f80",
+                        "sdevice_name": "Xeon E7 v3/Xeon E5 v3/Core i7 QPI Link 0"
+                    },
+                    {
+                        "slot": "7f:08.3",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "8086",
+                        "svendor_name": "Intel Corporation",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 QPI Link 0",
+                        "class_name": "System peripheral",
+                        "device_id": "2f83",
+                        "sdevice_id": "2f83",
+                        "sdevice_name": "Xeon E7 v3/Xeon E5 v3/Core i7 QPI Link 0"
+                    },
+                    {
+                        "slot": "7f:09.0",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "8086",
+                        "svendor_name": "Intel Corporation",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 QPI Link 1",
+                        "class_name": "System peripheral",
+                        "device_id": "2f90",
+                        "sdevice_id": "2f90",
+                        "sdevice_name": "Xeon E7 v3/Xeon E5 v3/Core i7 QPI Link 1"
+                    },
+                    {
+                        "slot": "7f:09.3",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "8086",
+                        "svendor_name": "Intel Corporation",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 QPI Link 1",
+                        "class_name": "System peripheral",
+                        "device_id": "2f93",
+                        "sdevice_id": "2f93",
+                        "sdevice_name": "Xeon E7 v3/Xeon E5 v3/Core i7 QPI Link 1"
+                    },
+                    {
+                        "slot": "7f:0b.0",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 R3 QPI Link 0 & 1 Monitoring",
+                        "class_name": "System peripheral",
+                        "device_id": "2f81",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "7f:0b.1",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "driver": "hswep_uncore",
+                        "class_id": "1101",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 R3 QPI Link 0 & 1 Monitoring",
+                        "vendor_name": "Intel Corporation",
+                        "class_name": "Performance counters",
+                        "device_id": "2f36",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "7f:0b.2",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "driver": "hswep_uncore",
+                        "class_id": "1101",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 R3 QPI Link 0 & 1 Monitoring",
+                        "vendor_name": "Intel Corporation",
+                        "class_name": "Performance counters",
+                        "device_id": "2f37",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "7f:0c.0",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Unicast Registers",
+                        "class_name": "System peripheral",
+                        "device_id": "2fe0",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "7f:0c.1",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Unicast Registers",
+                        "class_name": "System peripheral",
+                        "device_id": "2fe1",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "7f:0c.2",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Unicast Registers",
+                        "class_name": "System peripheral",
+                        "device_id": "2fe2",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "7f:0c.3",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Unicast Registers",
+                        "class_name": "System peripheral",
+                        "device_id": "2fe3",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "7f:0c.4",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Unicast Registers",
+                        "class_name": "System peripheral",
+                        "device_id": "2fe4",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "7f:0c.5",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Unicast Registers",
+                        "class_name": "System peripheral",
+                        "device_id": "2fe5",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "7f:0c.6",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Unicast Registers",
+                        "class_name": "System peripheral",
+                        "device_id": "2fe6",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "7f:0c.7",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Unicast Registers",
+                        "class_name": "System peripheral",
+                        "device_id": "2fe7",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "7f:0f.0",
+                        "class_name": "System peripheral",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "vendor_name": "Intel Corporation",
+                        "class_id": "0880",
+                        "device_id": "2ff8",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Buffered Ring Agent"
+                    },
+                    {
+                        "slot": "7f:0f.1",
+                        "class_name": "System peripheral",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "vendor_name": "Intel Corporation",
+                        "class_id": "0880",
+                        "device_id": "2ff9",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Buffered Ring Agent"
+                    },
+                    {
+                        "slot": "7f:0f.4",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 System Address Decoder & Broadcast Registers",
+                        "class_name": "System peripheral",
+                        "device_id": "2ffc",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "7f:0f.5",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 System Address Decoder & Broadcast Registers",
+                        "class_name": "System peripheral",
+                        "device_id": "2ffd",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "7f:0f.6",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 System Address Decoder & Broadcast Registers",
+                        "class_name": "System peripheral",
+                        "device_id": "2ffe",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "7f:10.0",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 PCIe Ring Interface",
+                        "class_name": "System peripheral",
+                        "device_id": "2f1d",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "7f:10.1",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "driver": "hswep_uncore",
+                        "class_id": "1101",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 PCIe Ring Interface",
+                        "vendor_name": "Intel Corporation",
+                        "class_name": "Performance counters",
+                        "device_id": "2f34",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "7f:10.5",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Scratchpad & Semaphore Registers",
+                        "class_name": "System peripheral",
+                        "device_id": "2f1e",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "7f:10.6",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "1101",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Scratchpad & Semaphore Registers",
+                        "class_name": "Performance counters",
+                        "device_id": "2f7d",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "7f:10.7",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Scratchpad & Semaphore Registers",
+                        "class_name": "System peripheral",
+                        "device_id": "2f1f",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "7f:12.0",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Home Agent 0",
+                        "class_name": "System peripheral",
+                        "device_id": "2fa0",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "7f:12.1",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "driver": "hswep_uncore",
+                        "class_id": "1101",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Home Agent 0",
+                        "vendor_name": "Intel Corporation",
+                        "class_name": "Performance counters",
+                        "device_id": "2f30",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "7f:12.2",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Home Agent 0 Debug",
+                        "class_name": "System peripheral",
+                        "device_id": "2f70",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "7f:13.0",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Integrated Memory Controller 0 Target Address, Thermal & RAS Registers",
+                        "class_name": "System peripheral",
+                        "device_id": "2fa8",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "7f:13.1",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Integrated Memory Controller 0 Target Address, Thermal & RAS Registers",
+                        "class_name": "System peripheral",
+                        "device_id": "2f71",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "7f:13.2",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Integrated Memory Controller 0 Channel Target Address Decoder",
+                        "class_name": "System peripheral",
+                        "device_id": "2faa",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "7f:13.3",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Integrated Memory Controller 0 Channel Target Address Decoder",
+                        "class_name": "System peripheral",
+                        "device_id": "2fab",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "7f:13.4",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Integrated Memory Controller 0 Channel Target Address Decoder",
+                        "class_name": "System peripheral",
+                        "device_id": "2fac",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "7f:13.5",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Integrated Memory Controller 0 Channel Target Address Decoder",
+                        "class_name": "System peripheral",
+                        "device_id": "2fad",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "7f:13.6",
+                        "class_name": "System peripheral",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "vendor_name": "Intel Corporation",
+                        "class_id": "0880",
+                        "device_id": "2fae",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 DDRIO Channel 0/1 Broadcast"
+                    },
+                    {
+                        "slot": "7f:13.7",
+                        "class_name": "System peripheral",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "vendor_name": "Intel Corporation",
+                        "class_id": "0880",
+                        "device_id": "2faf",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 DDRIO Global Broadcast"
+                    },
+                    {
+                        "slot": "7f:14.0",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "driver": "hswep_uncore",
+                        "class_id": "0880",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Integrated Memory Controller 0 Channel 0 Thermal Control",
+                        "vendor_name": "Intel Corporation",
+                        "class_name": "System peripheral",
+                        "device_id": "2fb0",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "7f:14.1",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "driver": "hswep_uncore",
+                        "class_id": "0880",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Integrated Memory Controller 0 Channel 1 Thermal Control",
+                        "vendor_name": "Intel Corporation",
+                        "class_name": "System peripheral",
+                        "device_id": "2fb1",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "7f:14.2",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Integrated Memory Controller 0 Channel 0 ERROR Registers",
+                        "class_name": "System peripheral",
+                        "device_id": "2fb2",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "7f:14.3",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Integrated Memory Controller 0 Channel 1 ERROR Registers",
+                        "class_name": "System peripheral",
+                        "device_id": "2fb3",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "7f:14.4",
+                        "class_name": "System peripheral",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "vendor_name": "Intel Corporation",
+                        "class_id": "0880",
+                        "device_id": "2fbc",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 DDRIO (VMSE) 0 & 1"
+                    },
+                    {
+                        "slot": "7f:14.5",
+                        "class_name": "System peripheral",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "vendor_name": "Intel Corporation",
+                        "class_id": "0880",
+                        "device_id": "2fbd",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 DDRIO (VMSE) 0 & 1"
+                    },
+                    {
+                        "slot": "7f:14.6",
+                        "class_name": "System peripheral",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "vendor_name": "Intel Corporation",
+                        "class_id": "0880",
+                        "device_id": "2fbe",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 DDRIO (VMSE) 0 & 1"
+                    },
+                    {
+                        "slot": "7f:14.7",
+                        "class_name": "System peripheral",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "vendor_name": "Intel Corporation",
+                        "class_id": "0880",
+                        "device_id": "2fbf",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 DDRIO (VMSE) 0 & 1"
+                    },
+                    {
+                        "slot": "7f:15.0",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "driver": "hswep_uncore",
+                        "class_id": "0880",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Integrated Memory Controller 0 Channel 2 Thermal Control",
+                        "vendor_name": "Intel Corporation",
+                        "class_name": "System peripheral",
+                        "device_id": "2fb4",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "7f:15.1",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "driver": "hswep_uncore",
+                        "class_id": "0880",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Integrated Memory Controller 0 Channel 3 Thermal Control",
+                        "vendor_name": "Intel Corporation",
+                        "class_name": "System peripheral",
+                        "device_id": "2fb5",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "7f:15.2",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Integrated Memory Controller 0 Channel 2 ERROR Registers",
+                        "class_name": "System peripheral",
+                        "device_id": "2fb6",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "7f:15.3",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Integrated Memory Controller 0 Channel 3 ERROR Registers",
+                        "class_name": "System peripheral",
+                        "device_id": "2fb7",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "7f:16.0",
+                        "class_name": "System peripheral",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "vendor_name": "Intel Corporation",
+                        "class_id": "0880",
+                        "device_id": "2f68",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Integrated Memory Controller 1 Target Address, Thermal & RAS Registers"
+                    },
+                    {
+                        "slot": "7f:16.6",
+                        "class_name": "System peripheral",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "vendor_name": "Intel Corporation",
+                        "class_id": "0880",
+                        "device_id": "2f6e",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 DDRIO Channel 2/3 Broadcast"
+                    },
+                    {
+                        "slot": "7f:16.7",
+                        "class_name": "System peripheral",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "vendor_name": "Intel Corporation",
+                        "class_id": "0880",
+                        "device_id": "2f6f",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 DDRIO Global Broadcast"
+                    },
+                    {
+                        "slot": "7f:17.0",
+                        "class_name": "System peripheral",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "vendor_name": "Intel Corporation",
+                        "class_id": "0880",
+                        "device_id": "2fd0",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Integrated Memory Controller 1 Channel 0 Thermal Control",
+                        "driver": "hswep_uncore"
+                    },
+                    {
+                        "slot": "7f:17.4",
+                        "class_name": "System peripheral",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "vendor_name": "Intel Corporation",
+                        "class_id": "0880",
+                        "device_id": "2fb8",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 DDRIO (VMSE) 2 & 3"
+                    },
+                    {
+                        "slot": "7f:17.5",
+                        "class_name": "System peripheral",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "vendor_name": "Intel Corporation",
+                        "class_id": "0880",
+                        "device_id": "2fb9",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 DDRIO (VMSE) 2 & 3"
+                    },
+                    {
+                        "slot": "7f:17.6",
+                        "class_name": "System peripheral",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "vendor_name": "Intel Corporation",
+                        "class_id": "0880",
+                        "device_id": "2fba",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 DDRIO (VMSE) 2 & 3"
+                    },
+                    {
+                        "slot": "7f:17.7",
+                        "class_name": "System peripheral",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "vendor_name": "Intel Corporation",
+                        "class_id": "0880",
+                        "device_id": "2fbb",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 DDRIO (VMSE) 2 & 3"
+                    },
+                    {
+                        "slot": "7f:1e.0",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Power Control Unit",
+                        "class_name": "System peripheral",
+                        "device_id": "2f98",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "7f:1e.1",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Power Control Unit",
+                        "class_name": "System peripheral",
+                        "device_id": "2f99",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "7f:1e.2",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Power Control Unit",
+                        "class_name": "System peripheral",
+                        "device_id": "2f9a",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "7f:1e.3",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "driver": "hswep_uncore",
+                        "class_id": "0880",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Power Control Unit",
+                        "vendor_name": "Intel Corporation",
+                        "class_name": "System peripheral",
+                        "device_id": "2fc0",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "7f:1e.4",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Power Control Unit",
+                        "class_name": "System peripheral",
+                        "device_id": "2f9c",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "7f:1f.0",
+                        "class_name": "System peripheral",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "vendor_name": "Intel Corporation",
+                        "class_id": "0880",
+                        "device_id": "2f88",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 VCU"
+                    },
+                    {
+                        "slot": "7f:1f.2",
+                        "class_name": "System peripheral",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "vendor_name": "Intel Corporation",
+                        "class_id": "0880",
+                        "device_id": "2f8a",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 VCU"
+                    },
+                    {
+                        "slot": "80:00.0",
+                        "class_name": "PCI bridge",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "vendor_name": "Intel Corporation",
+                        "class_id": "0604",
+                        "device_id": "2f01",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 PCI Express Root Port 0",
+                        "driver": "pcieport"
+                    },
+                    {
+                        "slot": "80:01.0",
+                        "class_name": "PCI bridge",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "vendor_name": "Intel Corporation",
+                        "class_id": "0604",
+                        "device_id": "2f02",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 PCI Express Root Port 1",
+                        "driver": "pcieport"
+                    },
+                    {
+                        "slot": "80:01.1",
+                        "class_name": "PCI bridge",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "vendor_name": "Intel Corporation",
+                        "class_id": "0604",
+                        "device_id": "2f03",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 PCI Express Root Port 1",
+                        "driver": "pcieport"
+                    },
+                    {
+                        "slot": "80:02.0",
+                        "class_name": "PCI bridge",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "vendor_name": "Intel Corporation",
+                        "class_id": "0604",
+                        "device_id": "2f04",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 PCI Express Root Port 2",
+                        "driver": "pcieport"
+                    },
+                    {
+                        "slot": "80:02.1",
+                        "class_name": "PCI bridge",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "vendor_name": "Intel Corporation",
+                        "class_id": "0604",
+                        "device_id": "2f05",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 PCI Express Root Port 2",
+                        "driver": "pcieport"
+                    },
+                    {
+                        "slot": "80:02.2",
+                        "class_name": "PCI bridge",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "vendor_name": "Intel Corporation",
+                        "class_id": "0604",
+                        "device_id": "2f06",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 PCI Express Root Port 2",
+                        "driver": "pcieport"
+                    },
+                    {
+                        "slot": "80:02.3",
+                        "class_name": "PCI bridge",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "vendor_name": "Intel Corporation",
+                        "class_id": "0604",
+                        "device_id": "2f07",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 PCI Express Root Port 2",
+                        "driver": "pcieport"
+                    },
+                    {
+                        "slot": "80:03.0",
+                        "class_name": "PCI bridge",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "vendor_name": "Intel Corporation",
+                        "class_id": "0604",
+                        "device_id": "2f08",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 PCI Express Root Port 3",
+                        "driver": "pcieport"
+                    },
+                    {
+                        "slot": "80:03.1",
+                        "class_name": "PCI bridge",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "vendor_name": "Intel Corporation",
+                        "class_id": "0604",
+                        "device_id": "2f09",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 PCI Express Root Port 3",
+                        "driver": "pcieport"
+                    },
+                    {
+                        "slot": "80:03.2",
+                        "class_name": "PCI bridge",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "vendor_name": "Intel Corporation",
+                        "class_id": "0604",
+                        "device_id": "2f0a",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 PCI Express Root Port 3",
+                        "driver": "pcieport"
+                    },
+                    {
+                        "slot": "80:03.3",
+                        "class_name": "PCI bridge",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "vendor_name": "Intel Corporation",
+                        "class_id": "0604",
+                        "device_id": "2f0b",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 PCI Express Root Port 3",
+                        "driver": "pcieport"
+                    },
+                    {
+                        "slot": "80:04.0",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 DMA Channel 0",
+                        "class_name": "System peripheral",
+                        "device_id": "2f20",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "80:04.1",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 DMA Channel 1",
+                        "class_name": "System peripheral",
+                        "device_id": "2f21",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "80:04.2",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 DMA Channel 2",
+                        "class_name": "System peripheral",
+                        "device_id": "2f22",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "80:04.3",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 DMA Channel 3",
+                        "class_name": "System peripheral",
+                        "device_id": "2f23",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "80:04.4",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 DMA Channel 4",
+                        "class_name": "System peripheral",
+                        "device_id": "2f24",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "80:04.5",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 DMA Channel 5",
+                        "class_name": "System peripheral",
+                        "device_id": "2f25",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "80:04.6",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 DMA Channel 6",
+                        "class_name": "System peripheral",
+                        "device_id": "2f26",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "80:04.7",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 DMA Channel 7",
+                        "class_name": "System peripheral",
+                        "device_id": "2f27",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "80:05.0",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Address Map, VTd_Misc, System Management",
+                        "class_name": "System peripheral",
+                        "device_id": "2f28",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "80:05.1",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Hot Plug",
+                        "class_name": "System peripheral",
+                        "device_id": "2f29",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "80:05.2",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 RAS, Control Status and Global Errors",
+                        "class_name": "System peripheral",
+                        "device_id": "2f2a",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "80:05.4",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0800",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 I/O APIC",
+                        "class_name": "PIC",
+                        "device_id": "2f2c",
+                        "progif": "20",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "81:00.0",
+                        "revision": "01",
+                        "vendor_id": "8086",
+                        "driver": "i40e",
+                        "class_id": "0200",
+                        "svendor_id": "8086",
+                        "svendor_name": "Intel Corporation",
+                        "device_name": "Ethernet Controller X710 for 10GbE SFP+",
+                        "vendor_name": "Intel Corporation",
+                        "class_name": "Ethernet controller",
+                        "device_id": "1572",
+                        "sdevice_id": "0007",
+                        "sdevice_name": "Ethernet Converged Network Adapter X710-2"
+                    },
+                    {
+                        "slot": "81:00.1",
+                        "revision": "01",
+                        "vendor_id": "8086",
+                        "driver": "i40e",
+                        "class_id": "0200",
+                        "svendor_id": "8086",
+                        "svendor_name": "Intel Corporation",
+                        "device_name": "Ethernet Controller X710 for 10GbE SFP+",
+                        "vendor_name": "Intel Corporation",
+                        "class_name": "Ethernet controller",
+                        "device_id": "1572",
+                        "sdevice_id": "0000",
+                        "sdevice_name": "Ethernet Converged Network Adapter X710"
+                    },
+                    {
+                        "slot": "84:00.0",
+                        "revision": "01",
+                        "vendor_id": "103c",
+                        "driver": "hpsa",
+                        "class_id": "0107",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Smart Array Gen9 Controllers",
+                        "vendor_name": "Hewlett-Packard Company",
+                        "class_name": "Serial Attached SCSI controller",
+                        "device_id": "3239",
+                        "sdevice_id": "21c8",
+                        "sdevice_name": "H241"
+                    },
+                    {
+                        "slot": "88:00.0",
+                        "revision": "01",
+                        "vendor_id": "103c",
+                        "driver": "hpsa",
+                        "class_id": "0107",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Smart Array Gen9 Controllers",
+                        "vendor_name": "Hewlett-Packard Company",
+                        "class_name": "Serial Attached SCSI controller",
+                        "device_id": "3239",
+                        "sdevice_id": "21c8",
+                        "sdevice_name": "H241"
+                    },
+                    {
+                        "slot": "ff:08.0",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "8086",
+                        "svendor_name": "Intel Corporation",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 QPI Link 0",
+                        "class_name": "System peripheral",
+                        "device_id": "2f80",
+                        "sdevice_id": "2f80",
+                        "sdevice_name": "Xeon E7 v3/Xeon E5 v3/Core i7 QPI Link 0"
+                    },
+                    {
+                        "slot": "ff:08.3",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "8086",
+                        "svendor_name": "Intel Corporation",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 QPI Link 0",
+                        "class_name": "System peripheral",
+                        "device_id": "2f83",
+                        "sdevice_id": "2f83",
+                        "sdevice_name": "Xeon E7 v3/Xeon E5 v3/Core i7 QPI Link 0"
+                    },
+                    {
+                        "slot": "ff:09.0",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "8086",
+                        "svendor_name": "Intel Corporation",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 QPI Link 1",
+                        "class_name": "System peripheral",
+                        "device_id": "2f90",
+                        "sdevice_id": "2f90",
+                        "sdevice_name": "Xeon E7 v3/Xeon E5 v3/Core i7 QPI Link 1"
+                    },
+                    {
+                        "slot": "ff:09.3",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "8086",
+                        "svendor_name": "Intel Corporation",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 QPI Link 1",
+                        "class_name": "System peripheral",
+                        "device_id": "2f93",
+                        "sdevice_id": "2f93",
+                        "sdevice_name": "Xeon E7 v3/Xeon E5 v3/Core i7 QPI Link 1"
+                    },
+                    {
+                        "slot": "ff:0b.0",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 R3 QPI Link 0 & 1 Monitoring",
+                        "class_name": "System peripheral",
+                        "device_id": "2f81",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "ff:0b.1",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "driver": "hswep_uncore",
+                        "class_id": "1101",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 R3 QPI Link 0 & 1 Monitoring",
+                        "vendor_name": "Intel Corporation",
+                        "class_name": "Performance counters",
+                        "device_id": "2f36",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "ff:0b.2",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "driver": "hswep_uncore",
+                        "class_id": "1101",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 R3 QPI Link 0 & 1 Monitoring",
+                        "vendor_name": "Intel Corporation",
+                        "class_name": "Performance counters",
+                        "device_id": "2f37",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "ff:0c.0",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Unicast Registers",
+                        "class_name": "System peripheral",
+                        "device_id": "2fe0",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "ff:0c.1",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Unicast Registers",
+                        "class_name": "System peripheral",
+                        "device_id": "2fe1",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "ff:0c.2",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Unicast Registers",
+                        "class_name": "System peripheral",
+                        "device_id": "2fe2",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "ff:0c.3",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Unicast Registers",
+                        "class_name": "System peripheral",
+                        "device_id": "2fe3",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "ff:0c.4",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Unicast Registers",
+                        "class_name": "System peripheral",
+                        "device_id": "2fe4",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "ff:0c.5",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Unicast Registers",
+                        "class_name": "System peripheral",
+                        "device_id": "2fe5",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "ff:0c.6",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Unicast Registers",
+                        "class_name": "System peripheral",
+                        "device_id": "2fe6",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "ff:0c.7",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Unicast Registers",
+                        "class_name": "System peripheral",
+                        "device_id": "2fe7",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "ff:0f.0",
+                        "class_name": "System peripheral",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "vendor_name": "Intel Corporation",
+                        "class_id": "0880",
+                        "device_id": "2ff8",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Buffered Ring Agent"
+                    },
+                    {
+                        "slot": "ff:0f.1",
+                        "class_name": "System peripheral",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "vendor_name": "Intel Corporation",
+                        "class_id": "0880",
+                        "device_id": "2ff9",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Buffered Ring Agent"
+                    },
+                    {
+                        "slot": "ff:0f.4",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 System Address Decoder & Broadcast Registers",
+                        "class_name": "System peripheral",
+                        "device_id": "2ffc",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "ff:0f.5",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 System Address Decoder & Broadcast Registers",
+                        "class_name": "System peripheral",
+                        "device_id": "2ffd",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "ff:0f.6",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 System Address Decoder & Broadcast Registers",
+                        "class_name": "System peripheral",
+                        "device_id": "2ffe",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "ff:10.0",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 PCIe Ring Interface",
+                        "class_name": "System peripheral",
+                        "device_id": "2f1d",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "ff:10.1",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "driver": "hswep_uncore",
+                        "class_id": "1101",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 PCIe Ring Interface",
+                        "vendor_name": "Intel Corporation",
+                        "class_name": "Performance counters",
+                        "device_id": "2f34",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "ff:10.5",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Scratchpad & Semaphore Registers",
+                        "class_name": "System peripheral",
+                        "device_id": "2f1e",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "ff:10.6",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "1101",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Scratchpad & Semaphore Registers",
+                        "class_name": "Performance counters",
+                        "device_id": "2f7d",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "ff:10.7",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Scratchpad & Semaphore Registers",
+                        "class_name": "System peripheral",
+                        "device_id": "2f1f",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "ff:12.0",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Home Agent 0",
+                        "class_name": "System peripheral",
+                        "device_id": "2fa0",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "ff:12.1",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "driver": "hswep_uncore",
+                        "class_id": "1101",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Home Agent 0",
+                        "vendor_name": "Intel Corporation",
+                        "class_name": "Performance counters",
+                        "device_id": "2f30",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "ff:12.2",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Home Agent 0 Debug",
+                        "class_name": "System peripheral",
+                        "device_id": "2f70",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "ff:13.0",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Integrated Memory Controller 0 Target Address, Thermal & RAS Registers",
+                        "class_name": "System peripheral",
+                        "device_id": "2fa8",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "ff:13.1",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Integrated Memory Controller 0 Target Address, Thermal & RAS Registers",
+                        "class_name": "System peripheral",
+                        "device_id": "2f71",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "ff:13.2",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Integrated Memory Controller 0 Channel Target Address Decoder",
+                        "class_name": "System peripheral",
+                        "device_id": "2faa",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "ff:13.3",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Integrated Memory Controller 0 Channel Target Address Decoder",
+                        "class_name": "System peripheral",
+                        "device_id": "2fab",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "ff:13.4",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Integrated Memory Controller 0 Channel Target Address Decoder",
+                        "class_name": "System peripheral",
+                        "device_id": "2fac",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "ff:13.5",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Integrated Memory Controller 0 Channel Target Address Decoder",
+                        "class_name": "System peripheral",
+                        "device_id": "2fad",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "ff:13.6",
+                        "class_name": "System peripheral",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "vendor_name": "Intel Corporation",
+                        "class_id": "0880",
+                        "device_id": "2fae",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 DDRIO Channel 0/1 Broadcast"
+                    },
+                    {
+                        "slot": "ff:13.7",
+                        "class_name": "System peripheral",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "vendor_name": "Intel Corporation",
+                        "class_id": "0880",
+                        "device_id": "2faf",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 DDRIO Global Broadcast"
+                    },
+                    {
+                        "slot": "ff:14.0",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "driver": "hswep_uncore",
+                        "class_id": "0880",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Integrated Memory Controller 0 Channel 0 Thermal Control",
+                        "vendor_name": "Intel Corporation",
+                        "class_name": "System peripheral",
+                        "device_id": "2fb0",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "ff:14.1",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "driver": "hswep_uncore",
+                        "class_id": "0880",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Integrated Memory Controller 0 Channel 1 Thermal Control",
+                        "vendor_name": "Intel Corporation",
+                        "class_name": "System peripheral",
+                        "device_id": "2fb1",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "ff:14.2",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Integrated Memory Controller 0 Channel 0 ERROR Registers",
+                        "class_name": "System peripheral",
+                        "device_id": "2fb2",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "ff:14.3",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Integrated Memory Controller 0 Channel 1 ERROR Registers",
+                        "class_name": "System peripheral",
+                        "device_id": "2fb3",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "ff:14.4",
+                        "class_name": "System peripheral",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "vendor_name": "Intel Corporation",
+                        "class_id": "0880",
+                        "device_id": "2fbc",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 DDRIO (VMSE) 0 & 1"
+                    },
+                    {
+                        "slot": "ff:14.5",
+                        "class_name": "System peripheral",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "vendor_name": "Intel Corporation",
+                        "class_id": "0880",
+                        "device_id": "2fbd",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 DDRIO (VMSE) 0 & 1"
+                    },
+                    {
+                        "slot": "ff:14.6",
+                        "class_name": "System peripheral",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "vendor_name": "Intel Corporation",
+                        "class_id": "0880",
+                        "device_id": "2fbe",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 DDRIO (VMSE) 0 & 1"
+                    },
+                    {
+                        "slot": "ff:14.7",
+                        "class_name": "System peripheral",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "vendor_name": "Intel Corporation",
+                        "class_id": "0880",
+                        "device_id": "2fbf",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 DDRIO (VMSE) 0 & 1"
+                    },
+                    {
+                        "slot": "ff:15.0",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "driver": "hswep_uncore",
+                        "class_id": "0880",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Integrated Memory Controller 0 Channel 2 Thermal Control",
+                        "vendor_name": "Intel Corporation",
+                        "class_name": "System peripheral",
+                        "device_id": "2fb4",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "ff:15.1",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "driver": "hswep_uncore",
+                        "class_id": "0880",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Integrated Memory Controller 0 Channel 3 Thermal Control",
+                        "vendor_name": "Intel Corporation",
+                        "class_name": "System peripheral",
+                        "device_id": "2fb5",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "ff:15.2",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Integrated Memory Controller 0 Channel 2 ERROR Registers",
+                        "class_name": "System peripheral",
+                        "device_id": "2fb6",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "ff:15.3",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Integrated Memory Controller 0 Channel 3 ERROR Registers",
+                        "class_name": "System peripheral",
+                        "device_id": "2fb7",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "ff:16.0",
+                        "class_name": "System peripheral",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "vendor_name": "Intel Corporation",
+                        "class_id": "0880",
+                        "device_id": "2f68",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Integrated Memory Controller 1 Target Address, Thermal & RAS Registers"
+                    },
+                    {
+                        "slot": "ff:16.6",
+                        "class_name": "System peripheral",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "vendor_name": "Intel Corporation",
+                        "class_id": "0880",
+                        "device_id": "2f6e",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 DDRIO Channel 2/3 Broadcast"
+                    },
+                    {
+                        "slot": "ff:16.7",
+                        "class_name": "System peripheral",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "vendor_name": "Intel Corporation",
+                        "class_id": "0880",
+                        "device_id": "2f6f",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 DDRIO Global Broadcast"
+                    },
+                    {
+                        "slot": "ff:17.0",
+                        "class_name": "System peripheral",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "vendor_name": "Intel Corporation",
+                        "class_id": "0880",
+                        "device_id": "2fd0",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Integrated Memory Controller 1 Channel 0 Thermal Control",
+                        "driver": "hswep_uncore"
+                    },
+                    {
+                        "slot": "ff:17.4",
+                        "class_name": "System peripheral",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "vendor_name": "Intel Corporation",
+                        "class_id": "0880",
+                        "device_id": "2fb8",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 DDRIO (VMSE) 2 & 3"
+                    },
+                    {
+                        "slot": "ff:17.5",
+                        "class_name": "System peripheral",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "vendor_name": "Intel Corporation",
+                        "class_id": "0880",
+                        "device_id": "2fb9",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 DDRIO (VMSE) 2 & 3"
+                    },
+                    {
+                        "slot": "ff:17.6",
+                        "class_name": "System peripheral",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "vendor_name": "Intel Corporation",
+                        "class_id": "0880",
+                        "device_id": "2fba",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 DDRIO (VMSE) 2 & 3"
+                    },
+                    {
+                        "slot": "ff:17.7",
+                        "class_name": "System peripheral",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "vendor_name": "Intel Corporation",
+                        "class_id": "0880",
+                        "device_id": "2fbb",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 DDRIO (VMSE) 2 & 3"
+                    },
+                    {
+                        "slot": "ff:1e.0",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Power Control Unit",
+                        "class_name": "System peripheral",
+                        "device_id": "2f98",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "ff:1e.1",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Power Control Unit",
+                        "class_name": "System peripheral",
+                        "device_id": "2f99",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "ff:1e.2",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Power Control Unit",
+                        "class_name": "System peripheral",
+                        "device_id": "2f9a",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "ff:1e.3",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "driver": "hswep_uncore",
+                        "class_id": "0880",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Power Control Unit",
+                        "vendor_name": "Intel Corporation",
+                        "class_name": "System peripheral",
+                        "device_id": "2fc0",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "ff:1e.4",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "class_id": "0880",
+                        "vendor_name": "Intel Corporation",
+                        "svendor_id": "103c",
+                        "svendor_name": "Hewlett-Packard Company",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Power Control Unit",
+                        "class_name": "System peripheral",
+                        "device_id": "2f9c",
+                        "sdevice_id": "21ea",
+                        "sdevice_name": "Device"
+                    },
+                    {
+                        "slot": "ff:1f.0",
+                        "class_name": "System peripheral",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "vendor_name": "Intel Corporation",
+                        "class_id": "0880",
+                        "device_id": "2f88",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 VCU"
+                    },
+                    {
+                        "slot": "ff:1f.2",
+                        "class_name": "System peripheral",
+                        "revision": "02",
+                        "vendor_id": "8086",
+                        "vendor_name": "Intel Corporation",
+                        "class_id": "0880",
+                        "device_id": "2f8a",
+                        "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 VCU"
+                    }
+                ],
+                "interfaces": [
+                    {
+                        "ipv6_gateways": null,
+                        "address_info_v6": [
+                            {
+                                "netmask": "ffff:ffff:ffff:ffff::/64",
+                                "addr": "fe80::3a63:bbff:fe3f:4bf4%eth0"
+                            }
+                        ],
+                        "ipv4_gateways": [
+                            {
+                                "interface": "eth0",
+                                "gateway_ip": "10.127.29.1",
+                                "default": true
+                            }
+                        ],
+                        "driver": "tg3",
+                        "devname": "eth0",
+                        "speed": "1000",
+                        "pci_id": "14E4:1657",
+                        "address": "38:63:bb:3f:4b:f4",
+                        "vendor_name": null,
+                        "dev_port": "0",
+                        "pci_class": "20000",
+                        "model_name": null,
+                        "pci_slot": "0000:02:00.0",
+                        "address_info": [
+                            {
+                                "netmask": "255.255.255.0",
+                                "addr": "10.127.29.196",
+                                "broadcast": "10.127.29.255"
+                            }
+                        ],
+                        "carrier": true,
+                        "pci_subsystem_id": "103C:22BE",
+                        "duplex": "full",
+                        "predictable_names": {
+                            "systemd_slot": null,
+                            "biosdevname": "em1",
+                            "systemd_mac": null,
+                            "systemd_udev": null,
+                            "systemd_onboard": null
+                        }
+                    },
+                    {
+                        "ipv6_gateways": null,
+                        "address_info_v6": [ ],
+                        "ipv4_gateways": null,
+                        "driver": "tg3",
+                        "devname": "eth1",
+                        "speed": "4294967295",
+                        "pci_id": "14E4:1657",
+                        "address": "38:63:bb:3f:4b:f5",
+                        "vendor_name": null,
+                        "dev_port": "0",
+                        "pci_class": "20000",
+                        "model_name": null,
+                        "pci_slot": "0000:02:00.1",
+                        "address_info": [ ],
+                        "carrier": false,
+                        "pci_subsystem_id": "103C:22BE",
+                        "duplex": "unknown",
+                        "predictable_names": {
+                            "systemd_slot": null,
+                            "biosdevname": "em2",
+                            "systemd_mac": null,
+                            "systemd_udev": null,
+                            "systemd_onboard": null
+                        }
+                    },
+                    {
+                        "ipv6_gateways": null,
+                        "address_info_v6": [ ],
+                        "ipv4_gateways": null,
+                        "driver": "tg3",
+                        "devname": "eth2",
+                        "speed": "4294967295",
+                        "pci_id": "14E4:1657",
+                        "address": "38:63:bb:3f:4b:f6",
+                        "vendor_name": null,
+                        "dev_port": "0",
+                        "pci_class": "20000",
+                        "model_name": null,
+                        "pci_slot": "0000:02:00.2",
+                        "address_info": [ ],
+                        "carrier": false,
+                        "pci_subsystem_id": "103C:22BE",
+                        "duplex": "unknown",
+                        "predictable_names": {
+                            "systemd_slot": null,
+                            "biosdevname": "em3",
+                            "systemd_mac": null,
+                            "systemd_udev": null,
+                            "systemd_onboard": null
+                        }
+                    },
+                    {
+                        "ipv6_gateways": null,
+                        "address_info_v6": [ ],
+                        "ipv4_gateways": null,
+                        "driver": "tg3",
+                        "devname": "eth3",
+                        "speed": "4294967295",
+                        "pci_id": "14E4:1657",
+                        "address": "38:63:bb:3f:4b:f7",
+                        "vendor_name": null,
+                        "dev_port": "0",
+                        "pci_class": "20000",
+                        "model_name": null,
+                        "pci_slot": "0000:02:00.3",
+                        "address_info": [ ],
+                        "carrier": false,
+                        "pci_subsystem_id": "103C:22BE",
+                        "duplex": "unknown",
+                        "predictable_names": {
+                            "systemd_slot": null,
+                            "biosdevname": "em4",
+                            "systemd_mac": null,
+                            "systemd_udev": null,
+                            "systemd_onboard": null
+                        }
+                    },
+                    {
+                        "ipv6_gateways": null,
+                        "address_info_v6": [ ],
+                        "ipv4_gateways": null,
+                        "driver": "ixgbe",
+                        "devname": "eth4",
+                        "speed": "4294967295",
+                        "pci_id": "8086:1528",
+                        "address": "8c:dc:d4:ad:d6:d0",
+                        "vendor_name": null,
+                        "dev_port": "0",
+                        "pci_class": "20000",
+                        "model_name": null,
+                        "pci_slot": "0000:04:00.0",
+                        "address_info": [ ],
+                        "carrier": false,
+                        "pci_subsystem_id": "103C:192D",
+                        "duplex": "unknown",
+                        "predictable_names": {
+                            "systemd_slot": null,
+                            "biosdevname": "em49",
+                            "systemd_mac": null,
+                            "systemd_udev": null,
+                            "systemd_onboard": null
+                        }
+                    },
+                    {
+                        "ipv6_gateways": null,
+                        "address_info_v6": [ ],
+                        "ipv4_gateways": null,
+                        "driver": "ixgbe",
+                        "devname": "eth5",
+                        "speed": "4294967295",
+                        "pci_id": "8086:1528",
+                        "address": "8c:dc:d4:ad:d6:d1",
+                        "vendor_name": null,
+                        "dev_port": "0",
+                        "pci_class": "20000",
+                        "model_name": null,
+                        "pci_slot": "0000:04:00.1",
+                        "address_info": [ ],
+                        "carrier": false,
+                        "pci_subsystem_id": "103C:192D",
+                        "duplex": "unknown",
+                        "predictable_names": {
+                            "systemd_slot": null,
+                            "biosdevname": "em50",
+                            "systemd_mac": null,
+                            "systemd_udev": null,
+                            "systemd_onboard": null
+                        }
+                    },
+                    {
+                        "ipv6_gateways": null,
+                        "address_info_v6": [ ],
+                        "ipv4_gateways": null,
+                        "driver": "i40e",
+                        "devname": "eth6",
+                        "speed": "4294967295",
+                        "pci_id": "8086:1572",
+                        "address": "68:05:ca:39:89:a0",
+                        "vendor_name": null,
+                        "dev_port": "0",
+                        "pci_class": "20000",
+                        "model_name": null,
+                        "pci_slot": "0000:81:00.0",
+                        "address_info": [ ],
+                        "carrier": false,
+                        "pci_subsystem_id": "8086:0007",
+                        "duplex": "unknown",
+                        "predictable_names": {
+                            "systemd_slot": null,
+                            "biosdevname": "p6p1",
+                            "systemd_mac": null,
+                            "systemd_udev": null,
+                            "systemd_onboard": null
+                        }
+                    },
+                    {
+                        "ipv6_gateways": null,
+                        "address_info_v6": [ ],
+                        "ipv4_gateways": null,
+                        "driver": "i40e",
+                        "devname": "eth7",
+                        "speed": "4294967295",
+                        "pci_id": "8086:1572",
+                        "address": "68:05:ca:39:89:a1",
+                        "vendor_name": null,
+                        "dev_port": "0",
+                        "pci_class": "20000",
+                        "model_name": null,
+                        "pci_slot": "0000:81:00.1",
+                        "address_info": [ ],
+                        "carrier": false,
+                        "pci_subsystem_id": "8086:0000",
+                        "duplex": "unknown",
+                        "predictable_names": {
+                            "systemd_slot": null,
+                            "biosdevname": "p6p2",
+                            "systemd_mac": null,
+                            "systemd_udev": null,
+                            "systemd_onboard": null
+                        }
+                    }
+                ],
+                "os_storage": {
+                    "/dev/sda": {
+                        "ID_SERIAL_SHORT": "600508b1001c1195b3ebc85eb101ebaa",
+                        "DEVNAME": "/dev/sda",
+                        "ID_SERIAL": "3600508b1001c1195b3ebc85eb101ebaa",
+                        "ID_WWN": "0x600508b1001c1195",
+                        "SUBSYSTEM": "block",
+                        "MINOR": "0",
+                        "ID_VENDOR": "HP",
+                        "UDEV_LOG": "3",
+                        "DEVPATH": "/devices/pci0000:00/0000:00:01.0/0000:03:00.0/host0/target0:0:0/0:0:0:0/block/sda",
+                        "DEVLINKS": "/dev/block/8:0 /dev/disk/by-id/scsi-3600508b1001c1195b3ebc85eb101ebaa /dev/disk/by-path/pci-0000:03:00.0-scsi-0:0:0:0 /dev/disk/by-id/wwn-0x600508b1001c1195b3ebc85eb101ebaa /dev/disk/by-id/edd-int13_dev80",
+                        "ID_REVISION": "5.04",
+                        "ID_SERIAL_RAW": "3600508b1001c1195b3ebc85eb101ebaa",
+                        "ID_EDD": "int13_dev80",
+                        "ID_BUS": "scsi",
+                        "MAJOR": "8",
+                        "ID_VENDOR_ENC": "HP\\x20\\x20\\x20\\x20\\x20\\x20",
+                        "UDISKS_PRESENTATION_NOPOLICY": "0",
+                        "ID_WWN_WITH_EXTENSION": "0x600508b1001c1195b3ebc85eb101ebaa",
+                        "UDISKS_PARTITION_TABLE": "1",
+                        "LVM_SBIN_PATH": "/sbin",
+                        "UDISKS_PARTITION_TABLE_SCHEME": "mbr",
+                        "ID_MODEL_ENC": "LOGICAL\\x20VOLUME\\x20\\x20",
+                        "ID_SCSI": "1",
+                        "ID_MODEL": "LOGICAL_VOLUME",
+                        "ID_WWN_VENDOR_EXTENSION": "0xb3ebc85eb101ebaa",
+                        "ID_PATH": "pci-0000:03:00.0-scsi-0:0:0:0",
+                        "UDISKS_PARTITION_TABLE_COUNT": "2",
+                        "ID_SCSI_SERIAL": "PDNLH0BRH7X32P",
+                        "ID_TYPE": "disk",
+                        "ID_PART_TABLE_TYPE": "dos",
+                        "DEVTYPE": "disk"
+                    },
+                    "/dev/dm-2": {
+                        "DM_ACTIVATION": "1",
+                        "ID_FS_LABEL_ENC": "ROOT",
+                        "DEVNAME": "/dev/dm-2",
+                        "ID_FS_LABEL": "ROOT",
+                        "DM_SBIN_PATH": "/sbin",
+                        "ID_FS_UUID": "11c724bb-6b14-4f1b-b9d7-0ce618482500",
+                        "ID_FS_TYPE": "ext4",
+                        "UDEV_LOG": "3",
+                        "UDISKS_DM_TARGETS_START": "0",
+                        "ID_FS_VERSION": "1.0",
+                        "DM_UDEV_DISABLE_LIBRARY_FALLBACK_FLAG": "1",
+                        "DEVLINKS": "/dev/mapper/vglocal20170525-root00 /dev/vglocal20170525/root00 /dev/disk/by-id/dm-name-vglocal20170525-root00 /dev/disk/by-id/dm-uuid-LVM-ydnnQTPwbHfzpdwAHrRLEX0lHQ4QM0y0FJWzaf7AkJNoH4kaaRBlA2Q2Xwu8Z0hi /dev/disk/by-uuid/11c724bb-6b14-4f1b-b9d7-0ce618482500 /dev/disk/by-label/ROOT /dev/block/253:2",
+                        "DM_VG_NAME": "vglocal20170525",
+                        "DM_NAME": "vglocal20170525-root00",
+                        "ID_FS_USAGE": "filesystem",
+                        "DM_LV_NAME": "root00",
+                        "MAJOR": "253",
+                        "DM_UDEV_RULES_VSN": "2",
+                        "UDISKS_DM_TARGETS_TYPE": "linear",
+                        "UDISKS_DM_TARGETS_LENGTH": "2334056448",
+                        "UDISKS_DM_TARGETS_COUNT": "1",
+                        "ID_FS_UUID_ENC": "11c724bb-6b14-4f1b-b9d7-0ce618482500",
+                        "SUBSYSTEM": "block",
+                        "DM_SUSPENDED": "0",
+                        "DEVPATH": "/devices/virtual/block/dm-2",
+                        "LVM_SBIN_PATH": "/sbin",
+                        "MINOR": "2",
+                        "DM_UUID": "LVM-ydnnQTPwbHfzpdwAHrRLEX0lHQ4QM0y0FJWzaf7AkJNoH4kaaRBlA2Q2Xwu8Z0hi",
+                        "UDISKS_DM_TARGETS_PARAMS": "8:2\\x208390656",
+                        "UDISKS_PRESENTATION_NOPOLICY": "1",
+                        "DM_UDEV_PRIMARY_SOURCE_FLAG": "1",
+                        "DEVTYPE": "disk"
+                    },
+                    "/dev/dm-1": {
+                        "DM_ACTIVATION": "1",
+                        "ID_FS_LABEL_ENC": "TMP",
+                        "DEVNAME": "/dev/dm-1",
+                        "ID_FS_LABEL": "TMP",
+                        "DM_SBIN_PATH": "/sbin",
+                        "ID_FS_UUID": "7ee1499b-619c-488e-8bd1-dbbbf6e6b181",
+                        "ID_FS_TYPE": "ext4",
+                        "UDEV_LOG": "3",
+                        "UDISKS_DM_TARGETS_START": "0",
+                        "ID_FS_VERSION": "1.0",
+                        "DM_UDEV_DISABLE_LIBRARY_FALLBACK_FLAG": "1",
+                        "DEVLINKS": "/dev/mapper/vglocal20170525-tmp00 /dev/vglocal20170525/tmp00 /dev/disk/by-id/dm-name-vglocal20170525-tmp00 /dev/disk/by-id/dm-uuid-LVM-ydnnQTPwbHfzpdwAHrRLEX0lHQ4QM0y01XIIyE2QO6Q8pu0nnzc503pdgOGtIEbz /dev/disk/by-uuid/7ee1499b-619c-488e-8bd1-dbbbf6e6b181 /dev/disk/by-label/TMP /dev/block/253:1",
+                        "DM_VG_NAME": "vglocal20170525",
+                        "DM_NAME": "vglocal20170525-tmp00",
+                        "ID_FS_USAGE": "filesystem",
+                        "DM_LV_NAME": "tmp00",
+                        "MAJOR": "253",
+                        "DM_UDEV_RULES_VSN": "2",
+                        "UDISKS_DM_TARGETS_TYPE": "linear",
+                        "UDISKS_DM_TARGETS_LENGTH": "4194304",
+                        "UDISKS_DM_TARGETS_COUNT": "1",
+                        "ID_FS_UUID_ENC": "7ee1499b-619c-488e-8bd1-dbbbf6e6b181",
+                        "SUBSYSTEM": "block",
+                        "DM_SUSPENDED": "0",
+                        "DEVPATH": "/devices/virtual/block/dm-1",
+                        "LVM_SBIN_PATH": "/sbin",
+                        "MINOR": "1",
+                        "DM_UUID": "LVM-ydnnQTPwbHfzpdwAHrRLEX0lHQ4QM0y01XIIyE2QO6Q8pu0nnzc503pdgOGtIEbz",
+                        "UDISKS_DM_TARGETS_PARAMS": "8:2\\x204196352",
+                        "UDISKS_PRESENTATION_NOPOLICY": "1",
+                        "DM_UDEV_PRIMARY_SOURCE_FLAG": "1",
+                        "DEVTYPE": "disk"
+                    },
+                    "/dev/dm-0": {
+                        "DM_ACTIVATION": "1",
+                        "ID_FS_LABEL_ENC": "SWAP",
+                        "DEVNAME": "/dev/dm-0",
+                        "ID_FS_LABEL": "SWAP",
+                        "DM_SBIN_PATH": "/sbin",
+                        "ID_FS_UUID": "59ff5c07-2081-4b62-b0d6-1ca9ea3861c0",
+                        "ID_FS_TYPE": "swap",
+                        "UDEV_LOG": "3",
+                        "UDISKS_DM_TARGETS_START": "0",
+                        "ID_FS_VERSION": "2",
+                        "DM_UDEV_DISABLE_LIBRARY_FALLBACK_FLAG": "1",
+                        "DEVLINKS": "/dev/mapper/vglocal20170525-swap00 /dev/vglocal20170525/swap00 /dev/disk/by-id/dm-name-vglocal20170525-swap00 /dev/disk/by-id/dm-uuid-LVM-ydnnQTPwbHfzpdwAHrRLEX0lHQ4QM0y0SeDoSB21JgCIztkpunwleQzeYMVfAY5q /dev/disk/by-uuid/59ff5c07-2081-4b62-b0d6-1ca9ea3861c0 /dev/disk/by-label/SWAP /dev/block/253:0",
+                        "DM_VG_NAME": "vglocal20170525",
+                        "DM_NAME": "vglocal20170525-swap00",
+                        "ID_FS_USAGE": "other",
+                        "DM_LV_NAME": "swap00",
+                        "MAJOR": "253",
+                        "DM_UDEV_RULES_VSN": "2",
+                        "UDISKS_DM_TARGETS_TYPE": "linear",
+                        "UDISKS_DM_TARGETS_LENGTH": "4194304",
+                        "UDISKS_DM_TARGETS_COUNT": "1",
+                        "ID_FS_UUID_ENC": "59ff5c07-2081-4b62-b0d6-1ca9ea3861c0",
+                        "SUBSYSTEM": "block",
+                        "DM_SUSPENDED": "0",
+                        "DEVPATH": "/devices/virtual/block/dm-0",
+                        "LVM_SBIN_PATH": "/sbin",
+                        "MINOR": "0",
+                        "DM_UUID": "LVM-ydnnQTPwbHfzpdwAHrRLEX0lHQ4QM0y0SeDoSB21JgCIztkpunwleQzeYMVfAY5q",
+                        "UDISKS_DM_TARGETS_PARAMS": "8:2\\x202048",
+                        "UDISKS_PRESENTATION_NOPOLICY": "1",
+                        "DM_UDEV_PRIMARY_SOURCE_FLAG": "1",
+                        "DEVTYPE": "disk"
+                    }
+                },
+                "_id": "5877fd5d5742ee0311097c52",
+                "mem": {
+                    "Buffers": 32124000,
+                    "HugePages_Rsvd": "0",
+                    "SwapFree": 0,
+                    "Inactive(anon)": 1144000,
+                    "DirectMap4k": 13056000,
+                    "SwapCached": 0,
+                    "Inactive": 16872000,
+                    "Dirty": 0,
+                    "Active(anon)": 34716000,
+                    "HugePages_Free": "0",
+                    "HardwareCorrupted": 0,
+                    "DirectMap1G": 134217728000,
+                    "Cached": 69276000,
+                    "Active": 116436000,
+                    "VmallocChunk": 34291076644000,
+                    "Inactive(file)": 15728000,
+                    "AnonHugePages": 2048000,
+                    "Slab": 132784000,
+                    "MemFree": 130517600000,
+                    "PageTables": 3124000,
+                    "Writeback": 0,
+                    "WritebackTmp": 0,
+                    "SwapTotal": 0,
+                    "VmallocTotal": 34359738367000,
+                    "NFS_Unstable": 0,
+                    "Active(file)": 81720000,
+                    "Unevictable": 0,
+                    "Mapped": 19520000,
+                    "VmallocUsed": 502360000,
+                    "AnonPages": 32124000,
+                    "Committed_AS": 118580000,
+                    "CommitLimit": 65948040000,
+                    "Mlocked": 0,
+                    "DirectMap2M": 1955840000,
+                    "MemTotal": 131896080000,
+                    "Hugepagesize": 2048000,
+                    "Bounce": 0,
+                    "SReclaimable": 69248000,
+                    "KernelStack": 7328000,
+                    "Shmem": 3948000,
+                    "SUnreclaim": 63536000,
+                    "HugePages_Surp": "0",
+                    "MemAvailable": 130488324000,
+                    "HugePages_Total": "0"
+                },
+                "dmi": {
+                    "board_vendor": "HP",
+                    "board_asset_tag": "",
+                    "board_serial": "TC51NR9952",
+                    "bios_date": "02/17/2017",
+                    "product_serial": "TC51NR9952",
+                    "product_name": "ProLiant DL380 Gen9",
+                    "chassis_version": "",
+                    "chassis_type": "23",
+                    "chassis_serial": "TC51NR9952",
+                    "modalias": "dmi:bvnHP:bvrP89:bd02/17/2017:svnHP:pnProLiantDL380Gen9:pvr:rvnHP:rnProLiantDL380Gen9:rvr:cvnHP:ct23:cvr:",
+                    "uevent": "MODALIAS=dmi:bvnHP:bvrP89:bd02/17/2017:svnHP:pnProLiantDL380Gen9:pvr:rvnHP:rnProLiantDL380Gen9:rvr:cvnHP:ct23:cvr:",
+                    "product_uuid": "37313930-3631-5443-3531-4E5239393532",
+                    "chassis_asset_tag": "",
+                    "board_name": "ProLiant DL380 Gen9",
+                    "sys_vendor": "HP",
+                    "bios_version": "P89",
+                    "board_version": "",
+                    "chassis_vendor": "HP",
+                    "product_version": "",
+                    "bios_vendor": "HP"
+                },
+                "bmc": {
+                    "network": {
+                        "netmask": "255.255.255.192",
+                        "ip_address": "10.127.12.165",
+                        "source": "static",
+                        "mac_address": "38:63:bb:38:e9:58",
+                        "gateway": "10.127.12.129"
+                    },
+                    "bmc": {
+                        "manufacturer_id": "11",
+                        "product_name": "Unknown (0x2000)",
+                        "firmware_revision": "2.50",
+                        "device_revision": "2",
+                        "additional_device_support": [
+                            "Sensor Device",
+                            "SDR Repository Device",
+                            "SEL Device",
+                            "FRU Inventory Device",
+                            "Chassis Device"
+                        ],
+                        "product_id": "8192 (0x2000)",
+                        "aux_firmware_rev_info": [
+                            "0x20",
+                            "0x00",
+                            "0x00",
+                            "0x00"
+                        ],
+                        "provides_device_sdrs": "no",
+                        "device_available": "yes",
+                        "ipmi_version": "2.0",
+                        "device_id": "19",
+                        "manufacturer_name": "Hewlett-Packard"
+                    }
+                },
+                "raid": [
+                    {
+                        "adapter_handler": "hpssa",
+                        "total_drives": 26,
+                        "vendor_info": {
+                            "no-battery_write_cache": "Disabled",
+                            "controller_mode_reboot": "Not Required",
+                            "parallel_surface_scan_supported": "Yes",
+                            "cache_module_temperature_c": "32",
+                            "degraded_performance_optimization": "Disabled",
+                            "host_serial_number": "TC51NR9952",
+                            "driver_supports_hp_ssd_smart_path": "True",
+                            "sanitize_erase_supported": "False",
+                            "elevator_sort": "Enabled",
+                            "controller_mode": "RAID",
+                            "firmware_version": "5.04",
+                            "primary_boot_volume": "None",
+                            "cache_status": "OK",
+                            "encryption": "Disabled",
+                            "ssd_caching_raid5_writeback_enabled": "True",
+                            "pci_address": "0000:03:00.0",
+                            "battery/capacitor_status": "OK",
+                            "cache_ratio": "10% Read / 90% Write",
+                            "total_cache_size": "2.0 GB",
+                            "inconsistency_repair_policy": "Disabled",
+                            "driver_name": "hpsa",
+                            "raid_6_adg_status": "Enabled",
+                            "surface_scan_mode": "Idle",
+                            "max_parallel_surface_scan_count": "16",
+                            "expand_priority": "Medium",
+                            "controller_status": "OK",
+                            "slot": "0",
+                            "post_prompt_timeout": "15 secs",
+                            "sata_ncq_supported": "True",
+                            "bus_interface": "PCI",
+                            "rebuild_priority": "High",
+                            "driver_version": "3.4.4",
+                            "drive_write_cache": "Disabled",
+                            "total_cache_memory_available": "1.8 GB",
+                            "cache_backup_power_source": "Batteries",
+                            "number_of_ports": "2 Internal only",
+                            "cache_serial_number": "PDNLH0BRH7X32P",
+                            "current_power_mode": "MaxPerformance",
+                            "serial_number": "PDNLH0BRH7X32P",
+                            "monitor_and_performance_delay": "60  min",
+                            "latency_scheduler_setting": "Disabled",
+                            "ssd_caching_version": "2",
+                            "negotiated_pcie_data_rate": "PCIe 3.0 x8 (7880 MB/s)",
+                            "express_local_encryption": "False",
+                            "secondary_boot_volume": "None",
+                            "surface_scan_delay": "3 secs",
+                            "battery/capacitor_count": "1",
+                            "surface_analysis_inconsistency_notification": "Disabled",
+                            "spare_activation_mode": "Activate on physical drive failure (default)",
+                            "controller_temperature_c": "45",
+                            "queue_depth": "Automatic",
+                            "current_parallel_surface_scan_count": "1",
+                            "cache_board_present": "True",
+                            "wait_for_cache_room": "Disabled",
+                            "hardware_revision": "B"
+                        },
+                        "name": "Smart Array P440ar",
+                        "provider": "hspa",
+                        "configuration": {
+                            "spares": [ ],
+                            "arrays": [
+                                {
+                                    "extra": {
+                                        "letter": "A"
+                                    },
+                                    "physical_drives": [
+                                        {
+                                            "index": 0,
+                                            "type": "SAS",
+                                            "status": "OK",
+                                            "size": 300000000000,
+                                            "extra": {
+                                                "bay": "1",
+                                                "box": "1",
+                                                "port": "1I"
+                                            }
+                                        },
+                                        {
+                                            "index": 1,
+                                            "type": "SAS",
+                                            "status": "OK",
+                                            "size": 300000000000,
+                                            "extra": {
+                                                "bay": "2",
+                                                "box": "1",
+                                                "port": "1I"
+                                            }
+                                        },
+                                        {
+                                            "index": 2,
+                                            "type": "SAS",
+                                            "status": "OK",
+                                            "size": 300000000000,
+                                            "extra": {
+                                                "bay": "3",
+                                                "box": "1",
+                                                "port": "1I"
+                                            }
+                                        },
+                                        {
+                                            "index": 3,
+                                            "type": "SAS",
+                                            "status": "OK",
+                                            "size": 300000000000,
+                                            "extra": {
+                                                "bay": "4",
+                                                "box": "1",
+                                                "port": "1I"
+                                            }
+                                        },
+                                        {
+                                            "index": 4,
+                                            "type": "SAS",
+                                            "status": "OK",
+                                            "size": 300000000000,
+                                            "extra": {
+                                                "bay": "5",
+                                                "box": "1",
+                                                "port": "1I"
+                                            }
+                                        },
+                                        {
+                                            "index": 5,
+                                            "type": "SAS",
+                                            "status": "OK",
+                                            "size": 300000000000,
+                                            "extra": {
+                                                "bay": "6",
+                                                "box": "1",
+                                                "port": "1I"
+                                            }
+                                        }
+                                    ],
+                                    "logical_drives": [
+                                        {
+                                            "extra": {
+                                                "progress": null,
+                                                "id": 1
+                                            },
+                                            "status": "OK",
+                                            "size": 1100000000000,
+                                            "level": 6
+                                        }
+                                    ],
+                                    "free_space": 0
+                                }
+                            ],
+                            "unassigned": [
+                                {
+                                    "index": 6,
+                                    "type": "SAS",
+                                    "status": "OK",
+                                    "size": 300000000000,
+                                    "extra": {
+                                        "bay": "7",
+                                        "box": "1",
+                                        "port": "1I"
+                                    }
+                                },
+                                {
+                                    "index": 7,
+                                    "type": "SAS",
+                                    "status": "OK",
+                                    "size": 300000000000,
+                                    "extra": {
+                                        "bay": "8",
+                                        "box": "1",
+                                        "port": "1I"
+                                    }
+                                },
+                                {
+                                    "index": 8,
+                                    "type": "SAS",
+                                    "status": "OK",
+                                    "size": 300000000000,
+                                    "extra": {
+                                        "bay": "9",
+                                        "box": "1",
+                                        "port": "1I"
+                                    }
+                                },
+                                {
+                                    "index": 9,
+                                    "type": "SAS",
+                                    "status": "OK",
+                                    "size": 300000000000,
+                                    "extra": {
+                                        "bay": "10",
+                                        "box": "1",
+                                        "port": "1I"
+                                    }
+                                },
+                                {
+                                    "index": 10,
+                                    "type": "SAS",
+                                    "status": "OK",
+                                    "size": 300000000000,
+                                    "extra": {
+                                        "bay": "11",
+                                        "box": "1",
+                                        "port": "1I"
+                                    }
+                                },
+                                {
+                                    "index": 11,
+                                    "type": "SAS",
+                                    "status": "OK",
+                                    "size": 300000000000,
+                                    "extra": {
+                                        "bay": "12",
+                                        "box": "1",
+                                        "port": "1I"
+                                    }
+                                },
+                                {
+                                    "index": 12,
+                                    "type": "SAS",
+                                    "status": "OK",
+                                    "size": 300000000000,
+                                    "extra": {
+                                        "bay": "13",
+                                        "box": "1",
+                                        "port": "1I"
+                                    }
+                                },
+                                {
+                                    "index": 13,
+                                    "type": "SAS",
+                                    "status": "OK",
+                                    "size": 300000000000,
+                                    "extra": {
+                                        "bay": "14",
+                                        "box": "1",
+                                        "port": "1I"
+                                    }
+                                },
+                                {
+                                    "index": 14,
+                                    "type": "SAS",
+                                    "status": "OK",
+                                    "size": 300000000000,
+                                    "extra": {
+                                        "bay": "15",
+                                        "box": "1",
+                                        "port": "1I"
+                                    }
+                                },
+                                {
+                                    "index": 15,
+                                    "type": "SAS",
+                                    "status": "OK",
+                                    "size": 300000000000,
+                                    "extra": {
+                                        "bay": "16",
+                                        "box": "1",
+                                        "port": "1I"
+                                    }
+                                },
+                                {
+                                    "index": 16,
+                                    "type": "SAS",
+                                    "status": "OK",
+                                    "size": 300000000000,
+                                    "extra": {
+                                        "bay": "17",
+                                        "box": "1",
+                                        "port": "1I"
+                                    }
+                                },
+                                {
+                                    "index": 17,
+                                    "type": "SAS",
+                                    "status": "OK",
+                                    "size": 300000000000,
+                                    "extra": {
+                                        "bay": "18",
+                                        "box": "1",
+                                        "port": "1I"
+                                    }
+                                },
+                                {
+                                    "index": 18,
+                                    "type": "SAS",
+                                    "status": "OK",
+                                    "size": 300000000000,
+                                    "extra": {
+                                        "bay": "19",
+                                        "box": "1",
+                                        "port": "1I"
+                                    }
+                                },
+                                {
+                                    "index": 19,
+                                    "type": "SAS",
+                                    "status": "OK",
+                                    "size": 300000000000,
+                                    "extra": {
+                                        "bay": "20",
+                                        "box": "1",
+                                        "port": "1I"
+                                    }
+                                },
+                                {
+                                    "index": 20,
+                                    "type": "SAS",
+                                    "status": "OK",
+                                    "size": 300000000000,
+                                    "extra": {
+                                        "bay": "21",
+                                        "box": "1",
+                                        "port": "1I"
+                                    }
+                                },
+                                {
+                                    "index": 21,
+                                    "type": "SAS",
+                                    "status": "OK",
+                                    "size": 300000000000,
+                                    "extra": {
+                                        "bay": "22",
+                                        "box": "1",
+                                        "port": "1I"
+                                    }
+                                },
+                                {
+                                    "index": 22,
+                                    "type": "SAS",
+                                    "status": "OK",
+                                    "size": 300000000000,
+                                    "extra": {
+                                        "bay": "23",
+                                        "box": "1",
+                                        "port": "1I"
+                                    }
+                                },
+                                {
+                                    "index": 23,
+                                    "type": "SAS",
+                                    "status": "OK",
+                                    "size": 300000000000,
+                                    "extra": {
+                                        "bay": "24",
+                                        "box": "1",
+                                        "port": "1I"
+                                    }
+                                },
+                                {
+                                    "index": 24,
+                                    "type": "SAS",
+                                    "status": "OK",
+                                    "size": 300000000000,
+                                    "extra": {
+                                        "bay": "25",
+                                        "box": "1",
+                                        "port": "1I"
+                                    }
+                                },
+                                {
+                                    "index": 25,
+                                    "type": "SAS",
+                                    "status": "OK",
+                                    "size": 300000000000,
+                                    "extra": {
+                                        "bay": "26",
+                                        "box": "1",
+                                        "port": "1I"
+                                    }
+                                }
+                            ]
+                        },
+                        "total_size": 7800000000000
+                    },
+                    {
+                        "adapter_handler": "hpssa",
+                        "total_drives": 0,
+                        "vendor_info": {
+                            "slot": "4",
+                            "serial_number": "PDNNL0ARH7E01K",
+                            "negotiated_pcie_data_rate": "PCIe 3.0 x8 (7880 MB/s)",
+                            "bus_interface": "PCI",
+                            "driver_version": "3.4.4",
+                            "controller_status": "OK",
+                            "host_serial_number": "TC51NR9952",
+                            "driver_name": "hpsa",
+                            "hardware_revision": "B",
+                            "controller_temperature_c": "42",
+                            "number_of_ports": "2 External only",
+                            "controller_mode_reboot": "Not Required",
+                            "controller_mode": "HBA",
+                            "current_power_mode": "MaxPerformance",
+                            "firmware_version": "5.04",
+                            "cache_serial_number": "PDNNL0ARH7E01K",
+                            "pci_address": "0000:88:00.0",
+                            "hba_mode_enabled": "True"
+                        },
+                        "name": "Smart HBA H241",
+                        "provider": "hspa",
+                        "configuration": {
+                            "spares": [ ],
+                            "arrays": [ ],
+                            "unassigned": [ ]
+                        },
+                        "total_size": 0
+                    },
+                    {
+                        "adapter_handler": "hpssa",
+                        "total_drives": 0,
+                        "vendor_info": {
+                            "slot": "5",
+                            "serial_number": "PDNNL0ARH7A02A",
+                            "negotiated_pcie_data_rate": "PCIe 3.0 x8 (7880 MB/s)",
+                            "bus_interface": "PCI",
+                            "driver_version": "3.4.4",
+                            "controller_status": "OK",
+                            "host_serial_number": "TC51NR9952",
+                            "driver_name": "hpsa",
+                            "hardware_revision": "B",
+                            "controller_temperature_c": "45",
+                            "number_of_ports": "2 External only",
+                            "controller_mode_reboot": "Not Required",
+                            "controller_mode": "HBA",
+                            "current_power_mode": "MaxPerformance",
+                            "firmware_version": "5.04",
+                            "cache_serial_number": "PDNNL0ARH7A02A",
+                            "pci_address": "0000:84:00.0",
+                            "hba_mode_enabled": "True"
+                        },
+                        "name": "Smart HBA H241",
+                        "provider": "hspa",
+                        "configuration": {
+                            "spares": [ ],
+                            "arrays": [ ],
+                            "unassigned": [ ]
+                        },
+                        "total_size": 0
+                    }
+                ],
+                "time_created": 1484258653.5659907,
+                "cpu": [
+                    {
+                        "physical_id": 0,
+                        "threads": 16,
+                        "cache_alignment": 64,
+                        "flags": [
+                            "fpu",
+                            "vme",
+                            "de",
+                            "pse",
+                            "tsc",
+                            "msr",
+                            "pae",
+                            "mce",
+                            "cx8",
+                            "apic",
+                            "sep",
+                            "mtrr",
+                            "pge",
+                            "mca",
+                            "cmov",
+                            "pat",
+                            "pse36",
+                            "clflush",
+                            "dts",
+                            "acpi",
+                            "mmx",
+                            "fxsr",
+                            "sse",
+                            "sse2",
+                            "ss",
+                            "ht",
+                            "tm",
+                            "pbe",
+                            "syscall",
+                            "nx",
+                            "pdpe1gb",
+                            "rdtscp",
+                            "lm",
+                            "constant_tsc",
+                            "arch_perfmon",
+                            "pebs",
+                            "bts",
+                            "rep_good",
+                            "nopl",
+                            "xtopology",
+                            "nonstop_tsc",
+                            "aperfmperf",
+                            "eagerfpu",
+                            "pni",
+                            "pclmulqdq",
+                            "dtes64",
+                            "monitor",
+                            "ds_cpl",
+                            "vmx",
+                            "smx",
+                            "est",
+                            "tm2",
+                            "ssse3",
+                            "fma",
+                            "cx16",
+                            "xtpr",
+                            "pdcm",
+                            "pcid",
+                            "dca",
+                            "sse4_1",
+                            "sse4_2",
+                            "x2apic",
+                            "movbe",
+                            "popcnt",
+                            "tsc_deadline_timer",
+                            "aes",
+                            "xsave",
+                            "avx",
+                            "f16c",
+                            "rdrand",
+                            "lahf_lm",
+                            "abm",
+                            "ida",
+                            "arat",
+                            "epb",
+                            "pln",
+                            "pts",
+                            "dtherm",
+                            "tpr_shadow",
+                            "vnmi",
+                            "flexpriority",
+                            "ept",
+                            "vpid",
+                            "fsgsbase",
+                            "tsc_adjust",
+                            "bmi1",
+                            "avx2",
+                            "smep",
+                            "bmi2",
+                            "erms",
+                            "invpcid",
+                            "xsaveopt"
+                        ],
+                        "cores": 8,
+                        "model_name": "Intel(R) Xeon(R) CPU E5-2630 v3 @ 2.40GHz",
+                        "frequency": {
+                            "current": 2397.233,
+                            "cpufreq_enabled": false,
+                            "max": 2397.233,
+                            "min": 2397.233,
+                            "bogomips": 4796.23,
+                            "model_name": "Intel(R) Xeon(R) CPU E5-2630 v3 @ 2.40GHz"
+                        },
+                        "cache_size": "20480 KB"
+                    },
+                    {
+                        "physical_id": 1,
+                        "threads": 16,
+                        "cache_alignment": 64,
+                        "flags": [
+                            "fpu",
+                            "vme",
+                            "de",
+                            "pse",
+                            "tsc",
+                            "msr",
+                            "pae",
+                            "mce",
+                            "cx8",
+                            "apic",
+                            "sep",
+                            "mtrr",
+                            "pge",
+                            "mca",
+                            "cmov",
+                            "pat",
+                            "pse36",
+                            "clflush",
+                            "dts",
+                            "acpi",
+                            "mmx",
+                            "fxsr",
+                            "sse",
+                            "sse2",
+                            "ss",
+                            "ht",
+                            "tm",
+                            "pbe",
+                            "syscall",
+                            "nx",
+                            "pdpe1gb",
+                            "rdtscp",
+                            "lm",
+                            "constant_tsc",
+                            "arch_perfmon",
+                            "pebs",
+                            "bts",
+                            "rep_good",
+                            "nopl",
+                            "xtopology",
+                            "nonstop_tsc",
+                            "aperfmperf",
+                            "eagerfpu",
+                            "pni",
+                            "pclmulqdq",
+                            "dtes64",
+                            "monitor",
+                            "ds_cpl",
+                            "vmx",
+                            "smx",
+                            "est",
+                            "tm2",
+                            "ssse3",
+                            "fma",
+                            "cx16",
+                            "xtpr",
+                            "pdcm",
+                            "pcid",
+                            "dca",
+                            "sse4_1",
+                            "sse4_2",
+                            "x2apic",
+                            "movbe",
+                            "popcnt",
+                            "tsc_deadline_timer",
+                            "aes",
+                            "xsave",
+                            "avx",
+                            "f16c",
+                            "rdrand",
+                            "lahf_lm",
+                            "abm",
+                            "ida",
+                            "arat",
+                            "epb",
+                            "pln",
+                            "pts",
+                            "dtherm",
+                            "tpr_shadow",
+                            "vnmi",
+                            "flexpriority",
+                            "ept",
+                            "vpid",
+                            "fsgsbase",
+                            "tsc_adjust",
+                            "bmi1",
+                            "avx2",
+                            "smep",
+                            "bmi2",
+                            "erms",
+                            "invpcid",
+                            "xsaveopt"
+                        ],
+                        "cores": 8,
+                        "model_name": "Intel(R) Xeon(R) CPU E5-2630 v3 @ 2.40GHz",
+                        "frequency": {
+                            "current": 2397.233,
+                            "cpufreq_enabled": false,
+                            "max": 2397.233,
+                            "min": 2397.233,
+                            "bogomips": 4798.11,
+                            "model_name": "Intel(R) Xeon(R) CPU E5-2630 v3 @ 2.40GHz"
+                        },
+                        "cache_size": "20480 KB"
+                    }
+                ],
+                "routes": [
+                    {
+                        "dev": "eth0",
+                        "destination": "default",
+                        "via": "10.127.29.1"
+                    },
+                    {
+                        "src": "10.127.29.196",
+                        "scope": "link",
+                        "dev": "eth0",
+                        "destination": "10.127.29.0/24",
+                        "proto": "kernel"
+                    }
+                ]
+
+            }
+
+/inventory/computers/query:
+  post:
+    description: |
+      Post queries to the inventory database controller using MongoDB query syntax
+    body:
+      application/json:
+      example: |
+        /api/inventory/computers/query/?projection=raid.total_drives,raid.name
+        {
+          "query":
+          {
+            "raid.total_drives":
+            {
+              "$gt"
+            }
+          }
+        }
+    queryParameters:
+      limit:
+        required: false
+        type: int
+        description: Maximum number of elements to return
+        default: 250
+      offset_id:
+        required: false
+        type: string
+        description: ObjectID to act as the offset (for pagenation)
+        example: 56f04b0a5742ee76aa836782
+      sort_direction:
+        description: ASCENDING or DESCENDING (by objectID)
+        required: false
+        type: string
+        example: ASCENDING
+        default: ASCENDING
+      projection:
+        required: false
+        description: Which fields to return or omit
+        default: mercury_id=1,_id=1
+        example: |
+          cpu.frequency.max=1,raid.total_drives=1
+          interfaces.lldp.switch_name=1
+
+/active/computers:
+  description: |
+    Get only computers with an active ZeroMQ agent.
+  get:
+    responses:
+      200:
+        body:
+          application/json:
+            example: |
+              {
+                    "limit": 1,
+                    "total": 1,
+                    "direction": "ASCENDING",
+                    "items": [
+                        {
+                            "_id": "56eae51c5742ee76aa83677f",
+                            "mercury_id": "001183c41825ed761ceddab91e8fdb2a88d4943006"
+                            "agent_info": {
+
+                              "rpc_address": "10.127.29.196",
+                              "_id": "594ff6015742ee10472bd804",
+                              "rpc_port": 9003,
+                              "localtime": 1498412631.401529,
+                              "rpc_address6": null,
+                              "time_created": 1498412545.7970352,
+                              "ping_port": 9004
+                            },
+                            "backend": {
+                              "name": be1-dev1.kickstart.rackspace.com,
+                              "datacenter": dev1,
+                              "address": 10.127.29.99,
+                              "address_v6": null,
+                              "frontend_port": 9001,
+                              "backend_port": 9002
+                        },
+                    ]
+              }
+
+      queryParameters:
+        limit:
+          required: false
+          type: int
+          description: Maximum number of elements to return
+          default: 250
+        offset_id:
+          required: false
+          type: string
+          description: ObjectID to act as the offset (for pagenation)
+          example: 56f04b0a5742ee76aa836782
+        sort_direction:
+          description: ASCENDING or DESCENDING (by objectID)
+          required: false
+          type: string
+          example: ASCENDING
+          default: ASCENDING
