@@ -26,27 +26,27 @@ class InventoryDBController(object):
         self.collection = collection
         self.collection.create_index('mercury_id', unique=True)
 
-    def insert_one(self, data):
+    async def insert_one(self, data):
         mercury_id = data.get('mercury_id')
         if not mercury_id:
             raise MercuryCritical('MercuryID is missing from payload. Shame. Shame. Shame.')
 
-        existing = self.collection.find_one({'mercury_id': mercury_id}, projection={'_id': 1})
+        existing = await self.collection.find_one({'mercury_id': mercury_id}, projection={'_id': 1})
         if existing:
             # implicit update
             log.info('Record exists, performing update instead.')
             del data['mercury_id']
-            self.update_one(mercury_id, data)
+            await self.update_one(mercury_id, data)
             return existing['_id']
 
         now = time.time()
         data['time_created'] = now
         data['time_updated'] = now
 
-        insert_result = self.collection.insert_one(data)
+        insert_result = await self.collection.insert_one(data)
         return insert_result.inserted_id
 
-    def update_one(self, mercury_id, data=None):
+    async def update_one(self, mercury_id, data=None):
         """
         Very simple update_one/insert method. Here monitor hooks will be run.
 
@@ -64,18 +64,18 @@ class InventoryDBController(object):
         if not data:
             log.warning('Update data is empty')
 
-        if not self.collection.count({'mercury_id': mercury_id}, projection={'_id': 1}):
+        if not await self.collection.count({'mercury_id': mercury_id}, projection={'_id': 1}):
             raise MercuryGeneralException('Attempting to update non-existing record')
 
         if 'mercury_id' in data:
             raise MercuryCritical('MercuryID cannot be updated once a record already exists')
 
         data['time_updated'] = time.time()
-        self.collection.update_one({'mercury_id': mercury_id}, {'$set': data})
+        await self.collection.update_one({'mercury_id': mercury_id}, {'$set': data})
 
-    def delete(self, mercury_id):
+    async def delete(self, mercury_id):
         log.info('Deleting: %s' % mercury_id)
-        self.collection.delete_one({'mercury_id': mercury_id})
+        await self.collection.delete_one({'mercury_id': mercury_id})
 
     def get_one(self, mercury_id, projection=None):
         log.debug('Fetching: %s' % mercury_id)

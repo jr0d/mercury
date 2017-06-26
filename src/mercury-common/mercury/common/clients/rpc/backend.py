@@ -21,9 +21,15 @@ log = logging.getLogger(__name__)
 
 
 class BackEndClient(SimpleRouterReqClient):
-    _service_name = 'Backend'
+    _service_name = 'RPC backend'
 
     def register(self, device_info, agent_info):
+        """
+
+        :param device_info:
+        :param agent_info:
+        :return:
+        """
         _payload = {
             'endpoint': 'register',
             'args': [device_info, agent_info]
@@ -31,22 +37,38 @@ class BackEndClient(SimpleRouterReqClient):
         return self.transceiver(_payload)
 
     def update(self, mercury_id, update_data):
+        """
+
+        :param mercury_id:
+        :param update_data:
+        :return:
+        """
         _payload = {
             'endpoint': 'update',
             'args': [mercury_id, update_data]
         }
         return self.transceiver(_payload)
 
-    def task_return(self, return_data):
+    def complete_task(self, return_data):
+        """
+
+        :param return_data:
+        :return:
+        """
         _payload = {
-            'action': 'task_return',
-            'return_data': return_data
+            'endpoint': 'complete_task',
+            'args': [return_data]
         }
         return self.transceiver(_payload)
 
-    def task_update(self, update_data):
+    def update_task(self, update_data):
+        """
+
+        :param update_data:
+        :return:
+        """
         _payload = {
-            'action': 'task_update',
-            'update_data': update_data
+            'endpoint': 'update_task',
+            'args': [update_data]
         }
         return self.transceiver(_payload)

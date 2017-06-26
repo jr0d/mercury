@@ -14,10 +14,10 @@
 #    limitations under the License.
 
 import logging
-import time
 import threading
+import time
 
-from mercury.agent.client import BackEndClient
+from mercury.common.clients.rpc.backend import BackEndClient
 from mercury.common.exceptions import fancy_traceback_short, parse_exception
 
 log = logging.getLogger(__name__)
@@ -84,7 +84,7 @@ class TaskRunner(object):
         log.debug('Publishing response to: %s' % self.backend.zmq_url,
                   extra={'task_id': self.task_id, 'job_id': self.job_id})
 
-        response = self.backend.task_return({
+        response = self.backend.complete_task({
             'status': status,
             'message': return_data,
             'traceback_info': traceback_info,

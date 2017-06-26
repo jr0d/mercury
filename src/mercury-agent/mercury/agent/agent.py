@@ -13,17 +13,6 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-"""
-agent:
-
-    1) Start Pong service
-    2) Start RPC service
-    2) Register
-
-#PROTOTYPE
-
-"""
-
 import argparse
 import logging
 
@@ -33,6 +22,7 @@ from mercury.agent.pong import spawn_pong_process
 from mercury.agent.register import get_dhcp_ip, register
 from mercury.agent.remote_logging import MercuryLogHandler
 from mercury.agent.rpc import AgentService
+from mercury.common.clients.rpc.backend import BackEndClient
 from mercury.common.exceptions import MercuryCritical, MercuryGeneralException
 from mercury.inspector import inspect
 
@@ -56,11 +46,13 @@ class Agent(object):
         self.agent_bind_address = self.local_config.get('service_bind_address', 'tcp://0.0.0.0:9003')
         self.pong_bind_address = self.local_config.get('pong_bind_address', 'tcp://0.0.0.0:9004')
 
-        self.rpc_backend = agent_configuration.get('remote', {}).get('rpc_service')
+        self.rpc_backend_url = agent_configuration.get('remote', {}).get('rpc_service')
         self.log_handler = logger
 
-        if not self.rpc_backend:
+        if not self.rpc_backend_url:
             raise MercuryCritical('Missing rpc backend in local configuration')
+
+        self.backend = BackEndClient(self.rpc_backend_url)
 
     def run(self, dhcp_ip_method='simple'):
         log.debug('Agent: %s, Pong: %s' % (self.agent_bind_address,
@@ -79,7 +71,7 @@ class Agent(object):
         local_ip = get_dhcp_ip(device_info, method=dhcp_ip_method)
         local_ipv6 = None
 
-        register(self.rpc_backend, device_info['mercury_id'], local_ip, local_ipv6, runtime_capabilities)
+        register(self.backend, device_info, local_ip, local_ipv6, runtime_capabilities)
 
         # LogHandler
 
@@ -89,13 +81,13 @@ class Agent(object):
 
         # AsyncInspectors
         try:
-            LLDPInspector(device_info, inventory_client).inspect()
+            LLDPInspector(device_info, self.backend).inspect()
         except MercuryGeneralException as mge:
             log.error('Caught recoverable exception running async inspector: {}'.format(mge))
 
         log.info('Starting agent rpc service: %s' % self.agent_bind_address)
 
-        agent_service = AgentService(self.agent_bind_address, self.rpc_backend)
+        agent_service = AgentService(self.agent_bind_address, self.rpc_backend_url)
         agent_service.bind()
         agent_service.start()
 

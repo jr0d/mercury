@@ -31,6 +31,12 @@ All aspects of the project, be it code, structure, philosophy; are likely to cha
 
    *Use at your own risk, without any warranty, implied or otherwise*
 
+Frontend API documentation
+--------------------------
+
+.. _a link: raml/frontend.v1.html
+
+
 Indices and tables
 ==================
 

@@ -9,6 +9,7 @@ For an example usage, see mercury.inventory.controller.InventoryController
 import inspect
 import logging
 
+from mercury.common.exceptions import MercuryClientException
 
 log = logging.getLogger(__name__)
 
@@ -33,3 +34,22 @@ class StaticEndpointController(object):
     """Use this if you want to be lazy"""
     def __init__(self):
         self.endpoints = async_endpoints
+
+    # TODO: CODE Duplication, move these static methods to a library module
+
+    @staticmethod
+    def get_key(key, d):
+        try:
+            return d[key]
+        except KeyError:
+            raise MercuryClientException('{} is missing from request'.format(key))
+
+    @staticmethod
+    def validate_required(required, data):
+        missing = []
+        for key in required:
+            if key not in data:
+                missing.append(data)
+
+        if missing:
+            raise MercuryClientException('Message is missing required data: {}'.format(missing))

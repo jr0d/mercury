@@ -54,7 +54,7 @@ def update_task(task_id, update_data, tasks_collection=None):
     )
 
 
-def complete_task(job_id, task_id, response_data, jobs_collection=None, tasks_collection=None):
+async def complete_task(job_id, task_id, response_data, jobs_collection=None, tasks_collection=None):
     """
     response_data should include time_started and time_completed from the remote host.
     time_updated and ttl_time_completed are relative to the server.
@@ -86,11 +86,11 @@ def complete_task(job_id, task_id, response_data, jobs_collection=None, tasks_co
             **response_data
         ))
 
-    update_task(task_id, task_update, tasks_collection)
+    await update_task(task_id, task_update, tasks_collection)
 
     if is_completed(tasks_collection, job_id):
         log.info('Job completed: {}, status: {}'.format(job_id, response_data['status']))
-        jobs_collection.update_one(
+        await jobs_collection.update_one(
             {
                 'job_id': job_id
             },
@@ -120,8 +120,6 @@ def is_completed(tasks_collection, job_id):
 
 class Task(object):
     """
-    There is a voice in my head shouting 'JUST SUBCLASS DICT!!!'
-
     status: NEW|DISPATCHED|UPDATED|SUCCESS|ERROR|TIMEOUT|EXCEPTION
     action: Arbitrary and optional action string set by the executor
     progress: Optional progress delta 0 through 1 set by the executor

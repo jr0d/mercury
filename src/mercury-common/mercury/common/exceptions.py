@@ -54,7 +54,7 @@ class MercuryClientException(MercuryGeneralException):
 
 
 class EndpointError(MercuryGeneralException):
-    def __init__(self, message, endpoint, request):
+    def __init__(self, message, endpoint, request=None):
         """
         Raised when an exception is encountered while processing an endpoint
         request

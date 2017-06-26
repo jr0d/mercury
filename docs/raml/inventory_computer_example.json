@@ -1,203 +1,4 @@
-<!DOCTYPE HTML><html><head><title>Mercury API documentation</title><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><meta name="generator" content="https://github.com/raml2html/raml2html 6.3.0"><link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.3.0/styles/default.min.css"><script type="text/javascript" src="https://code.jquery.com/jquery-1.11.0.min.js"></script><script type="text/javascript" src="https://netdna.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.3.0/highlight.min.js"></script><script type="text/javascript">
-      $(document).ready(function() {
-        $('.page-header pre code, .top-resource-description pre code, .modal-body pre code').each(function(i, block) {
-          hljs.highlightBlock(block);
-        });
-
-        $('[data-toggle]').click(function() {
-          var selector = $(this).data('target') + ' pre code';
-          $(selector).each(function(i, block) {
-            hljs.highlightBlock(block);
-          });
-        });
-
-        // open modal on hashes like #_action_get
-        $(window).bind('hashchange', function(e) {
-          var anchor_id = document.location.hash.substr(1); //strip #
-          var element = $('#' + anchor_id);
-
-          // do we have such element + is it a modal?  --> show it
-          if (element.length && element.hasClass('modal')) {
-            element.modal('show');
-          }
-        });
-
-        // execute hashchange on first page load
-        $(window).trigger('hashchange');
-
-        // remove url fragment on modal hide
-        $('.modal').on('hidden.bs.modal', function() {
-          try {
-            if (history && history.replaceState) {
-                history.replaceState({}, '', '#');
-            }
-          } catch(e) {}
-        });
-      });
-    </script><style>
-      .hljs {
-        background: transparent;
-      }
-      .parent {
-        color: #999;
-      }
-      .list-group-item > .badge {
-        float: none;
-        margin-right: 6px;
-      }
-      .panel-title > .methods {
-        float: right;
-      }
-      .badge {
-        border-radius: 0;
-        text-transform: uppercase;
-        width: 70px;
-        font-weight: normal;
-        color: #f3f3f6;
-        line-height: normal;
-      }
-      .badge_get {
-        background-color: #63a8e2;
-      }
-      .badge_post {
-        background-color: #6cbd7d;
-      }
-      .badge_put {
-        background-color: #22bac4;
-      }
-      .badge_delete {
-        background-color: #d26460;
-      }
-      .badge_patch {
-        background-color: #ccc444;
-      }
-      .list-group, .panel-group {
-        margin-bottom: 0;
-      }
-      .panel-group .panel+.panel-white {
-        margin-top: 0;
-      }
-      .panel-group .panel-white {
-        border-bottom: 1px solid #F5F5F5;
-        border-radius: 0;
-      }
-      .panel-white:last-child {
-        border-bottom-color: white;
-        -webkit-box-shadow: none;
-        box-shadow: none;
-      }
-      .panel-white .panel-heading {
-        background: white;
-      }
-      .tab-pane ul {
-        padding-left: 2em;
-      }
-      .tab-pane h1 {
-        font-size: 1.3em;
-      }
-      .tab-pane h2 {
-        font-size: 1.2em;
-        padding-bottom: 4px;
-        border-bottom: 1px solid #ddd;
-      }
-      .tab-pane h3 {
-        font-size: 1.1em;
-      }
-      .tab-content {
-        border-left: 1px solid #ddd;
-        border-right: 1px solid #ddd;
-        border-bottom: 1px solid #ddd;
-        padding: 10px;
-      }
-      #sidebar {
-        margin-top: 30px;
-        padding-right: 5px;
-        overflow: auto;
-        height: 90%;
-      }
-      .top-resource-description {
-        border-bottom: 1px solid #ddd;
-        background: #fcfcfc;
-        padding: 15px 15px 0 15px;
-        margin: -15px -15px 10px -15px;
-      }
-      .resource-description {
-        border-bottom: 1px solid #fcfcfc;
-        background: #fcfcfc;
-        padding: 15px 15px 0 15px;
-        margin: -15px -15px 10px -15px;
-      }
-      .resource-description p:last-child {
-        margin: 0;
-      }
-      .list-group .badge {
-        float: left;
-      }
-      .method_description {
-        margin-left: 85px;
-      }
-      .method_description p:last-child {
-        margin: 0;
-      }
-      .list-group-item {
-        cursor: pointer;
-      }
-      .list-group-item:hover {
-        background-color: #f5f5f5;
-      }
-      pre code {
-        overflow: auto;
-        word-wrap: normal;
-        white-space: pre;
-      }
-      .items {
-        background: #f5f5f5;
-        color: #333;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        padding: 9.5px;
-        margin: 0 0 10px;
-        font-size: 13px;
-        line-height: 1.42857143;
-      }
-      .examples {
-        margin-left: 0.5em;
-      }
-      .resource-modal li > ul {
-        margin-bottom: 1em;
-      }
-    </style></head><body data-spy="scroll" data-target="#sidebar"><div class="container"><div class="row"><div class="col-md-9" role="main"><div class="page-header"><h1>Mercury API documentation <small>version 0.0.1</small></h1><p></p><h3 id="overview"><a href="#overview">Overview</a></h3><p>The frontend mercury HTTP API allows us to query the inventory datatbase, inject RPC tasks, view task status, and retrieve RPC outputs</p></div><div class="panel panel-default"><div class="panel-heading"><h3 id="inventory_computers" class="panel-title">/inventory/computers</h3></div><div class="panel-body"><div class="top-resource-description"><p>Gets the current inventory with support for pagenation and custom projections</p></div><div class="panel-group"><div class="panel panel-white resource-modal"><div class="panel-heading"><h4 class="panel-title"><a class="collapsed" data-toggle="collapse" href="#panel_inventory_computers"><span class="parent"></span>/inventory/computers</a> <span class="methods"><a href="#inventory_computers_get"><span class="badge badge_get">get</span></a></span></h4></div><div id="panel_inventory_computers" class="panel-collapse collapse"><div class="panel-body"><div class="list-group"><div onclick="window.location.href = '#inventory_computers_get'" class="list-group-item"><span class="badge badge_get">get</span><div class="method_description"></div><div class="clearfix"></div></div></div></div></div><div class="modal fade" tabindex="0" id="inventory_computers_get"><div class="modal-dialog modal-lg"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button><h4 class="modal-title" id="myModalLabel"><span class="badge badge_get">get</span> <span class="parent"></span>/inventory/computers</h4></div><div class="modal-body"><ul class="nav nav-tabs"><li class="active"><a href="#inventory_computers_get_request" data-toggle="tab">Request</a></li><li><a href="#inventory_computers_get_response" data-toggle="tab">Response</a></li></ul><div class="tab-content"><div class="tab-pane active" id="inventory_computers_get_request"><h3>Query Parameters</h3><ul><li><strong>limit</strong>: <em>(int - default: 250)</em><p>Maximum number of elements to return</p></li><li><strong>offset_id</strong>: <em>(string)</em><p>ObjectID to act as the offset (for pagenation)</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>56f04b0a5742ee76aa836782</code></pre></div></li><li><strong>sort_direction</strong>: <em>(string - default: ASCENDING)</em><p>ASCENDING or DESCENDING (by objectID)</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>ASCENDING</code></pre></div></li><li><strong>projection</strong>: <em>(string - default: mercury_id=1,_id=1)</em><p>Which fields to return or omit</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>cpu.frequency.max=1,raid.total_drives=1
-interfaces.lldp.switch_name=1
-</code></pre></div></li></ul></div><div class="tab-pane" id="inventory_computers_get_response"><h2>HTTP status code <a href="http://httpstatus.es/200" target="_blank">200</a></h2><h3>Body</h3><p><strong>Media type</strong>: application/json</p><p><strong>Type</strong>: object</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>{
-      "limit": 5,
-      "total": 104,
-      "direction": "ASCENDING",
-      "items": [
-          {
-              "_id": "56eae51c5742ee76aa83677f",
-              "mercury_id": "001183c41825ed761ceddab91e8fdb2a88d4943006"
-          },
-          {
-              "_id": "56eb6df75742ee76aa836780",
-              "mercury_id": "018baf9b8936161a5a954e470afcb781298d2448d9"
-          },
-          {
-              "_id": "56f039d15742ee76aa836781",
-              "mercury_id": "0137c992d1988be7b154a7633d3514a59718ca5104"
-          },
-          {
-              "_id": "56f04b0a5742ee76aa836782",
-              "mercury_id": "019ffb80cddf6a99aa4e401dc2ab5d749fae13b3ec"
-          },
-          {
-              "_id": "56f066cb5742ee76aa836783",
-              "mercury_id": "00be1514caff0518640530e749d4da5f1049ec5221"
-          }
-      ]
-}
-</code></pre></div></div></div></div></div></div></div></div></div></div></div><div class="panel panel-default"><div class="panel-heading"><h3 id="inventory_computers__mercury_id_" class="panel-title">/inventory/computers/{mercury_id}</h3></div><div class="panel-body"><div class="top-resource-description"><p>Gets a single inventory object by mercury_id</p></div><div class="panel-group"><div class="panel panel-white resource-modal"><div class="panel-heading"><h4 class="panel-title"><a class="collapsed" data-toggle="collapse" href="#panel_inventory_computers__mercury_id_"><span class="parent"></span>/inventory/computers/{mercury_id}</a> <span class="methods"><a href="#inventory_computers__mercury_id__get"><span class="badge badge_get">get</span></a></span></h4></div><div id="panel_inventory_computers__mercury_id_" class="panel-collapse collapse"><div class="panel-body"><div class="list-group"><div onclick="window.location.href = '#inventory_computers__mercury_id__get'" class="list-group-item"><span class="badge badge_get">get</span><div class="method_description"></div><div class="clearfix"></div></div></div></div></div><div class="modal fade" tabindex="0" id="inventory_computers__mercury_id__get"><div class="modal-dialog modal-lg"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button><h4 class="modal-title" id="myModalLabel"><span class="badge badge_get">get</span> <span class="parent"></span>/inventory/computers/{mercury_id}</h4></div><div class="modal-body"><ul class="nav nav-tabs"><li class="active"><a href="#inventory_computers__mercury_id__get_request" data-toggle="tab">Request</a></li><li><a href="#inventory_computers__mercury_id__get_response" data-toggle="tab">Response</a></li></ul><div class="tab-content"><div class="tab-pane active" id="inventory_computers__mercury_id__get_request"><h3>URI Parameters</h3><ul><li><strong>mercury_id</strong>: <em>required (string)</em></li></ul><h3>Query Parameters</h3><ul><li><strong>projection</strong>: <em>(string)</em><p>Which fields to return or omit</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>raid,os_storage
-interfaces.lldp.switch_name
-</code></pre></div></li></ul></div><div class="tab-pane" id="inventory_computers__mercury_id__get_response"><h2>HTTP status code <a href="http://httpstatus.es/200" target="_blank">200</a></h2><h3>Body</h3><p><strong>Media type</strong>: application/json</p><p><strong>Type</strong>: object</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>{
+{
   "mercury_id": "0110a1628669e487f48b3f8de13bebeafe2933c875",
   "time_updated": 1498412545.7720537,
   "pci": [
@@ -649,7 +450,7 @@ interfaces.lldp.switch_name
           "vendor_name": "Hewlett-Packard Company",
           "svendor_id": "103c",
           "svendor_name": "Hewlett-Packard Company",
-          "device_name": "Integrated Lights-Out Standard Slave Instrumentation &amp; System Support",
+          "device_name": "Integrated Lights-Out Standard Slave Instrumentation & System Support",
           "class_name": "System peripheral",
           "device_id": "3306",
           "sdevice_id": "3381",
@@ -868,7 +669,7 @@ interfaces.lldp.switch_name
           "vendor_name": "Intel Corporation",
           "svendor_id": "103c",
           "svendor_name": "Hewlett-Packard Company",
-          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 R3 QPI Link 0 &amp; 1 Monitoring",
+          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 R3 QPI Link 0 & 1 Monitoring",
           "class_name": "System peripheral",
           "device_id": "2f81",
           "sdevice_id": "21ea",
@@ -882,7 +683,7 @@ interfaces.lldp.switch_name
           "class_id": "1101",
           "svendor_id": "103c",
           "svendor_name": "Hewlett-Packard Company",
-          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 R3 QPI Link 0 &amp; 1 Monitoring",
+          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 R3 QPI Link 0 & 1 Monitoring",
           "vendor_name": "Intel Corporation",
           "class_name": "Performance counters",
           "device_id": "2f36",
@@ -897,7 +698,7 @@ interfaces.lldp.switch_name
           "class_id": "1101",
           "svendor_id": "103c",
           "svendor_name": "Hewlett-Packard Company",
-          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 R3 QPI Link 0 &amp; 1 Monitoring",
+          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 R3 QPI Link 0 & 1 Monitoring",
           "vendor_name": "Intel Corporation",
           "class_name": "Performance counters",
           "device_id": "2f37",
@@ -1044,7 +845,7 @@ interfaces.lldp.switch_name
           "vendor_name": "Intel Corporation",
           "svendor_id": "103c",
           "svendor_name": "Hewlett-Packard Company",
-          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 System Address Decoder &amp; Broadcast Registers",
+          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 System Address Decoder & Broadcast Registers",
           "class_name": "System peripheral",
           "device_id": "2ffc",
           "sdevice_id": "21ea",
@@ -1058,7 +859,7 @@ interfaces.lldp.switch_name
           "vendor_name": "Intel Corporation",
           "svendor_id": "103c",
           "svendor_name": "Hewlett-Packard Company",
-          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 System Address Decoder &amp; Broadcast Registers",
+          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 System Address Decoder & Broadcast Registers",
           "class_name": "System peripheral",
           "device_id": "2ffd",
           "sdevice_id": "21ea",
@@ -1072,7 +873,7 @@ interfaces.lldp.switch_name
           "vendor_name": "Intel Corporation",
           "svendor_id": "103c",
           "svendor_name": "Hewlett-Packard Company",
-          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 System Address Decoder &amp; Broadcast Registers",
+          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 System Address Decoder & Broadcast Registers",
           "class_name": "System peripheral",
           "device_id": "2ffe",
           "sdevice_id": "21ea",
@@ -1115,7 +916,7 @@ interfaces.lldp.switch_name
           "vendor_name": "Intel Corporation",
           "svendor_id": "103c",
           "svendor_name": "Hewlett-Packard Company",
-          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Scratchpad &amp; Semaphore Registers",
+          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Scratchpad & Semaphore Registers",
           "class_name": "System peripheral",
           "device_id": "2f1e",
           "sdevice_id": "21ea",
@@ -1129,7 +930,7 @@ interfaces.lldp.switch_name
           "vendor_name": "Intel Corporation",
           "svendor_id": "103c",
           "svendor_name": "Hewlett-Packard Company",
-          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Scratchpad &amp; Semaphore Registers",
+          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Scratchpad & Semaphore Registers",
           "class_name": "Performance counters",
           "device_id": "2f7d",
           "sdevice_id": "21ea",
@@ -1143,7 +944,7 @@ interfaces.lldp.switch_name
           "vendor_name": "Intel Corporation",
           "svendor_id": "103c",
           "svendor_name": "Hewlett-Packard Company",
-          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Scratchpad &amp; Semaphore Registers",
+          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Scratchpad & Semaphore Registers",
           "class_name": "System peripheral",
           "device_id": "2f1f",
           "sdevice_id": "21ea",
@@ -1200,7 +1001,7 @@ interfaces.lldp.switch_name
           "vendor_name": "Intel Corporation",
           "svendor_id": "103c",
           "svendor_name": "Hewlett-Packard Company",
-          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Integrated Memory Controller 0 Target Address, Thermal &amp; RAS Registers",
+          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Integrated Memory Controller 0 Target Address, Thermal & RAS Registers",
           "class_name": "System peripheral",
           "device_id": "2fa8",
           "sdevice_id": "21ea",
@@ -1214,7 +1015,7 @@ interfaces.lldp.switch_name
           "vendor_name": "Intel Corporation",
           "svendor_id": "103c",
           "svendor_name": "Hewlett-Packard Company",
-          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Integrated Memory Controller 0 Target Address, Thermal &amp; RAS Registers",
+          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Integrated Memory Controller 0 Target Address, Thermal & RAS Registers",
           "class_name": "System peripheral",
           "device_id": "2f71",
           "sdevice_id": "21ea",
@@ -1362,7 +1163,7 @@ interfaces.lldp.switch_name
           "vendor_name": "Intel Corporation",
           "class_id": "0880",
           "device_id": "2fbc",
-          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 DDRIO (VMSE) 0 &amp; 1"
+          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 DDRIO (VMSE) 0 & 1"
       },
       {
           "slot": "7f:14.5",
@@ -1372,7 +1173,7 @@ interfaces.lldp.switch_name
           "vendor_name": "Intel Corporation",
           "class_id": "0880",
           "device_id": "2fbd",
-          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 DDRIO (VMSE) 0 &amp; 1"
+          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 DDRIO (VMSE) 0 & 1"
       },
       {
           "slot": "7f:14.6",
@@ -1382,7 +1183,7 @@ interfaces.lldp.switch_name
           "vendor_name": "Intel Corporation",
           "class_id": "0880",
           "device_id": "2fbe",
-          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 DDRIO (VMSE) 0 &amp; 1"
+          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 DDRIO (VMSE) 0 & 1"
       },
       {
           "slot": "7f:14.7",
@@ -1392,7 +1193,7 @@ interfaces.lldp.switch_name
           "vendor_name": "Intel Corporation",
           "class_id": "0880",
           "device_id": "2fbf",
-          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 DDRIO (VMSE) 0 &amp; 1"
+          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 DDRIO (VMSE) 0 & 1"
       },
       {
           "slot": "7f:15.0",
@@ -1460,7 +1261,7 @@ interfaces.lldp.switch_name
           "vendor_name": "Intel Corporation",
           "class_id": "0880",
           "device_id": "2f68",
-          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Integrated Memory Controller 1 Target Address, Thermal &amp; RAS Registers"
+          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Integrated Memory Controller 1 Target Address, Thermal & RAS Registers"
       },
       {
           "slot": "7f:16.6",
@@ -1501,7 +1302,7 @@ interfaces.lldp.switch_name
           "vendor_name": "Intel Corporation",
           "class_id": "0880",
           "device_id": "2fb8",
-          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 DDRIO (VMSE) 2 &amp; 3"
+          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 DDRIO (VMSE) 2 & 3"
       },
       {
           "slot": "7f:17.5",
@@ -1511,7 +1312,7 @@ interfaces.lldp.switch_name
           "vendor_name": "Intel Corporation",
           "class_id": "0880",
           "device_id": "2fb9",
-          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 DDRIO (VMSE) 2 &amp; 3"
+          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 DDRIO (VMSE) 2 & 3"
       },
       {
           "slot": "7f:17.6",
@@ -1521,7 +1322,7 @@ interfaces.lldp.switch_name
           "vendor_name": "Intel Corporation",
           "class_id": "0880",
           "device_id": "2fba",
-          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 DDRIO (VMSE) 2 &amp; 3"
+          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 DDRIO (VMSE) 2 & 3"
       },
       {
           "slot": "7f:17.7",
@@ -1531,7 +1332,7 @@ interfaces.lldp.switch_name
           "vendor_name": "Intel Corporation",
           "class_id": "0880",
           "device_id": "2fbb",
-          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 DDRIO (VMSE) 2 &amp; 3"
+          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 DDRIO (VMSE) 2 & 3"
       },
       {
           "slot": "7f:1e.0",
@@ -2038,7 +1839,7 @@ interfaces.lldp.switch_name
           "vendor_name": "Intel Corporation",
           "svendor_id": "103c",
           "svendor_name": "Hewlett-Packard Company",
-          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 R3 QPI Link 0 &amp; 1 Monitoring",
+          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 R3 QPI Link 0 & 1 Monitoring",
           "class_name": "System peripheral",
           "device_id": "2f81",
           "sdevice_id": "21ea",
@@ -2052,7 +1853,7 @@ interfaces.lldp.switch_name
           "class_id": "1101",
           "svendor_id": "103c",
           "svendor_name": "Hewlett-Packard Company",
-          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 R3 QPI Link 0 &amp; 1 Monitoring",
+          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 R3 QPI Link 0 & 1 Monitoring",
           "vendor_name": "Intel Corporation",
           "class_name": "Performance counters",
           "device_id": "2f36",
@@ -2067,7 +1868,7 @@ interfaces.lldp.switch_name
           "class_id": "1101",
           "svendor_id": "103c",
           "svendor_name": "Hewlett-Packard Company",
-          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 R3 QPI Link 0 &amp; 1 Monitoring",
+          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 R3 QPI Link 0 & 1 Monitoring",
           "vendor_name": "Intel Corporation",
           "class_name": "Performance counters",
           "device_id": "2f37",
@@ -2214,7 +2015,7 @@ interfaces.lldp.switch_name
           "vendor_name": "Intel Corporation",
           "svendor_id": "103c",
           "svendor_name": "Hewlett-Packard Company",
-          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 System Address Decoder &amp; Broadcast Registers",
+          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 System Address Decoder & Broadcast Registers",
           "class_name": "System peripheral",
           "device_id": "2ffc",
           "sdevice_id": "21ea",
@@ -2228,7 +2029,7 @@ interfaces.lldp.switch_name
           "vendor_name": "Intel Corporation",
           "svendor_id": "103c",
           "svendor_name": "Hewlett-Packard Company",
-          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 System Address Decoder &amp; Broadcast Registers",
+          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 System Address Decoder & Broadcast Registers",
           "class_name": "System peripheral",
           "device_id": "2ffd",
           "sdevice_id": "21ea",
@@ -2242,7 +2043,7 @@ interfaces.lldp.switch_name
           "vendor_name": "Intel Corporation",
           "svendor_id": "103c",
           "svendor_name": "Hewlett-Packard Company",
-          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 System Address Decoder &amp; Broadcast Registers",
+          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 System Address Decoder & Broadcast Registers",
           "class_name": "System peripheral",
           "device_id": "2ffe",
           "sdevice_id": "21ea",
@@ -2285,7 +2086,7 @@ interfaces.lldp.switch_name
           "vendor_name": "Intel Corporation",
           "svendor_id": "103c",
           "svendor_name": "Hewlett-Packard Company",
-          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Scratchpad &amp; Semaphore Registers",
+          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Scratchpad & Semaphore Registers",
           "class_name": "System peripheral",
           "device_id": "2f1e",
           "sdevice_id": "21ea",
@@ -2299,7 +2100,7 @@ interfaces.lldp.switch_name
           "vendor_name": "Intel Corporation",
           "svendor_id": "103c",
           "svendor_name": "Hewlett-Packard Company",
-          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Scratchpad &amp; Semaphore Registers",
+          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Scratchpad & Semaphore Registers",
           "class_name": "Performance counters",
           "device_id": "2f7d",
           "sdevice_id": "21ea",
@@ -2313,7 +2114,7 @@ interfaces.lldp.switch_name
           "vendor_name": "Intel Corporation",
           "svendor_id": "103c",
           "svendor_name": "Hewlett-Packard Company",
-          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Scratchpad &amp; Semaphore Registers",
+          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Scratchpad & Semaphore Registers",
           "class_name": "System peripheral",
           "device_id": "2f1f",
           "sdevice_id": "21ea",
@@ -2370,7 +2171,7 @@ interfaces.lldp.switch_name
           "vendor_name": "Intel Corporation",
           "svendor_id": "103c",
           "svendor_name": "Hewlett-Packard Company",
-          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Integrated Memory Controller 0 Target Address, Thermal &amp; RAS Registers",
+          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Integrated Memory Controller 0 Target Address, Thermal & RAS Registers",
           "class_name": "System peripheral",
           "device_id": "2fa8",
           "sdevice_id": "21ea",
@@ -2384,7 +2185,7 @@ interfaces.lldp.switch_name
           "vendor_name": "Intel Corporation",
           "svendor_id": "103c",
           "svendor_name": "Hewlett-Packard Company",
-          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Integrated Memory Controller 0 Target Address, Thermal &amp; RAS Registers",
+          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Integrated Memory Controller 0 Target Address, Thermal & RAS Registers",
           "class_name": "System peripheral",
           "device_id": "2f71",
           "sdevice_id": "21ea",
@@ -2532,7 +2333,7 @@ interfaces.lldp.switch_name
           "vendor_name": "Intel Corporation",
           "class_id": "0880",
           "device_id": "2fbc",
-          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 DDRIO (VMSE) 0 &amp; 1"
+          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 DDRIO (VMSE) 0 & 1"
       },
       {
           "slot": "ff:14.5",
@@ -2542,7 +2343,7 @@ interfaces.lldp.switch_name
           "vendor_name": "Intel Corporation",
           "class_id": "0880",
           "device_id": "2fbd",
-          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 DDRIO (VMSE) 0 &amp; 1"
+          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 DDRIO (VMSE) 0 & 1"
       },
       {
           "slot": "ff:14.6",
@@ -2552,7 +2353,7 @@ interfaces.lldp.switch_name
           "vendor_name": "Intel Corporation",
           "class_id": "0880",
           "device_id": "2fbe",
-          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 DDRIO (VMSE) 0 &amp; 1"
+          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 DDRIO (VMSE) 0 & 1"
       },
       {
           "slot": "ff:14.7",
@@ -2562,7 +2363,7 @@ interfaces.lldp.switch_name
           "vendor_name": "Intel Corporation",
           "class_id": "0880",
           "device_id": "2fbf",
-          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 DDRIO (VMSE) 0 &amp; 1"
+          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 DDRIO (VMSE) 0 & 1"
       },
       {
           "slot": "ff:15.0",
@@ -2630,7 +2431,7 @@ interfaces.lldp.switch_name
           "vendor_name": "Intel Corporation",
           "class_id": "0880",
           "device_id": "2f68",
-          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Integrated Memory Controller 1 Target Address, Thermal &amp; RAS Registers"
+          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 Integrated Memory Controller 1 Target Address, Thermal & RAS Registers"
       },
       {
           "slot": "ff:16.6",
@@ -2671,7 +2472,7 @@ interfaces.lldp.switch_name
           "vendor_name": "Intel Corporation",
           "class_id": "0880",
           "device_id": "2fb8",
-          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 DDRIO (VMSE) 2 &amp; 3"
+          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 DDRIO (VMSE) 2 & 3"
       },
       {
           "slot": "ff:17.5",
@@ -2681,7 +2482,7 @@ interfaces.lldp.switch_name
           "vendor_name": "Intel Corporation",
           "class_id": "0880",
           "device_id": "2fb9",
-          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 DDRIO (VMSE) 2 &amp; 3"
+          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 DDRIO (VMSE) 2 & 3"
       },
       {
           "slot": "ff:17.6",
@@ -2691,7 +2492,7 @@ interfaces.lldp.switch_name
           "vendor_name": "Intel Corporation",
           "class_id": "0880",
           "device_id": "2fba",
-          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 DDRIO (VMSE) 2 &amp; 3"
+          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 DDRIO (VMSE) 2 & 3"
       },
       {
           "slot": "ff:17.7",
@@ -2701,7 +2502,7 @@ interfaces.lldp.switch_name
           "vendor_name": "Intel Corporation",
           "class_id": "0880",
           "device_id": "2fbb",
-          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 DDRIO (VMSE) 2 &amp; 3"
+          "device_name": "Xeon E7 v3/Xeon E5 v3/Core i7 DDRIO (VMSE) 2 & 3"
       },
       {
           "slot": "ff:1e.0",
@@ -3941,34 +3742,4 @@ interfaces.lldp.switch_name
           "proto": "kernel"
       }
   ]
-</code></pre></div><h2>HTTP status code <a href="http://httpstatus.es/404" target="_blank">404</a></h2></div></div></div></div></div></div></div></div></div></div><div class="panel panel-default"><div class="panel-heading"><h3 id="inventory_computers_query" class="panel-title">/inventory/computers/query</h3></div><div class="panel-body"><div class="top-resource-description"><p>Post queries to the inventory database controller using MongoDB query syntax</p><p>Example: /api/inventory/computers/query/?projection=raid.total_drives,raid.name { "query": { "raid.total_drives": { "$gt": 20 }, "dmi.sys_vendor": "HP" } }</p></div><div class="panel-group"><div class="panel panel-white resource-modal"><div class="panel-heading"><h4 class="panel-title"><a class="collapsed" data-toggle="collapse" href="#panel_inventory_computers_query"><span class="parent"></span>/inventory/computers/query</a> <span class="methods"><a href="#inventory_computers_query_post"><span class="badge badge_post">post</span></a></span></h4></div><div id="panel_inventory_computers_query" class="panel-collapse collapse"><div class="panel-body"><div class="list-group"><div onclick="window.location.href = '#inventory_computers_query_post'" class="list-group-item"><span class="badge badge_post">post</span><div class="method_description"></div><div class="clearfix"></div></div></div></div></div><div class="modal fade" tabindex="0" id="inventory_computers_query_post"><div class="modal-dialog modal-lg"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button><h4 class="modal-title" id="myModalLabel"><span class="badge badge_post">post</span> <span class="parent"></span>/inventory/computers/query</h4></div><div class="modal-body"><ul class="nav nav-tabs"><li class="active"><a href="#inventory_computers_query_post_request" data-toggle="tab">Request</a></li></ul><div class="tab-content"><div class="tab-pane active" id="inventory_computers_query_post_request"><h3>Query Parameters</h3><ul><li><strong>limit</strong>: <em>(int - default: 250)</em><p>Maximum number of elements to return</p></li><li><strong>offset_id</strong>: <em>(string)</em><p>ObjectID to act as the offset (for pagenation)</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>56f04b0a5742ee76aa836782</code></pre></div></li><li><strong>sort_direction</strong>: <em>(string - default: ASCENDING)</em><p>ASCENDING or DESCENDING (by objectID)</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>ASCENDING</code></pre></div></li><li><strong>projection</strong>: <em>(string - default: mercury_id=1,_id=1)</em><p>Which fields to return or omit</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>cpu.frequency.max=1,raid.total_drives=1
-interfaces.lldp.switch_name=1
-</code></pre></div></li></ul><h3>Body</h3><p><strong>Media type</strong>: application/json</p><p><strong>Type</strong>: object</p></div></div></div></div></div></div></div></div></div></div><div class="panel panel-default"><div class="panel-heading"><h3 id="active_computers" class="panel-title">/active/computers</h3></div><div class="panel-body"><div class="top-resource-description"><p>Get only computers with an active ZeroMQ agent.</p></div><div class="panel-group"><div class="panel panel-white resource-modal"><div class="panel-heading"><h4 class="panel-title"><a class="collapsed" data-toggle="collapse" href="#panel_active_computers"><span class="parent"></span>/active/computers</a> <span class="methods"><a href="#active_computers_get"><span class="badge badge_get">get</span></a></span></h4></div><div id="panel_active_computers" class="panel-collapse collapse"><div class="panel-body"><div class="list-group"><div onclick="window.location.href = '#active_computers_get'" class="list-group-item"><span class="badge badge_get">get</span><div class="method_description"></div><div class="clearfix"></div></div></div></div></div><div class="modal fade" tabindex="0" id="active_computers_get"><div class="modal-dialog modal-lg"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button><h4 class="modal-title" id="myModalLabel"><span class="badge badge_get">get</span> <span class="parent"></span>/active/computers</h4></div><div class="modal-body"><ul class="nav nav-tabs"><li class="active"><a href="#active_computers_get_response" data-toggle="tab">Response</a></li></ul><div class="tab-content"><div class="tab-pane active" id="active_computers_get_response"><h2>HTTP status code <a href="http://httpstatus.es/200" target="_blank">200</a></h2><h3>Body</h3><p><strong>Media type</strong>: application/json</p><p><strong>Type</strong>: object</p><p><strong>Example</strong>:</p><div class="examples"><pre><code>{
-      "limit": 1,
-      "total": 1,
-      "direction": "ASCENDING",
-      "items": [
-          {
-              "_id": "56eae51c5742ee76aa83677f",
-              "mercury_id": "001183c41825ed761ceddab91e8fdb2a88d4943006"
-              "agent_info": {
-
-                "rpc_address": "10.127.29.196",
-                "_id": "594ff6015742ee10472bd804",
-                "rpc_port": 9003,
-                "localtime": 1498412631.401529,
-                "rpc_address6": null,
-                "time_created": 1498412545.7970352,
-                "ping_port": 9004
-              },
-              "backend": {
-                "name": be1-dev1.kickstart.rackspace.com,
-                "datacenter": dev1,
-                "address": 10.127.29.99,
-                "address_v6": null,
-                "frontend_port": 9001,
-                "backend_port": 9002
-          },
-      ]
 }
-</code></pre></div><h2>HTTP status code <a href="http://httpstatus.es/queryParameters" target="_blank">queryParameters</a></h2></div></div></div></div></div></div></div></div></div></div></div><div class="col-md-3"><div id="sidebar" class="hidden-print affix" role="complementary"><ul class="nav nav-pills nav-stacked"><li><a href="#inventory_computers">/inventory/computers</a></li><li><a href="#inventory_computers__mercury_id_">/inventory/computers/{mercury_id}</a></li><li><a href="#inventory_computers_query">/inventory/computers/query</a></li><li><a href="#active_computers">/active/computers</a></li></ul></div></div></div></div></body></html>

@@ -12,8 +12,10 @@
 #    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
-"""Provides MongoDB connection functionalities for Mercury."""
 
+"""Generic mongodb facilities"""
+
+import bson
 import logging
 import pymongo
 
@@ -92,3 +94,26 @@ def get_collection(database,
     db = connection[database_name]
     log.info('collection: %s' % collection_name)
     return db[collection_name]
+
+
+def serialize_object_id(obj):
+    if isinstance(obj, bson.ObjectId):
+        obj = str(obj)
+
+    if isinstance(obj, dict):
+        if '_id' in obj:
+            obj['_id'] = str(obj['_id'])
+    return obj
+
+
+def deserialize_object_id(obj):
+    if '_id' in obj:
+        if isinstance(obj['_id'], dict):
+            # ex: {'_id': {'$gt': 'xxxxx'}}
+            for key, value in list(obj['_id'].items()):
+                if bson.ObjectId.is_valid(value):
+                    obj['_id'][key] = bson.ObjectId(value)
+                    break  # there should only be one
+        elif isinstance(obj['_id'], str):
+            obj['_id'] = bson.ObjectId(obj['_id'])
+    return obj

@@ -13,19 +13,15 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-import logging
-
 from mercury.common.exceptions import MercuryClientException
 from mercury.common.transport import SimpleRouterReqClient
 
 
-LOG = logging.getLogger(__name__)
-
-
 class InventoryClient(SimpleRouterReqClient):
+    """Client to interact with inventory."""
+
     _service_name = 'Inventory'
 
-    """Client to interact with inventory."""
     def insert_one(self, device_info):
         """Insert a new device in inventory.
 

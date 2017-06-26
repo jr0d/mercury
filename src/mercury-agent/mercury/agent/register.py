@@ -16,7 +16,6 @@
 import logging
 import time
 
-from mercury.agent.client import BackEndClient
 from mercury.agent.configuration import agent_configuration
 from mercury.common.exceptions import MercuryCritical
 from mercury.inspector.inspectors.interfaces import get_interface_by_name
@@ -77,9 +76,7 @@ def _serialize_capabilities(capabilities):
     return _d
 
 
-def register(rpc_backend, device_info, local_ip, local_ip6, capabilities):
-    backend = BackEndClient(rpc_backend)
-
+def register(rpc_backend_client, device_info, local_ip, local_ip6, capabilities):
     # There is still some confusion regarding how best to determine what ip
     # to publish. Current wisdom suggest that we find the default gateway,
     # determine the interface used for the default route, and take whatever
@@ -110,4 +107,4 @@ def register(rpc_backend, device_info, local_ip, local_ip6, capabilities):
         'capabilities': _serialize_capabilities(capabilities)
     }
 
-    return backend.register(device_info, agent_info)
+    return rpc_backend_client.register(device_info, agent_info)

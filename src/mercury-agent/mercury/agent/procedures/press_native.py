@@ -18,14 +18,12 @@ import logging
 import time
 
 from mercury.agent.capabilities import capability
-from mercury.agent.client import BackEndClient
 from mercury.agent.configuration import agent_configuration, remote_configuration
-
+from mercury.common.clients.rpc.backend import BackEndClient
 from mercury.common.exceptions import fancy_traceback_short, parse_exception
-
-from press.press import Press
 from press.configuration.util import set_environment
 from press.plugin_init import init_plugins
+from press.press import Press
 
 log = logging.getLogger(__name__)
 
@@ -90,7 +88,7 @@ def press_native(**kwargs):
     backend_client = BackEndClient(remote_configuration['rpc_service'])
     log.info('Starting press')
     start = time.time()
-    backend_client.task_update({'task_id': task_id, 'action': 'Press: Launching'})
+    backend_client.update_task({'task_id': task_id, 'action': 'Press: Launching'})
     return_data = entry(press_configuration)
     return_data['press_execution_time'] = time.time() - start
     return return_data

@@ -1,0 +1,43 @@
+{
+  "limit": 250,
+  "total": 2,
+  "direction": "ASCENDING",
+  "items": [
+    {
+      "raid": [
+        {
+          "name": "Smart Array P440ar",
+          "total_drives": 26
+        },
+        {
+          "name": "Smart HBA H241",
+          "total_drives": 0
+        },
+        {
+          "name": "Smart HBA H241",
+          "total_drives": 0
+        }
+      ],
+      "_id": "573b4e385742ee23b15cdd58",
+      "mercury_id": "017f3b1adc67a79050e3655747a0b6b0711c81ad68"
+    },
+    {
+      "raid": [
+        {
+          "name": "Smart Array P440ar",
+          "total_drives": 26
+        },
+        {
+          "name": "Smart HBA H241",
+          "total_drives": 0
+        },
+        {
+          "name": "Smart HBA H241",
+          "total_drives": 0
+        }
+      ],
+      "_id": "5877fd5d5742ee0311097c52",
+      "mercury_id": "0110a1628669e487f48b3f8de13bebeafe2933c875"
+    }
+  ]
+}

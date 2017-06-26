@@ -7,7 +7,7 @@
 
 import logging
 
-from mercury.agent.client import BackEndClient
+from mercury.common.clients.rpc.backend import BackEndClient
 
 log = logging.getLogger(__name__)
 
@@ -50,7 +50,7 @@ class MercurySpecialLoggingHandler(logging.Handler):
             log.debug('Press Event: {}'.format(record.press_event))
             # noinspection PyBroadException
             try:
-                self.backend_client.task_update(
+                self.backend_client.update_task(
                     {'task_id': self.task_id,
                      'action': 'Press: ' + record.press_event.capitalize(),
                      'progress': 0.5  # TODO: press event to progress map

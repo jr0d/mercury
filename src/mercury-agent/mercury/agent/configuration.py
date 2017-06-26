@@ -16,7 +16,7 @@
 import logging
 
 from mercury.common.configuration import get_configuration
-from mercury.common.inventory_client import InventoryClient
+from mercury.common.clients.rpc.backend import BackEndClient
 
 __all__ = ['AGENT_CONFIG_FILE', 'agent_configuration']
 
@@ -31,7 +31,7 @@ agent_configuration = get_configuration(AGENT_CONFIG_FILE)
 remote_configuration = agent_configuration.get('remote', {})
 
 try:
-    inventory_url = remote_configuration['inventory_service']
+    backend_url = remote_configuration['rpc_service']
 except KeyError:
     log.warning('Missing inventory service url')
 
@@ -40,5 +40,5 @@ def get_backend_client():
     # TODO: Trying this out, 0mq says it is ok
     global __backend_client
     if not __backend_client:
-        __backend_client = InventoryClient(inventory_url)
+        __backend_client = BackEndClient(backend_url)
     return __backend_client

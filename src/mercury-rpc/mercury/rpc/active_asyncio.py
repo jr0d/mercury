@@ -6,27 +6,29 @@ import msgpack
 import zmq
 import zmq.asyncio
 
+from mercury.common.clients.inventory import InventoryClient
+
 log = logging.getLogger(__name__)
 
 active_state = {}
 ping_queue = asyncio.Queue()
 
 
-def add_record(record):
-    log.debug('Adding record, {mercury_id}, to active state'.format(**record))
+def add_active_record(record):
+    log.info('Adding record, {mercury_id}, to active state'.format(**record))
     active_state.update({
         record['mercury_id']: {
             'mercury_id': record['mercury_id'],
-            'rpc_address': record['rpc_address'],
-            'rpc_address6': record['rpc_address6'],
-            'ping_port': record['ping_port'],
+            'rpc_address': record['active']['rpc_address'],
+            'rpc_address6': record['active']['rpc_address6'],
+            'ping_port': record['active']['ping_port'],
             'last_ping': 0,
             'pinging': False
         }
     })
 
 
-async def ping(record, ctx, timeout, retries, backoff):
+async def ping(record, ctx, timeout, retries, backoff, inventory_client):
     """
     ping node until it responds or encounters x timeouts of x*backoff
     :param timeout:
@@ -34,6 +36,7 @@ async def ping(record, ctx, timeout, retries, backoff):
     :param retries:
     :param record:
     :param ctx:
+    :param inventory_client:
     :return:
     """
     failures = 0
@@ -75,7 +78,12 @@ async def ping(record, ctx, timeout, retries, backoff):
 
         socket.close()
 
-    log.debug('Ping Failed! <REMOVE>')
+    log.info('{} timed out, removing active record'.format(record['mercury_id']))
+
+    # remove agent data from the database
+    inventory_client.update_one(record['mercury_id'], {'active': None})
+
+    # remove the record from the state data structure
     del active_state[record['mercury_id']]
 
 
@@ -85,7 +93,8 @@ async def ping_loop(ctx,
                     initial_ping_timeout,
                     ping_retries,
                     backoff,
-                    loop):
+                    loop,
+                    inventory_router_url):
     """
 
     :param ctx:
@@ -95,9 +104,12 @@ async def ping_loop(ctx,
     :param ping_retries:
     :param backoff:
     :param loop:
+    :param inventory_router_url:
     :return:
     """
     # load the queue
+    inventory_client = InventoryClient(inventory_router_url)
+
     while True:
         log.debug('Looking for work')
         now = time.time()
@@ -106,7 +118,6 @@ async def ping_loop(ctx,
             if now - data['last_ping'] > ping_interval and not data['pinging']:
                 log.debug('Scheduling ping for {}'.format(mercury_id))
                 active_state[mercury_id]['pinging'] = True
-
-                asyncio.ensure_future(ping(data, ctx, initial_ping_timeout, ping_retries, backoff),
+                asyncio.ensure_future(ping(data, ctx, initial_ping_timeout, ping_retries, backoff, inventory_client),
                                       loop=loop)
         await asyncio.sleep(cycle_time)

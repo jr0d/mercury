@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-03/schema",
+  "type": "object",
+  "title": "Inventory Computers",
+  "description": "Return object from the inventory controller",
+  "properties": {
+    "limit": {
+      "type": "integer",
+      "description": "The maximum number of return results"
+    },
+    "total": {
+      "type": "integer",
+      "description": "The number of items present in the database"
+    },
+    "direction": {
+      "type": "string",
+      "description": "Sort direction. ASCENDING or DESCENDING"
+    },
+    "items": {
+      "type": "array",
+      "description": "Inventory objects",
+      "items": "object"
+    }
+  }
+}

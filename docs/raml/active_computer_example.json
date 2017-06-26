@@ -1,0 +1,146 @@
+{
+  "_id": "56eae51c5742ee76aa83677f",
+  "mercury_id": "001183c41825ed761ceddab91e8fdb2a88d4943006",
+  "agent_info": {
+    "rpc_address": "10.127.29.196",
+    "_id": "594ff6015742ee10472bd804",
+    "rpc_port": 9003,
+    "localtime": 1498412631.401529,
+    "rpc_address6": null,
+    "time_created": 1498412545.7970352,
+    "ping_port": 9004,
+    "capabilities": {
+      "kexec": {
+        "doc": "\n    Kexec into a kernel\n    ",
+        "num_args": null,
+        "description": "kexec into kernel at supplied location",
+        "kwarg_names": [
+          "kernel",
+          "initrd",
+          "options"
+        ],
+        "no_return": false,
+        "timeout": 1800,
+        "serial": false,
+        "name": "kexec",
+        "task_id_kwargs": false,
+        "entry": "kexec"
+      },
+      "press": {
+        "doc": null,
+        "num_args": null,
+        "description": "Native press support in mercury",
+        "kwarg_names": [
+          "configuration"
+        ],
+        "no_return": false,
+        "timeout": 1800,
+        "serial": true,
+        "name": "press",
+        "task_id_kwargs": true,
+        "entry": "press_native"
+      },
+      "echo": {
+        "doc": "\n    Echo the dolphin\n    :param message: message to Echo\n    :return: None\n    ",
+        "num_args": 1,
+        "description": "Echo something to the console",
+        "kwarg_names": null,
+        "no_return": false,
+        "timeout": 1800,
+        "serial": false,
+        "name": "echo",
+        "task_id_kwargs": false,
+        "entry": "echo"
+      },
+      "hpssa_clear_configuration": {
+        "doc": "\n    Delete all arrays on a given controller\n    :param slot: Adapter slot\n    :return dict:  stdout, stderr, returncode\n    ",
+        "num_args": null,
+        "description": "Delete all arrays on a given controller",
+        "kwarg_names": [
+          "slot"
+        ],
+        "no_return": false,
+        "timeout": 120,
+        "serial": true,
+        "name": "hpssa_clear_configuration",
+        "task_id_kwargs": false,
+        "entry": "hpssa_clear_configuration"
+      },
+      "hpssa_clear_configuration_all_controllers": {
+        "doc": "\n    Nuke it from orbit. It's the only way to be sure\n    :return dict: Indexed by adapter slot\n    ",
+        "num_args": null,
+        "description": "Delete all configurations from all RAID controllers",
+        "kwarg_names": null,
+        "no_return": false,
+        "timeout": 120,
+        "serial": true,
+        "name": "hpssa_clear_configuration_all_controllers",
+        "task_id_kwargs": false,
+        "entry": "hpssa_clear_configurations_all_controllers"
+      },
+      "hpssa_create_array": {
+        "doc": "\n    Create an array\n\n    :param slot: Slot ID of the adapter you are targeting\n    :param selection: all, allunassigned, Port:Box:Bay,...  , 1I:1:1-1I:1:6\n    :param raid: 0, 1, 5, 6, 1+0, 1+0asm, 50, 60\n    :param array_letter: Optional array ID, Any unused, A-Z\n    :param array_type: ld, ldcache, arrayr0\n    :param size: size in MB, min, max, maxmbr\n    :param stripe_size: 2**3-10 (8-1024), default\n    :param write_policy: writeback, writethrough\n    :param sectors: 32, 64\n    :param caching: True | False\n    :param data_ld: ld ID, required if array_type == ldcache\n    :param parity_init_method: default\n\n    :return type dict: stdout, stderr, returncode\n    ",
+        "num_args": null,
+        "description": "Create array on an HP SmartArray Controller",
+        "kwarg_names": [
+          "slot",
+          "selection",
+          "raid"
+        ],
+        "no_return": false,
+        "timeout": 120,
+        "serial": true,
+        "name": "hpssa_create_array",
+        "task_id_kwargs": false,
+        "entry": "hpssa_create_array"
+      },
+      "run": {
+        "doc": "\n    Run a shell command\n    :param command: The shell command to use\n    :param _input: Optional data to pass to stdin\n    :return:\n    ",
+        "num_args": 1,
+        "description": "Run an arbitrary command",
+        "kwarg_names": null,
+        "no_return": false,
+        "timeout": 1800,
+        "serial": false,
+        "name": "run",
+        "task_id_kwargs": false,
+        "entry": "runner"
+      },
+      "hpssa_delete_ld": {
+        "doc": "\n    Delete a logical drive\n    :param slot: Adapter slot\n    :param logical_drive: Logical drive id\n    :return dict: stdout, stderr, returncode\n    ",
+        "num_args": null,
+        "description": "Delete a logical drive on a given controller",
+        "kwarg_names": [
+          "slot",
+          "logical_drive"
+        ],
+        "no_return": false,
+        "timeout": 120,
+        "serial": true,
+        "name": "hpssa_delete_ld",
+        "task_id_kwargs": false,
+        "entry": "hpssa_delete_ld"
+      },
+      "inspector": {
+        "doc": "\n    Manually run inspectors\n    :return: results\n    ",
+        "num_args": null,
+        "description": "Run inspector",
+        "kwarg_names": null,
+        "no_return": false,
+        "timeout": 1800,
+        "serial": false,
+        "name": "inspector",
+        "task_id_kwargs": false,
+        "entry": "inspector"
+      }
+    },
+    "backend": {
+      "name": "be1-dev1.kickstart.rackspace.com",
+      "datacenter": "dev1",
+      "address": "10.127.29.99",
+      "address_v6": null,
+      "frontend_port": 9001,
+      "backend_port": 9002
+    }
+  }
+}

@@ -13,12 +13,11 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-import bson
 import logging
 
 from mercury.common.asyncio.endpoints import async_endpoint, StaticEndpointController
 from mercury.common.asyncio.mongo import get_connection
-from mercury.common.mongo import get_collection
+from mercury.common.mongo import get_collection, serialize_object_id, deserialize_object_id
 from mercury.common.exceptions import EndpointError
 from mercury.inventory.db import InventoryDBController
 from mercury.inventory.configuration import inventory_configuration
@@ -52,33 +51,6 @@ class InventoryController(StaticEndpointController):
 
         super(InventoryController, self).__init__()
 
-    @staticmethod
-    def __serialize_object_id(obj):
-        if isinstance(obj, bson.ObjectId):
-            obj = str(obj)
-
-        if isinstance(obj, dict):
-            if '_id' in obj:
-                obj['_id'] = str(obj['_id'])
-        return obj
-
-    @staticmethod
-    def __deserialize_object_id(obj):
-        if '_id' in obj:
-            if isinstance(obj['_id'], dict):
-                # ex: {'_id': {'$gt': 'xxxxx'}}
-                for key, value in list(obj['_id'].items()):
-                    if bson.ObjectId.is_valid(value):
-                        obj['_id'][key] = bson.ObjectId(value)
-                        break  # there should only be one
-            elif isinstance(obj['_id'], str):
-                obj['_id'] = bson.ObjectId(obj['_id'])
-        return obj
-
-    @async_endpoint('index')
-    def index(self):
-        return 'Hello World'
-
     @async_endpoint('insert_one')
     async def insert_one(self, device_info):
         mercury_id = device_info.get('device_info')
@@ -90,7 +62,7 @@ class InventoryController(StaticEndpointController):
     async def update_one(self, mercury_id, update_data):
         if 'mercury_id' in update_data:
             raise EndpointError('Cannot update mercury_id with this method', 'update_one', update_data)
-        return {'object_id': self.__serialize_object_id(await self.db.update_one(mercury_id, update_data))}
+        return {'object_id': serialize_object_id(await self.db.update_one(mercury_id, update_data))}
 
     @async_endpoint('delete')
     async def delete(self, mercury_id):
@@ -98,11 +70,11 @@ class InventoryController(StaticEndpointController):
 
     @async_endpoint('get_one')
     async def get_one(self, mercury_id, projection=None):
-        return self.__serialize_object_id(await self.db.get_one(mercury_id=mercury_id, projection=projection))
+        return serialize_object_id(await self.db.get_one(mercury_id=mercury_id, projection=projection))
 
     @async_endpoint('query')
     async def query(self, q, projection, limit=0, sort_direction=1):
-        c = self.db.query(query=self.__deserialize_object_id(q),
+        c = self.db.query(query=deserialize_object_id(q),
                           extra_projection=projection,
                           limit=limit,
                           sort_direction=sort_direction)
@@ -111,7 +83,7 @@ class InventoryController(StaticEndpointController):
 
         items = []
         async for document in c:
-            items.append(self.__serialize_object_id(document))
+            items.append(serialize_object_id(document))
 
         return {
             'total': total_items,

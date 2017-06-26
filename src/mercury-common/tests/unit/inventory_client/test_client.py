@@ -14,13 +14,12 @@
 #    limitations under the License.
 
 import mock
-
+from mercury.common.clients import inventory
 from mercury.common.exceptions import MercuryCritical
-from mercury.common.inventory_client import client
 from tests.unit.base import MercuryCommonUnitTest
 
 
-class FakeInventoryClient(client.InventoryClient):
+class FakeInventoryClient(inventory.InventoryClient):
     """Helper class to fake an inventory client in tests."""
     def __init__(self):
         self.ctx = None

@@ -1,0 +1,10 @@
+{
+  "$schema": "http://json-schema.org/draft-03/schema",
+  "type": "object",
+  "title": "RPC Jobs Response",
+  "description": "An object containing RPC jobs",
+  "properties": {
+    "count": {"type": "integer", "description": "The number of active jobs"},
+    "jobs": {"type": "array", "description": "Jobs"}
+  }
+}
