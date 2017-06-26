@@ -1,0 +1,252 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Installation &#8212; Mercury 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Introduction" href="introduction.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="installation">
+<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
+<p>For development and testing, the server and the agent can be directly installed
+from pip. The agent typically runs in an a stateless environment with access to
+server management utilities. For the safety of your development environment, <strong>do
+not run the agent as root</strong>, unless you really know what you are doing.</p>
+<div class="section" id="requirements">
+<h2>Requirements<a class="headerlink" href="#requirements" title="Permalink to this headline">¶</a></h2>
+<p>Python 3.5+ for the server</p>
+<p>Python 2.7+ for the agent</p>
+</div>
+<div class="section" id="server">
+<h2>Server<a class="headerlink" href="#server" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>$ pip install mercury-server
+</pre></div>
+</div>
+</div>
+<div class="section" id="agent">
+<h2>Agent<a class="headerlink" href="#agent" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>$ pip install mercury-agent
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="module-mercury.hardware.raid.abstraction.api">
+<span id="raid-abstraction"></span><h1>RAID Abstraction<a class="headerlink" href="#module-mercury.hardware.raid.abstraction.api" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="mercury.hardware.raid.abstraction.api.RAIDActions">
+<em class="property">class </em><code class="descclassname">mercury.hardware.raid.abstraction.api.</code><code class="descname">RAIDActions</code><a class="headerlink" href="#mercury.hardware.raid.abstraction.api.RAIDActions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bare bones RAID abstraction layer. Simple support for querying and modifying a RAID controller
+through a standard interface. Many things are not supported, but may be added at a later date
+If controller specific advanced features are needed, see the provider APIs and RPC capabilities</p>
+<dl class="method">
+<dt id="mercury.hardware.raid.abstraction.api.RAIDActions.create">
+<code class="descname">create</code><span class="sig-paren">(</span><em>adapter_info</em>, <em>level</em>, <em>drives=None</em>, <em>size=None</em>, <em>array=None</em><span class="sig-paren">)</span><a class="headerlink" href="#mercury.hardware.raid.abstraction.api.RAIDActions.create" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method should only be called from the base classes create_logical_volume method.
+This method will be implemented by all Actions classes.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>adapter_info</strong> &#8211; Transformed adapter data</li>
+<li><strong>level</strong> (<em>str</em>) &#8211; A supported RAID level</li>
+<li><strong>drives</strong> &#8211; A zero based, expanded list of participating drive indexes.
+Should be None if array is specified</li>
+<li><strong>size</strong> &#8211; A python-size object or None (maximum)</li>
+<li><strong>array</strong> &#8211; The index of the existing array (with sufficient free space) being targeted
+Should be None if drives are specified</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mercury.hardware.raid.abstraction.api.RAIDActions.create_logical_drive">
+<code class="descname">create_logical_drive</code><span class="sig-paren">(</span><em>adapter</em>, <em>level</em>, <em>drives=None</em>, <em>size=None</em>, <em>array=None</em><span class="sig-paren">)</span><a class="headerlink" href="#mercury.hardware.raid.abstraction.api.RAIDActions.create_logical_drive" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>adapter</strong> (<em>int</em>) &#8211; </li>
+<li><strong>level</strong> (<em>str</em>) &#8211; 0, 1, 5, 6, 10, 1+0, 50, 60</li>
+<li><strong>drives</strong> &#8211; <p>drives should be referenced as 0 based comma separated indexes, ranges,
+or a combination of both. For example:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span>
+    <span class="ow">or</span>
+<span class="mi">0</span><span class="o">-</span><span class="mi">3</span>
+    <span class="ow">or</span>
+<span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="o">-</span><span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">10</span>
+</pre></div>
+</div>
+<p>When using a range, both the lower and upper bounds are inclusive</p>
+<p>Another option is to use all or unassigned. <cite>all</cite> requires that all drives on the
+adapter are not part of the array. <cite>unassigned</cite> will select all drives not currently
+members of an array or participating as spares</p>
+</li>
+<li><strong>size</strong> &#8211; Size can be specified in bytes (int), a string using SI or IEC standards,</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>a percent of total space, or a percent of free space available. If no size is listed,
+all available space will be used
+:param array: An index of an existing array we are updating
+:return:</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mercury.hardware.raid.abstraction.api.RAIDActions.get_adapter_info">
+<code class="descname">get_adapter_info</code><span class="sig-paren">(</span><em>adapter_index</em><span class="sig-paren">)</span><a class="headerlink" href="#mercury.hardware.raid.abstraction.api.RAIDActions.get_adapter_info" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns adapter details in a standard format. The driver is responsible for finding
+adapters to perform actions on. The abstraction uses indexes rather than vendor references.</p>
+<p>For instance, hpsa uses pci slot ids to specify adapters, onboard adapters will be 0,
+expansion cards will be 3 and 4, should they occupy pci-e slots 3 and 4 on the riser card.
+In order to &#8216;flatten&#8217; the interface, these cards will be accessed by enumeration:</p>
+<p>adapter0: slot0
+adapter1: slot3
+adapter2: slot4</p>
+<p>In the rare occurrence that there are multiple manufacturers, cards will enumerated based
+on there subsystem ids (PCI Ids for example). To implement this, the driver probe process
+will need to change so that drivers and handlers are registered in PCI order and not import
+order. Talk to Jared R. about implementation details as he is soldiering on.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>adapter_index</strong> &#8211; The index of the adapter to populate configuration information</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A dictionary representing the adapter</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mercury.hardware.raid.abstraction.api.RAIDActions.get_all_drives">
+<code class="descname">get_all_drives</code><span class="sig-paren">(</span><em>adapter_index</em><span class="sig-paren">)</span><a class="headerlink" href="#mercury.hardware.raid.abstraction.api.RAIDActions.get_all_drives" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get drives while preserving array membership
+:param adapter_index: target adapter
+:return: drives
+:return type: list</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="mercury.hardware.raid.abstraction.api.RAIDActions.get_selection_from_pattern">
+<em class="property">static </em><code class="descname">get_selection_from_pattern</code><span class="sig-paren">(</span><em>pattern</em><span class="sig-paren">)</span><a class="headerlink" href="#mercury.hardware.raid.abstraction.api.RAIDActions.get_selection_from_pattern" title="Permalink to this definition">¶</a></dt>
+<dd><p>The pattern is a mechanism to target one or more drives attached to a controller.
+See the create_logical_volume documentation for the full format
+:param pattern:
+:type pattern: str
+:return: a list of indexes</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Installation</a><ul>
+<li><a class="reference internal" href="#requirements">Requirements</a></li>
+<li><a class="reference internal" href="#server">Server</a></li>
+<li><a class="reference internal" href="#agent">Agent</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-mercury.hardware.raid.abstraction.api">RAID Abstraction</a></li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="introduction.html" title="previous chapter">Introduction</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/installation.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Jared Rodriguez.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="_sources/installation.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

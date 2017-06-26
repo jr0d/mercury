@@ -1,85 +1,149 @@
-<!DOCTYPE html>
-<html lang="en-us">
-<head>
-    <meta charset="UTF-8">
-    <title>Mercury by jared-rodriguez</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
-    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
-    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
-    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
-</head>
-<body>
-<section class="page-header">
-    <img src="images/project_mercury_alpha.png">
-    <h1 class="project-name">Project Mercury</h1>
-    <p><i>"Liquid Metal"</i></p>
-    <h2 class="project-tagline"></h2>
-    <a href="https://github.rackspace.com/jared-rodriguez/mercury" class="btn">View on GitHub</a>
-</section>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
-<section class="main-content">
-    <h3>
-        <a id="welcome-to-project-mercury-developer-home" class="anchor"
-           href="#welcome-to-project-mercury-developer-home" aria-hidden="true"><span
-                class="octicon octicon-link"></span></a>Welcome to the Project Mercury overview page</h3>
-        <p>Mercury is a set of services, agents, and libraries designed for the purpose of managing datacenter hardware
-            assets
-        </p>
-    <ul>
-    <li><b>Mercury is not 'cloud' software.</b> However, it can be used to deploy clouds more quickly and efficiently.</li>
 
-    <li><b>Mercury is not configuration management.</b> However, it's real time inventory databases can be used as back ends for
-        many DevOPs work.</li>
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Welcome to Mercury’s 0.1 documentation! &#8212; Mercury 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Introduction" href="introduction.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <img alt="Liquid Metal" class="align-center" src="_images/project_mercury.png" />
+<p class="centered">
+<strong>Mercury</strong></p><p class="centered">
+<strong><em>An element having the properties of liquid metal</em></strong></p><div class="section" id="welcome-to-mercury-s-release-documentation">
+<h1>Welcome to Mercury&#8217;s 0.1 documentation!<a class="headerlink" href="#welcome-to-mercury-s-release-documentation" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
+<p>Mercury is a set of services, agents, and hardware libraries designed for the
+purpose of heterogeneous datacenter management.</p>
+<p>Mercury provides two core facilities, a hardware inventory and RPC API
+for firmware management, BMC configuration, RAID configuration,
+OS provisioning, and secure decommissioning. Mercury has been developed
+specifically for base systems management of large numbers of servers from
+multiple vendors and generations, spread across multiple datacenters.</p>
+<p>Mercury is approaching alpha status and is currently under <strong>heavy</strong> development.
+All aspects of the project, be it code, structure, philosophy; are likely to change.</p>
+<div class="sidebar">
+<p class="first sidebar-title">WARNING</p>
+<p class="last"><em>Use at your own risk, without any warranty, implied or otherwise</em></p>
+</div>
+</div>
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></li>
+<li><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></li>
+<li><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></li>
+</ul>
+<div class="toctree-wrapper compound">
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#requirements">Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#server">Server</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#agent">Agent</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html#module-mercury.hardware.raid.abstraction.api">RAID Abstraction</a></li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="#">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Welcome to Mercury&#8217;s 0.1 documentation!</a><ul>
+<li><a class="reference internal" href="#overview">Overview</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="#">Documentation overview</a><ul>
+      <li>Next: <a href="introduction.html" title="next chapter">Introduction</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/index.rst.txt"
+            rel="nofollow">Show Source</a></li>
     </ul>
-    <h3><a id="mercury-services" class="anchor" href="#mercury-services" aria-hidden="true"><span
-            class="octicon octicon-link"></span></a>Mercury Services</h3>
-    <h4>mercury_inventory</h4>
-    <p>Controller service for a free form, document oriented database. Populated by mercury agents and multi-band
-        collectors for the purpose of building a ubiquitous document structure that describes hardware. <b>If it exists
-            here, it exists on the floor; exactly as described</b></p>
-    <h4>mercury_rpc</h4>
-    <p>Service that provides access to active agent RPC capabilities at scale. Calls can be run on a single node or an
-        entire fleet in parallel. Targets are selected using a mercury_inventory query.</p>
-    <h4>mercury_log</h4>
-    <p>Service endpoint for all logging messages originating from the mercury namespace. Allows for post-mortim and live
-        tracing of any mercury process. Provides accurate metric generation for the purpose of billing, auditing, and BU
-        reporting at any granularity. </p>
-    <h3><a id="mercury-agents" class="anchor" href="#mercury-agents" aria-hidden="true"><span
-            class="octicon octicon-link"></span></a>Mercury Agents</h3>
-    <h4>mercury_agent</h4>
-    <p>The core agent that operates within an ephemeral OS running on an inventory target (device still under provider
-        control, ie not sold or allocated). The OS environment contains libraries and abstraction layers for the intent
-        of providing a common RPC interface for provisioning and decommissioning workflows. Agent capabilities expose
-        mechanisms for managing firmware, hardware RAID, OS Provisioning, drive sanitation, etc.</p>
-    <h4>mercury_inspectors</h4>
-    <p>These core software units provide the most precises and full featured libraries for interrogating hardware,
-        discovering network interfaces and neighbors (LLDP), and detecting hardware state change. Used primarily for
-        populating the mercury_inventory database, but also useful for standalone operation</p>
-    <h3><a id="oob" class="anchor" href="#oob" aria-hidden="true"><span class="octicon octicon-link"></span></a>Out of
-        band</h3>
-    <h4>mercury_power</h4>
-    <p>Provides inventory backed, centralized mechanism for controlling device power state. Also provides interfaces to
-        higher level OBM protocols such as redfish, wsman, rac, and hp-rest. Such protocols can be used to supplement
-        inventory acquisition and discovery when running the agent and inspectors is not possible (device is sold)</p>
-    <h3><a id="inband" class="anchor" href="#inband" aria-hidden="true"><span class="octicon octicon-link"></span></a>In
-        Band</h3>
-    <h4>mercury_ssh</h4>
-    <p>Light, agent-less RPC interface used primarily to load the agent OS via kexec</p>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Jared Rodriguez.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="_sources/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
 
+    
 
-    <footer class="site-footer">
-        <span class="site-footer-owner"><a href="https://github.rackspace.com/jared-rodriguez/mercury">Mercury</a> is maintained by <a
-                href="https://github.rackspace.com/jared-rodriguez">jared-rodriguez</a>.</span>
-
-        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a
-                href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a
-                href="https://twitter.com/jasonlong">Jason Long</a>.</span>
-    </footer>
-
-</section>
-
-
-</body>
+    
+  </body>
 </html>
-
