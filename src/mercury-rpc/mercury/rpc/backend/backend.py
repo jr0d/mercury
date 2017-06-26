@@ -13,18 +13,24 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
+import asyncio
 import logging
 
-from mercury.common.transport import SimpleRouterReqService
-from mercury.common.mongo import get_collection, get_connection
+import zmq
+import zmq.asyncio
+
+from mercury.common.asyncio.mongo import get_connection
+from mercury.common.asyncio.transport import AsyncRouterReqService
+from mercury.common.asyncio.dispatcher import AsyncDispatcher
+from mercury.common.inventory_client.client import InventoryClient
+from mercury.rpc.active_asyncio import add_record, ping_loop
+from mercury.rpc.backend.controller import BackendController
 from mercury.rpc.configuration import rpc_configuration, get_jobs_collection, get_tasks_collection
-from mercury.rpc.db import ActiveInventoryDBController
 from mercury.rpc.jobs.monitor import Monitor
 from mercury.rpc.jobs.tasks import (
     complete_task,
     update_task
 )
-from mercury.rpc.ping import spawn
 
 log = logging.getLogger(__name__)
 
@@ -34,51 +40,44 @@ RPC_CONFIG_FILE = 'mercury-rpc.yaml'
 # TODO: Rewrite BackEndService as a general purpose message router
 
 
-class BackEndService(SimpleRouterReqService):
-    def __init__(self, active_db_collection, jobs_collection, tasks_collection):
+class BackEndService(AsyncRouterReqService):
+
+    def __init__(self, inventory_router_url, jobs_collection, tasks_collection):
         registration_service_bind_address = rpc_configuration.get('backend',
                                                                   {}).get('service_url',
                                                                           'tcp://0.0.0.0:9002')
+        service_info = rpc_configuration.get('info', {})
         super(BackEndService, self).__init__(registration_service_bind_address)
 
-        self.active_db_controller = ActiveInventoryDBController(active_db_collection)
-
+        self.inventory_client = InventoryClient(inventory_router_url)
         self.jobs_collection = jobs_collection
         self.tasks_collection = tasks_collection
 
-    def process(self, message):
-        if message.get('action') == 'register':
-            return self.register(data=message.get('client_info'))
-        elif message.get('action') == 'task_update':
-            return self.task_update(message.get('update_data'))
-        elif message.get('action') == 'task_return':
-            return self.task_return(message.get('return_data'))
-        return dict(error=True, message='Did not receive appropriate action')
+        self.controller = BackendController(service_info,
+                                            self.inventory_client,
+                                            self.jobs_collection,
+                                            self.tasks_collection)
+        self.dispatcher = AsyncDispatcher(self.controller)
 
-    def spawn_pinger(self, mercury_id, address, port):
-        endpoint = 'tcp://%s:%s' % (address, port)
-        spawn(endpoint, mercury_id, self.active_db_controller)
+    async def process(self, message):
+        """
+        :param message:
+        :return:
+        """
+        return await self.dispatcher.dispatch(message)
 
     def reacquire(self):
-        existing_documents = self.active_db_controller.query({}, projection={'mercury_id': 1,
-                                                                             'rpc_address': 1,
-                                                                             'ping_port': 1})
-        for doc in existing_documents:
-            log.info('Attempting to reacquire %s : %s' % (doc['mercury_id'], doc['rpc_address']))
-            self.spawn_pinger(doc['mercury_id'], doc['rpc_address'], doc['ping_port'])
+        existing_documents = self.inventory_client.query({'active': {'$ne': None}},
+                                                         projection={'mercury_id': 1, 'active': 1})
+        for doc in existing_documents['items']:
+            if not self.controller.validate_agent_info(doc['active']):
+                log.error('Found junk in document {} expunging'.format(doc['mercury_id']))
+                self.inventory_client.update_one(doc['mercury_id'], {'active': None})
 
-    def register(self, data):
-        if not self.active_db_controller.validate(data):
-            log.error('Recieved invalid data')
-            return dict(error=True, message='Invalid request')
+            log.info('Attempting to reacquire %s : %s' % (doc['mercury_id'], doc['active']['rpc_address']))
+            add_record(doc)
 
-        self.active_db_controller.insert(data)
-
-        self.spawn_pinger(data['mercury_id'], data['rpc_address'], data['ping_port'])
-
-        return dict(error=False, message='Registration successful')
-
-    def task_update(self, update_data):
+    async def task_update(self, update_data):
         """
         Update a task action string and optional progress metric
         :param update_data: {
@@ -92,7 +91,7 @@ class BackEndService(SimpleRouterReqService):
 
         return dict(message='Accepted')
 
-    def task_return(self, return_data):
+    async def task_return(self, return_data):
         """Finish Job task with response data and status status
         :param return_data: {
             job_id:
@@ -122,9 +121,14 @@ class BackEndService(SimpleRouterReqService):
 
         return dict(message='Accepted')
 
-    def cleanup(self):
-        super(BackEndService, self).cleanup()
-        # clean up ping threads
+
+def configure_logging():
+    # TODO: get these from the configuration
+    logging.basicConfig(level=logging.DEBUG,
+                        format='%(asctime)s : %(levelname)s - %(name)s - %(message)s')
+    logging.getLogger('mercury.rpc.ping').setLevel(logging.INFO)
+    logging.getLogger('mercury.rpc.ping2').setLevel(logging.INFO)
+    logging.getLogger('mercury.rpc.jobs.monitor').setLevel(logging.DEBUG)
 
 
 def rpc_backend_service():
@@ -133,22 +137,19 @@ def rpc_backend_service():
 
     :return:
     """
-    logging.basicConfig(level=logging.DEBUG,
-                        format='%(asctime)s : %(levelname)s - %(name)s - %(message)s')
-    logging.getLogger('mercury.rpc.ping').setLevel(logging.INFO)
-    logging.getLogger('mercury.rpc.ping2').setLevel(logging.INFO)
-    logging.getLogger('mercury.rpc.jobs.monitor').setLevel(logging.INFO)
+
+    configure_logging()
     db_configuration = rpc_configuration.get('db', {})
 
+    # Create the event loop
+    loop = zmq.asyncio.ZMQEventLoop()
+    loop.set_debug(True)
+    asyncio.set_event_loop(loop)
+
+    # Ready the DB
     connection = get_connection(server_or_servers=db_configuration.get('rpc_mongo_servers',
                                                                        'localhost'),
                                 replica_set=db_configuration.get('replica_set'))
-
-    active_db_collection = get_collection(db_configuration.get('rpc_mongo_db',
-                                                               'test'),
-                                          db_configuration.get('rpc_mongo_collection',
-                                                               'rpc'),
-                                          connection)
 
     jobs_collection = get_jobs_collection(connection)
     tasks_collection = get_tasks_collection(connection)
@@ -156,13 +157,27 @@ def rpc_backend_service():
     jobs_collection.create_index('ttl_time_completed', expireAfterSeconds=3600)
     tasks_collection.create_index('ttl_time_completed', expireAfterSeconds=3600)
 
+    # Inject the monitor loop
     monitor = Monitor(jobs_collection, tasks_collection)
-    monitor.start()
-    server = BackEndService(active_db_collection, jobs_collection, tasks_collection)
+    asyncio.ensure_future(monitor.loop(), loop=loop)
+
+    # Create a backend instance
+    inventory_router = rpc_configuration['inventory']['inventory_router']
+    server = BackEndService(inventory_router, jobs_collection, tasks_collection)
     server.reacquire()
-    server.bind()
-    server.start()
-    monitor.kill()
+
+    # Inject ping loop
+    asyncio.ensure_future(ping_loop(server.context, 30, 10, 2500, 5, .42, loop), loop=loop)
+
+    # Start main loop
+    try:
+        loop.run_until_complete(server.start())
+    except KeyboardInterrupt:
+        pass
+    finally:
+        server.socket.close(0)
+        server.context.destroy()
+        monitor.kill()
 
 
 if __name__ == '__main__':

@@ -160,7 +160,7 @@ def computer(mercury_id):
     projection = get_projection_from_qsa()
     c = inventory_client.get_one(mercury_id, projection=projection)
 
-    if not computer:
+    if not c:
         return http_error('mercury_id %s does not exist in inventory' % mercury_id,
                           404)
 
@@ -170,82 +170,29 @@ def computer(mercury_id):
 @route('/api/active/computers', method='GET')
 def active_computers():
     projection = get_projection_from_qsa()
+    paging_data = get_paging_info_from_qsa()
     if not projection:
         print('projection: ' + str(projection))
-        projection = {'capabilities': 0}
-    cursor = active_collection.find({}, projection=projection)
-    active = []
-    for document in cursor:
-        document['_id'] = str(document['_id'])
-        active.append(document)
+        projection = {'active': 1, 'mercury_id': 1}
 
-    return {'active': active, 'count': len(active)}
+    return inventory_client.query({'active': {'ne': None}},
+                                  projection=projection,
+                                  limit=paging_data['limit'],
+                                  sort_direction=paging_data['sort_direction'])
 
 
 @route('/api/active/computers/<mercury_id>', method='GET')
 def active_computer(mercury_id):
     projection = get_projection_from_qsa()
-    c = active_collection.find_one({'mercury_id': mercury_id}, projection=projection)
-    if not c:
-        return http_error('No such device', 404)
-    c['_id'] = str(c['_id'])
-    return c
-
-
-####################################################################
-# These functions highlight some optimization issues related having
-# separated the active and persistent inventory.
-# We still think it's worth it, for now.
-####################################################################
-
-def query_active_prototype1(query, projection=None):
-    # Get all inventory matching inventory mercury_ids and iterate over
-    inventory_matches = inventory_client.query(query)
-
-    active_matches = []
-    cursor = active_collection.find({}, projection=projection)
-
-    for active_document in cursor:
-        for inventory_document in inventory_matches['items']:
-
-            if active_document.get('mercury_id') == inventory_document.get('mercury_id'):
-                active_matches.append(active_document)
-                convert_id(active_document)
-                break
-
-    return active_matches
-
-
-###
-
-
-def query_active_inventory(query, projection=None):
-    """
-    The same as query active prototype but returns the inventory records instead
-    :param projection:
-    :param query:
-    :return:
-    """
     if not projection:
-        projection = {'mercury_id': 1}
+        projection = {'active': 1, 'mercury_id': 1}
 
-    inventory_matches = inventory_client.query(query, projection=projection)
-    active_inventory = []
-    cursor = active_collection.find({}, projection={'mercury_id': 1})
+    c = inventory_client.get_one({'mercury_id': mercury_id}, projection=projection)
 
-    for document in cursor:
-        for inventory_document in inventory_matches['items']:
-            if document.get('mercury_id') == inventory_document.get('mercury_id'):
-                active_inventory.append(inventory_document)
-                break
-    return active_inventory
-
-
-#####
-
-
-def get_active(query, projection):
-    return query_active_prototype1(query, projection=projection)
+    if not c:
+        return http_error('mercury_id %s does not exist in inventory' % mercury_id,
+                          404)
+    return c
 
 
 @route('/api/active/computers/query', method='POST')
@@ -253,9 +200,14 @@ def get_active(query, projection):
 @check_query
 def active_computer_query():
     query = request.json.get('query')
+
+    # Make sure we get only active devices
+    query.update({'active': {'$ne': None}})
     projection = get_projection_from_qsa()
-    active = get_active(query, projection)
-    return {'active': active, 'count': len(active)}
+    paging_data = get_paging_info_from_qsa()
+    return inventory_client.query(query, projection=projection,
+                                  limit=paging_data['limit'],
+                                  sort_direction=paging_data['sort_direction'])
 
 
 @route('/api/rpc/jobs/<job_id>', method='GET')
@@ -317,6 +269,11 @@ def get_jobs():
     return {'count': count, 'jobs': jobs}
 
 
+def get_all_active_query(query):
+    query.update({'active': {'$ne': None}})
+    return inventory_client.query(query, projection={'active': 1}, limit=0, sort_direction=1)['items']
+
+
 @route('/api/rpc/jobs', method='POST')
 @validate_json
 @check_query
@@ -327,9 +284,8 @@ def post_jobs():
         return http_error('Command is missing from request or is malformed', code=400)
 
     query = request.json.get('query')
-    projection = get_projection_from_qsa()
 
-    active_matches = get_active(query, projection)
+    active_matches = get_all_active_query(query)
 
     active_match_count = len(active_matches)
     log.debug('Matched %d active computers' % active_match_count)

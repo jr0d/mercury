@@ -28,11 +28,7 @@ import argparse
 import logging
 
 from mercury.agent.capabilities import runtime_capabilities
-from mercury.agent.configuration import (
-    agent_configuration,
-    inventory_url,  # Only so we can report it
-    get_inventory_client
-)
+from mercury.agent.configuration import agent_configuration
 from mercury.agent.pong import spawn_pong_process
 from mercury.agent.register import get_dhcp_ip, register
 from mercury.agent.remote_logging import MercuryLogHandler
@@ -67,20 +63,14 @@ class Agent(object):
             raise MercuryCritical('Missing rpc backend in local configuration')
 
     def run(self, dhcp_ip_method='simple'):
-        log.debug('Agent: %s, Pong: %s, Inventory: %s' % (self.agent_bind_address,
-                                                          self.pong_bind_address,
-                                                          inventory_url))
+        log.debug('Agent: %s, Pong: %s' % (self.agent_bind_address,
+                                           self.pong_bind_address))
 
         log.info('Running inspectors')
 
         device_info = inspect.inspect()
 
         log.info('Registering device inventory for MercuryID {}'.format(device_info['mercury_id']))
-
-        inventory_client = get_inventory_client()
-        object_id = inventory_client.insert_one(device_info)
-
-        log.debug('Created/Updated inventory record: %s' % object_id)
 
         log.info('Starting pong service')
         spawn_pong_process(self.pong_bind_address)

@@ -15,7 +15,7 @@
 
 import logging
 
-from mercury.common.exceptions import MercuryCritical
+from mercury.common.exceptions import MercuryClientException
 from mercury.common.transport import SimpleRouterReqClient
 
 
@@ -23,46 +23,25 @@ LOG = logging.getLogger(__name__)
 
 
 class InventoryClient(SimpleRouterReqClient):
+    _service_name = 'Inventory'
+
     """Client to interact with inventory."""
-    @staticmethod
-    def raise_reply_error(reply):
-        """Raise a MercuryCritical exception.
-
-        Called when the client cannot talk to the inventory service.
-        :raises: MercuryCritical.
-        """
-        raise MercuryCritical('Problem talking to inventory service: '
-                              'message = %s, tb = %s' % (
-                                  reply.get('message'),
-                                  '\n'.join(reply.get('tb', []))
-                              ))
-
-    def check_and_return(self, reply):
-        """Check a transceiver's reply for errors.
-
-        :param reply: A dictionary containing the transceiver's reply.
-        :returns: The 'response' field of the transceiver's reply.
-        """
-        if reply.get('error'):
-            self.raise_reply_error(reply)
-        return reply['response']
-
     def insert_one(self, device_info):
         """Insert a new device in inventory.
 
         :param device_info: A dict containing the new device info.
         :returns: The 'response' field of the transceiver's reply.
-        :raises: MercuryCritical if 'mercury_id' is missing.
+        :raises: MercuryClientException if 'mercury_id' is missing.
         """
         mercury_id = device_info.get('mercury_id')
         if not mercury_id:
-            raise MercuryCritical('device_info is missing mercury_id')
+            raise MercuryClientException('device_info is missing mercury_id')
 
         payload = {
             'endpoint': 'insert_one',
             'args': [device_info]
         }
-        return self.check_and_return(self.transceiver(payload))
+        return self.transceiver(payload)
 
     def update_one(self, mercury_id, update_data):
         """Update a device in inventory.
@@ -77,7 +56,7 @@ class InventoryClient(SimpleRouterReqClient):
             'kwargs': {'update_data': update_data}
         }
 
-        return self.check_and_return(self.transceiver(payload))
+        return self.transceiver(payload)
 
     def get_one(self, mercury_id, projection=None):
         """Get a device from inventory.
@@ -94,7 +73,7 @@ class InventoryClient(SimpleRouterReqClient):
                 'projection': projection
             }
         }
-        return self.check_and_return(self.transceiver(payload))
+        return self.transceiver(payload)
 
     def query(self, query_data, projection=None, limit=0, sort_direction=1):
         """Query inventory for devices matching query_data.
@@ -115,7 +94,7 @@ class InventoryClient(SimpleRouterReqClient):
                 'sort_direction': sort_direction
             }
         }
-        return self.check_and_return(self.transceiver(payload))
+        return self.transceiver(payload)
 
     def delete(self, mercury_id):
         """Delete a device from inventory.
@@ -127,7 +106,7 @@ class InventoryClient(SimpleRouterReqClient):
             'endpoint': 'delete',
             'args': [mercury_id]
         }
-        return self.check_and_return(self.transceiver(payload))
+        return self.transceiver(payload)
 
     def count(self, query_data):
         """Count how many devices match query_data.
@@ -139,4 +118,4 @@ class InventoryClient(SimpleRouterReqClient):
             'endpoint': 'count',
             'args': [query_data]
         }
-        return self.check_and_return(self.transceiver(payload))
+        return self.transceiver(payload)

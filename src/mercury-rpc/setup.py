@@ -31,6 +31,7 @@ setup(
         'msgpack-python',
         'pymongo',
         'redis',
-        'python-hpssa'
+        'python-hpssa',
+        'motor'
     ]
 )

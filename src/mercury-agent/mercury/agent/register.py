@@ -22,7 +22,6 @@ from mercury.common.exceptions import MercuryCritical
 from mercury.inspector.inspectors.interfaces import get_interface_by_name
 from mercury.inspector.inspectors.routes import find_default_route
 
-
 log = logging.getLogger(__name__)
 
 
@@ -78,8 +77,7 @@ def _serialize_capabilities(capabilities):
     return _d
 
 
-def register(rpc_backend, mercury_id, local_ip, local_ip6, capabilities):
-
+def register(rpc_backend, device_info, local_ip, local_ip6, capabilities):
     backend = BackEndClient(rpc_backend)
 
     # There is still some confusion regarding how best to determine what ip
@@ -103,8 +101,7 @@ def register(rpc_backend, mercury_id, local_ip, local_ip6, capabilities):
 
     # UPDATE: Determine the route taken to find rpc_backend and use that interface
 
-    payload = {
-        'mercury_id': mercury_id,
+    agent_info = {
         'rpc_address': local_ip,
         'rpc_address6': local_ip6,
         'rpc_port': agent_configuration.get('rpc_port', 9003),
@@ -113,4 +110,4 @@ def register(rpc_backend, mercury_id, local_ip, local_ip6, capabilities):
         'capabilities': _serialize_capabilities(capabilities)
     }
 
-    return backend.register(payload)
+    return backend.register(device_info, agent_info)

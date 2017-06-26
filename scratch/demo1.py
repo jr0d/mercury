@@ -40,7 +40,7 @@ def prune_inactive(inv_matches, active_matches):
     return pruned
 
 
-def storage_homogony_report(report_items):
+def storage_homogeny_report(report_items):
     counters = [Counter([x['total_drives'] for x in report_items]),
                 Counter([x['slot'] for x in report_items]),
                 Counter([x['total_size'] for x in report_items])]
@@ -95,7 +95,7 @@ def storage_report():
     report = {
         'count': len(matches),
         'items':  report_items,
-        'homogeneity': storage_homogony_report(report_items)
+        'homogeneity': storage_homogeny_report(report_items)
     }
 
     return report

@@ -55,9 +55,6 @@ class InventoryDBController(object):
         LLDP information. The hook might publish this transaction to a subscriber interested in
         such things.
 
-        TODO: change function name to update_one.
-        TODO: update prototype so that it takes the arguments, mercury_id, data=None
-            (if data is None, create an empty dict and touch time_updated)
         :param mercury_id: The update target
         :param data: The update or insert data
         :return:
