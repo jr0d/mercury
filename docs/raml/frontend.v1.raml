@@ -3836,22 +3836,25 @@ documentation:
             }
 
 /inventory/computers/query:
+  description: |
+    Post queries to the inventory database controller using MongoDB query syntax
   post:
-    description: |
-      Post queries to the inventory database controller using MongoDB query syntax
     body:
       application/json:
-      example: |
-        /api/inventory/computers/query/?projection=raid.total_drives,raid.name
-        {
-          "query":
+        schema: |
           {
-            "raid.total_drives":
-            {
-              "$gt"
-            }
+            "$schema": "http://json-schema.org/draft-03/schema",
+            "type": "object",
+            "title": "Query Payload",
+            "description": "An object containing a query property"
+            "properties": {
+              "query": {
+                "description": "A MongoDB query. For more information on the syntax: https://docs.mongodb.com/manual/reference/method/db.collection.find/"
+                "type": "object"
+              }
+            },
+            "required": ["query"]
           }
-        }
     queryParameters:
       limit:
         required: false
