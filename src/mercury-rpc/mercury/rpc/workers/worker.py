@@ -29,7 +29,7 @@ class RPCTask(RedisTask):
         if response['status'] != 0:
             complete_task(self.task['job_id'], self.task['task_id'],
                           {'status': 'ERROR', 'response': 'Dispatch Error: %s' % response})
-        return response
+        return response['data']  # This is the actual return information
 
     @classmethod
     def create(cls):

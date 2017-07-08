@@ -49,12 +49,12 @@ class AgentService(SimpleRouterReqService):
         super(AgentService, self).__init__(bind_address)
 
     @staticmethod
-    def error(code, message='', data=None):
-        return {'status': code, 'message': message, 'data': data}
+    def error(code, data=''):
+        return {'message': {'status': code, 'data': data}}
 
     @staticmethod
     def sync_response(data):
-        return {'status': 0, 'message': '', 'data': data}
+        return {'message': {'status': 0, 'data': data}}
 
     @staticmethod
     def lookup_method(method):
@@ -89,9 +89,6 @@ class AgentService(SimpleRouterReqService):
             return self.error(1, 'missing category, nothing to do')
 
         if category != 'rpc':
-            # Remember, all of this is just a prototype
-
-            # Need to finalize the agent contract
             return self.error(3, 'invalid category')
 
         method = message.get('method')
