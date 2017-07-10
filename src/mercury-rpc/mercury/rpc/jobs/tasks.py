@@ -14,7 +14,7 @@ log = logging.getLogger(__name__)
 COMPLETED_STATUSES = ['SUCCESS', 'ERROR', 'EXCEPTION', 'TIMEOUT']  # This will move
 
 
-def update_task(task_id, update_data, tasks_collection=None):
+async def update_task(task_id, update_data, tasks_collection=None):
     """
     Helper function that simplifies updating job tasks
     :param tasks_collection:
@@ -82,11 +82,11 @@ async def complete_task(job_id, task_id, response_data, jobs_collection=None, ta
         'action': response_data.get('action', '')
     }
 
+    await update_task(task_id, task_update, tasks_collection)
+
     log.info('Task completed: task_id: {task_id} job: {job_id} message: {message}'.format(
             **response_data
         ))
-
-    await update_task(task_id, task_update, tasks_collection)
 
     if is_completed(tasks_collection, job_id):
         log.info('Job completed: {}, status: {}'.format(job_id, response_data['status']))
@@ -103,19 +103,19 @@ async def complete_task(job_id, task_id, response_data, jobs_collection=None, ta
         )
 
 
-def get_tasks(tasks_collection, job_id):
+async def get_tasks(tasks_collection, job_id):
     docs = tasks_collection.find({'job_id': job_id})
-    return docs or []
+    return docs
 
 
-def is_completed(tasks_collection, job_id):
+async def is_completed(tasks_collection, job_id):
     """
     This will likely change once Job statuses are finalized
     :param tasks_collection:
     :param job_id:
     :return:
     """
-    return tasks_collection.count({'job_id': job_id, 'status': {'$nin': COMPLETED_STATUSES}}) == 0
+    return await tasks_collection.count({'job_id': job_id, 'status': {'$nin': COMPLETED_STATUSES}}) == 0
 
 
 class Task(object):

@@ -26,6 +26,17 @@ class FrontEndController(StaticEndpointController):
 
         super(FrontEndController, self).__init__()
 
+    @staticmethod
+    def prepare_for_serialization(obj):
+        """Converts object_id to a string and a datetime object to ctime format
+        :param obj: probably a task or a job document
+        :return: the object reference
+        """
+        mongo.serialize_object_id(obj)
+        if obj.get('ttl_time_completed'):
+            obj['ttl_time_completed'] = obj['ttl_time_completed'].ctime()
+        return obj
+
     @async_endpoint('get_job')
     async def get_job(self, job_id, projection=None):
         """Gets a job from the job_collection. Jobs expire quickly.
@@ -61,7 +72,7 @@ class FrontEndController(StaticEndpointController):
             if task['status'] in error_states:
                 job['has_failures'] = True
 
-        return mongo.serialize_object_id(job)
+        return self.prepare_for_serialization(job)
 
     @async_endpoint('get_job_tasks')
     async def get_job_tasks(self, job_id, projection=None):
@@ -75,7 +86,7 @@ class FrontEndController(StaticEndpointController):
         count = await c.count()
         tasks = []
         async for task in c:
-            tasks.append(mongo.serialize_object_id(task))
+            tasks.append(self.prepare_for_serialization(task))
 
         return {'count': count, 'tasks': tasks}
 
@@ -86,7 +97,7 @@ class FrontEndController(StaticEndpointController):
         :param task_id: The id of the task (UUID)
         :return: The task object (dict)
         """
-        return mongo.serialize_object_id(
+        return self.prepare_for_serialization(
             await self.tasks_collection.find_one({'task_id': task_id}))
 
     @async_endpoint('get_jobs')
@@ -102,7 +113,7 @@ class FrontEndController(StaticEndpointController):
         count = await c.count()
         jobs = []
         async for job in c:
-            jobs.append(mongo.serialize_object_id(job))
+            jobs.append(self.prepare_for_serialization(job))
         return {'count': count, 'jobs': jobs}
 
     @async_endpoint('create_job')
