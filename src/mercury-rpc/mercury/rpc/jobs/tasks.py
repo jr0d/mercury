@@ -46,7 +46,7 @@ async def update_task(task_id, update_data, tasks_collection=None):
         update_data.get('progress', 0)
     ))
 
-    return collection.update_one(
+    await collection.update_one(
         filter={'task_id': task_id},
         update={
             '$set': task_update
@@ -88,7 +88,7 @@ async def complete_task(job_id, task_id, response_data, jobs_collection=None, ta
             **response_data
         ))
 
-    if is_completed(tasks_collection, job_id):
+    if await is_completed(tasks_collection, job_id):
         log.info('Job completed: {}, status: {}'.format(job_id, response_data['status']))
         await jobs_collection.update_one(
             {

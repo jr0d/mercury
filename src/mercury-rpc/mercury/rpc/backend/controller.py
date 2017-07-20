@@ -111,7 +111,8 @@ class BackendController(StaticEndpointController):
 
         task_id = self.get_key('task_id', update_data)
 
-        return await update_task(task_id, update_data, self.tasks_collection)
+        await update_task(task_id, update_data, self.tasks_collection)
+        return dict(message='Accepted')
 
     @async_endpoint('complete_task')
     async def complete_task(self, return_data):

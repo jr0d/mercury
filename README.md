@@ -115,21 +115,26 @@ information.
 
 - run
 - update_firmware
-- create_raid_configuration
-- create_raid_configuration_from_model
-- destroy_raid_configuration
-- destroy_raid_configuration_all_controllers
+- update_firmware_package
 - secure_erase
 - zero_fill
 - configure_bmc_lan
 - configure_bmc_user
-- deploy_os
+- press (OS Provisioning)
 - kexec
 - inspector
 - stress
 - set_cpu_frequency
 - disk_benchmark
 - set_boot_order
+
+### Abstract RAID operations
+*For supported controllers (LSI/PERC, HPSSA, MPTFusion)*
+
+- create_logical_drive
+- delete_logical_drive
+- add_spares
+- clear_configuration
 
 ### Direct capabilities
 
