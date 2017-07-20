@@ -48,7 +48,11 @@ class MercurySmartArrayDriverTest(MercuryAgentUnitTest):
         assert not SmartArrayDriver.probe([])
 
     def test_inspect(self):
-        driver = DummySmartArrayDriver()
+        with open(os.path.join(os.path.dirname(__file__), '../resources/pci_data.json')) as fp:
+            pci_data = json.load(fp)
+
+        devices = SmartArrayDriver.probe(pci_data)
+        driver = DummySmartArrayDriver(devices)
         data = driver.inspect()
         assert data
 

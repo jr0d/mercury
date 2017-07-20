@@ -6,7 +6,6 @@ from mercury.hardware.drivers.drivers import get_subsystem_drivers
 from mercury.inspector.inspect import global_device_info
 from mercury.inspector.inspectors.raid import raid_inspector
 
-
 log = logging.getLevelName(__name__)
 
 
