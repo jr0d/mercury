@@ -24,6 +24,7 @@ from mercury.common.exceptions import fancy_traceback_short, parse_exception
 from press.configuration.util import set_environment
 from press.plugin_init import init_plugins
 from press.press import Press
+from press.hooks.hooks import clear_hooks
 
 log = logging.getLogger(__name__)
 
@@ -61,6 +62,9 @@ def entry(press_configuration):
 
             # Clear logging handlers!
             del logging.getLogger('press').handlers[:]  # python2 doesn't have list.clear()
+
+            # Clear hooks
+            clear_hooks()
 
     return return_data
 
