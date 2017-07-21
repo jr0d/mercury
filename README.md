@@ -182,3 +182,8 @@ capacity [Jared Rodriguez].
 # Running
 
 TBC
+
+# Bugs and TODO
+
+* Tasks should update time_started and status once they are received by the agent
+* Unknown methods are passing though and silently failing

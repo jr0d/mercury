@@ -92,7 +92,7 @@ def hpssa_create_array(slot, selection, raid, array_letter=None, array_type='ld'
 
     log.info('Creating HPSSA Array: {0} {1} {2}'.format(slot, str(selection), raid))
 
-    result = hp_raid_driver.handler.create(
+    result = hp_raid_driver.handler.hpssa.hpssa.create(
         slot,
         selection,
         raid,
@@ -127,7 +127,7 @@ def hpssa_delete_ld(slot, logical_drive):
     :return dict: stdout, stderr, returncode
     """
     hp_raid_driver = get_hp_raid_driver()
-    result = hp_raid_driver.handler.delete_logical_drive(slot, logical_drive)
+    result = hp_raid_driver.handler.hpssa.hpssa.delete_logical_drive(slot, logical_drive)
 
     return {'stdout': result, 'stderr': result.stderr, 'returncode': result.returncode}
 
@@ -143,7 +143,7 @@ def hpssa_clear_configuration(slot):
     :return dict:  stdout, stderr, returncode
     """
     hp_raid_driver = get_hp_raid_driver()
-    result = hp_raid_driver.handler.delete_all_logical_drives(slot)
+    result = hp_raid_driver.handler.hpssa.delete_all_logical_drives(slot)
 
     return {'stdout': result, 'stderr': result.stderr, 'returncode': result.returncode}
 
@@ -160,4 +160,4 @@ def hpssa_clear_configurations_all_controllers():
     :return dict: Indexed by adapter slot
     """
     hp_raid_driver = get_hp_raid_driver()
-    return hp_raid_driver.handler.clear_configuration()
+    return hp_raid_driver.handler.hpssa.clear_configuration()

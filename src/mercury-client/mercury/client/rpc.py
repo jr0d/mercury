@@ -41,8 +41,11 @@ class JobQuery(JobInterfaceBase):
         r = self.post(data=_payload)
         self.job_id = r['job_id']
 
-    def get_status(self):
+    def status(self):
         return self.get('{}/status'.format(self.job_id))
+
+    def tasks(self):
+        return self.get('{}/tasks'.format(self.job_id))
 
 
 class ActiveComputers(InterfaceBase):
