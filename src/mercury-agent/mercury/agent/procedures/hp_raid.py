@@ -92,7 +92,7 @@ def hpssa_create_array(slot, selection, raid, array_letter=None, array_type='ld'
 
     log.info('Creating HPSSA Array: {0} {1} {2}'.format(slot, str(selection), raid))
 
-    result = hp_raid_driver.handler.hpssa.hpssa.create(
+    result = hp_raid_driver.handler.hpssa.create(
         slot,
         selection,
         raid,
