@@ -230,6 +230,7 @@ setting up a development environment
     - mercury-log.yaml
     
 *Note: The logging facility can be configured natively in python, presently, only the stream handler is configured*
+
 7) Start the inventory
     
     ```
