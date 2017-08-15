@@ -1,4 +1,7 @@
 **Under Construction**
+# Mercury
+<i>Liquid Metal</i>
+
 
 ![alt tag](docs/images/project_mercury.png)
 
@@ -12,15 +15,20 @@ later time.
 **Mercury is a set of services, agents, and libraries designed for the 
 purpose of managing datacenter hardware assets**
 
-Mercury is not 'cloud' software. However, it can be used to deploy 
-clouds onto physical assets.
+* Mercury is not cloud software or an IaaS solution. Mercury is intended to extend the inventory and management
+capabilities of these higher level applications. 
 
-Mercury is not configuration management. However, it's real time 
+* Mercury is not configuration management. However, it's real time 
 inventory databases can be used as back ends for many DevOPs workloads.
+
+* Mercury is the result of over 10 years of experience in the provisioning space at Rackspace, where we have built 
+provisioning software for large, heterogeneous environments. 
 
 At a high level, Mercury is a protocol for interacting with physical 
 assets in a 'pre-provisioned' state. The code herein is an
 implementation of that protocol.
+
+## Design
 
 Mercury provides two core facilities, a hardware inventory and an abstraction API for firmware management, BMC
 configuration, RAID configuration, OS provisioning, and secure decommissioning. Mercury has been developed specifically
@@ -31,12 +39,14 @@ spread across multiple datacenters.
 - Simplicity
 - Ease of Administration
 - Control
-- Forget Nothing
-- Log Everything
+
 
 ## Code structure
 At present, mercury exists as a set of python packages which use the 
-mercury namespace.
+mercury namespace. This structure and this repository are likely to change as mercury moves into
+alpha and beta phases. For now, this structure works as we actively develop across all libraries
+and services.
+
 
 ### Mercury Inventory
 When a server boots using the mercury agent, software inspectors interrogate the hardware. The gathered information is
@@ -72,12 +82,9 @@ else: id = 00 + sha1(onboard_mac_address0 + onboard_mac_addressN …)
 
 ```
 
-The purpose of MercuryId is to create an indexable value devices that will never change. The Id can easily be
+The purpose of MercuryId is to create an indexable value for devices that will never change. The Id can easily be
 re-generated via the aforementioned algorithm should it ever be lost.
 
-### Frontend API
-Mercury provide simple bottle service for querying the inventory, viewing active agents and their capabilities, and 
-scheduling jobs. Front end documentation can be found here: XXX
 
 ### Mercury Agent
 The core agent that operates within an ephemeral OS running on an inventory target (device still under provider
@@ -109,7 +116,7 @@ mercury_inventory database, but also useful for standalone operation
 
 The agent provides an extensible python RPC interface. Exposed procedures, or capabilities, are published by the agent.
 The published data includes the method name, method prototype requirements (args and kwargs), doc string, and locking 
-information. 
+information. This acts as a device level service discovery mechanism.
 
 ### Base capabilities
 
@@ -162,27 +169,86 @@ Full RPC method documentation can be viewed in the RPC section of the API docume
 
 Parallel execution of an identical task does not always make sense. This is especially evident when considering
 the press workflow. For instance, if I happen to create a job that matches 12 active inventory records and provide a
-single press configuration to the method deploy_os, all 12 nodes would be provisioned using the same user and
+single press configuration to the `press` method, all 12 nodes would be provisioned using the same user and
 networking information. This is usually not the intended result. As such, mercury provides a preprocessor interface.
 
-### press_static_assets preprocessor
 
-This provided preprocessor allows
+With preprocessors, press templates can be rendered using inventory data and external asset management
+systems. Adding preprocessors can occur through the plugin interface. See [Preprocessor](documentation_link)
+documentation for more information
+
+
+This version of Mercury provides a reference implementation called `press_static_assets`. As the name suggest, it
+allows the user to submit a set of static assets, referenced by mercury_id, to be used when rendering the provided
+template. 
 
 ### Transport
 
-For all backend communication, mercury uses 0mq socket API [http://zeromq.org/whitepapers:architecture] and MessagePack
-for serialization [https://github.com/msgpack/msgpack/blob/master/spec.md]. Mercury is designed to work in tandem with
-production workloads; as such, mercury’s messaging system has been developed to minimize impact on overall network
-capacity [Jared Rodriguez].
+For all backend communication, mercury uses [0mq socket API](http://zeromq.org/whitepapers:architecture) and
+[MessagePack](https://github.com/msgpack/msgpack/blob/master/spec.md) for serialization . Mercury is 
+designed to work in tandem with production workloads; as such, mercury’s messaging system has been 
+developed to minimize impact on overall network capacity.
 
 
 # Installation
 
-# Running
+Each component contains a setup.py which is intended to be run with the `develop` option. This is due to an
+issue with the namespace implementation that prevents `install` from working. As such, mercury can only be 
+installed using the source distribution and has not yet been added to the python package index. 
 
-TBC
+We currently have two paths forward to resolve this:
 
+1) Remove the namespace, keep separate packages, and give them names like hg_<i>component</i>. For instance
+instead of using:
+
+    ```python
+    from mercury.common import mercury_id
+    ```
+    
+    We would use:
+    ```python
+    from hg_common import mercury_id
+    ```
+2) Create only *one* package, call it mercury. When installing mercury from pip, common, agent, and server code
+will be installed. The risk involved should be minimal, as most dependencies are pulled in from common. Our only
+concern is that the agent may require a heavy dependency foot print as we add support for more hardware devices.
+
+
+See the [installation documentation](https://jr0d.github.io/mercury/installation.html) for full instructions on
+setting up a development environment
+
+# Running (Don't copy and paste)
+
+1) Install mongodb
+2) Install redis
+3) Create python3.6 virtualenv and activate it
+4) Install mercury-common `cd src/mercury-common ; pip install requirements.txt ; python setup.py develop`
+5) `$ mkdir ~/.mercury`
+6) copy and modify configuration samples to ~/.mercury
+    - mercury-inventory.yaml
+    - mercury-rpc.yaml
+    - mercury-log.yaml
+    
+*Note: The logging facility can be configured natively in python, presently, only the stream handler is configured*
+7) Start the inventory
+    
+    ```
+        $ python src/mercury-inventory/mercury/inventory/server.py &>> mercury-inventory.log &
+    ```
+8) Start the RPC services
+
+    ```
+       $ python src/mercury-rpc/mercury/rpc/backend/backend.py &>> mercury-backend.log &
+       $ python src/mercury-rpc/mercury/rpc/frontend/frontend.py &>> mercury-frontend.log &
+       $ python src/mercury-rpc/mercury/rpc/workers/worker.py &>> mercury-worker.log &
+    ```
+9) Start the Agent logging service
+
+    ```
+        $ python src/mercury-log/mercury/log_service/server.py &>> mercury-log_service.log &
+    ```
+
+Once all of these servirces are running, agents can begin connecting to the backend service.
 # Bugs and TODO
 
 * Tasks should update time_started and status once they are received by the agent
