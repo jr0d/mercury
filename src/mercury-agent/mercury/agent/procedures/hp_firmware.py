@@ -191,6 +191,29 @@ def parse_log_output_for_errors():
     return status.get('reboot_flag')
 
 
+@capability('hp_apply_bios_settings',
+            description='Apply bios settings found in given file',
+            kwargs_name=['url'], serial=False,
+            dependency_callback=is_hp, timeout=60)
+def hp_apply_bios_settings(url=None):
+    """
+    Apply BIOS settings found at the given URL
+
+    :param url: Full URL to the BIOS file
+    """
+    # TODO: Implement this
+    # TODO: Alongside the conrepfile, some blobs have to be installed to bring
+    # certain components up to a recommended version. Who determines which blobs
+    # to execute? Are they provided or does this method
+    # keep track of those based on the model 
+
+    # DL380Gen9 = HPServer(name="ProLiant DL380 Gen9",
+    #                      cfg='DL380Gen9_conrep_RAX.dat',
+    #                      blobs=['BCM5719_2.13.5_RHEL6.scexe',
+    #                             'HPSA_1.18_RHEL6.scexe',
+    #                             'iLO4_2.02_RHEL6.scexe'])
+
+
 @capability('hp_update_firmware',
             description='Installs updates from provided packages',
             kwarg_names=['url', 'dry_run'], serial=False,
