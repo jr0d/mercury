@@ -1,4 +1,5 @@
-# Copyright 2015 Jared Rodriguez (jared.rodriguez@rackspace.com)
+# Copyright 2015 Jared Rodriguez (jared.rodriguez@rackspace.com, hussamd@gmail.com,
+# prashantvm89@gmail.com, lee.scott@rackspace.com, Chris.Griffith@rackspace.com)
 # All Rights Reserved.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,7 +21,7 @@ import os
 import requests
 
 from mercury.agent.capabilities import capability
-from mercury.agent.procedures.firmware import HPFirmwareException
+from mercury.common.exceptions import import HPFirmwareException
 from mercury.agent.hardware.platform.platform_detection import is_hp
 from mercury.common.helpers import cli
 
@@ -44,18 +45,15 @@ def _extract(tarball_path, extract_path):
 
 def parse_fw_report(xml_file):
     fw_tree = lxml.etree.parse(xml_file)
-    component_list = []
     # For checking needs_install XML tag is present or not
-    component_list += parse_xml_for_components(fw_tree, 'needs_install')
+    component_list = parse_xml_for_components(fw_tree, 'needs_install')
     component_list += parse_xml_for_components(fw_tree, 'already_installed')
     return component_list
 
 
 def parse_xml_for_components(xml_tree, xml_tag):
     def strip_date(version):
-        if '-' in version:
-            version = version.split('-')[0]
-        return version
+        return version.split('-')[0]
 
     component_list = []
     for i in xml_tree.findall(".//{0}/component".format(xml_tag)):
@@ -216,7 +214,7 @@ def hp_apply_bios_settings(url=None):
 
 @capability('hp_update_firmware',
             description='Installs updates from provided packages',
-            kwarg_names=['url', 'dry_run'], serial=False,
+            kwarg_names=['url', 'dry_run'], serial=True,
             dependency_callback=is_hp, timeout=3600)
 def hp_update_firmware(url=None, dry_run=False):
     """
@@ -225,9 +223,6 @@ def hp_update_firmware(url=None, dry_run=False):
     :param url: Full URL to the package containing firmware files
     :param dry_run: If firmware updates should be applied when found
     """
-    if not url:
-        return
-
     try:
         r = requests.get(url, stream=True, verify=False)
     except requests.RequestException as err:
@@ -238,9 +233,8 @@ def hp_update_firmware(url=None, dry_run=False):
     download_path = '/tmp/hpfirmware.tar.gz'
     with open(download_path, 'wb') as f:
         for chunk in r.iter_content(1024**2):
-            if not chunk:
-                break
-            f.write(chunk)
+            if chunk:
+                f.write(chunk)
 
     if not _extract(download_path, firmware_path):
         return
@@ -255,5 +249,10 @@ def hp_update_firmware(url=None, dry_run=False):
     install_updates(updates_available)
     reboot_required = parse_log_output_for_errors()
     # TODO: Implement a reboot capability?
-    if reboot_required:
-        log.debug('A reboot is required')
+    return {'result': {
+                'return_code': 1,
+                'success': True,
+                'reboot_required': reboot_required
+                }
+            }
+
