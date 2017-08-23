@@ -13,6 +13,13 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
+import os
+
+import requests
+from lxml import objectify as xml_objectify
+
+from mercury.common.helpers import cli
+
 
 def chunk(l, n):
     """Yield successive n-sized chunks from l.
@@ -55,3 +62,40 @@ def build_index_l(l, key):
         else:
             our_dict[idx] = [d]
     return our_dict
+
+
+def extract_tar_archive(tarball_path, extract_path):
+    os.makedirs(extract_path)
+    cmd = 'tar --strip-components=1 -xvf {0} -C {1}'.format(tarball_path,
+                                                            extract_path)
+    return cli.run(cmd)
+
+
+def download_tar_acrhive(url, download_path):
+    try:
+        r = requests.get(url, stream=True, verify=False)
+    except requests.RequestException as err:
+        raise err
+
+    with open(download_path, 'wb') as f:
+        for chunk in r.iter_content(1024 ** 2):
+            if chunk:
+                f.write(chunk)
+
+
+def xml_to_dict(xml_str, xml_element):
+    """ Convert xml to dict """
+    def xml_to_dict_recursion(xml_object):
+        dict_object = xml_object.__dict__
+        if not dict_object:
+            return xml_object
+        for key, value in dict_object.items():
+            dict_object[key] = xml_to_dict_recursion(value)
+        return dict_object
+    xml_obj = xml_objectify.fromstring(xml_str)
+    xml_element_dict = []
+    for i in xml_obj.findall("{0}".format(xml_element)):
+        x = xml_to_dict_recursion(i)
+        xml_element_dict.append(x)
+    return xml_element_dict
+
