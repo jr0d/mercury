@@ -16,14 +16,15 @@
 
 import glob
 import logging
-import lxml
 import os
+
+import lxml
 import requests
 
 from mercury.agent.capabilities import capability
-from mercury.common.exceptions import import HPFirmwareException
-from mercury.agent.hardware.platform.platform_detection import is_hp
+from mercury.common.exceptions import HPFirmwareException
 from mercury.common.helpers import cli
+from mercury.hardware.platform_detection import is_hp
 
 log = logging.getLogger(__name__)
 firmware_path = '/tmp/hp/firmware'
@@ -44,6 +45,7 @@ def _extract(tarball_path, extract_path):
 
 
 def parse_fw_report(xml_file):
+    # noinspection PyUnresolvedReferences
     fw_tree = lxml.etree.parse(xml_file)
     # For checking needs_install XML tag is present or not
     component_list = parse_xml_for_components(fw_tree, 'needs_install')
@@ -191,7 +193,7 @@ def parse_log_output_for_errors():
 
 @capability('hp_apply_bios_settings',
             description='Apply bios settings found in given file',
-            kwargs_name=['url'], serial=False,
+            kwarg_names=['url'], serial=True,
             dependency_callback=is_hp, timeout=60)
 def hp_apply_bios_settings(url=None):
     """
@@ -203,13 +205,22 @@ def hp_apply_bios_settings(url=None):
     # TODO: Alongside the conrepfile, some blobs have to be installed to bring
     # certain components up to a recommended version. Who determines which blobs
     # to execute? Are they provided or does this method
-    # keep track of those based on the model 
-
+    # keep track of those based on the model
+    ########
+    # Consider writing a generic conrep interface, rather than relying on these
+    # legacy interfaces. If the firmware needs to be updated prior to certain settings
+    # being available, use the hp_update_firmware method first, rather than orchestrating
+    # the upgrades here.
+    # - Jared
+    #########
     # DL380Gen9 = HPServer(name="ProLiant DL380 Gen9",
     #                      cfg='DL380Gen9_conrep_RAX.dat',
     #                      blobs=['BCM5719_2.13.5_RHEL6.scexe',
     #                             'HPSA_1.18_RHEL6.scexe',
     #                             'iLO4_2.02_RHEL6.scexe'])
+
+    assert url
+    raise NotImplementedError
 
 
 @capability('hp_update_firmware',
@@ -232,7 +243,7 @@ def hp_update_firmware(url=None, dry_run=False):
 
     download_path = '/tmp/hpfirmware.tar.gz'
     with open(download_path, 'wb') as f:
-        for chunk in r.iter_content(1024**2):
+        for chunk in r.iter_content(1024 ** 2):
             if chunk:
                 f.write(chunk)
 
@@ -248,11 +259,4 @@ def hp_update_firmware(url=None, dry_run=False):
     # Return code could be a false positive, check log file output
     install_updates(updates_available)
     reboot_required = parse_log_output_for_errors()
-    # TODO: Implement a reboot capability?
-    return {'result': {
-                'return_code': 1,
-                'success': True,
-                'reboot_required': reboot_required
-                }
-            }
-
+    return dict(result=dict(return_code=1, success=True, reboot_required=reboot_required))
