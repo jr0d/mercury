@@ -53,6 +53,10 @@ class MercuryClientException(MercuryGeneralException):
     pass
 
 
+class HPFirmwareException(MercuryGeneralException):
+    pass
+
+
 class EndpointError(MercuryGeneralException):
     def __init__(self, message, endpoint, request=None):
         """
