@@ -15,9 +15,10 @@ class Monitor(object):
     Monitors the tasks collection for expired tasks. Timeout values should accompany tasks. If
     a task does not contain a timeout, default_timeout will be used
     """
-    def __init__(self, jobs_collection, tasks_collection, default_timeout=120, cycle_time=10):
+    def __init__(self, jobs_collection, tasks_collection, loop, default_timeout=120, cycle_time=10):
         self.jobs_collection = jobs_collection
         self.tasks_collection = tasks_collection
+        self.asyncio_loop = loop
         self.default_timeout = default_timeout
         self.cycle_time = cycle_time
         self.last_run = 0
@@ -57,6 +58,9 @@ class Monitor(object):
         while True:
             if self._kill:
                 log.info('Kill signal received, shutting down')
+                break
+            if not self.asyncio_loop.is_running:
+                print('loop is not running')
                 break
             await self.process()
             await asyncio.sleep(self.cycle_time)

@@ -33,9 +33,6 @@ log = logging.getLogger(__name__)
 RPC_CONFIG_FILE = 'mercury-rpc.yaml'
 
 
-# TODO: Rewrite BackEndService as a general purpose message router
-
-
 class BackEndService(AsyncRouterReqService):
 
     def __init__(self, inventory_router_url, jobs_collection, tasks_collection):
@@ -86,10 +83,10 @@ def configure_logging():
     # TODO: get these from the configuration
     logging.basicConfig(level=logging.DEBUG,
                         format='%(asctime)s : %(levelname)s - %(name)s - %(message)s')
-    logging.getLogger('mercury.rpc.ping').setLevel(logging.INFO)
-    logging.getLogger('mercury.rpc.ping2').setLevel(logging.INFO)
-    logging.getLogger('mercury.rpc.jobs.monitor').setLevel(logging.INFO)
-    logging.getLogger('mercury.rpc.active_asyncio').setLevel(logging.INFO)
+    logging.getLogger('mercury.rpc.ping').setLevel(logging.DEBUG)
+    logging.getLogger('mercury.rpc.ping2').setLevel(logging.DEBUG)
+    logging.getLogger('mercury.rpc.jobs.monitor').setLevel(logging.DEBUG)
+    logging.getLogger('mercury.rpc.active_asyncio').setLevel(logging.DEBUG)
 
 
 def rpc_backend_service():
@@ -119,7 +116,7 @@ def rpc_backend_service():
     tasks_collection.create_index('ttl_time_completed', expireAfterSeconds=3600)
 
     # Inject the monitor loop
-    monitor = Monitor(jobs_collection, tasks_collection)
+    monitor = Monitor(jobs_collection, tasks_collection, loop=loop)
     asyncio.ensure_future(monitor.loop(), loop=loop)
 
     # Create a backend instance
@@ -133,13 +130,17 @@ def rpc_backend_service():
 
     # Start main loop
     try:
-        loop.run_until_complete(server.start())
+        asyncio.ensure_future(server.start())
+        loop.run_forever()
     except KeyboardInterrupt:
-        pass
+        log.debug('Killing monitor...')
+        monitor.kill()
+        loop.run_until_complete(asyncio.sleep(20))
     finally:
+        log.debug('Cleaning up...')
         server.socket.close(0)
         server.context.destroy()
-        monitor.kill()
+        loop.close()
 
 
 if __name__ == '__main__':
