@@ -36,11 +36,14 @@ class AsyncRouterReqService(object):
                                                                        type_error))
             await self.send_error(parsed_message['address'], 'Client error, message is not packed')
             raise MercuryClientException('Message is malformed')
+
         except (msgpack.UnpackException, msgpack.ExtraData) as msgpack_exception:
             log.error('Received invalid request: %s' % str(
                 msgpack_exception))
+
             await self.send_error(parsed_message['address'], 'Client error, message is malformed')
             raise MercuryClientException('Message is malformed')
+
         return parsed_message['address'], message
 
     async def send_error(self, address, message):
@@ -66,6 +69,7 @@ class AsyncRouterReqService(object):
             except MercuryClientException as mce:
                 await self.send_error(address, 'Encountered client error: {}'.format(mce))
                 continue
+
             except Exception:
                 exec_dict = parse_exception()
                 log.error('process raised an exception and should not have.')

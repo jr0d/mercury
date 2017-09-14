@@ -111,6 +111,9 @@ async def ping_loop(ctx,
     inventory_client = InventoryClient(inventory_router_url)
 
     while True:
+        if not loop.is_running():
+            log.info('Loop has stopped, shutting down.')
+            break
         log.debug('Looking for work')
         now = time.time()
         for mercury_id, data in list(active_state.items()):  # copy to list because the list length could change

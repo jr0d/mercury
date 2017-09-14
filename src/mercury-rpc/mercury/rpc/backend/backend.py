@@ -101,7 +101,7 @@ def rpc_backend_service():
 
     # Create the event loop
     loop = zmq.asyncio.ZMQEventLoop()
-    # loop.set_debug(True)
+    loop.set_debug(True)
     asyncio.set_event_loop(loop)
 
     # Ready the DB
@@ -128,14 +128,15 @@ def rpc_backend_service():
     asyncio.ensure_future(ping_loop(
         server.context, 30, 10, 2500, 5, .42, loop, inventory_router), loop=loop)
 
-    # Start main loop
+    # Inject main service loop
+    asyncio.ensure_future(server.start())
+
     try:
-        asyncio.ensure_future(server.start())
         loop.run_forever()
     except KeyboardInterrupt:
-        log.debug('Killing monitor...')
-        monitor.kill()
-        loop.run_until_complete(asyncio.sleep(20))
+        loop.stop()
+        import time
+        time.sleep(20)
     finally:
         log.debug('Cleaning up...')
         server.socket.close(0)
