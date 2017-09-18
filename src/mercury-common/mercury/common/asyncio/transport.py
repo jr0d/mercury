@@ -22,6 +22,7 @@ class AsyncRouterReqService(object):
         self.socket.bind(self.bind_address)
 
     async def receive(self):
+
         multipart = await self.socket.recv_multipart()
         parsed_message = parse_multipart_message(multipart)
 
@@ -60,6 +61,7 @@ class AsyncRouterReqService(object):
     async def start(self):
         while True:
             try:
+                log.info('Here')
                 address, msg = await self.receive()
             except MercuryClientException:
                 continue

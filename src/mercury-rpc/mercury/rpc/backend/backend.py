@@ -23,7 +23,7 @@ from mercury.common.asyncio.mongo import get_connection
 from mercury.common.asyncio.transport import AsyncRouterReqService
 from mercury.common.asyncio.clients.inventory import InventoryClient as AsyncInventoryClient
 from mercury.common.clients.inventory import InventoryClient
-from mercury.rpc.active_asyncio import add_active_record, ping_loop
+from mercury.rpc.active_asyncio import add_active_record, ping_loop, stop_ping
 from mercury.rpc.backend.controller import BackendController
 from mercury.rpc.configuration import rpc_configuration, get_jobs_collection, get_tasks_collection
 from mercury.rpc.jobs.monitor import Monitor
@@ -128,21 +128,19 @@ def rpc_backend_service():
     asyncio.ensure_future(ping_loop(
         server.context, 30, 10, 2500, 5, .42, loop, inventory_router), loop=loop)
 
-    # Inject main service loop
-    asyncio.ensure_future(server.start())
-
     try:
-        loop.run_forever()
+        loop.run_until_complete(server.start())
     except KeyboardInterrupt:
-        loop.stop()
-        import time
-        time.sleep(20)
+        log.info('Sending kill signals')
+        monitor.kill()
+        stop_ping()
     finally:
         log.debug('Cleaning up...')
-        server.socket.close(0)
-        server.context.destroy()
-        loop.close()
+        pending = asyncio.Task.all_tasks()
+        loop.run_until_complete(asyncio.gather(*pending))
 
+        # server.socket.close(0)
+        # server.context.destroy()
 
 if __name__ == '__main__':
     rpc_backend_service()
