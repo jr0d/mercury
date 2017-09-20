@@ -25,12 +25,10 @@ Classes should provide:
 
 import logging
 import os
-import shlex
 
 from lxml import etree
-from subprocess import PIPE, Popen
 
-from mercury.common.helpers.cli import find_in_path
+from mercury.common.helpers import cli
 
 log = logging.getLogger(__name__)
 
@@ -60,7 +58,7 @@ class IPMIToolParsingError(Exception):
 
 class IPMITool(object):
     def __init__(self, ipmitool_path=DEFAULT_IPMITOOL_PATH):
-        self.ipmitool_path = find_in_path(ipmitool_path)
+        self.ipmitool_path = cli.find_in_path(ipmitool_path)
 
         if not self.ipmitool_path:
             raise OSError("%s does not exist" % ipmitool_path)
@@ -76,39 +74,14 @@ class IPMITool(object):
     def __raw_command(cmd):
         return 'raw %s' % cmd
 
-    @staticmethod
-    def utility_exec(args, bufsize=1048567, raise_on_error=True, ignore_error=False,
-                     quiet=False):
-        """
-        Simple executor for shell commands.
-        """
-        if not quiet:
-            log.info('Executing: %s' % args)
-
-        cmd = shlex.split(args)
-        p = Popen(cmd, stdout=PIPE, stderr=PIPE, bufsize=bufsize)
-        out, err = p.communicate()
-        ret = p.returncode
-
-        if err and not ignore_error:
-            log.error('Failed Executing with return code %s' % ret)
-            log.error('Output: %s' % out)
-            log.error('Error: %s' % err)
-            if raise_on_error:
-                raise Exception('%s: %s' % (out, err))
-
-        return out, err, ret
-
     def run(self, args, bufsize=1048567, raise_on_error=True, ignore_error=False):
         cmd = self.ipmitool_path + ' ' + args
-        return self.utility_exec(cmd, bufsize=bufsize,
-                                 raise_on_error=raise_on_error,
-                                 ignore_error=ignore_error)
+        return cli.run(cmd, bufsize=bufsize, raise_exception=raise_on_error, ignore_error=ignore_error)
 
     def parse_network_info(self, channel=1):
         log.debug('Parsing and storing IPMI LAN info')
         args = 'lan print %d' % channel
-        out, _, _ = self.run(args)
+        out = self.run(args)
         for line in out.splitlines():
             label = line.split(':')[0].strip()
             data = line.split(':')[1].strip()
@@ -200,10 +173,10 @@ class IPMITool(object):
     @property
     def bmc_info(self):
         log.debug('Getting bmc info')
-        out, err, returncode = self.run('mc info')
-        if returncode:
+        out = self.run('mc info', raise_on_error=False)
+        if out.returncode:
             log.error('Problem getting bmc info : '
-                      'std {} - err {} - return {}'.format(out, err, returncode))
+                      'std {} - err {} - return {}'.format(out, out.stderr, out.returncode))
             return None
 
         return self.parse_output_type1(out)
@@ -211,7 +184,7 @@ class IPMITool(object):
 
 class DCMITool(IPMITool):
     def __init__(self, dcmitool_path='/usr/local/sbin/Qdcmitool'):
-        self.dcmitool_path = find_in_path(dcmitool_path)
+        self.dcmitool_path = cli.find_in_path(dcmitool_path)
         super(DCMITool, self).__init__(ipmitool_path=dcmitool_path)
 
     def bootstrap_obm_static(self, ip_address, netmask, gateway, username, password):
@@ -226,8 +199,8 @@ class IPMIToolDrac(IPMITool):
         self.drac_version = self.get_drac_version()
 
     def get_drac_version(self):
-        out, err, ret = self.run('sdr elist mcloc', raise_on_error=False)
-        if not ret:
+        out = self.run('sdr elist mcloc', raise_on_error=False)
+        if not out.returncode:
             return
         try:
             sensors = [i.split('  ', 1)[0] for i in out]
@@ -282,9 +255,8 @@ class IPMIToolHP(IPMITool):
 
     def run_hpon(self, args, bufsize=1048567, raise_on_error=True, ignore_error=False):
         cmd = self.hponcfg_path + ' ' + args
-        return self.utility_exec(cmd, bufsize=bufsize,
-                                 raise_on_error=raise_on_error,
-                                 ignore_error=ignore_error)
+        return cli.run(cmd, bufsize=bufsize, raise_exception=raise_on_error,
+                       ignore_error=ignore_error)
 
     def create_superuser(self, username, password, channels=(1, 2), user_id=2):
         raise NotImplemented
