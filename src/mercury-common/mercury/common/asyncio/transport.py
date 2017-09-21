@@ -61,7 +61,6 @@ class AsyncRouterReqService(object):
     async def start(self):
         while True:
             try:
-                log.info('Here')
                 address, msg = await self.receive()
             except MercuryClientException:
                 continue
