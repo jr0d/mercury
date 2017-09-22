@@ -95,7 +95,8 @@ def abstract_delete_logical_drive(adapter, array, logical_drive):
     :param logical_drive:
     :return:
     """
-    raise NotImplementedError
+    raid_driver = get_subsystem_drivers('raid')[0]
+    return raid_driver.delete_logical_drive(adapter, array, logical_drive)
 
 
 @capability('clear_configuration',
@@ -110,7 +111,8 @@ def abstract_clear_configuration(adapter):
     :param adapter:
     :return:
     """
-    raise NotImplementedError
+    raid_driver = get_subsystem_drivers('raid')[0]
+    return raid_driver.clear_configuration(adapter)
 
 
 @capability('add_spares',
@@ -127,4 +129,5 @@ def abstract_add_spares(adapter, array, drives):
     :param drives:
     :return:
     """
-    raise NotImplementedError
+    raid_driver = get_subsystem_drivers('raid')[0]
+    return raid_driver.add_spares(adapter, array, drives)
