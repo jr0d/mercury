@@ -14,6 +14,8 @@
 #    limitations under the License.
 
 import logging
+import subprocess
+
 
 from mercury.agent.capabilities import capability
 from mercury.common.helpers.cli import run
@@ -57,4 +59,24 @@ def kexec(kernel='', initrd='', options=None, kernel_type='bzImage'):
     """
     Kexec into a kernel
     """
+    options = options or []
+    command = 'kexec --type {kernel_type} --initrd={initrd} --append={options} {kernel}'.format(
+        kernel_type=kernel_type,
+        initrd=initrd,
+        options=' '.join(options),
+        kernel=kernel
+    )
 
+    # TODO: implement workflow that allows an agent to un-register itself
+    # Sleep a little bit to allow the command to return
+    subprocess.Popen('sleep 5 ; {}'.format(command), shell=True)
+
+
+@capability('reload', 'kexec into current preboot kernel, re-downloading the root file system')
+def reload():
+    """
+    Reload the environment
+    """
+    # This should look into the configuration to find the location
+    # of the kernel/initrd images and download them
+    raise NotImplementedError
