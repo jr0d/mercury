@@ -1,0 +1,14 @@
+{
+  "query": {
+
+  },
+  "instruction": {
+    "method": "delete_logical_drive",
+    "args": [],
+    "kwargs": {
+      "adapter": 0,
+      "array": 0,
+      "logical_drive": 0
+    }
+  }
+}

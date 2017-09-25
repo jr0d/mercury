@@ -39,7 +39,10 @@ class JobQuery(JobInterfaceBase):
             'instruction': self.instruction
         }
         r = self.post(data=_payload)
-        self.job_id = r['job_id']
+        try:
+            self.job_id = r['job_id']
+        except KeyError:
+            raise Exception('Missing job_id, data contains: {}'.format(r))
 
     def status(self):
         return self.get('{}/status'.format(self.job_id))

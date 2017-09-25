@@ -1,0 +1,10 @@
+{
+  "query": {},
+  "instruction": {
+    "method": "reload",
+    "args": [
+      "http://10.192.0.44:9997/srv/images/preconfig/vmlinuz-3.18.9-RAX-aufs",
+      "http://10.192.0.44:9997/srv/images/preconfig/initrd-3.18.9-RAX-aufs"
+    ]
+  }
+}

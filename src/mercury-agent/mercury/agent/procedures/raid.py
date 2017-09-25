@@ -3,16 +3,17 @@ import logging
 from mercury.agent.capabilities import capability
 from mercury.agent.configuration import get_backend_client
 from mercury.hardware.drivers.drivers import get_subsystem_drivers
+from mercury.hardware.raid.abstraction.api import RAIDActions
 from mercury.inspector.inspect import global_device_info
 from mercury.inspector.inspectors.raid import raid_inspector
 
-log = logging.getLevelName(__name__)
+log = logging.getLogger(__name__)
 
 
 def has_abstraction_handler():
     raid_drivers = get_subsystem_drivers('raid')
     for driver in raid_drivers:
-        if hasattr(driver, 'raid_abstraction_handler'):
+        if isinstance(driver.handler, RAIDActions):
             return True
     return False
 
@@ -78,7 +79,7 @@ def abstract_create_logical_drive(adapter, level, drives=None, size=None, array=
 
     raid_driver = get_subsystem_drivers('raid')[0]
 
-    return raid_driver.create_logical_drive(adapter, level, drives, size, array)
+    return raid_driver.handler.create_logical_drive(adapter, level, drives, size, array)
 
 
 @capability('delete_logical_drive',
@@ -96,7 +97,7 @@ def abstract_delete_logical_drive(adapter, array, logical_drive):
     :return:
     """
     raid_driver = get_subsystem_drivers('raid')[0]
-    return raid_driver.delete_logical_drive(adapter, array, logical_drive)
+    return raid_driver.handler.delete_logical_drive(adapter, array, logical_drive)
 
 
 @capability('clear_configuration',
@@ -112,7 +113,7 @@ def abstract_clear_configuration(adapter):
     :return:
     """
     raid_driver = get_subsystem_drivers('raid')[0]
-    return raid_driver.clear_configuration(adapter)
+    return raid_driver.handler.clear_configuration(adapter)
 
 
 @capability('add_spares',
@@ -130,4 +131,4 @@ def abstract_add_spares(adapter, array, drives):
     :return:
     """
     raid_driver = get_subsystem_drivers('raid')[0]
-    return raid_driver.add_spares(adapter, array, drives)
+    return raid_driver.handler.add_spares(adapter, array, drives)

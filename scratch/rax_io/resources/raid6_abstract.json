@@ -1,0 +1,14 @@
+{
+  "query": {
+    "mercury_id": "018aefb539b2fe39733d59bc333500d445d10276b5"
+  },
+  "instruction": {
+    "method": "create_logical_drive",
+    "args": [],
+    "kwargs": {
+      "adapter": 0,
+      "level": "6",
+      "drives": "all"
+    }
+  }
+}

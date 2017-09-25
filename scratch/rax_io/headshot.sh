@@ -20,5 +20,7 @@ cat << "EOF"
 EOF
 
 
-ansible-playbook -f 16 -i/tmp/inventory headshot.pb
+#ansible-playbook -f 8 -i/tmp/inventory_1 headshot.pb
+ansible-playbook -f 8 -i/tmp/inventory_2 headshot.pb
+
 

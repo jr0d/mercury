@@ -25,7 +25,7 @@ def chunk(l, n):
     """Yield successive n-sized chunks from l.
     """
     for i in range(0, len(l), n):
-        yield l[i:i+n]
+        yield l[i:i + n]
 
 
 def get_index(l, key, value):
@@ -54,7 +54,7 @@ def build_index_l(l, key):
     """
     our_dict = dict()
     for d in l:
-        if not key in d:
+        if key not in d:
             continue
         idx = d[key]
         if idx in our_dict:
@@ -71,20 +71,21 @@ def extract_tar_archive(tarball_path, extract_path):
     return cli.run(cmd)
 
 
-def download_tar_acrhive(url, download_path):
+def download_file(url, download_path):
     try:
         r = requests.get(url, stream=True, verify=False)
     except requests.RequestException as err:
         raise err
 
     with open(download_path, 'wb') as f:
-        for chunk in r.iter_content(1024 ** 2):
-            if chunk:
-                f.write(chunk)
+        for _chunk in r.iter_content(1024 ** 2):
+            if _chunk:
+                f.write(_chunk)
 
 
 def xml_to_dict(xml_str, xml_element):
     """ Convert xml to dict """
+
     def xml_to_dict_recursion(xml_object):
         dict_object = xml_object.__dict__
         if not dict_object:
@@ -92,10 +93,11 @@ def xml_to_dict(xml_str, xml_element):
         for key, value in dict_object.items():
             dict_object[key] = xml_to_dict_recursion(value)
         return dict_object
+
+    # noinspection PyUnresolvedReferences
     xml_obj = xml_objectify.fromstring(xml_str)
     xml_element_dict = []
     for i in xml_obj.findall("{0}".format(xml_element)):
         x = xml_to_dict_recursion(i)
         xml_element_dict.append(x)
     return xml_element_dict
-
