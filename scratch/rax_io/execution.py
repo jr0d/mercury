@@ -1,3 +1,5 @@
+import os
+import argparse
 import curses
 import json
 import time
@@ -29,9 +31,9 @@ def poll_tasks(job_query, interval=0.5):
             window.refresh()
             time.sleep(interval)
     curses.wrapper(draw)
+    print('Job ID: {}\n'.format(job_query.job_id))
     for task in job_query.tasks()['tasks']:
-        print('{} : {} , elapsed: {}, message: {}'.format(
-            task['mercury_id'][-6:],
+        print('{} , elapsed: {}, message: {}'.format(
             task['task_id'],
             int(task['time_completed'] - task['time_started']),
             task['message'],
@@ -60,10 +62,24 @@ def preprocessor_exec(target, instruction):
     _exec(target, instruction)
 
 
-if __name__ == '__main__':
-    execute(config.TARGET_QUERY, 'create_logical_drive', kwargs={
-        'adapter': 0,
-        'level': '6',
-        'drives': 'all'
-    })
+def configuration_from_yaml(path):
+    with open(path) as fp:
+        return yaml.load(fp)
 
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description="Execute mercury commands")
+    parser.add_argument('query', help="The target query")
+    parser.add_argument('instruction', help='Path to the instruction JSON')
+
+    namespace = parser.parse_args()
+
+    if os.path.isfile(namespace.instruction):
+        with open(namespace.instruction) as fp:
+            _instruction = json.load(fp)
+    else:
+        _instruction = json.loads(namespace.instruction)
+
+    _target = json.loads(namespace.query)
+
+    _exec(_target, _instruction)

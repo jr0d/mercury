@@ -1,0 +1,4 @@
+{
+  "method": "run",
+  "args": ["mkdir -p /mnt/press"]
+}

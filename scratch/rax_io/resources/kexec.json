@@ -1,19 +1,17 @@
 {
-  "query": {},
-  "instruction": {
-    "method": "kexec",
-    "kwargs": {
-      "kernel": "/tmp/vmlinuz",
-      "initrd": "/tmp/initrd",
-      "options": [
-        "ramdisk_size=750000",
-        "KCLIENTROOTFS=http://10.192.0.44/press/yolo/mercury-yolo7-kir.squashfs",
-        "env=mercury",
-        "console=tty0",
-        "biosdevname=0",
-        "debug"
-      ]
-    }
-
+  "method": "kexec",
+  "kwargs": {
+    "kernel": "/tmp/vmlinuz",
+    "initrd": "/tmp/initrd",
+    "options": [
+      "ramdisk_size=750000",
+      "KCLIENTROOTFS=http://10.192.0.44/press/yolo/mercury-yolo7-kir.squashfs",
+      "env=mercury",
+      "console=tty0",
+      "biosdevname=0",
+      "debug"
+    ]
   }
 }
+
+

@@ -39,6 +39,14 @@ if __name__ == '__main__':
     # }
     #
     # press_system(target, './press/centos_k8.yaml')
-    press_system_preprocessor(config.TARGET_QUERY,
-                              './press/centos_k8.yaml')
+
+    import argparse
+    parser = argparse.ArgumentParser(description="Execute mercury commands")
+    parser.add_argument('query', help="The target query")
+    parser.add_argument('configuration_path', help='Path press configuration')
+
+    namespace = parser.parse_args()
+
+    press_system_preprocessor(json.loads(namespace.query),
+                              namespace.configuration_path)
 

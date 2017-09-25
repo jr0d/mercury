@@ -1,0 +1,4 @@
+{
+  "method": "run",
+  "args": ["mount /dev/sda1 /mnt/press"]
+}

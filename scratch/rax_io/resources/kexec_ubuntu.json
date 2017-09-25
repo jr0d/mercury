@@ -1,0 +1,16 @@
+{
+  "method": "kexec",
+  "kwargs": {
+    "initrd": "/mnt/press/initrd.img-4.4.0-43-generic",
+    "kernel": "/mnt/press/vmlinuz-4.4.0-43-generic",
+    "options": [
+      "root=/dev/sda2",
+      "ro",
+      "biosdevname=1",
+      "net.ifnames=0",
+      "nomodeset"
+    ]
+  }
+}
+
+
