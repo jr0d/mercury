@@ -13,7 +13,7 @@ auth:
   users:
     root:
       home: /root
-      password: ball$$$$
+      password: super_secret_password
       password_options:
         encrypted: False
       authorized_keys:

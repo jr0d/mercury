@@ -27,9 +27,10 @@ def press_system_preprocessor(targets, path):
     instruction = {
         'preprocessor': 'press_static_assets',
         'template': template,
-        'assets': assets.generate_assets_for_targets()
+        'assets': assets.generate_assets_for_targets(targets)
     }
 
+    # print(instruction)
     execution.preprocessor_exec(targets, instruction)
 
 

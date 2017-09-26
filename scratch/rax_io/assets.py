@@ -1,14 +1,14 @@
-from mercury.client.inventory import InventoryComputers
+from mercury.client.rpc import ActiveComputers
 from rax_io import config
 
-inventory_api = InventoryComputers(config.MERCURY)
+active_api = ActiveComputers(config.MERCURY)
 
 HOSTNAME_TEMPLATE = 'demo{}.iad3.kir.kickstart.rackspace.com'
 
 
-def generate_assets_for_targets():
+def generate_assets_for_targets(targets):
     assets = {}
-    inventory = inventory_api.query(config.TARGET_QUERY, projection=['interfaces'])
+    inventory = active_api.query(targets, projection=['interfaces'])
     cnt = 1
     for computer in inventory['items']:
         data = {}
