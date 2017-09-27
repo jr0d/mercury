@@ -64,6 +64,10 @@ function demo_capabilities {
     python lex.py demo_capabilities
 }
 
+function demo_inventory {
+    python lex.py demo_inventory
+}
+
 function create_raid
 {
     python execution.py "$G9" resources/raid0_single_disk.json
@@ -74,16 +78,34 @@ function destroy_raid
     python execution.py "$G9" resources/clear_adapter_0.json
 }
 
+function get_raid
+{
+    query_inventory '{"active": {"$ne": null}, "dmi.sys_vendor": "HP"}' raid.configuration 1
+}
+
 function deploy
 {
+    echo 'Deploying'
     python press.py "$ALL_TARGETS" press/ubuntu_k8.yaml
+    
+    echo 'Mounting'
     python execution.py "$ALL_TARGETS" resources/mount_boot.json
+    
+    echo 'Kexec'
     python execution.py "$ALL_TARGETS" resources/kexec_ubuntu.json
 }
 
 function destroy
 {
     destroy_raid
+}
+
+function mcli {
+    python execution.py $1 $2
+}
+
+function jcat {
+    cat $1 | jq
 }
 
 echo "****   Don't forget to build your inventory          ****"
