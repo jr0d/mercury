@@ -17,13 +17,13 @@ from setuptools import setup
 
 setup(
     name='mercury-client',
-    version='0.0.1',
-    packages=['mercury'],
-    url='https://www.rackspace.com',
-    license='',
+    version='0.0.2.1',
+    packages=['mercury.client', 'mercury.mcli'],
+    url='http://www.mercurysoft.io',
+    license='Apache-2.0',
     author='Jared Rodriguez',
     author_email='jared.rodriguez@rackspace.com',
-    description='Throw away client',
+    description='Mercury Client libraries and CLI',
     install_requires=[
         'PyYAML',
         'requests'
