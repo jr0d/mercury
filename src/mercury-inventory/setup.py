@@ -17,13 +17,13 @@ from setuptools import setup
 
 setup(
     name='mercury-inventory',
-    version='0.0.1',
-    packages=['mercury'],
-    url='https://www.rackspace.com',
-    license='',
+    version='0.0.2.1',
+    packages=['mercury.inventory'],
+    url='http://www.mercurysoft.io',
+    license='Apache-2.0',
     author='Jared Rodriguez',
     author_email='jared.rodriguez@rackspace.com',
-    description='',
+    description='Mercury inventory controller',
     install_requires=[
         'msgpack-python',
         'pyzmq',
