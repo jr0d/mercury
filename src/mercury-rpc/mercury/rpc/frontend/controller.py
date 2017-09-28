@@ -45,7 +45,7 @@ class FrontEndController(StaticEndpointController):
         :param projection: A mongodb projection. https://goo.gl/kB2g26
         :return: A job object
         """
-        return mongo.serialize_object_id(
+        return self.prepare_for_serialization(
             await self.jobs_collection.find_one(
                 {'job_id': job_id}, projection=projection))
 

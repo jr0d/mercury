@@ -17,12 +17,10 @@
 import logging
 import os
 
-import requests
-
 from mercury.agent.capabilities import capability
-from mercury.agent.hardware.platform.platform_detection import is_dell
+from mercury.hardware.platform_detection import is_dell
 from mercury.common.exceptions import MercuryFirmwareException
-from mercury.common.helpers import extract_tar_archive, download_tar_acrhive, cli, xml_to_dict
+from mercury.common.helpers.util import extract_tar_archive, download_file, cli, xml_to_dict
 
 
 log = logging.getLogger(__name__)
@@ -224,7 +222,7 @@ def install_updates():
 
 @capability('dell_apply_bios_settings',
             description='Apply bios settings found in given file',
-            kwargs_name=['url'], serial=True,
+            kwarg_names=['url'], serial=True,
             dependency_callback=is_dell, timeout=600)
 def dell_apply_bios_settings(url=None):
     """
@@ -249,7 +247,7 @@ def dell_update_firmware(url, dry_run=False):
     """
     download_path = '/tmp/dell_firmware.tar.gz'
 
-    download_tar_acrhive(url, download_path)
+    download_file(url, download_path)
 
     result = extract_tar_archive(download_path, firmware_path)
     if result.returncode:
@@ -265,4 +263,3 @@ def dell_update_firmware(url, dry_run=False):
     reboot_required = install_updates()
     # TODO: Implement a reboot capability?
     return dict(result=dict(return_code=1, success=True, reboot_required=reboot_required))
-

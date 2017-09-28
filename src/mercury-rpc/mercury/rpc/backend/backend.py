@@ -23,7 +23,7 @@ from mercury.common.asyncio.mongo import get_connection
 from mercury.common.asyncio.transport import AsyncRouterReqService
 from mercury.common.asyncio.clients.inventory import InventoryClient as AsyncInventoryClient
 from mercury.common.clients.inventory import InventoryClient
-from mercury.rpc.active_asyncio import add_active_record, ping_loop
+from mercury.rpc.active_asyncio import add_active_record, ping_loop, stop_ping
 from mercury.rpc.backend.controller import BackendController
 from mercury.rpc.configuration import rpc_configuration, get_jobs_collection, get_tasks_collection
 from mercury.rpc.jobs.monitor import Monitor
@@ -31,9 +31,6 @@ from mercury.rpc.jobs.monitor import Monitor
 log = logging.getLogger(__name__)
 
 RPC_CONFIG_FILE = 'mercury-rpc.yaml'
-
-
-# TODO: Rewrite BackEndService as a general purpose message router
 
 
 class BackEndService(AsyncRouterReqService):
@@ -86,10 +83,10 @@ def configure_logging():
     # TODO: get these from the configuration
     logging.basicConfig(level=logging.DEBUG,
                         format='%(asctime)s : %(levelname)s - %(name)s - %(message)s')
-    logging.getLogger('mercury.rpc.ping').setLevel(logging.INFO)
-    logging.getLogger('mercury.rpc.ping2').setLevel(logging.INFO)
-    logging.getLogger('mercury.rpc.jobs.monitor').setLevel(logging.INFO)
-    logging.getLogger('mercury.rpc.active_asyncio').setLevel(logging.INFO)
+    logging.getLogger('mercury.rpc.ping').setLevel(logging.DEBUG)
+    logging.getLogger('mercury.rpc.ping2').setLevel(logging.DEBUG)
+    logging.getLogger('mercury.rpc.jobs.monitor').setLevel(logging.DEBUG)
+    logging.getLogger('mercury.rpc.active_asyncio').setLevel(logging.DEBUG)
 
 
 def rpc_backend_service():
@@ -104,7 +101,7 @@ def rpc_backend_service():
 
     # Create the event loop
     loop = zmq.asyncio.ZMQEventLoop()
-    # loop.set_debug(True)
+    loop.set_debug(True)
     asyncio.set_event_loop(loop)
 
     # Ready the DB
@@ -119,7 +116,7 @@ def rpc_backend_service():
     tasks_collection.create_index('ttl_time_completed', expireAfterSeconds=3600)
 
     # Inject the monitor loop
-    monitor = Monitor(jobs_collection, tasks_collection)
+    monitor = Monitor(jobs_collection, tasks_collection, loop=loop)
     asyncio.ensure_future(monitor.loop(), loop=loop)
 
     # Create a backend instance
@@ -131,16 +128,19 @@ def rpc_backend_service():
     asyncio.ensure_future(ping_loop(
         server.context, 30, 10, 2500, 5, .42, loop, inventory_router), loop=loop)
 
-    # Start main loop
     try:
         loop.run_until_complete(server.start())
     except KeyboardInterrupt:
-        pass
-    finally:
-        server.socket.close(0)
-        server.context.destroy()
+        log.info('Sending kill signals')
         monitor.kill()
+        stop_ping()
+    finally:
+        log.debug('Cleaning up...')
+        pending = asyncio.Task.all_tasks()
+        loop.run_until_complete(asyncio.gather(*pending))
 
+        # server.socket.close(0)
+        # server.context.destroy()
 
 if __name__ == '__main__':
     rpc_backend_service()

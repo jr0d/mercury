@@ -12,6 +12,12 @@ log = logging.getLogger(__name__)
 
 active_state = {}
 ping_queue = asyncio.Queue()
+stop_ping_loop = False
+
+
+def stop_ping():
+    global stop_ping_loop
+    stop_ping_loop = True
 
 
 def add_active_record(record):
@@ -111,6 +117,10 @@ async def ping_loop(ctx,
     inventory_client = InventoryClient(inventory_router_url)
 
     while True:
+        global stop_ping_loop
+        if stop_ping_loop:
+            log.info('Stopping ping loop')
+            break
         log.debug('Looking for work')
         now = time.time()
         for mercury_id, data in list(active_state.items()):  # copy to list because the list length could change

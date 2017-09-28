@@ -50,6 +50,8 @@ def inspect():
         if devices:
             set_driver_cache(driver, devices)
 
+    # TODO: Sort RAID drivers based on devices
+
     for inspector, f in late_inspectors:
         collected[inspector] = f(collected)
 
