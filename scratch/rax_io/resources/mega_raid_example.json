@@ -1,8 +1,0 @@
-{
-  "method": "megaraid_create_array",
-  "kwargs": {
-    "controller": "0",
-    "selection": "32:1,32:2,32:3,32:4,32:5,1I:1:6,1I:1:7,1I:1:8",
-    "raid": "10"
-  }
-}

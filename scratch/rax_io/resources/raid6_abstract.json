@@ -1,8 +1,0 @@
-{
-  "method": "create_logical_drive",
-  "kwargs": {
-    "adapter": 0,
-    "level": "6",
-    "drives": "all"
-  }
-}
