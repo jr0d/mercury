@@ -1,1 +1,1 @@
--e ../mercury-common/
+mercury-common

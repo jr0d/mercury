@@ -191,28 +191,15 @@ developed to minimize impact on overall network capacity.
 
 
 # Installation
+## Server
+Install the mercury-server meta-package from pip
 
-Each component contains a setup.py which is intended to be run with the `develop` option. This is due to an
-issue with the namespace implementation that prevents `install` from working. As such, mercury can only be 
-installed using the source distribution and has not yet been added to the python package index. 
+`$ pip install mercury-server`
 
-We currently have two paths forward to resolve this:
+This will pull in mercury-common, mercury-inventory, mercury-log, and mercury-rpc packages
 
-1) Remove the namespace, keep separate packages, and give them names like hg_<i>component</i>. For instance
-instead of using:
-
-    ```python
-    from mercury.common import mercury_id
-    ```
-    
-    We would use:
-    ```python
-    from hg_common import mercury_id
-    ```
-2) Create only *one* package, call it mercury. When installing mercury from pip, common, agent, and server code
-will be installed. The risk involved should be minimal, as most dependencies are pulled in from common. Our only
-concern is that the agent may require a heavy dependency foot print as we add support for more hardware devices.
-
+## Agent
+`$ pip install mercury-agent`
 
 See the [installation documentation](https://jr0d.github.io/mercury/installation.html) for full instructions on
 setting up a development environment
