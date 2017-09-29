@@ -17,7 +17,7 @@ import argparse
 import logging
 
 from mercury.agent.capabilities import runtime_capabilities
-from mercury.agent.configuration import agent_configuration
+from mercury.agent.configuration import agent_configuration, set_agent_configuration
 from mercury.agent.pong import spawn_pong_process
 from mercury.agent.register import get_dhcp_ip, register
 from mercury.agent.remote_logging import MercuryLogHandler
@@ -92,28 +92,48 @@ class Agent(object):
         agent_service.start()
 
 
-def _parse_args():
+def parse_args():
     parser = argparse.ArgumentParser(description='Mercury Agent')
+    parser.add_argument('-c', '--config-file', default=None, help='Path to agent configuration file')
+    parser.add_argument('-d', '--debug', default=False, action='store_true', help='Enable debug logging')
+    return parser.parse_args()
 
 
-def main():
+def setup_logging():
+    log_level = logging.getLevelName(agent_configuration['agent']['log_level'])
+    logging.basicConfig(level=log_level)
+    fh = logging.FileHandler(agent_configuration['agent']['log_file'])
 
-    # TODO: SERVICE BASE CLASS
-    logging.basicConfig(level=logging.DEBUG)
-    fh = logging.FileHandler('mercury-agent.log')
-    fh.setLevel(logging.DEBUG)
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    fh.setLevel(log_level)
+    formatter = logging.Formatter(agent_configuration['agent']['log_format'])
     fh.setFormatter(formatter)
+
     mercury_logger = logging.getLogger('mercury')
     mercury_logger.addHandler(fh)
-    mercury_logger.info('[prototype] starting agent')
+    mercury_logger.info('Starting Agent')
+
+    # Quiet these down
     logging.getLogger('mercury.agent.pong').setLevel(logging.ERROR)
     logging.getLogger('hpssa._cli').setLevel(logging.ERROR)
 
-    # TODO: CLEAN THIS UP
+    # Configure the remote logging handler
     mh = MercuryLogHandler(agent_configuration.get('remote', {}).get('log_service'))
     mercury_logger.addHandler(mh)
-    agent = Agent(agent_configuration, mh)
+
+    # Return this so that we can inject the mercury_id once we have it
+    return mh
+
+
+def merge_configuration(namespace):
+    set_agent_configuration(namespace)
+
+
+def main():
+    namespace = parse_args()
+    merge_configuration(namespace)
+
+    mercury_handler = setup_logging()
+    agent = Agent(agent_configuration, mercury_handler)
     agent.run('simple')
 
 

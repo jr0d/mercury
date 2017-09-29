@@ -1,10 +1,12 @@
 agent:
   service_bind_address: tcp://0.0.0.0:9003
-  capability_package_dir: ./packages
   pong_bind_address: tcp://0.0.0.0:9004
   rpc_port: 9003
   ping_port: 9004
   dhcp_ip_source: simple
+  log_file: mercury-agent.log
+  log_level: INFO
+  log_format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 
 remote:
   rpc_service: tcp://localhost:9002

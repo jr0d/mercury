@@ -62,3 +62,7 @@ target/
 
 # Ignore vim swap files.
 .*.sw*
+
+# Ignore configuration files
+mercury_agent.yaml
+mercury_inventory.yaml
