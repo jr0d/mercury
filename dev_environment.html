@@ -1,0 +1,246 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Building a Development Environment for Mercury &#8212; Mercury 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Installation" href="installation.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="building-a-development-environment-for-mercury">
+<h1>Building a Development Environment for Mercury<a class="headerlink" href="#building-a-development-environment-for-mercury" title="Permalink to this headline">¶</a></h1>
+<p>Here we will discuss setting up a development environment. We will cover steps
+and strategies for deploying natively on linux, running the agent in vagrant on OSX,
+and setting up a virtual network and virtual machine targets to test end to end provisioning.</p>
+<div class="section" id="get-the-code">
+<h2>Get The Code<a class="headerlink" href="#get-the-code" title="Permalink to this headline">¶</a></h2>
+<p>Like most open source projects, the mercury source code is available on github. Let&#8217;s
+start by cloning the repository.</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>$ git clone https://github.com/jr0d/mercury.git
+</pre></div>
+</div>
+<p>This will create a directory called mercury in your current working directory.</p>
+</div>
+<div class="section" id="install-python-3-6-and-virtualenv">
+<h2>Install Python 3.6 and virtualenv<a class="headerlink" href="#install-python-3-6-and-virtualenv" title="Permalink to this headline">¶</a></h2>
+<p>This process will very per your distribution. It is here for the uninitiated, if you already
+have a working python3.6 development environment, you can skip to the mercury install section.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">If you intend to skip the guided python-3.6 install process, ensure that gcc, gcc-c++, automake,
+autoconf, and python development headers are installed. They are require to build zeromq during
+the merucry install process</p>
+</div>
+<div class="section" id="enterprise-linux-7-centos-7">
+<h3>Enterprise Linux 7 / CentOS 7<a class="headerlink" href="#enterprise-linux-7-centos-7" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>yum install -y https://mirror.rackspace.com/ius/stable/CentOS/7/x86_64/ius-release-1.0-15.ius.centos7.noarch.rpm <span class="o">&amp;&amp;</span> <span class="se">\</span>
+yum install -y gcc gcc-c++ automake autoconf python36u python36u-devel python36u-pip <span class="o">&amp;&amp;</span> <span class="se">\</span>
+pip3.6 install virtualenv
+</pre></div>
+</div>
+</div>
+<div class="section" id="ubuntu-16-04">
+<h3>Ubuntu 16.04<a class="headerlink" href="#ubuntu-16-04" title="Permalink to this headline">¶</a></h3>
+<p>For python 3.6 (preferred)</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>apt-get update <span class="o">&amp;&amp;</span> <span class="se">\</span>
+apt-get -y install software-properties-common <span class="o">&amp;&amp;</span> <span class="se">\</span>
+add-apt-repository -y ppa:jonathonf/python-3.6 <span class="o">&amp;&amp;</span> <span class="se">\</span>
+apt-get update <span class="o">&amp;&amp;</span> <span class="se">\</span>
+apt-get -y install gcc g++ automake python3.6 python3.6-dev wget <span class="o">&amp;&amp;</span> <span class="se">\</span>
+wget https://bootstrap.pypa.io/get-pip.py -O - <span class="p">|</span> python3.6 <span class="o">&amp;&amp;</span> <span class="se">\</span>
+pip3.6 install virtualenv
+</pre></div>
+</div>
+<p>For python3.5, just install the python3.5-dev and python3.5-pip packages. Then:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>pip3 install virtualenv
+</pre></div>
+</div>
+</div>
+<div class="section" id="osx">
+<h3>OSX<a class="headerlink" href="#osx" title="Permalink to this headline">¶</a></h3>
+<p>I do not have an OSX machine to test this on, but I believe the following <cite>should</cite> work</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>brew install python3
+pip install virtualenv
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="installing-service-dependencies">
+<h2>Installing service dependencies<a class="headerlink" href="#installing-service-dependencies" title="Permalink to this headline">¶</a></h2>
+<p>Mercury utilizes mongodb for persistent storage and redis for distributed queuing. Install
+both of these services from your distributions package management repositories. Ensure that
+both mongodb and redis are running locally before proceeding.</p>
+</div>
+<div class="section" id="create-a-virtual-environment">
+<h2>Create a virtual environment<a class="headerlink" href="#create-a-virtual-environment" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>$ mkdir ~/.virtualenvs
+$ virtualenv -p<span class="sb">`</span>which python3.6<span class="sb">`</span> ~/.virtualenvs/mercury
+</pre></div>
+</div>
+<p>Now activate the virtual environment.</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>$ <span class="nb">source</span> ~/.virtualenvs/mercury/bin/activate
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">You will need to activate the virtual environment whenever you are running a mercury service.
+To make virtualenv management easier, consider using
+<a class="reference external" href="http://virtualenvwrapper.readthedocs.io/en/latest/install.html">virtualenvwrapper</a> or
+<a class="reference external" href="https://docs.python.org/3/library/venv.html">pyvenv</a>.</p>
+</div>
+</div>
+<div class="section" id="installing-mercury-services">
+<h2>Installing Mercury Services<a class="headerlink" href="#installing-mercury-services" title="Permalink to this headline">¶</a></h2>
+<p>Mercury implements a micro-services architecture. This allows us to deploy and scale components
+independently. Unfortunately, such an architecture slightly complicates the development process
+when compared to a monolithic application. Instead of only installing and running a single service
+element, we instead install and run several components.</p>
+<p>The first component is the mercury-common package. This package, as the name implies, contains
+common libraries used by two or more discrete components. Following common, are the mercury-inventory,
+mercury-log, and mercury-rpc packages.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The mercury-agent package depends heavily on the linux sysfs ABI and should only be installed on
+linux hosts. If you are developing on MacOS, this poses a problem. Fortunately, this problem is
+easily solved using Vagrant, Docker, or by spinning up a vanilla VM. More on this later.</p>
+</div>
+<p>Each mercury package contains a <cite>setup.py</cite> which we will run with the <cite>develop</cite> argument.</p>
+<p>From the mercury repository root</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nb">pushd</span> src/mercury-common <span class="o">&amp;&amp;</span> <span class="se">\</span>
+python setup.py develop <span class="o">&amp;&amp;</span> <span class="se">\</span>
+<span class="nb">popd</span> <span class="o">&amp;&amp;</span> <span class="se">\</span>
+<span class="nb">pushd</span> src/mercury-inventory <span class="o">&amp;&amp;</span> <span class="se">\</span>
+python setup.py develop <span class="o">&amp;&amp;</span> <span class="se">\</span>
+<span class="nb">popd</span> <span class="o">&amp;&amp;</span> <span class="se">\</span>
+<span class="nb">pushd</span> src/mercury-rpc <span class="o">&amp;&amp;</span> <span class="se">\</span>
+python setup.py develop <span class="o">&amp;&amp;</span> <span class="se">\</span>
+<span class="nb">popd</span> <span class="o">&amp;&amp;</span> <span class="se">\</span>
+<span class="nb">pushd</span> src/mercury-log <span class="o">&amp;&amp;</span> <span class="se">\</span>
+python setup.py develop <span class="o">&amp;&amp;</span> <span class="se">\</span>
+<span class="nb">popd</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="creating-the-configuration-files">
+<h2>Creating the Configuration Files<a class="headerlink" href="#creating-the-configuration-files" title="Permalink to this headline">¶</a></h2>
+<p>All mercury services are configured using a YAML configuration file. Included with each source is a
+sample file. The files are already ready for local development for the most part, so we only need
+to copy them to a location mercury scans. By default, mercury scans the following directories:</p>
+<ul class="simple">
+<li><cite>.</cite> (The current working directory)</li>
+<li>~/.mercury</li>
+<li>/etc/mercury</li>
+</ul>
+</div>
+<div class="section" id="references">
+<h2>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://www.marinamele.com/2014/07/install-python3-on-mac-os-x-and-use-virtualenv-and-virtualenvwrapper.html">Installing python on OSX</a>.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Building a Development Environment for Mercury</a><ul>
+<li><a class="reference internal" href="#get-the-code">Get The Code</a></li>
+<li><a class="reference internal" href="#install-python-3-6-and-virtualenv">Install Python 3.6 and virtualenv</a><ul>
+<li><a class="reference internal" href="#enterprise-linux-7-centos-7">Enterprise Linux 7 / CentOS 7</a></li>
+<li><a class="reference internal" href="#ubuntu-16-04">Ubuntu 16.04</a></li>
+<li><a class="reference internal" href="#osx">OSX</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#installing-service-dependencies">Installing service dependencies</a></li>
+<li><a class="reference internal" href="#create-a-virtual-environment">Create a virtual environment</a></li>
+<li><a class="reference internal" href="#installing-mercury-services">Installing Mercury Services</a></li>
+<li><a class="reference internal" href="#creating-the-configuration-files">Creating the Configuration Files</a></li>
+<li><a class="reference internal" href="#references">References</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="installation.html" title="previous chapter">Installation</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/dev_environment.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Jared Rodriguez.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="_sources/dev_environment.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
