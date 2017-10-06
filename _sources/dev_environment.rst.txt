@@ -18,6 +18,13 @@ start by cloning the repository.
 
 This will create a directory called mercury in your current working directory.
 
+Also, we will probably want to interact with mercury using the HTTP API, so be sure to clone this repository as
+well:
+
+.. code-block:: bash
+
+    $ git clone https://github.com/jr0d/mercury_api.git
+
 
 Install Python 3.6 and virtualenv
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -125,7 +132,7 @@ mercury-log, and mercury-rpc packages.
     linux hosts. If you are developing on MacOS, this poses a problem. Fortunately, this problem is
     easily solved using Vagrant, Docker, or by spinning up a vanilla VM. More on this later.
 
-Each mercury package contains a `setup.py` which we will run with the `develop` argument.
+Each mercury package contains a *setup.py* which we will run with the *develop* argument.
 
 
 From the mercury repository root
@@ -146,6 +153,12 @@ From the mercury repository root
     popd
 
 
+If you are installing the HTTP API, make sure to install that too
+
+.. code-block:: bash
+    cd mercury-api && python setup.py develop
+
+
 Creating the Configuration Files
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -153,16 +166,67 @@ All mercury services are configured using a YAML configuration file. Included wi
 sample file. The files are already ready for local development for the most part, so we only need
 to copy them to a location mercury scans. By default, mercury scans the following directories:
 
-* `.` (The current working directory)
+* . (The current working directory)
 * ~/.mercury
 * /etc/mercury
 
+.. note::
+
+    that once the **find_configuration()** function *finds* the configuration file it is looking for,
+    the loop breaks. So, if you happen to have a configuration file in your local directory, it will
+    ignore the configuration file in /etc/mercury, for instance.
+
+For easy use, we will be populating our configuration files in our home directory, **~/.mercury**. Keep in mind,
+Mercury is under heavy development, so watch for changes to the configuration file samples when pulling master; making
+sure to update your local copies when necessary.
+
+From the mercury repository root:
+
+.. code-block:: bash
+
+    mkdir -p ~/.mercury && \
+    for _package in mercury-inventory mercury-rpc mercury-log; \
+    do cp src/${_package}/${_package}-sample.yaml ~/.mercury/${_package}.yaml; done
 
 
+Running the Services
+~~~~~~~~~~~~~~~~~~~~
 
+I am currently designing the service launcher and CLI for the inventory and backend components. Once implemented, this
+process, which requires us to launch each service directly by calling *x/server.py*; **will go away**. For now, this
+is what we have.
 
+The services we need to launch are located in the mercury-inventory, mercury-rpc, and mercury-log packages. In addition
+to these, we probably want to start the API bottle service as well.
 
+* mercury-inventory
 
+  * Inventory Service | *python src/mercury-inventory/mercury/inventory/server.py*
+
+* mercury-rpc
+
+  * Front End ZeroMQ service | *python src/mercury-rpc/mercury/rpc/frontend/frontend.py*
+  * Back End ZeroMQ service  | *python src/mercury-rpc/mercury/rpc/backend/backend.py*
+  * Workers service          | *python src/mercury-rpc/mercury/rpc/workers/worker.py*
+
+* mercury-log
+
+  * Logging service | *python src/mercury-log/log_service/server.py*
+
+* mercury-api
+
+  * Bottle API service | *python mercury-api/mercury_api/frontend.py*
+
+With an IDE, such as pycharm, I typically create a profile for each service launcher. How you start these services
+is up to you. You can use the tmux start script (after modifying it) provided in the scripts directory if you are
+comfortable with tmux.
+
+Once these services are running, we are ready to connect an agent to the backend.
+
+Running the Agent
+~~~~~~~~~~~~~~~~~
+
+TBC
 
 
 References

@@ -56,6 +56,11 @@ start by cloning the repository.</p>
 </pre></div>
 </div>
 <p>This will create a directory called mercury in your current working directory.</p>
+<p>Also, we will probably want to interact with mercury using the HTTP API, so be sure to clone this repository as
+well:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>$ git clone https://github.com/jr0d/mercury_api.git
+</pre></div>
+</div>
 </div>
 <div class="section" id="install-python-3-6-and-virtualenv">
 <h2>Install Python 3.6 and virtualenv<a class="headerlink" href="#install-python-3-6-and-virtualenv" title="Permalink to this headline">¶</a></h2>
@@ -140,7 +145,7 @@ mercury-log, and mercury-rpc packages.</p>
 linux hosts. If you are developing on MacOS, this poses a problem. Fortunately, this problem is
 easily solved using Vagrant, Docker, or by spinning up a vanilla VM. More on this later.</p>
 </div>
-<p>Each mercury package contains a <cite>setup.py</cite> which we will run with the <cite>develop</cite> argument.</p>
+<p>Each mercury package contains a <em>setup.py</em> which we will run with the <em>develop</em> argument.</p>
 <p>From the mercury repository root</p>
 <div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nb">pushd</span> src/mercury-common <span class="o">&amp;&amp;</span> <span class="se">\</span>
 python setup.py develop <span class="o">&amp;&amp;</span> <span class="se">\</span>
@@ -156,6 +161,7 @@ python setup.py develop <span class="o">&amp;&amp;</span> <span class="se">\</sp
 <span class="nb">popd</span>
 </pre></div>
 </div>
+<p>If you are installing the HTTP API, make sure to install that too</p>
 </div>
 <div class="section" id="creating-the-configuration-files">
 <h2>Creating the Configuration Files<a class="headerlink" href="#creating-the-configuration-files" title="Permalink to this headline">¶</a></h2>
@@ -163,10 +169,61 @@ python setup.py develop <span class="o">&amp;&amp;</span> <span class="se">\</sp
 sample file. The files are already ready for local development for the most part, so we only need
 to copy them to a location mercury scans. By default, mercury scans the following directories:</p>
 <ul class="simple">
-<li><cite>.</cite> (The current working directory)</li>
+<li>. (The current working directory)</li>
 <li>~/.mercury</li>
 <li>/etc/mercury</li>
 </ul>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">that once the <strong>find_configuration()</strong> function <em>finds</em> the configuration file it is looking for,
+the loop breaks. So, if you happen to have a configuration file in your local directory, it will
+ignore the configuration file in /etc/mercury, for instance.</p>
+</div>
+<p>For easy use, we will be populating our configuration files in our home directory, <strong>~/.mercury</strong>. Keep in mind,
+Mercury is under heavy development, so watch for changes to the configuration file samples when pulling master; making
+sure to update your local copies when necessary.</p>
+<p>From the mercury repository root:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>mkdir -p ~/.mercury <span class="o">&amp;&amp;</span> <span class="se">\</span>
+<span class="k">for</span> _package in mercury-inventory mercury-rpc mercury-log<span class="p">;</span> <span class="se">\</span>
+<span class="k">do</span> cp src/<span class="si">${</span><span class="nv">_package</span><span class="si">}</span>/<span class="si">${</span><span class="nv">_package</span><span class="si">}</span>-sample.yaml ~/.mercury/<span class="si">${</span><span class="nv">_package</span><span class="si">}</span>.yaml<span class="p">;</span> <span class="k">done</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="running-the-services">
+<h2>Running the Services<a class="headerlink" href="#running-the-services" title="Permalink to this headline">¶</a></h2>
+<p>I am currently designing the service launcher and CLI for the inventory and backend components. Once implemented, this
+process, which requires us to launch each service directly by calling <em>x/server.py</em>; <strong>will go away</strong>. For now, this
+is what we have.</p>
+<p>The services we need to launch are located in the mercury-inventory, mercury-rpc, and mercury-log packages. In addition
+to these, we probably want to start the API bottle service as well.</p>
+<ul class="simple">
+<li>mercury-inventory<ul>
+<li>Inventory Service | <em>python src/mercury-inventory/mercury/inventory/server.py</em></li>
+</ul>
+</li>
+<li>mercury-rpc<ul>
+<li>Front End ZeroMQ service | <em>python src/mercury-rpc/mercury/rpc/frontend/frontend.py</em></li>
+<li>Back End ZeroMQ service  | <em>python src/mercury-rpc/mercury/rpc/backend/backend.py</em></li>
+<li>Workers service          | <em>python src/mercury-rpc/mercury/rpc/workers/worker.py</em></li>
+</ul>
+</li>
+<li>mercury-log<ul>
+<li>Logging service | <em>python src/mercury-log/log_service/server.py</em></li>
+</ul>
+</li>
+<li>mercury-api<ul>
+<li>Bottle API service | <em>python mercury-api/mercury_api/frontend.py</em></li>
+</ul>
+</li>
+</ul>
+<p>With an IDE, such as pycharm, I typically create a profile for each service launcher. How you start these services
+is up to you. You can use the tmux start script (after modifying it) provided in the scripts directory if you are
+comfortable with tmux.</p>
+<p>Once these services are running, we are ready to connect an agent to the backend.</p>
+</div>
+<div class="section" id="running-the-agent">
+<h2>Running the Agent<a class="headerlink" href="#running-the-agent" title="Permalink to this headline">¶</a></h2>
+<p>TBC</p>
 </div>
 <div class="section" id="references">
 <h2>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h2>
@@ -194,6 +251,8 @@ to copy them to a location mercury scans. By default, mercury scans the followin
 <li><a class="reference internal" href="#create-a-virtual-environment">Create a virtual environment</a></li>
 <li><a class="reference internal" href="#installing-mercury-services">Installing Mercury Services</a></li>
 <li><a class="reference internal" href="#creating-the-configuration-files">Creating the Configuration Files</a></li>
+<li><a class="reference internal" href="#running-the-services">Running the Services</a></li>
+<li><a class="reference internal" href="#running-the-agent">Running the Agent</a></li>
 <li><a class="reference internal" href="#references">References</a></li>
 </ul>
 </li>
