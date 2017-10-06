@@ -26,7 +26,11 @@ DEFAULT_SEARCH_DIRS = ['.', '~/.mercury', '/etc/mercury']
 
 
 def find_config(filename, dirs=None):
-    """Searches for configuration files.
+    """Searches for configuration files. Setting the environment variable:
+        ```
+            MERCURY_SEARCH_DIRS
+        ```
+        can be used to extend the search paths as well
 
     :param filename: The filename of the configuration file.
     :param dirs: A list of filesystem directories to search for the
@@ -36,6 +40,9 @@ def find_config(filename, dirs=None):
         found.  None otherwise.
     """
     dirs = dirs or list() + DEFAULT_SEARCH_DIRS
+    if 'MERCURY_SEARCH_DIRS' in os.environ:
+        dirs = dirs + os.environ.get('MERCURY_SEARCH_DIRS')
+
     for directory in dirs:
         full_path = os.path.join(os.path.expanduser(directory), filename)
         if os.path.isfile(full_path):

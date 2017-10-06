@@ -16,7 +16,7 @@
 import logging
 
 from mercury.agent.capabilities import capability
-from mercury.agent.configuration import get_backend_client
+from mercury.agent.backend_client import get_backend_client
 from mercury.common.exceptions import MercuryUserError
 from mercury.hardware.drivers.drivers import driver_class_cache
 from mercury.inspector.inspect import global_device_info

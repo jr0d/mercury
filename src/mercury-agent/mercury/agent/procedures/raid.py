@@ -1,7 +1,7 @@
 import logging
 
 from mercury.agent.capabilities import capability
-from mercury.agent.configuration import get_backend_client
+from mercury.agent.backend_client import get_backend_client
 from mercury.hardware.drivers.drivers import get_subsystem_drivers
 from mercury.hardware.raid.abstraction.api import RAIDActions
 from mercury.inspector.inspect import global_device_info

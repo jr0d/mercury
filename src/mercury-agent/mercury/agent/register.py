@@ -36,9 +36,9 @@ def get_dhcp_ip(device_info, method='simple'):
     :param method: Possible methods are:
                     simple - Find the interface used for the default route, select this interfaces primary (first)
                     address
-                    udhcpc - A mercury_ghost and mercury.agent.inspector construct. The ghost (ephemeral) os that carries
-                    the agent and inspector codes contains a script that is called during udhcpc operation. This
-                    script will configured the interface as normal. In addition the script will write a file,
+                    udhcpc - A mercury_ghost and mercury.agent.inspector construct. The ghost (ephemeral) os that
+                    carries the agent and inspector codes contains a script that is called during udhcpc operation.
+                    This script will configured the interface as normal. In addition the script will write a file,
                     mercury_dhcp_info.sh, containing DHCP options recieved from the server (including the dhcp_ip).
     :return: ip address
     """

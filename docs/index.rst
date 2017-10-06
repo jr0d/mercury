@@ -51,3 +51,4 @@ Indices and tables
    introduction
    inventory
    installation
+   dev_environment

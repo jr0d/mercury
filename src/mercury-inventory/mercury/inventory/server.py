@@ -34,6 +34,10 @@ class InventoryServer(transport.AsyncRouterReqService):
         return await self.dispatcher.dispatch(message)
 
 
+def main():
+    pass
+
+
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
     loop = zmq.asyncio.ZMQEventLoop()

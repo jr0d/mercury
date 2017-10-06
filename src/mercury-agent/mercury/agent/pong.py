@@ -113,6 +113,7 @@ def spawn_pong_process(bind_address):
     p.start()
     LOG.debug('pong service started: PID=%s' % p.pid)
 
+
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
     ps = PongService('tcp://0.0.0.0:9004')
