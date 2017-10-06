@@ -125,7 +125,7 @@ mercury-log, and mercury-rpc packages.
     linux hosts. If you are developing on MacOS, this poses a problem. Fortunately, this problem is
     easily solved using Vagrant, Docker, or by spinning up a vanilla VM. More on this later.
 
-Each mercury package contains a `setup.py` which we will run with the `develop` argument.
+Each mercury package contains a *setup.py* which we will run with the *develop* argument.
 
 
 From the mercury repository root
@@ -153,10 +153,27 @@ All mercury services are configured using a YAML configuration file. Included wi
 sample file. The files are already ready for local development for the most part, so we only need
 to copy them to a location mercury scans. By default, mercury scans the following directories:
 
-* `.` (The current working directory)
+* . (The current working directory)
 * ~/.mercury
 * /etc/mercury
 
+.. note::
+
+    that once the **find_configuration()** function *finds* the configuration file it is looking for,
+    the loop breaks. So, if you happen to have a configuration file in your local directory, it will
+    ignore the configuration file in /etc/mercury, for instance.
+
+For easy use, we will be populating our configuration files in our home directory, **~/.mercury**. Keep in mind,
+Mercury is under heavy development, so watch for changes to the configuration file samples when pulling master; making
+sure to update your local copies when necessary.
+
+From the mercury repository root:
+
+.. code-block:: bash
+
+    mkdir -p ~/.mercury && \
+    for _package in mercury-inventory mercury-rpc mercury-log; \
+    do cp src/$_package/*-sample.yaml ~/.mercury
 
 
 

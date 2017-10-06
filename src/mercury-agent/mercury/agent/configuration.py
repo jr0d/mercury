@@ -24,7 +24,7 @@ __all__ = ['AGENT_CONFIG_FILE', 'agent_configuration']
 log = logging.getLogger(__name__)
 
 # Helpers
-DEFAULT_AGENT_CONFIG_FILE = 'mercury_agent.yaml'
+DEFAULT_AGENT_CONFIG_FILE = 'mercury-agent.yaml'
 
 
 agent_configuration = {}

@@ -64,5 +64,8 @@ target/
 .*.sw*
 
 # Ignore configuration files
-mercury_agent.yaml
-mercury_inventory.yaml
+mercury-agent.yaml
+mercury-inventory.yaml
+mercury-log.yaml
+mercury-rpc.yaml
+
