@@ -1,0 +1,4 @@
+Inventory
+---------
+
+The inventory
