@@ -228,6 +228,14 @@ Running the Agent
 
 On linux, running the agent is as simple as running any other service.
 
+Step 1: Create the configuration file
+
+.. code-block:: bash
+
+    mkdir -p ~/.mercury && \
+    
+
+
 
 
 
