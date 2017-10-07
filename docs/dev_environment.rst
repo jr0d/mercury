@@ -97,8 +97,6 @@ Create a virtual environment
    $ virtualenv -p`which python3.6` ~/.virtualenvs/mercury
 
 
-
-
 Now activate the virtual environment.
 
 
@@ -120,8 +118,8 @@ Installing Mercury Services
 
 Mercury implements a micro-services architecture. This allows us to deploy and scale components
 independently. Unfortunately, such an architecture slightly complicates the development process
-when compared to a monolithic application. Instead of only installing and running a single service
-element, we instead install and run several components.
+when compared to a monolithic application. Instead of installing and running a single service
+element, we must install and run several components.
 
 The first component is the mercury-common package. This package, as the name implies, contains
 common libraries used by two or more discrete components. Following common, are the mercury-inventory,
@@ -130,12 +128,13 @@ mercury-log, and mercury-rpc packages.
 .. note::
     The mercury-agent package depends heavily on the linux sysfs ABI and should only be installed on
     linux hosts. If you are developing on MacOS, this poses a problem. Fortunately, this problem is
-    easily solved using Vagrant, Docker, or by spinning up a vanilla VM. More on this later.
+    easily solved using Vagrant, Docker (untested), or by spinning up a vanilla VM. More on this
+    later.
 
 Each mercury package contains a *setup.py* which we will run with the *develop* argument.
 
 
-From the mercury repository root
+From the mercury repository root:
 
 .. code-block:: bash
 
@@ -217,16 +216,19 @@ to these, we probably want to start the API bottle service as well.
 
   * Bottle API service | *python mercury-api/mercury_api/frontend.py*
 
-With an IDE, such as pycharm, I typically create a profile for each service launcher. How you start these services
-is up to you. You can use the tmux start script (after modifying it) provided in the scripts directory if you are
-comfortable with tmux.
+With an IDE, such as pycharm, I typically create a profile for each service launcher. How you start
+these services is up to you. There is a script provided in the scripts directory which will launch
+all services in separate tmux windows ( with the exception of the mercury_api, which exists in
+another repository ).
 
 Once these services are running, we are ready to connect an agent to the backend.
 
 Running the Agent
 ~~~~~~~~~~~~~~~~~
 
-TBC
+On linux, running the agent is as simple as running any other service.
+
+
 
 
 References
