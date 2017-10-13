@@ -20,23 +20,23 @@ from mercury.common.asyncio.mongo import get_connection
 from mercury.common.mongo import get_collection, serialize_object_id, deserialize_object_id
 from mercury.common.exceptions import EndpointError
 from mercury.inventory.db import InventoryDBController
-from mercury.inventory.configuration import inventory_configuration
 
 
-LOG = logging.getLogger(__name__)
+log = logging.getLogger(__name__)
 
 
 __all__ = ['InventoryController']
 
 
 class InventoryController(StaticEndpointController):
-    def __init__(self):
-        self.db_configuration = inventory_configuration.get('inventory', {}).get('db', {})
-        LOG.debug('DB Configuration: %s' % self.db_configuration)
+    def __init__(self, inventory_configuration):
+        self.inventory_configuration = inventory_configuration
+        self.db_configuration = self.inventory_configuration.get('inventory', {}).get('db', {})
+        log.debug('DB Configuration: %s' % self.db_configuration)
 
         db_name = self.db_configuration.get('name')
         if not db_name:
-            LOG.warning('DB name is not specified, using test')
+            log.warning('DB name is not specified, using test')
             db_name = 'test'
 
         connection = get_connection(

@@ -55,6 +55,7 @@ class Agent(object):
         self.backend = BackEndClient(self.rpc_backend_url)
 
     def run(self, dhcp_ip_method='simple'):
+        # TODO: Add other mechanisms for enumerating the devices public ip
         log.debug('Agent: %s, Pong: %s' % (self.agent_bind_address,
                                            self.pong_bind_address))
 
@@ -68,7 +69,15 @@ class Agent(object):
         spawn_pong_process(self.pong_bind_address)
 
         log.info('Registering device')
-        local_ip = get_dhcp_ip(device_info, method=dhcp_ip_method)
+        if self.local_config.get('local_ip'):
+            # This allows us to explicitly set the agent ip. This is useful for testing in environments which
+            # utilize containers which are not directly accessible via a discoverable ip address.
+            # This option will be implemented as a command line argument in the future.
+            local_ip = self.local_config['local_ip']
+        else:
+            local_ip = get_dhcp_ip(device_info, method=dhcp_ip_method)
+
+        # TODO: enumerate ipv6 addresses
         local_ipv6 = None
 
         register(self.backend, device_info, local_ip, local_ipv6, runtime_capabilities)

@@ -32,13 +32,16 @@ def find_config(filename, dirs=None):
         ```
         can be used to extend the search paths as well
 
-    :param filename: The filename of the configuration file.
+    :param filename: The configuration file path or a filename to search for
     :param dirs: A list of filesystem directories to search for the
         configuration file. Parameter defaults to None, which means a set
         of default locations will be searched.
     :returns: string or None -- The full path of the configuration file if
         found.  None otherwise.
     """
+    if os.path.isfile(filename):
+        return filename
+
     dirs = dirs or list() + DEFAULT_SEARCH_DIRS
     if 'MERCURY_SEARCH_DIRS' in os.environ:
         dirs = dirs + os.environ.get('MERCURY_SEARCH_DIRS')

@@ -18,33 +18,39 @@ import logging
 import zmq.asyncio
 
 from mercury.common.asyncio import dispatcher, transport
+from mercury.common.log import log_format
 from mercury.inventory.controller import InventoryController
+from mercury.inventory.configuration import get_inventory_configuration
 
 log = logging.getLogger(__name__)
 
 
 class InventoryServer(transport.AsyncRouterReqService):
-    def __init__(self, bind_address):
+    def __init__(self, bind_address, inventory_configuration):
         super(InventoryServer, self).__init__(bind_address)
 
-        inventory_controller = InventoryController()
+        inventory_controller = InventoryController(inventory_configuration)
         self.dispatcher = dispatcher.AsyncDispatcher(inventory_controller)
 
     async def process(self, message):
         return await self.dispatcher.dispatch(message)
 
 
-def main():
-    pass
+def main(bind_address='tcp://0.0.0.0:9000',
+         log_level='INFO',
+         asyncio_debug=False,
+         configuration_file=None):
+    logging.basicConfig(level=logging.getLevelName(log_level),
+                        format=log_format)
 
-
-if __name__ == '__main__':
-    logging.basicConfig(level=logging.DEBUG)
     loop = zmq.asyncio.ZMQEventLoop()
-    loop.set_debug(True)
+    loop.set_debug(asyncio_debug)
     asyncio.set_event_loop(loop)
 
-    s = InventoryServer('tcp://0.0.0.0:9000')
+    inventory_configuration = get_inventory_configuration(configuration_file)
+
+    s = InventoryServer(bind_address=bind_address,
+                        inventory_configuration=inventory_configuration)
 
     try:
         loop.run_until_complete(s.start())
@@ -53,3 +59,7 @@ if __name__ == '__main__':
     finally:
         s.socket.close(0)
         s.context.destroy()
+
+
+if __name__ == '__main__':
+    main()

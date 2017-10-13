@@ -16,7 +16,10 @@
 from mercury.common.configuration import get_configuration
 
 
-__all__ = ['INVENTORY_CONFIG_FILE', 'inventory_configuration']
+__all__ = ['INVENTORY_CONFIG_FILE']
 
 INVENTORY_CONFIG_FILE = 'mercury-inventory.yaml'
-inventory_configuration = get_configuration(INVENTORY_CONFIG_FILE)
+
+
+def get_inventory_configuration(explicit_configuration=None):
+    return get_configuration(explicit_configuration or INVENTORY_CONFIG_FILE)
