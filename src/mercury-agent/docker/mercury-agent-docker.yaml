@@ -1,0 +1,44 @@
+agent:
+  service_bind_address: tcp://0.0.0.0:9003
+  pong_bind_address: tcp://0.0.0.0:9004
+  rpc_port: 9003
+  ping_port: 9004
+  dhcp_ip_source: simple
+  log_file: mercury-agent.log
+  log_level: INFO
+  log_format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  local_ip: 127.0.0.1
+remote:
+  rpc_service: tcp://docker.for.mac.localhost:9002
+  log_service: tcp://docker.for.mac.localhost:9006
+
+hardware:
+  raid:
+    storcli_path: storcli64
+    hpssacli_path: hpssacli
+
+press_environment:
+  paths:
+    parted: /usr/bin/parted
+  plugins:
+    scan_directories:
+      - ./press_plugins/plugins
+      - /home/jared/git/rax-press-plugins/rax_press_plugins
+    enabled:
+      - mercury
+      - server_management
+  press:
+    deployment_root: /mnt/press
+    staging_directory: /.press
+
+    layout:
+      use_fibre_channel: False
+      loop_only: True
+
+    partition_table:
+      partition_start: 1048576,
+      alignment: 1048576
+
+    volume_group:
+      pe_size: 4MiB
+
