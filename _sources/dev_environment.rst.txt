@@ -127,7 +127,7 @@ You can see that they are running with the *ps* command
     452e3997d683        redis                  "docker-entrypoint..."   3 minutes ago       Up 3 minutes        0.0.0.0:6379->6379/tcp             pensive_poincare
     b639809a68ff        mongo                  "docker-entrypoint..."   4 minutes ago       Up 4 minutes        0.0.0.0:27017->27017/tcp           zen_albattani
 
-When you are done with them
+When you are done with them, stop them with the kill command
 
 .. code-block:: bash
 
@@ -135,6 +135,7 @@ When you are done with them
     452e3997d683
     $  ~ : docker kill b639809a68ff
     b639809a68ff
+
 
 
 Create a virtual environment
