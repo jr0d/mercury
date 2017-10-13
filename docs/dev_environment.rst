@@ -72,20 +72,70 @@ For python3.5, just install the python3.5-dev and python3.5-pip packages. Then:
 OSX
 ____
 
-I do not have an OSX machine to test this on, but I believe the following `should` work
+Homebrew python3 works like a charm
 
 .. code-block:: bash
 
     brew install python3
-    pip install virtualenv
+    pip3 install virtualenv
 
 
 Installing service dependencies
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Mercury utilizes mongodb for persistent storage and redis for distributed queuing. Install
 both of these services from your distributions package management repositories. Ensure that
 both mongodb and redis are running locally before proceeding.
+
+
+Using docker to run mongodb and redis
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+On mac, the easiest way to get a development environment up and running is to launch mongo and redis in ephemeral
+containers.
+
+.. note::
+
+    Any data that is added to the services running within the container is lost when the container exits. This is
+    fine for mercury development, which does not require any table bootstrapping. If you would like to preserve
+    your data for more than one session, take a look at the docker
+    `volume <https://docs.docker.com/engine/reference/commandline/volume_create/>`_ command
+
+Docker hub provides first party mongo and redis library images. To run both services, use the following commands:
+
+.. code-block:: bash
+
+    $ docker run -p 27017:27017 mongo
+    $ docker run -p 6379:6379 redis
+
+This will launch both services in their own containers and forward their service port to your local environment.
+To run the commands in the background, use the *-d* flag:
+
+.. code-block:: bash
+
+    $  ~ : docker run -dp 27017:27017 mongo
+    b639809a68ff7525869ce799605f0001251169cb4e65407b56712471e8389cb8  <-- The container id
+    $  ~ : docker run -dp 6379:6379 redis
+    452e3997d6833df75dea1aad2cc966975605fa4d17a080e3e5f38710fa7a5433
+
+You can see that they are running with the *ps* command
+
+.. code-block:: bash
+
+    $  ~ : docker ps
+    CONTAINER ID        IMAGE                  COMMAND                  CREATED             STATUS              PORTS                              NAMES
+    452e3997d683        redis                  "docker-entrypoint..."   3 minutes ago       Up 3 minutes        0.0.0.0:6379->6379/tcp             pensive_poincare
+    b639809a68ff        mongo                  "docker-entrypoint..."   4 minutes ago       Up 4 minutes        0.0.0.0:27017->27017/tcp           zen_albattani
+
+When you are done with them, stop them with the kill command
+
+.. code-block:: bash
+
+    $  ~ : docker kill 452e3997d683
+    452e3997d683
+    $  ~ : docker kill b639809a68ff
+    b639809a68ff
+
 
 
 Create a virtual environment
@@ -235,6 +285,9 @@ Step 1: Create the configuration file
     mkdir -p ~/.mercury && \
     
 
+
+Running the Agent in Docker on Mac
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 
