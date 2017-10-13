@@ -72,20 +72,69 @@ For python3.5, just install the python3.5-dev and python3.5-pip packages. Then:
 OSX
 ____
 
-I do not have an OSX machine to test this on, but I believe the following `should` work
+Homebrew python3 works like a charm
 
 .. code-block:: bash
 
     brew install python3
-    pip install virtualenv
+    pip3 install virtualenv
 
 
 Installing service dependencies
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Mercury utilizes mongodb for persistent storage and redis for distributed queuing. Install
 both of these services from your distributions package management repositories. Ensure that
 both mongodb and redis are running locally before proceeding.
+
+
+Using docker to run mongodb and redis
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+On mac, the easiest way to get a development environment up and running is to launch mongo and redis in ephemeral
+containers.
+
+.. note::
+
+    Any data that is added to the services running within the container is lost when the container exits. This is
+    fine for mercury development, which does not require any table bootstrapping. If you would like to preserve
+    your data for more than one session, take a look at the docker
+    `volume <https://docs.docker.com/engine/reference/commandline/volume_create/>`_ command
+
+Docker hub provides first party mongo and redis library images. To run both services, use the following commands:
+
+.. code-block:: bash
+
+    $ docker run -p 27017:27017 mongo
+    $ docker run -p 6379:6379 redis
+
+This will launch both services in their own containers and forward their service port to your local environment.
+To run the commands in the background, use the *-d* flag:
+
+.. code-block:: bash
+
+    $  ~ : docker run -dp 27017:27017 mongo
+    b639809a68ff7525869ce799605f0001251169cb4e65407b56712471e8389cb8  <-- The container id
+    $  ~ : docker run -dp 6379:6379 redis
+    452e3997d6833df75dea1aad2cc966975605fa4d17a080e3e5f38710fa7a5433
+
+You can see that they are running with the *ps* command
+
+.. code-block:: bash
+
+    $  ~ : docker ps
+    CONTAINER ID        IMAGE                  COMMAND                  CREATED             STATUS              PORTS                              NAMES
+    452e3997d683        redis                  "docker-entrypoint..."   3 minutes ago       Up 3 minutes        0.0.0.0:6379->6379/tcp             pensive_poincare
+    b639809a68ff        mongo                  "docker-entrypoint..."   4 minutes ago       Up 4 minutes        0.0.0.0:27017->27017/tcp           zen_albattani
+
+When you are done with them
+
+.. code-block:: bash
+
+    $  ~ : docker kill 452e3997d683
+    452e3997d683
+    $  ~ : docker kill b639809a68ff
+    b639809a68ff
 
 
 Create a virtual environment
@@ -95,8 +144,6 @@ Create a virtual environment
 
    $ mkdir ~/.virtualenvs
    $ virtualenv -p`which python3.6` ~/.virtualenvs/mercury
-
-
 
 
 Now activate the virtual environment.
@@ -120,8 +167,8 @@ Installing Mercury Services
 
 Mercury implements a micro-services architecture. This allows us to deploy and scale components
 independently. Unfortunately, such an architecture slightly complicates the development process
-when compared to a monolithic application. Instead of only installing and running a single service
-element, we instead install and run several components.
+when compared to a monolithic application. Instead of installing and running a single service
+element, we must install and run several components.
 
 The first component is the mercury-common package. This package, as the name implies, contains
 common libraries used by two or more discrete components. Following common, are the mercury-inventory,
@@ -130,12 +177,13 @@ mercury-log, and mercury-rpc packages.
 .. note::
     The mercury-agent package depends heavily on the linux sysfs ABI and should only be installed on
     linux hosts. If you are developing on MacOS, this poses a problem. Fortunately, this problem is
-    easily solved using Vagrant, Docker, or by spinning up a vanilla VM. More on this later.
+    easily solved using Vagrant, Docker (untested), or by spinning up a vanilla VM. More on this
+    later.
 
 Each mercury package contains a *setup.py* which we will run with the *develop* argument.
 
 
-From the mercury repository root
+From the mercury repository root:
 
 .. code-block:: bash
 
@@ -172,9 +220,9 @@ to copy them to a location mercury scans. By default, mercury scans the followin
 
 .. note::
 
-    that once the **find_configuration()** function *finds* the configuration file it is looking for,
-    the loop breaks. So, if you happen to have a configuration file in your local directory, it will
-    ignore the configuration file in /etc/mercury, for instance.
+    Once the **find_configuration()** function *finds* the configuration file it is looking for,
+    the loop breaks. If you happen to have a configuration file in your local directory and in /etc/mercury,
+    the configuration in /etc/mercury will be ignored.
 
 For easy use, we will be populating our configuration files in our home directory, **~/.mercury**. Keep in mind,
 Mercury is under heavy development, so watch for changes to the configuration file samples when pulling master; making
@@ -217,16 +265,30 @@ to these, we probably want to start the API bottle service as well.
 
   * Bottle API service | *python mercury-api/mercury_api/frontend.py*
 
-With an IDE, such as pycharm, I typically create a profile for each service launcher. How you start these services
-is up to you. You can use the tmux start script (after modifying it) provided in the scripts directory if you are
-comfortable with tmux.
+With an IDE, such as pycharm, I typically create a profile for each service launcher. How you start
+these services is up to you. There is a script provided in the scripts directory which will launch
+all services in separate tmux windows ( with the exception of the mercury_api, which exists in
+another repository ).
 
 Once these services are running, we are ready to connect an agent to the backend.
 
 Running the Agent
 ~~~~~~~~~~~~~~~~~
 
-TBC
+On linux, running the agent is as simple as running any other service.
+
+Step 1: Create the configuration file
+
+.. code-block:: bash
+
+    mkdir -p ~/.mercury && \
+    
+
+
+Running the Agent in Docker on Mac
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
 
 
 References

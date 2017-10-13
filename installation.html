@@ -1,16 +1,13 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
     <title>Installation &#8212; Mercury 0.1 documentation</title>
-    
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
@@ -24,7 +21,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Building a Development Environment for Mercury" href="dev_environment.html" />
@@ -36,7 +33,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
   </head>
-  <body role="document">
+  <body>
   
 
     <div class="document">
@@ -86,12 +83,12 @@ This method will be implemented by all Actions classes.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>adapter_info</strong> &#8211; Transformed adapter data</li>
-<li><strong>level</strong> (<em>str</em>) &#8211; A supported RAID level</li>
-<li><strong>drives</strong> &#8211; A zero based, expanded list of participating drive indexes.
+<li><strong>adapter_info</strong> – Transformed adapter data</li>
+<li><strong>level</strong> (<em>str</em>) – A supported RAID level</li>
+<li><strong>drives</strong> – A zero based, expanded list of participating drive indexes.
 Should be None if array is specified</li>
-<li><strong>size</strong> &#8211; A python-size object or None (maximum)</li>
-<li><strong>array</strong> &#8211; The index of the existing array (with sufficient free space) being targeted
+<li><strong>size</strong> – A python-size object or None (maximum)</li>
+<li><strong>array</strong> – The index of the existing array (with sufficient free space) being targeted
 Should be None if drives are specified</li>
 </ul>
 </td>
@@ -111,9 +108,9 @@ Should be None if drives are specified</li>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>adapter</strong> (<em>int</em>) &#8211; </li>
-<li><strong>level</strong> (<em>str</em>) &#8211; 0, 1, 5, 6, 10, 1+0, 50, 60</li>
-<li><strong>drives</strong> &#8211; <p>drives should be referenced as 0 based comma separated indexes, ranges,
+<li><strong>adapter</strong> (<em>int</em>) – </li>
+<li><strong>level</strong> (<em>str</em>) – 0, 1, 5, 6, 10, 1+0, 50, 60</li>
+<li><strong>drives</strong> – <p>drives should be referenced as 0 based comma separated indexes, ranges,
 or a combination of both. For example:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span>
     <span class="ow">or</span>
@@ -127,7 +124,7 @@ or a combination of both. For example:</p>
 adapter are not part of the array. <cite>unassigned</cite> will select all drives not currently
 members of an array or participating as spares</p>
 </li>
-<li><strong>size</strong> &#8211; Size can be specified in bytes (int), a string using SI or IEC standards,</li>
+<li><strong>size</strong> – Size can be specified in bytes (int), a string using SI or IEC standards,</li>
 </ul>
 </td>
 </tr>
@@ -147,12 +144,12 @@ all available space will be used
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>adapter</strong> &#8211; </li>
-<li><strong>adapter_info</strong> &#8211; </li>
-<li><strong>level</strong> &#8211; </li>
-<li><strong>array</strong> &#8211; </li>
-<li><strong>converted_size</strong> &#8211; </li>
-<li><strong>percent_string</strong> &#8211; </li>
+<li><strong>adapter</strong> – </li>
+<li><strong>adapter_info</strong> – </li>
+<li><strong>level</strong> – </li>
+<li><strong>array</strong> – </li>
+<li><strong>converted_size</strong> – </li>
+<li><strong>percent_string</strong> – </li>
 </ul>
 </td>
 </tr>
@@ -171,12 +168,12 @@ all available space will be used
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>adapter</strong> &#8211; </li>
-<li><strong>adapter_info</strong> &#8211; </li>
-<li><strong>level</strong> &#8211; </li>
-<li><strong>drives</strong> &#8211; </li>
-<li><strong>converted_size</strong> &#8211; </li>
-<li><strong>percent_string</strong> &#8211; </li>
+<li><strong>adapter</strong> – </li>
+<li><strong>adapter_info</strong> – </li>
+<li><strong>level</strong> – </li>
+<li><strong>drives</strong> – </li>
+<li><strong>converted_size</strong> – </li>
+<li><strong>percent_string</strong> – </li>
 </ul>
 </td>
 </tr>
@@ -194,7 +191,7 @@ all available space will be used
 adapters to perform actions on. The abstraction uses indexes rather than vendor references.</p>
 <p>For instance, hpsa uses pci slot ids to specify adapters, onboard adapters will be 0,
 expansion cards will be 3 and 4, should they occupy pci-e slots 3 and 4 on the riser card.
-In order to &#8216;flatten&#8217; the interface, these cards will be accessed by enumeration:</p>
+In order to ‘flatten’ the interface, these cards will be accessed by enumeration:</p>
 <p>adapter0: slot0
 adapter1: slot3
 adapter2: slot4</p>
@@ -206,7 +203,7 @@ order. Talk to Jared R. about implementation details as he is soldiering on.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>adapter_index</strong> &#8211; The index of the adapter to populate configuration information</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>adapter_index</strong> – The index of the adapter to populate configuration information</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A dictionary representing the adapter</td>
 </tr>
@@ -287,8 +284,8 @@ See the create_logical_volume documentation for the full format
       &copy;2017, Jared Rodriguez.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.1</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
       |
       <a href="_sources/installation.rst.txt"

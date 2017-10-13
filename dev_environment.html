@@ -1,16 +1,13 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
     <title>Building a Development Environment for Mercury &#8212; Mercury 0.1 documentation</title>
-    
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
@@ -24,7 +21,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="prev" title="Installation" href="installation.html" />
@@ -35,7 +32,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
   </head>
-  <body role="document">
+  <body>
   
 
     <div class="document">
@@ -50,7 +47,7 @@ and strategies for deploying natively on linux, running the agent in vagrant on 
 and setting up a virtual network and virtual machine targets to test end to end provisioning.</p>
 <div class="section" id="get-the-code">
 <h2>Get The Code<a class="headerlink" href="#get-the-code" title="Permalink to this headline">¶</a></h2>
-<p>Like most open source projects, the mercury source code is available on github. Let&#8217;s
+<p>Like most open source projects, the mercury source code is available on github. Let’s
 start by cloning the repository.</p>
 <div class="highlight-bash"><div class="highlight"><pre><span></span>$ git clone https://github.com/jr0d/mercury.git
 </pre></div>
@@ -99,9 +96,9 @@ pip3.6 install virtualenv
 </div>
 <div class="section" id="osx">
 <h3>OSX<a class="headerlink" href="#osx" title="Permalink to this headline">¶</a></h3>
-<p>I do not have an OSX machine to test this on, but I believe the following <cite>should</cite> work</p>
+<p>Homebrew python3 works like a charm</p>
 <div class="highlight-bash"><div class="highlight"><pre><span></span>brew install python3
-pip install virtualenv
+pip3 install virtualenv
 </pre></div>
 </div>
 </div>
@@ -111,6 +108,45 @@ pip install virtualenv
 <p>Mercury utilizes mongodb for persistent storage and redis for distributed queuing. Install
 both of these services from your distributions package management repositories. Ensure that
 both mongodb and redis are running locally before proceeding.</p>
+</div>
+<div class="section" id="using-docker-to-run-mongodb-and-redis">
+<h2>Using docker to run mongodb and redis<a class="headerlink" href="#using-docker-to-run-mongodb-and-redis" title="Permalink to this headline">¶</a></h2>
+<p>On mac, the easiest way to get a development environment up and running is to launch mongo and redis in ephemeral
+containers.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Any data that is added to the services running within the container is lost when the container exits. This is
+fine for mercury development, which does not require any table bootstrapping. If you would like to preserve
+your data for more than one session, take a look at the docker
+<a class="reference external" href="https://docs.docker.com/engine/reference/commandline/volume_create/">volume</a> command</p>
+</div>
+<p>Docker hub provides first party mongo and redis library images. To run both services, use the following commands:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>$ docker run -p <span class="m">27017</span>:27017 mongo
+$ docker run -p <span class="m">6379</span>:6379 redis
+</pre></div>
+</div>
+<p>This will launch both services in their own containers and forward their service port to your local environment.
+To run the commands in the background, use the <em>-d</em> flag:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>$  ~ : docker run -dp <span class="m">27017</span>:27017 mongo
+b639809a68ff7525869ce799605f0001251169cb4e65407b56712471e8389cb8  &lt;-- The container id
+$  ~ : docker run -dp <span class="m">6379</span>:6379 redis
+452e3997d6833df75dea1aad2cc966975605fa4d17a080e3e5f38710fa7a5433
+</pre></div>
+</div>
+<p>You can see that they are running with the <em>ps</em> command</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>$  ~ : docker ps
+CONTAINER ID        IMAGE                  COMMAND                  CREATED             STATUS              PORTS                              NAMES
+452e3997d683        redis                  <span class="s2">&quot;docker-entrypoint...&quot;</span>   <span class="m">3</span> minutes ago       Up <span class="m">3</span> minutes        <span class="m">0</span>.0.0.0:6379-&gt;6379/tcp             pensive_poincare
+b639809a68ff        mongo                  <span class="s2">&quot;docker-entrypoint...&quot;</span>   <span class="m">4</span> minutes ago       Up <span class="m">4</span> minutes        <span class="m">0</span>.0.0.0:27017-&gt;27017/tcp           zen_albattani
+</pre></div>
+</div>
+<p>When you are done with them</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>$  ~ : docker <span class="nb">kill</span> 452e3997d683
+452e3997d683
+$  ~ : docker <span class="nb">kill</span> b639809a68ff
+b639809a68ff
+</pre></div>
+</div>
 </div>
 <div class="section" id="create-a-virtual-environment">
 <h2>Create a virtual environment<a class="headerlink" href="#create-a-virtual-environment" title="Permalink to this headline">¶</a></h2>
@@ -134,8 +170,8 @@ To make virtualenv management easier, consider using
 <h2>Installing Mercury Services<a class="headerlink" href="#installing-mercury-services" title="Permalink to this headline">¶</a></h2>
 <p>Mercury implements a micro-services architecture. This allows us to deploy and scale components
 independently. Unfortunately, such an architecture slightly complicates the development process
-when compared to a monolithic application. Instead of only installing and running a single service
-element, we instead install and run several components.</p>
+when compared to a monolithic application. Instead of installing and running a single service
+element, we must install and run several components.</p>
 <p>The first component is the mercury-common package. This package, as the name implies, contains
 common libraries used by two or more discrete components. Following common, are the mercury-inventory,
 mercury-log, and mercury-rpc packages.</p>
@@ -143,10 +179,11 @@ mercury-log, and mercury-rpc packages.</p>
 <p class="first admonition-title">Note</p>
 <p class="last">The mercury-agent package depends heavily on the linux sysfs ABI and should only be installed on
 linux hosts. If you are developing on MacOS, this poses a problem. Fortunately, this problem is
-easily solved using Vagrant, Docker, or by spinning up a vanilla VM. More on this later.</p>
+easily solved using Vagrant, Docker (untested), or by spinning up a vanilla VM. More on this
+later.</p>
 </div>
 <p>Each mercury package contains a <em>setup.py</em> which we will run with the <em>develop</em> argument.</p>
-<p>From the mercury repository root</p>
+<p>From the mercury repository root:</p>
 <div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nb">pushd</span> src/mercury-common <span class="o">&amp;&amp;</span> <span class="se">\</span>
 python setup.py develop <span class="o">&amp;&amp;</span> <span class="se">\</span>
 <span class="nb">popd</span> <span class="o">&amp;&amp;</span> <span class="se">\</span>
@@ -175,9 +212,9 @@ to copy them to a location mercury scans. By default, mercury scans the followin
 </ul>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">that once the <strong>find_configuration()</strong> function <em>finds</em> the configuration file it is looking for,
-the loop breaks. So, if you happen to have a configuration file in your local directory, it will
-ignore the configuration file in /etc/mercury, for instance.</p>
+<p class="last">Once the <strong>find_configuration()</strong> function <em>finds</em> the configuration file it is looking for,
+the loop breaks. If you happen to have a configuration file in your local directory and in /etc/mercury,
+the configuration in /etc/mercury will be ignored.</p>
 </div>
 <p>For easy use, we will be populating our configuration files in our home directory, <strong>~/.mercury</strong>. Keep in mind,
 Mercury is under heavy development, so watch for changes to the configuration file samples when pulling master; making
@@ -216,14 +253,22 @@ to these, we probably want to start the API bottle service as well.</p>
 </ul>
 </li>
 </ul>
-<p>With an IDE, such as pycharm, I typically create a profile for each service launcher. How you start these services
-is up to you. You can use the tmux start script (after modifying it) provided in the scripts directory if you are
-comfortable with tmux.</p>
+<p>With an IDE, such as pycharm, I typically create a profile for each service launcher. How you start
+these services is up to you. There is a script provided in the scripts directory which will launch
+all services in separate tmux windows ( with the exception of the mercury_api, which exists in
+another repository ).</p>
 <p>Once these services are running, we are ready to connect an agent to the backend.</p>
 </div>
 <div class="section" id="running-the-agent">
 <h2>Running the Agent<a class="headerlink" href="#running-the-agent" title="Permalink to this headline">¶</a></h2>
-<p>TBC</p>
+<p>On linux, running the agent is as simple as running any other service.</p>
+<p>Step 1: Create the configuration file</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>mkdir -p ~/.mercury <span class="o">&amp;&amp;</span> <span class="se">\</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="running-the-agent-in-docker-on-mac">
+<h2>Running the Agent in Docker on Mac<a class="headerlink" href="#running-the-agent-in-docker-on-mac" title="Permalink to this headline">¶</a></h2>
 </div>
 <div class="section" id="references">
 <h2>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h2>
@@ -248,11 +293,13 @@ comfortable with tmux.</p>
 </ul>
 </li>
 <li><a class="reference internal" href="#installing-service-dependencies">Installing service dependencies</a></li>
+<li><a class="reference internal" href="#using-docker-to-run-mongodb-and-redis">Using docker to run mongodb and redis</a></li>
 <li><a class="reference internal" href="#create-a-virtual-environment">Create a virtual environment</a></li>
 <li><a class="reference internal" href="#installing-mercury-services">Installing Mercury Services</a></li>
 <li><a class="reference internal" href="#creating-the-configuration-files">Creating the Configuration Files</a></li>
 <li><a class="reference internal" href="#running-the-services">Running the Services</a></li>
 <li><a class="reference internal" href="#running-the-agent">Running the Agent</a></li>
+<li><a class="reference internal" href="#running-the-agent-in-docker-on-mac">Running the Agent in Docker on Mac</a></li>
 <li><a class="reference internal" href="#references">References</a></li>
 </ul>
 </li>
@@ -290,8 +337,8 @@ comfortable with tmux.</p>
       &copy;2017, Jared Rodriguez.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.1</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
       |
       <a href="_sources/dev_environment.rst.txt"
