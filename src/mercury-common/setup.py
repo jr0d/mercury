@@ -13,12 +13,12 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
     name='mercury-common',
     version='0.0.3',
-    packages=['mercury.common'],
+    packages=find_packages(include=['mercury.common'], exclude=['tests']),
     url='http://www.mercurysoft.io',
     license='Apache-2.0',
     author='Jared Rodriguez',
