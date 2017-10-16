@@ -43,8 +43,7 @@
   <div class="section" id="building-a-development-environment-for-mercury">
 <h1>Building a Development Environment for Mercury<a class="headerlink" href="#building-a-development-environment-for-mercury" title="Permalink to this headline">¶</a></h1>
 <p>Here we will discuss setting up a development environment. We will cover steps
-and strategies for deploying natively on linux, running the agent in vagrant on OSX,
-and setting up a virtual network and virtual machine targets to test end to end provisioning.</p>
+and strategies for deploying natively on linux as well as running the agent in a docker container on OSX.</p>
 <div class="section" id="get-the-code">
 <h2>Get The Code<a class="headerlink" href="#get-the-code" title="Permalink to this headline">¶</a></h2>
 <p>Like most open source projects, the mercury source code is available on github. Let’s
@@ -182,7 +181,8 @@ linux hosts. If you are developing on MacOS, this poses a problem. Fortunately, 
 easily solved using Vagrant, Docker (untested), or by spinning up a vanilla VM. More on this
 later.</p>
 </div>
-<p>Each mercury package contains a <em>setup.py</em> which we will run with the <em>develop</em> argument.</p>
+<p>We’ll install each package using pip -e. This is synonymous with using <em>setup.py devel</em>, but pip allows
+us to use library wheelhouses for binary dependencies, such as ZeroMQ or pyYAML, when resolving requirements.</p>
 <p>From the mercury repository root:</p>
 <div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nb">pushd</span> src/mercury-common <span class="o">&amp;&amp;</span> <span class="se">\</span>
 pip install -r test-requirements.txt <span class="o">&amp;&amp;</span> <span class="se">\</span>
@@ -199,7 +199,10 @@ pip install -e . <span class="o">&amp;&amp;</span> <span class="se">\</span>
 <span class="nb">popd</span>
 </pre></div>
 </div>
-<p>If you are installing the HTTP API, make sure to install that too</p>
+<p>Install the HTTP API in the same manner</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nb">cd</span> mercury-api <span class="o">&amp;&amp;</span> pip install -e .
+</pre></div>
+</div>
 </div>
 <div class="section" id="creating-the-configuration-files">
 <h2>Creating the Configuration Files<a class="headerlink" href="#creating-the-configuration-files" title="Permalink to this headline">¶</a></h2>
@@ -260,20 +263,105 @@ all services in separate tmux windows ( with the exception of the mercury_api, w
 another repository ).</p>
 <p>Once these services are running, we are ready to connect an agent to the backend.</p>
 </div>
-<div class="section" id="running-the-agent">
-<h2>Running the Agent<a class="headerlink" href="#running-the-agent" title="Permalink to this headline">¶</a></h2>
-<p>On linux, running the agent is as simple as running any other service.</p>
-<p>Step 1: Create the configuration file</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>mkdir -p ~/.mercury <span class="o">&amp;&amp;</span> <span class="se">\</span>
+<div class="section" id="getting-the-agent">
+<h2>Getting the Agent<a class="headerlink" href="#getting-the-agent" title="Permalink to this headline">¶</a></h2>
+<p>The agent lives in it’s own repository. You can clone it with:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>git clone git@github.com:jr0d/mercury-agent.git
 </pre></div>
+</div>
+</div>
+<div class="section" id="running-the-agent-native">
+<h2>Running the Agent (Native)<a class="headerlink" href="#running-the-agent-native" title="Permalink to this headline">¶</a></h2>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">For MacOS instructions see <a class="reference internal" href="#running-the-agent-in-docker-on-mac">Running the Agent in Docker on Mac</a>.</p>
+</div>
+<p>Following the same pattern as before, copy the agent configuration file to a place mercury will search</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>mkdir -p ~/.mercury
+cp mercury-agent/mercury-agent-sample.yaml ~/.mercury/mercury-agent.yaml
+</pre></div>
+</div>
+<p>Install the agent into the same virtual environment as the other services, see <a class="reference internal" href="#create-a-virtual-environment">Create a virtual environment</a>.</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nb">cd</span> mercury-agent <span class="p">;</span> pip install -e .
+</pre></div>
+</div>
+<p>Now you can run the agent with:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>$ mercury_agent
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">You should probably run the mercury agent as a normal user for now. TODO: Create a link to the
+press development integration documentation</p>
 </div>
 </div>
 <div class="section" id="running-the-agent-in-docker-on-mac">
 <h2>Running the Agent in Docker on Mac<a class="headerlink" href="#running-the-agent-in-docker-on-mac" title="Permalink to this headline">¶</a></h2>
+<p>Running the agent natively on MacOS is not possible due to the agent’s dependence on the Linux ABI. Docker for mac,
+fortunately, use a linux VM to host containers, making it an excellent target for running the agent.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>Docker allows us to quickly develop on the RPC stack of mercury, without having to go through the process of spinning
+up a dedicated VM. If you need to develop on hardware native components, protected ABI inspectors, or press
+provisioning, follow this guide for setting up a development VM and network:</p>
+<blockquote class="last">
+<div>TODO: Provide link to Agent development guide.</div></blockquote>
+</div>
+<p>To take advantage of this awesomeness, you need to install <a class="reference external" href="https://docs.docker.com/docker-for-mac/install/">Docker on your mac</a>.</p>
+<p>A docker file and configuration file (built specifically for local development on a mac) is provided with the
+agent source. The docker file contains the following:</p>
+<div class="highlight-Dockerfile"><div class="highlight"><pre><span></span><span class="k">FROM</span><span class="s"> python</span>
+<span class="k">WORKDIR</span><span class="s"> /</span>
+<span class="k">ADD</span><span class="s"> . /src/mercury/agent</span>
+<span class="k">ADD</span><span class="s"> docker/mercury-agent-docker.yaml /etc/mercury/mercury-agent.yaml</span>
+<span class="k">RUN</span> pip install -r /src/mercury/agent/requirements.txt
+<span class="k">RUN</span> pip install -e /src/mercury/agent
+<span class="k">RUN</span> apt-get -y update
+<span class="k">RUN</span> apt-get -y install pciutils
+<span class="k">EXPOSE</span><span class="s"> 9003</span>
+<span class="k">EXPOSE</span><span class="s"> 9004</span>
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p>The docker build script installs the mercury-common package from pypi, and will not use any local copy. If you
+are making changes to common that you want the agent to take advantage of, copy the provided docker file, and
+modify it to look like this:</p>
+<div class="highlight-Dockerfile"><div class="highlight"><pre><span></span><span class="k">FROM</span><span class="s"> python</span>
+<span class="k">WORKDIR</span><span class="s"> /</span>
+<span class="k">ADD</span><span class="s"> . /src/mercury/agent</span>
+<span class="k">ADD</span><span class="s"> docker/mercury-agent-docker.yaml /etc/mercury/mercury-agent.yaml</span>
+<span class="k">ADD</span><span class="s"> ### PATH TO LOCAL MERCURY COMMON SOURCE ### /src/mercury/common</span>
+<span class="k">RUN</span> pip install -e /src/mercury/common
+<span class="k">RUN</span> pip install -e /src/mercury/agent
+<span class="k">RUN</span> apt-get -y update
+<span class="k">RUN</span> apt-get -y install pciutils
+<span class="k">EXPOSE</span><span class="s"> 9003</span>
+<span class="k">EXPOSE</span><span class="s"> 9004</span>
+</pre></div>
+</div>
+<p>Then, run this command to build</p>
+<div class="last highlight-bash"><div class="highlight"><pre><span></span>$ docker build -f PATH_TO_DOCKERFILE -t mercury/agent .
+</pre></div>
+</div>
+</div>
+<p>Build the image with the following</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>$ <span class="nb">cd</span> mercury-agent
+$ docker build -t mercury/agent .
+</pre></div>
+</div>
+<p>Now, run the agent</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>$ docker run -p <span class="m">9003</span>:9003 -p <span class="m">9004</span>:9004 mercury/agent mercury_agent
+</pre></div>
+</div>
+</div>
+<div class="section" id="next-steps">
+<h2>Next steps<a class="headerlink" href="#next-steps" title="Permalink to this headline">¶</a></h2>
+<p>TODO: Link to usage documentation</p>
 </div>
 <div class="section" id="references">
 <h2>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://www.marinamele.com/2014/07/install-python3-on-mac-os-x-and-use-virtualenv-and-virtualenvwrapper.html">Installing python on OSX</a>.</p>
+<p><a class="reference external" href="http://www.marinamele.com/2014/07/install-python3-on-mac-os-x-and-use-virtualenv-and-virtualenvwrapper.html">Installing python on OSX</a></p>
 </div>
 </div>
 
@@ -299,8 +387,10 @@ another repository ).</p>
 <li><a class="reference internal" href="#installing-mercury-services">Installing Mercury Services</a></li>
 <li><a class="reference internal" href="#creating-the-configuration-files">Creating the Configuration Files</a></li>
 <li><a class="reference internal" href="#running-the-services">Running the Services</a></li>
-<li><a class="reference internal" href="#running-the-agent">Running the Agent</a></li>
+<li><a class="reference internal" href="#getting-the-agent">Getting the Agent</a></li>
+<li><a class="reference internal" href="#running-the-agent-native">Running the Agent (Native)</a></li>
 <li><a class="reference internal" href="#running-the-agent-in-docker-on-mac">Running the Agent in Docker on Mac</a></li>
+<li><a class="reference internal" href="#next-steps">Next steps</a></li>
 <li><a class="reference internal" href="#references">References</a></li>
 </ul>
 </li>
