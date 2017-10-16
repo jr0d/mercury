@@ -72,7 +72,7 @@ the merucry install process</p>
 <div class="section" id="enterprise-linux-7-centos-7">
 <h3>Enterprise Linux 7 / CentOS 7<a class="headerlink" href="#enterprise-linux-7-centos-7" title="Permalink to this headline">¶</a></h3>
 <div class="highlight-bash"><div class="highlight"><pre><span></span>yum install -y https://mirror.rackspace.com/ius/stable/CentOS/7/x86_64/ius-release-1.0-15.ius.centos7.noarch.rpm <span class="o">&amp;&amp;</span> <span class="se">\</span>
-yum install -y gcc gcc-c++ automake autoconf python36u python36u-devel python36u-pip <span class="o">&amp;&amp;</span> <span class="se">\</span>
+yum install -y python36u python36u-pip <span class="o">&amp;&amp;</span> <span class="se">\</span>
 pip3.6 install virtualenv
 </pre></div>
 </div>
@@ -84,7 +84,7 @@ pip3.6 install virtualenv
 apt-get -y install software-properties-common <span class="o">&amp;&amp;</span> <span class="se">\</span>
 add-apt-repository -y ppa:jonathonf/python-3.6 <span class="o">&amp;&amp;</span> <span class="se">\</span>
 apt-get update <span class="o">&amp;&amp;</span> <span class="se">\</span>
-apt-get -y install gcc g++ automake python3.6 python3.6-dev wget <span class="o">&amp;&amp;</span> <span class="se">\</span>
+apt-get -y install python3.6 wget <span class="o">&amp;&amp;</span> <span class="se">\</span>
 wget https://bootstrap.pypa.io/get-pip.py -O - <span class="p">|</span> python3.6 <span class="o">&amp;&amp;</span> <span class="se">\</span>
 pip3.6 install virtualenv
 </pre></div>
@@ -185,16 +185,17 @@ later.</p>
 <p>Each mercury package contains a <em>setup.py</em> which we will run with the <em>develop</em> argument.</p>
 <p>From the mercury repository root:</p>
 <div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nb">pushd</span> src/mercury-common <span class="o">&amp;&amp;</span> <span class="se">\</span>
-python setup.py develop <span class="o">&amp;&amp;</span> <span class="se">\</span>
+pip install -r test-requirements.txt <span class="o">&amp;&amp;</span> <span class="se">\</span>
+pip install -e . <span class="o">&amp;&amp;</span> <span class="se">\</span>
 <span class="nb">popd</span> <span class="o">&amp;&amp;</span> <span class="se">\</span>
 <span class="nb">pushd</span> src/mercury-inventory <span class="o">&amp;&amp;</span> <span class="se">\</span>
-python setup.py develop <span class="o">&amp;&amp;</span> <span class="se">\</span>
+pip install -e . <span class="o">&amp;&amp;</span> <span class="se">\</span>
 <span class="nb">popd</span> <span class="o">&amp;&amp;</span> <span class="se">\</span>
 <span class="nb">pushd</span> src/mercury-rpc <span class="o">&amp;&amp;</span> <span class="se">\</span>
-python setup.py develop <span class="o">&amp;&amp;</span> <span class="se">\</span>
+pip install -e . <span class="o">&amp;&amp;</span> <span class="se">\</span>
 <span class="nb">popd</span> <span class="o">&amp;&amp;</span> <span class="se">\</span>
 <span class="nb">pushd</span> src/mercury-log <span class="o">&amp;&amp;</span> <span class="se">\</span>
-python setup.py develop <span class="o">&amp;&amp;</span> <span class="se">\</span>
+pip install -e . <span class="o">&amp;&amp;</span> <span class="se">\</span>
 <span class="nb">popd</span>
 </pre></div>
 </div>

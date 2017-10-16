@@ -44,7 +44,7 @@ _____________________________
 .. code-block:: bash
 
     yum install -y https://mirror.rackspace.com/ius/stable/CentOS/7/x86_64/ius-release-1.0-15.ius.centos7.noarch.rpm && \
-    yum install -y gcc gcc-c++ automake autoconf python36u python36u-devel python36u-pip && \
+    yum install -y python36u python36u-pip && \
     pip3.6 install virtualenv
 
 Ubuntu 16.04
@@ -58,7 +58,7 @@ For python 3.6 (preferred)
     apt-get -y install software-properties-common && \
     add-apt-repository -y ppa:jonathonf/python-3.6 && \
     apt-get update && \
-    apt-get -y install gcc g++ automake python3.6 python3.6-dev wget && \
+    apt-get -y install python3.6 wget && \
     wget https://bootstrap.pypa.io/get-pip.py -O - | python3.6 && \
     pip3.6 install virtualenv
 
@@ -189,23 +189,24 @@ From the mercury repository root:
 .. code-block:: bash
 
     pushd src/mercury-common && \
-    python setup.py develop && \
+    pip install -r test-requirements.txt && \
+    pip install -e . && \
     popd && \
     pushd src/mercury-inventory && \
-    python setup.py develop && \
+    pip install -e . && \
     popd && \
     pushd src/mercury-rpc && \
-    python setup.py develop && \
+    pip install -e . && \
     popd && \
     pushd src/mercury-log && \
-    python setup.py develop && \
+    pip install -e . && \
     popd
 
 
 If you are installing the HTTP API, make sure to install that too
 
 .. code-block:: bash
-    cd mercury-api && python setup.py develop
+    cd mercury-api && pip install -e .
 
 
 Creating the Configuration Files
