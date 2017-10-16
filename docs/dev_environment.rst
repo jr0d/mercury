@@ -274,8 +274,21 @@ another repository ).
 
 Once these services are running, we are ready to connect an agent to the backend.
 
+
+Getting the Agent
+~~~~~~~~~~~~~~~~~
+
+The agent lives in it's own repository. You can clone it with:
+
+.. code-block:: bash
+
+    git clone git@github.com:jr0d/mercury-agent.git
+
+
 Running the Agent
 ~~~~~~~~~~~~~~~~~
+
+First, clone the agent repository
 
 On linux, running the agent is as simple as running any other service.
 
@@ -284,7 +297,7 @@ Step 1: Create the configuration file
 .. code-block:: bash
 
     mkdir -p ~/.mercury && \
-    
+
 
 
 Running the Agent in Docker on Mac
