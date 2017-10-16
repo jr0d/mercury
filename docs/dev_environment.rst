@@ -189,23 +189,23 @@ From the mercury repository root:
 .. code-block:: bash
 
     pushd src/mercury-common && \
-    python setup.py develop && \
+    pip install -e . && \
     popd && \
     pushd src/mercury-inventory && \
-    python setup.py develop && \
+    pip install -e . && \
     popd && \
     pushd src/mercury-rpc && \
-    python setup.py develop && \
+    pip install -e . && \
     popd && \
     pushd src/mercury-log && \
-    python setup.py develop && \
+    pip install -e . && \
     popd
 
 
 If you are installing the HTTP API, make sure to install that too
 
 .. code-block:: bash
-    cd mercury-api && python setup.py develop
+    cd mercury-api && pip install -e .
 
 
 Creating the Configuration Files
