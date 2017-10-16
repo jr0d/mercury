@@ -13,12 +13,23 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
+import os
 from setuptools import setup
+
+
+def find_mercury_packages():
+    """Fix for easily finding mercury packages and subpackages"""
+    packages = []
+    for container, _, items in os.walk('mercury'):
+        if '__init__.py' in items:
+            packages.append(container.replace('/', '.'))
+    return packages
+
 
 setup(
     name='mercury-common',
-    version='0.0.2.1',
-    packages=['mercury.common'],
+    version='0.0.4',
+    packages=find_mercury_packages(),
     url='http://www.mercurysoft.io',
     license='Apache-2.0',
     author='Jared Rodriguez',

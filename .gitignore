@@ -63,6 +63,9 @@ target/
 # Ignore vim swap files.
 .*.sw*
 
+# MAC OSx
+.DS_Store
+
 # Ignore configuration files
 mercury-agent.yaml
 mercury-inventory.yaml
