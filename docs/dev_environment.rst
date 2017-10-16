@@ -1,9 +1,8 @@
 Building a Development Environment for Mercury
----------------------------------------
+----------------------------------------------
 
 Here we will discuss setting up a development environment. We will cover steps
-and strategies for deploying natively on linux, running the agent in vagrant on OSX,
-and setting up a virtual network and virtual machine targets to test end to end provisioning.
+and strategies for deploying natively on linux as well as running the agent in a docker container on OSX.
 
 
 Get The Code
@@ -48,7 +47,7 @@ _____________________________
     pip3.6 install virtualenv
 
 Ubuntu 16.04
-______
+____________
 
 For python 3.6 (preferred)
 
@@ -70,7 +69,7 @@ For python3.5, just install the python3.5-dev and python3.5-pip packages. Then:
 
 
 OSX
-____
+___
 
 Homebrew python3 works like a charm
 
@@ -181,7 +180,8 @@ mercury-log, and mercury-rpc packages.
     easily solved using Vagrant, Docker (untested), or by spinning up a vanilla VM. More on this
     later.
 
-Each mercury package contains a *setup.py* which we will run with the *develop* argument.
+We'll install each package using pip -e. This is synonymous with using *setup.py devel*, but pip allows
+us to use library wheelhouses for binary dependencies, such as ZeroMQ or pyYAML, when resolving requirements.
 
 
 From the mercury repository root:
@@ -203,9 +203,10 @@ From the mercury repository root:
     popd
 
 
-If you are installing the HTTP API, make sure to install that too
+Install the HTTP API in the same manner
 
 .. code-block:: bash
+
     cd mercury-api && pip install -e .
 
 
@@ -278,6 +279,7 @@ Once these services are running, we are ready to connect an agent to the backend
 Getting the Agent
 ~~~~~~~~~~~~~~~~~
 
+
 The agent lives in it's own repository. You can clone it with:
 
 .. code-block:: bash
@@ -285,28 +287,120 @@ The agent lives in it's own repository. You can clone it with:
     git clone git@github.com:jr0d/mercury-agent.git
 
 
-Running the Agent
-~~~~~~~~~~~~~~~~~
+Running the Agent (Native)
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-First, clone the agent repository
+.. note::
 
-On linux, running the agent is as simple as running any other service.
+    For MacOS instructions see `Running the Agent in Docker on Mac`_.
 
-Step 1: Create the configuration file
+
+Following the same pattern as before, copy the agent configuration file to a place mercury will search
 
 .. code-block:: bash
 
-    mkdir -p ~/.mercury && \
+    mkdir -p ~/.mercury
+    cp mercury-agent/mercury-agent-sample.yaml ~/.mercury/mercury-agent.yaml
 
+
+Install the agent into the same virtual environment as the other services, see `Create a virtual environment`_.
+
+.. code-block:: bash
+
+    cd mercury-agent ; pip install -e .
+
+Now you can run the agent with:
+
+.. code-block:: bash
+
+    $ mercury_agent
+
+.. note::
+
+    You should probably run the mercury agent as a normal user for now. TODO: Create a link to the
+    press development integration documentation
 
 
 Running the Agent in Docker on Mac
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+Running the agent natively on MacOS is not possible due to the agent's dependence on the Linux ABI. Docker for mac,
+fortunately, use a linux VM to host containers, making it an excellent target for running the agent.
 
+.. note::
+    Docker allows us to quickly develop on the RPC stack of mercury, without having to go through the process of spinning
+    up a dedicated VM. If you need to develop on hardware native components, protected ABI inspectors, or press
+    provisioning, follow this guide for setting up a development VM and network:
+
+        TODO: Provide link to Agent development guide.
+
+To take advantage of this awesomeness, you need to install `Docker on your mac <https://docs.docker.com/docker-for-mac/install/>`_.
+
+A docker file and configuration file (built specifically for local development on a mac) is provided with the
+agent source. The docker file contains the following:
+
+.. code-block:: Dockerfile
+
+    FROM python
+    WORKDIR /
+    ADD . /src/mercury/agent
+    ADD docker/mercury-agent-docker.yaml /etc/mercury/mercury-agent.yaml
+    RUN pip install -r /src/mercury/agent/requirements.txt
+    RUN pip install -e /src/mercury/agent
+    RUN apt-get -y update
+    RUN apt-get -y install pciutils
+    EXPOSE 9003
+    EXPOSE 9004
+
+
+.. warning::
+
+    The docker build script installs the mercury-common package from pypi, and will not use any local copy. If you
+    are making changes to common that you want the agent to take advantage of, copy the provided docker file, and
+    modify it to look like this:
+
+    .. code-block:: Dockerfile
+
+        FROM python
+        WORKDIR /
+        ADD . /src/mercury/agent
+        ADD docker/mercury-agent-docker.yaml /etc/mercury/mercury-agent.yaml
+        ADD ### PATH TO LOCAL MERCURY COMMON SOURCE ### /src/mercury/common
+        RUN pip install -e /src/mercury/common
+        RUN pip install -e /src/mercury/agent
+        RUN apt-get -y update
+        RUN apt-get -y install pciutils
+        EXPOSE 9003
+        EXPOSE 9004
+
+    Then, run this command to build
+
+    .. code-block:: bash
+
+        $ docker build -f PATH_TO_DOCKERFILE -t mercury/agent .
+
+
+Build the image with the following
+
+.. code-block:: bash
+
+    $ cd mercury-agent
+    $ docker build -t mercury/agent .
+
+Now, run the agent
+
+.. code-block:: bash
+
+    $ docker run -p 9003:9003 -p 9004:9004 mercury/agent mercury_agent
+
+
+Next steps
+~~~~~~~~~~
+
+TODO: Link to usage documentation
 
 
 References
 ~~~~~~~~~~
 
-`Installing python on OSX <http://www.marinamele.com/2014/07/install-python3-on-mac-os-x-and-use-virtualenv-and-virtualenvwrapper.html>`_.
+`Installing python on OSX <http://www.marinamele.com/2014/07/install-python3-on-mac-os-x-and-use-virtualenv-and-virtualenvwrapper.html>`_
