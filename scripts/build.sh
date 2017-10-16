@@ -5,10 +5,6 @@ set -e
 BUILD_CMD="python setup.py bdist_egg bdist_wheel upload"
 
 pushd src/
-pushd mercury-agent
-$BUILD_CMD
-
-popd
 pushd mercury-common
 $BUILD_CMD
 

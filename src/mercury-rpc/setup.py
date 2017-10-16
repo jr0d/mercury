@@ -17,7 +17,7 @@ from setuptools import setup
 
 setup(
     name='mercury-rpc',
-    version='0.0.2.1',
+    version='0.0.3',
     packages=['mercury.rpc'],
     url='http://www.mercurysoft.io',
     license='Apache-2.0',

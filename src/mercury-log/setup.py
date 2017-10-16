@@ -17,7 +17,7 @@ from setuptools import setup
 
 setup(
     name='mercury-log',
-    version='0.0.2.1',
+    version='0.0.3',
     packages=['mercury.log_handlers', 'mercury.log_service'],
     url='http://www.mercurysoft.io',
     license='Apache-2.0',
