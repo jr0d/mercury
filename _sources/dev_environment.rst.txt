@@ -1,35 +1,60 @@
 Building a Development Environment for Mercury
 ----------------------------------------------
 
-Here we will discuss setting up a development environment. We will cover steps
-and strategies for deploying natively on linux as well as running the agent in a docker container on OSX.
+In this guide we will discuss how to setup a Mercury development environment on linux and osx. Microsoft Windows is not
+supported in this guide and we suggest that windows users provision a Linux VM for Mercury development.
 
 
-Get The Code
-~~~~~~~~~~~~
+The Code
+~~~~~~~~
 
-Like most open source projects, the mercury source code is available on github. Let's
-start by cloning the repository.
+Mercury sources are divided into three major repositories.
+
+mercury
+_______
+
+This is the main repository for the mercury project. This documentation source (and much more) can be found in the main
+repository's *docs* directory. The repo includes the core mercury packages: common, inventory, rpc, and log. It's super
+important and you should clone it now.
+
 
 .. code-block:: bash
 
     $ git clone https://github.com/jr0d/mercury.git
 
-This will create a directory called mercury in your current working directory.
 
-Also, we will probably want to interact with mercury using the HTTP API, so be sure to clone this repository as
-well:
+.. note::
+
+    If your OCD goes crazy here, I have plans to standardize on dashes for repositories and underscores for packages
+
+
+mercury-api
+___________
+
+The mercury_api repository contains the mercury HTTP API and provides a convenient interface to the mercury inventory
+and rpc ZeroMQ services. Clone this repository.
 
 .. code-block:: bash
 
     $ git clone https://github.com/jr0d/mercury_api.git
 
 
+mercury_agent
+_____________
+
+The agent is designed to run on target devices running a Linux operating system. Regardless of your development
+operating system, go ahead and clone it now. We'll circle back at the end of this guide.
+
+.. code-block:: bash
+
+    $ git clone https://github.com/jr0d/mercury-agent.git
+
+
 Install Python 3.6 and virtualenv
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This process will very per your distribution. It is here for the uninitiated, if you already
-have a working python3.6 development environment, you can skip to the mercury install section.
+have a working python3.6 development environment, you can skip to `Installing service dependencies`_
 
 .. warning::
 
@@ -71,7 +96,7 @@ For python3.5, just install the python3.5-dev and python3.5-pip packages. Then:
 OSX
 ___
 
-Homebrew python3 works like a charm
+Use homebrew to install python
 
 .. code-block:: bash
 
@@ -82,13 +107,13 @@ Homebrew python3 works like a charm
 Installing service dependencies
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Mercury utilizes mongodb for persistent storage and redis for distributed queuing. Install
-both of these services from your distributions package management repositories. Ensure that
-both mongodb and redis are running locally before proceeding.
+Mercury utilizes mongodb for persistent storage and redis for distributed queuing. Install both of these
+services using your distributions package management system or use the docker method (see next section)
+before proceeding.
 
 
 Using docker to run mongodb and redis
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+_____________________________________
 
 On mac, the easiest way to get a development environment up and running is to launch mongo and redis in ephemeral
 containers.
@@ -136,9 +161,11 @@ When you are done with them, stop them with the kill command
     b639809a68ff
 
 
+Mercury Services
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Create a virtual environment
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+____________________________
 
 .. code-block:: bash
 
@@ -162,8 +189,8 @@ Now activate the virtual environment.
    `pyvenv <https://docs.python.org/3/library/venv.html>`_.
 
 
-Installing Mercury Services
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Installing the services
+_______________________
 
 Mercury implements a micro-services architecture. This allows us to deploy and scale components
 independently. Unfortunately, such an architecture slightly complicates the development process
@@ -211,7 +238,7 @@ Install the HTTP API in the same manner
 
 
 Creating the Configuration Files
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+________________________________
 
 All mercury services are configured using a YAML configuration file. Included with each source is a
 sample file. The files are already ready for local development for the most part, so we only need
@@ -241,7 +268,7 @@ From the mercury repository root:
 
 
 Running the Services
-~~~~~~~~~~~~~~~~~~~~
+____________________
 
 I am currently designing the service launcher and CLI for the inventory and backend components. Once implemented, this
 process, which requires us to launch each service directly by calling *x/server.py*; **will go away**. For now, this
@@ -276,8 +303,8 @@ another repository ).
 Once these services are running, we are ready to connect an agent to the backend.
 
 
-Getting the Agent
-~~~~~~~~~~~~~~~~~
+Installing the Agent
+~~~~~~~~~~~~~~~~~~~~
 
 
 The agent lives in it's own repository. You can clone it with:
@@ -288,7 +315,7 @@ The agent lives in it's own repository. You can clone it with:
 
 
 Running the Agent (Native)
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+__________________________
 
 .. note::
 
@@ -322,7 +349,7 @@ Now you can run the agent with:
 
 
 Running the Agent in Docker on Mac
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+__________________________________
 
 Running the agent natively on MacOS is not possible due to the agent's dependence on the Linux ABI. Docker for mac,
 fortunately, use a linux VM to host containers, making it an excellent target for running the agent.

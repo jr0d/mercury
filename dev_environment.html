@@ -42,26 +42,45 @@
             
   <div class="section" id="building-a-development-environment-for-mercury">
 <h1>Building a Development Environment for Mercury<a class="headerlink" href="#building-a-development-environment-for-mercury" title="Permalink to this headline">¶</a></h1>
-<p>Here we will discuss setting up a development environment. We will cover steps
-and strategies for deploying natively on linux as well as running the agent in a docker container on OSX.</p>
-<div class="section" id="get-the-code">
-<h2>Get The Code<a class="headerlink" href="#get-the-code" title="Permalink to this headline">¶</a></h2>
-<p>Like most open source projects, the mercury source code is available on github. Let’s
-start by cloning the repository.</p>
+<p>In this guide we will discuss how to setup a Mercury development environment on linux and osx. Microsoft Windows is not
+supported in this guide and we suggest that windows users provision a Linux VM for Mercury development.</p>
+<div class="section" id="the-code">
+<h2>The Code<a class="headerlink" href="#the-code" title="Permalink to this headline">¶</a></h2>
+<p>Mercury sources are divided into three major repositories.</p>
+<div class="section" id="mercury">
+<h3>mercury<a class="headerlink" href="#mercury" title="Permalink to this headline">¶</a></h3>
+<p>This is the main repository for the mercury project. This documentation source (and much more) can be found in the main
+repository’s <em>docs</em> directory. The repo includes the core mercury packages: common, inventory, rpc, and log. It’s super
+important and you should clone it now.</p>
 <div class="highlight-bash"><div class="highlight"><pre><span></span>$ git clone https://github.com/jr0d/mercury.git
 </pre></div>
 </div>
-<p>This will create a directory called mercury in your current working directory.</p>
-<p>Also, we will probably want to interact with mercury using the HTTP API, so be sure to clone this repository as
-well:</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">If your OCD goes crazy here, I have plans to standardize on dashes for repositories and underscores for packages</p>
+</div>
+</div>
+<div class="section" id="mercury-api">
+<h3>mercury-api<a class="headerlink" href="#mercury-api" title="Permalink to this headline">¶</a></h3>
+<p>The mercury_api repository contains the mercury HTTP API and provides a convenient interface to the mercury inventory
+and rpc ZeroMQ services. Clone this repository.</p>
 <div class="highlight-bash"><div class="highlight"><pre><span></span>$ git clone https://github.com/jr0d/mercury_api.git
 </pre></div>
+</div>
+</div>
+<div class="section" id="mercury-agent">
+<h3>mercury_agent<a class="headerlink" href="#mercury-agent" title="Permalink to this headline">¶</a></h3>
+<p>The agent is designed to run on target devices running a Linux operating system. Regardless of your development
+operating system, go ahead and clone it now. We’ll circle back at the end of this guide.</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>$ git clone https://github.com/jr0d/mercury-agent.git
+</pre></div>
+</div>
 </div>
 </div>
 <div class="section" id="install-python-3-6-and-virtualenv">
 <h2>Install Python 3.6 and virtualenv<a class="headerlink" href="#install-python-3-6-and-virtualenv" title="Permalink to this headline">¶</a></h2>
 <p>This process will very per your distribution. It is here for the uninitiated, if you already
-have a working python3.6 development environment, you can skip to the mercury install section.</p>
+have a working python3.6 development environment, you can skip to <a class="reference internal" href="#installing-service-dependencies">Installing service dependencies</a></p>
 <div class="admonition warning">
 <p class="first admonition-title">Warning</p>
 <p class="last">If you intend to skip the guided python-3.6 install process, ensure that gcc, gcc-c++, automake,
@@ -95,7 +114,7 @@ pip3.6 install virtualenv
 </div>
 <div class="section" id="osx">
 <h3>OSX<a class="headerlink" href="#osx" title="Permalink to this headline">¶</a></h3>
-<p>Homebrew python3 works like a charm</p>
+<p>Use homebrew to install python</p>
 <div class="highlight-bash"><div class="highlight"><pre><span></span>brew install python3
 pip3 install virtualenv
 </pre></div>
@@ -104,12 +123,11 @@ pip3 install virtualenv
 </div>
 <div class="section" id="installing-service-dependencies">
 <h2>Installing service dependencies<a class="headerlink" href="#installing-service-dependencies" title="Permalink to this headline">¶</a></h2>
-<p>Mercury utilizes mongodb for persistent storage and redis for distributed queuing. Install
-both of these services from your distributions package management repositories. Ensure that
-both mongodb and redis are running locally before proceeding.</p>
-</div>
+<p>Mercury utilizes mongodb for persistent storage and redis for distributed queuing. Install both of these
+services using your distributions package management system or use the docker method (see next section)
+before proceeding.</p>
 <div class="section" id="using-docker-to-run-mongodb-and-redis">
-<h2>Using docker to run mongodb and redis<a class="headerlink" href="#using-docker-to-run-mongodb-and-redis" title="Permalink to this headline">¶</a></h2>
+<h3>Using docker to run mongodb and redis<a class="headerlink" href="#using-docker-to-run-mongodb-and-redis" title="Permalink to this headline">¶</a></h3>
 <p>On mac, the easiest way to get a development environment up and running is to launch mongo and redis in ephemeral
 containers.</p>
 <div class="admonition note">
@@ -147,8 +165,11 @@ b639809a68ff
 </pre></div>
 </div>
 </div>
+</div>
+<div class="section" id="mercury-services">
+<h2>Mercury Services<a class="headerlink" href="#mercury-services" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="create-a-virtual-environment">
-<h2>Create a virtual environment<a class="headerlink" href="#create-a-virtual-environment" title="Permalink to this headline">¶</a></h2>
+<h3>Create a virtual environment<a class="headerlink" href="#create-a-virtual-environment" title="Permalink to this headline">¶</a></h3>
 <div class="highlight-bash"><div class="highlight"><pre><span></span>$ mkdir ~/.virtualenvs
 $ virtualenv -p<span class="sb">`</span>which python3.6<span class="sb">`</span> ~/.virtualenvs/mercury
 </pre></div>
@@ -165,8 +186,8 @@ To make virtualenv management easier, consider using
 <a class="reference external" href="https://docs.python.org/3/library/venv.html">pyvenv</a>.</p>
 </div>
 </div>
-<div class="section" id="installing-mercury-services">
-<h2>Installing Mercury Services<a class="headerlink" href="#installing-mercury-services" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="installing-the-services">
+<h3>Installing the services<a class="headerlink" href="#installing-the-services" title="Permalink to this headline">¶</a></h3>
 <p>Mercury implements a micro-services architecture. This allows us to deploy and scale components
 independently. Unfortunately, such an architecture slightly complicates the development process
 when compared to a monolithic application. Instead of installing and running a single service
@@ -205,7 +226,7 @@ pip install -e . <span class="o">&amp;&amp;</span> <span class="se">\</span>
 </div>
 </div>
 <div class="section" id="creating-the-configuration-files">
-<h2>Creating the Configuration Files<a class="headerlink" href="#creating-the-configuration-files" title="Permalink to this headline">¶</a></h2>
+<h3>Creating the Configuration Files<a class="headerlink" href="#creating-the-configuration-files" title="Permalink to this headline">¶</a></h3>
 <p>All mercury services are configured using a YAML configuration file. Included with each source is a
 sample file. The files are already ready for local development for the most part, so we only need
 to copy them to a location mercury scans. By default, mercury scans the following directories:</p>
@@ -231,7 +252,7 @@ sure to update your local copies when necessary.</p>
 </div>
 </div>
 <div class="section" id="running-the-services">
-<h2>Running the Services<a class="headerlink" href="#running-the-services" title="Permalink to this headline">¶</a></h2>
+<h3>Running the Services<a class="headerlink" href="#running-the-services" title="Permalink to this headline">¶</a></h3>
 <p>I am currently designing the service launcher and CLI for the inventory and backend components. Once implemented, this
 process, which requires us to launch each service directly by calling <em>x/server.py</em>; <strong>will go away</strong>. For now, this
 is what we have.</p>
@@ -263,15 +284,15 @@ all services in separate tmux windows ( with the exception of the mercury_api, w
 another repository ).</p>
 <p>Once these services are running, we are ready to connect an agent to the backend.</p>
 </div>
-<div class="section" id="getting-the-agent">
-<h2>Getting the Agent<a class="headerlink" href="#getting-the-agent" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="installing-the-agent">
+<h2>Installing the Agent<a class="headerlink" href="#installing-the-agent" title="Permalink to this headline">¶</a></h2>
 <p>The agent lives in it’s own repository. You can clone it with:</p>
 <div class="highlight-bash"><div class="highlight"><pre><span></span>git clone git@github.com:jr0d/mercury-agent.git
 </pre></div>
 </div>
-</div>
 <div class="section" id="running-the-agent-native">
-<h2>Running the Agent (Native)<a class="headerlink" href="#running-the-agent-native" title="Permalink to this headline">¶</a></h2>
+<h3>Running the Agent (Native)<a class="headerlink" href="#running-the-agent-native" title="Permalink to this headline">¶</a></h3>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">For MacOS instructions see <a class="reference internal" href="#running-the-agent-in-docker-on-mac">Running the Agent in Docker on Mac</a>.</p>
@@ -296,7 +317,7 @@ press development integration documentation</p>
 </div>
 </div>
 <div class="section" id="running-the-agent-in-docker-on-mac">
-<h2>Running the Agent in Docker on Mac<a class="headerlink" href="#running-the-agent-in-docker-on-mac" title="Permalink to this headline">¶</a></h2>
+<h3>Running the Agent in Docker on Mac<a class="headerlink" href="#running-the-agent-in-docker-on-mac" title="Permalink to this headline">¶</a></h3>
 <p>Running the agent natively on MacOS is not possible due to the agent’s dependence on the Linux ABI. Docker for mac,
 fortunately, use a linux VM to host containers, making it an excellent target for running the agent.</p>
 <div class="admonition note">
@@ -355,6 +376,7 @@ $ docker build -t mercury/agent .
 </pre></div>
 </div>
 </div>
+</div>
 <div class="section" id="next-steps">
 <h2>Next steps<a class="headerlink" href="#next-steps" title="Permalink to this headline">¶</a></h2>
 <p>TODO: Link to usage documentation</p>
@@ -374,22 +396,34 @@ $ docker build -t mercury/agent .
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Building a Development Environment for Mercury</a><ul>
-<li><a class="reference internal" href="#get-the-code">Get The Code</a></li>
+<li><a class="reference internal" href="#the-code">The Code</a><ul>
+<li><a class="reference internal" href="#mercury">mercury</a></li>
+<li><a class="reference internal" href="#mercury-api">mercury-api</a></li>
+<li><a class="reference internal" href="#mercury-agent">mercury_agent</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#install-python-3-6-and-virtualenv">Install Python 3.6 and virtualenv</a><ul>
 <li><a class="reference internal" href="#enterprise-linux-7-centos-7">Enterprise Linux 7 / CentOS 7</a></li>
 <li><a class="reference internal" href="#ubuntu-16-04">Ubuntu 16.04</a></li>
 <li><a class="reference internal" href="#osx">OSX</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#installing-service-dependencies">Installing service dependencies</a></li>
+<li><a class="reference internal" href="#installing-service-dependencies">Installing service dependencies</a><ul>
 <li><a class="reference internal" href="#using-docker-to-run-mongodb-and-redis">Using docker to run mongodb and redis</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#mercury-services">Mercury Services</a><ul>
 <li><a class="reference internal" href="#create-a-virtual-environment">Create a virtual environment</a></li>
-<li><a class="reference internal" href="#installing-mercury-services">Installing Mercury Services</a></li>
+<li><a class="reference internal" href="#installing-the-services">Installing the services</a></li>
 <li><a class="reference internal" href="#creating-the-configuration-files">Creating the Configuration Files</a></li>
 <li><a class="reference internal" href="#running-the-services">Running the Services</a></li>
-<li><a class="reference internal" href="#getting-the-agent">Getting the Agent</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#installing-the-agent">Installing the Agent</a><ul>
 <li><a class="reference internal" href="#running-the-agent-native">Running the Agent (Native)</a></li>
 <li><a class="reference internal" href="#running-the-agent-in-docker-on-mac">Running the Agent in Docker on Mac</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#next-steps">Next steps</a></li>
 <li><a class="reference internal" href="#references">References</a></li>
 </ul>
