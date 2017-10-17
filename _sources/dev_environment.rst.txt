@@ -461,7 +461,7 @@ Now for the fun part, let's try scheduling a job!
     }
     EOF
 
-Your consoles should light up and should get a some JSON back, containing a job_id
+Your consoles should light up and you should get a some JSON back, containing a job_id
 
 .. code-block:: json
 
