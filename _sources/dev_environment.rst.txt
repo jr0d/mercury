@@ -478,7 +478,7 @@ Done!
 ~~~~~
 
 Pat yourself on the back! You should now be ready to begin hacking on Mercury! For full API documentation, be sure to
-check out the `API docs<https://jr0d.github.io/mercury_api_docs/>`_.
+check out the `API docs <https://jr0d.github.io/mercury_api_docs>`_.
 
 TODO: List mercury resources, slack, irc, mailing list, etc
 
