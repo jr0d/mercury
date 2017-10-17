@@ -61,7 +61,7 @@ important and you should clone it now.</p>
 </div>
 </div>
 <div class="section" id="mercury-api">
-<h3>mercury-api<a class="headerlink" href="#mercury-api" title="Permalink to this headline">¶</a></h3>
+<h3>mercury_api<a class="headerlink" href="#mercury-api" title="Permalink to this headline">¶</a></h3>
 <p>The mercury_api repository contains the mercury HTTP API and provides a convenient interface to the mercury inventory
 and rpc ZeroMQ services. Clone this repository.</p>
 <div class="highlight-bash"><div class="highlight"><pre><span></span>$ git clone https://github.com/jr0d/mercury_api.git
@@ -69,7 +69,7 @@ and rpc ZeroMQ services. Clone this repository.</p>
 </div>
 </div>
 <div class="section" id="mercury-agent">
-<h3>mercury_agent<a class="headerlink" href="#mercury-agent" title="Permalink to this headline">¶</a></h3>
+<h3>mercury-agent<a class="headerlink" href="#mercury-agent" title="Permalink to this headline">¶</a></h3>
 <p>The agent is designed to run on target devices running a Linux operating system. Regardless of your development
 operating system, go ahead and clone it now. We’ll circle back at the end of this guide.</p>
 <div class="highlight-bash"><div class="highlight"><pre><span></span>$ git clone https://github.com/jr0d/mercury-agent.git
@@ -81,12 +81,6 @@ operating system, go ahead and clone it now. We’ll circle back at the end of t
 <h2>Install Python 3.6 and virtualenv<a class="headerlink" href="#install-python-3-6-and-virtualenv" title="Permalink to this headline">¶</a></h2>
 <p>This process will very per your distribution. It is here for the uninitiated, if you already
 have a working python3.6 development environment, you can skip to <a class="reference internal" href="#installing-service-dependencies">Installing service dependencies</a></p>
-<div class="admonition warning">
-<p class="first admonition-title">Warning</p>
-<p class="last">If you intend to skip the guided python-3.6 install process, ensure that gcc, gcc-c++, automake,
-autoconf, and python development headers are installed. They are require to build zeromq during
-the merucry install process</p>
-</div>
 <div class="section" id="enterprise-linux-7-centos-7">
 <h3>Enterprise Linux 7 / CentOS 7<a class="headerlink" href="#enterprise-linux-7-centos-7" title="Permalink to this headline">¶</a></h3>
 <div class="highlight-bash"><div class="highlight"><pre><span></span>yum install -y https://mirror.rackspace.com/ius/stable/CentOS/7/x86_64/ius-release-1.0-15.ius.centos7.noarch.rpm <span class="o">&amp;&amp;</span> <span class="se">\</span>
@@ -195,13 +189,6 @@ element, we must install and run several components.</p>
 <p>The first component is the mercury-common package. This package, as the name implies, contains
 common libraries used by two or more discrete components. Following common, are the mercury-inventory,
 mercury-log, and mercury-rpc packages.</p>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">The mercury-agent package depends heavily on the linux sysfs ABI and should only be installed on
-linux hosts. If you are developing on MacOS, this poses a problem. Fortunately, this problem is
-easily solved using Vagrant, Docker (untested), or by spinning up a vanilla VM. More on this
-later.</p>
-</div>
 <p>We’ll install each package using pip -e. This is synonymous with using <em>setup.py devel</em>, but pip allows
 us to use library wheelhouses for binary dependencies, such as ZeroMQ or pyYAML, when resolving requirements.</p>
 <p>From the mercury repository root:</p>
@@ -285,18 +272,10 @@ another repository ).</p>
 <p>Once these services are running, we are ready to connect an agent to the backend.</p>
 </div>
 </div>
-<div class="section" id="installing-the-agent">
-<h2>Installing the Agent<a class="headerlink" href="#installing-the-agent" title="Permalink to this headline">¶</a></h2>
-<p>The agent lives in it’s own repository. You can clone it with:</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>git clone git@github.com:jr0d/mercury-agent.git
-</pre></div>
-</div>
-<div class="section" id="running-the-agent-native">
-<h3>Running the Agent (Native)<a class="headerlink" href="#running-the-agent-native" title="Permalink to this headline">¶</a></h3>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">For MacOS instructions see <a class="reference internal" href="#running-the-agent-in-docker-on-mac">Running the Agent in Docker on Mac</a>.</p>
-</div>
+<div class="section" id="running-the-agent">
+<h2>Running the Agent<a class="headerlink" href="#running-the-agent" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="linux-native">
+<h3>Linux (Native)<a class="headerlink" href="#linux-native" title="Permalink to this headline">¶</a></h3>
 <p>Following the same pattern as before, copy the agent configuration file to a place mercury will search</p>
 <div class="highlight-bash"><div class="highlight"><pre><span></span>mkdir -p ~/.mercury
 cp mercury-agent/mercury-agent-sample.yaml ~/.mercury/mercury-agent.yaml
@@ -375,11 +354,76 @@ $ docker build -t mercury/agent .
 <div class="highlight-bash"><div class="highlight"><pre><span></span>$ docker run -p <span class="m">9003</span>:9003 -p <span class="m">9004</span>:9004 mercury/agent mercury_agent
 </pre></div>
 </div>
+<p>If everything goes correctly you should see output similar to:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">INFO</span><span class="p">:</span><span class="n">mercury</span><span class="p">:</span><span class="n">Starting</span> <span class="n">Agent</span>
+<span class="n">INFO</span><span class="p">:</span><span class="n">mercury</span><span class="o">.</span><span class="n">agent</span><span class="o">.</span><span class="n">agent</span><span class="p">:</span><span class="n">Running</span> <span class="n">inspectors</span>
+<span class="n">INFO</span><span class="p">:</span><span class="n">mercury</span><span class="o">.</span><span class="n">agent</span><span class="o">.</span><span class="n">agent</span><span class="p">:</span><span class="n">Registering</span> <span class="n">device</span> <span class="n">inventory</span> <span class="k">for</span> <span class="n">MercuryID</span> <span class="mi">00</span><span class="n">fc6ad81ffb792d04a7a4454a4c9af4579f9af982</span>
+<span class="n">INFO</span><span class="p">:</span><span class="n">mercury</span><span class="o">.</span><span class="n">agent</span><span class="o">.</span><span class="n">agent</span><span class="p">:</span><span class="n">Starting</span> <span class="n">pong</span> <span class="n">service</span>
+<span class="n">INFO</span><span class="p">:</span><span class="n">mercury</span><span class="o">.</span><span class="n">agent</span><span class="o">.</span><span class="n">agent</span><span class="p">:</span><span class="n">Registering</span> <span class="n">device</span>
+<span class="n">INFO</span><span class="p">:</span><span class="n">mercury</span><span class="o">.</span><span class="n">agent</span><span class="o">.</span><span class="n">agent</span><span class="p">:</span><span class="n">Injecting</span> <span class="n">MercuryID</span> <span class="k">for</span> <span class="n">remote</span> <span class="n">logging</span>
+<span class="n">INFO</span><span class="p">:</span><span class="n">mercury</span><span class="o">.</span><span class="n">agent</span><span class="o">.</span><span class="n">agent</span><span class="p">:</span><span class="n">Injection</span> <span class="n">completed</span>
+<span class="n">ERROR</span><span class="p">:</span><span class="n">mercury</span><span class="o">.</span><span class="n">agent</span><span class="o">.</span><span class="n">agent</span><span class="p">:</span><span class="n">Caught</span> <span class="n">recoverable</span> <span class="n">exception</span> <span class="n">running</span> <span class="k">async</span> <span class="n">inspector</span><span class="p">:</span> <span class="n">Could</span> <span class="ow">not</span> <span class="n">find</span> <span class="n">lldplite</span> <span class="n">binary</span>
+<span class="n">INFO</span><span class="p">:</span><span class="n">mercury</span><span class="o">.</span><span class="n">agent</span><span class="o">.</span><span class="n">agent</span><span class="p">:</span><span class="n">Starting</span> <span class="n">agent</span> <span class="n">rpc</span> <span class="n">service</span><span class="p">:</span> <span class="n">tcp</span><span class="p">:</span><span class="o">//</span><span class="mf">0.0</span><span class="o">.</span><span class="mf">0.0</span><span class="p">:</span><span class="mi">9003</span>
+<span class="n">INFO</span><span class="p">:</span><span class="n">mercury</span><span class="o">.</span><span class="n">common</span><span class="o">.</span><span class="n">transport</span><span class="p">:</span><span class="n">Bound</span><span class="p">:</span> <span class="n">tcp</span><span class="p">:</span><span class="o">//</span><span class="mf">0.0</span><span class="o">.</span><span class="mf">0.0</span><span class="p">:</span><span class="mi">9003</span>
+</pre></div>
+</div>
+<p>If you check the backend console you should also see the successful connection:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="mi">2017</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">17</span> <span class="mi">16</span><span class="p">:</span><span class="mi">46</span><span class="p">:</span><span class="mi">07</span><span class="p">,</span><span class="mi">429</span> <span class="p">:</span> <span class="n">INFO</span> <span class="o">-</span> <span class="n">mercury</span><span class="o">.</span><span class="n">rpc</span><span class="o">.</span><span class="n">active_asyncio</span> <span class="o">-</span> <span class="n">Adding</span> <span class="n">record</span><span class="p">,</span> <span class="mi">00</span><span class="n">fc6ad81ffb792d04a7a4454a4c9af4579f9af982</span><span class="p">,</span> <span class="n">to</span> <span class="n">active</span> <span class="n">state</span>
+</pre></div>
 </div>
 </div>
-<div class="section" id="next-steps">
-<h2>Next steps<a class="headerlink" href="#next-steps" title="Permalink to this headline">¶</a></h2>
-<p>TODO: Link to usage documentation</p>
+</div>
+<div class="section" id="testing-out-the-api">
+<h2>Testing out the API<a class="headerlink" href="#testing-out-the-api" title="Permalink to this headline">¶</a></h2>
+<p>Now that everything is up and running, we can begin using the HTTP API to explore the inventory and rpc systems. Try
+pointing your browser here: <a class="reference external" href="http://localhost:9005/api/active/computers">http://localhost:9005/api/active/computers</a></p>
+<p>You should see something like this:</p>
+<div class="highlight-json"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="nt">&quot;total&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="nt">&quot;limit&quot;</span><span class="p">:</span> <span class="mi">250</span><span class="p">,</span>
+    <span class="nt">&quot;items&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="nt">&quot;_id&quot;</span><span class="p">:</span> <span class="s2">&quot;59e518dd72bb0a572a05cf08&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;mercury_id&quot;</span><span class="p">:</span> <span class="s2">&quot;00fc6ad81ffb792d04a7a4454a4c9af4579f9af982&quot;</span>
+        <span class="p">}</span>
+    <span class="p">],</span>
+    <span class="nt">&quot;direction&quot;</span><span class="p">:</span> <span class="s2">&quot;ASCENDING&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>That’s you’re lonely little agent running all by it’s lonesome. You can enumerate the agent’s RPC capabilities by
+hitting the active API with the mercury_id <a class="reference external" href="http://localhost:9005/api/active/computers">http://localhost:9005/api/active/computers</a>/&lt;mercury_id&gt;</p>
+<p>To see it’s full inventory record, hit the inventory endpoint <a class="reference external" href="http://localhost:9005/api/inventory/computers">http://localhost:9005/api/inventory/computers</a>/&lt;mercury_id&gt;</p>
+<p>Now for the fun part, let’s try scheduling a job!</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>curl -H <span class="s1">&#39;Content-type: application/json&#39;</span> -d @- -XPOST http://localhost:9005/api/rpc/jobs <span class="s">&lt;&lt; EOF</span>
+<span class="s">{</span>
+<span class="s">  &quot;query&quot;: {},</span>
+<span class="s">  &quot;instruction&quot;: {</span>
+<span class="s">    &quot;method&quot;: &quot;echo&quot;,</span>
+<span class="s">    &quot;args&quot;: [</span>
+<span class="s">      &quot;Hello Mercury!&quot;</span>
+<span class="s">    ]</span>
+<span class="s">  }</span>
+<span class="s">}</span>
+<span class="s">EOF</span>
+</pre></div>
+</div>
+<p>Your consoles should light up and should get a some JSON back, containing a job_id</p>
+<div class="highlight-json"><div class="highlight"><pre><span></span><span class="p">{</span><span class="nt">&quot;job_id&quot;</span><span class="p">:</span> <span class="s2">&quot;314ac71b-d353-46e9-95c8-f2e72c3a4f77&quot;</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>Try the following urls to inspect the job</p>
+<ul class="simple">
+<li><a class="reference external" href="http://localhost:9005/api/rpc/jobs">http://localhost:9005/api/rpc/jobs</a>/&lt;job_id&gt;</li>
+<li><a class="reference external" href="http://localhost:9005/api/rpc/jobs">http://localhost:9005/api/rpc/jobs</a>/&lt;job_id&gt;/status</li>
+<li><a class="reference external" href="http://localhost:9005/api/rpc/jobs">http://localhost:9005/api/rpc/jobs</a>/&lt;job_id&gt;/tasks</li>
+</ul>
+</div>
+<div class="section" id="done">
+<h2>Done!<a class="headerlink" href="#done" title="Permalink to this headline">¶</a></h2>
+<p>Pat yourself on the back! You should now be ready to begin hacking on Mercury! For full API documentation, be sure to
+check out the <a href="#id1"><span class="problematic" id="id2">`API docs&lt;https://jr0d.github.io/mercury_api_docs/&gt;`_</span></a>.</p>
+<p>TODO: List mercury resources, slack, irc, mailing list, etc</p>
 </div>
 <div class="section" id="references">
 <h2>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h2>
@@ -398,8 +442,8 @@ $ docker build -t mercury/agent .
 <li><a class="reference internal" href="#">Building a Development Environment for Mercury</a><ul>
 <li><a class="reference internal" href="#the-code">The Code</a><ul>
 <li><a class="reference internal" href="#mercury">mercury</a></li>
-<li><a class="reference internal" href="#mercury-api">mercury-api</a></li>
-<li><a class="reference internal" href="#mercury-agent">mercury_agent</a></li>
+<li><a class="reference internal" href="#mercury-api">mercury_api</a></li>
+<li><a class="reference internal" href="#mercury-agent">mercury-agent</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#install-python-3-6-and-virtualenv">Install Python 3.6 and virtualenv</a><ul>
@@ -419,12 +463,13 @@ $ docker build -t mercury/agent .
 <li><a class="reference internal" href="#running-the-services">Running the Services</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#installing-the-agent">Installing the Agent</a><ul>
-<li><a class="reference internal" href="#running-the-agent-native">Running the Agent (Native)</a></li>
+<li><a class="reference internal" href="#running-the-agent">Running the Agent</a><ul>
+<li><a class="reference internal" href="#linux-native">Linux (Native)</a></li>
 <li><a class="reference internal" href="#running-the-agent-in-docker-on-mac">Running the Agent in Docker on Mac</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#next-steps">Next steps</a></li>
+<li><a class="reference internal" href="#testing-out-the-api">Testing out the API</a></li>
+<li><a class="reference internal" href="#done">Done!</a></li>
 <li><a class="reference internal" href="#references">References</a></li>
 </ul>
 </li>
