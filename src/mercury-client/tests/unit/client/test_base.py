@@ -18,10 +18,11 @@ import mock
 import requests
 
 import mercury.client.base as client_base
-from tests.unit import base as test_base
+
+from ..base import MercuryClientUnitTest
 
 
-class TestClientBase(test_base.MercuryClientUnitTest):
+class TestClientBase(MercuryClientUnitTest):
 
     def setUp(self):
         super(TestClientBase, self).setUp()
