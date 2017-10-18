@@ -100,8 +100,13 @@ class FrontEndController(StaticEndpointController):
         :param task_id: The id of the task (UUID)
         :return: The task object (dict)
         """
-        return self.prepare_for_serialization(
-            await self.tasks_collection.find_one({'task_id': task_id}))
+
+        task = await self.tasks_collection.find_one({'task_id': task_id})
+
+        if not task:
+            return
+
+        return self.prepare_for_serialization(task)
 
     @async_endpoint('get_jobs')
     async def get_jobs(self, projection=None):
