@@ -28,7 +28,7 @@ important and you should clone it now.
     If your OCD goes crazy here, I have plans to standardize on dashes for repositories and underscores for packages
 
 
-mercury-api
+mercury_api
 ___________
 
 The mercury_api repository contains the mercury HTTP API and provides a convenient interface to the mercury inventory
@@ -39,7 +39,7 @@ and rpc ZeroMQ services. Clone this repository.
     $ git clone https://github.com/jr0d/mercury_api.git
 
 
-mercury_agent
+mercury-agent
 _____________
 
 The agent is designed to run on target devices running a Linux operating system. Regardless of your development
@@ -56,11 +56,6 @@ Install Python 3.6 and virtualenv
 This process will very per your distribution. It is here for the uninitiated, if you already
 have a working python3.6 development environment, you can skip to `Installing service dependencies`_
 
-.. warning::
-
-    If you intend to skip the guided python-3.6 install process, ensure that gcc, gcc-c++, automake,
-    autoconf, and python development headers are installed. They are require to build zeromq during
-    the merucry install process
 
 Enterprise Linux 7 / CentOS 7
 _____________________________
@@ -201,12 +196,6 @@ The first component is the mercury-common package. This package, as the name imp
 common libraries used by two or more discrete components. Following common, are the mercury-inventory,
 mercury-log, and mercury-rpc packages.
 
-.. note::
-    The mercury-agent package depends heavily on the linux sysfs ABI and should only be installed on
-    linux hosts. If you are developing on MacOS, this poses a problem. Fortunately, this problem is
-    easily solved using Vagrant, Docker (untested), or by spinning up a vanilla VM. More on this
-    later.
-
 We'll install each package using pip -e. This is synonymous with using *setup.py devel*, but pip allows
 us to use library wheelhouses for binary dependencies, such as ZeroMQ or pyYAML, when resolving requirements.
 
@@ -302,25 +291,11 @@ another repository ).
 
 Once these services are running, we are ready to connect an agent to the backend.
 
+Running the Agent
+~~~~~~~~~~~~~~~~~
 
-Installing the Agent
-~~~~~~~~~~~~~~~~~~~~
-
-
-The agent lives in it's own repository. You can clone it with:
-
-.. code-block:: bash
-
-    git clone git@github.com:jr0d/mercury-agent.git
-
-
-Running the Agent (Native)
-__________________________
-
-.. note::
-
-    For MacOS instructions see `Running the Agent in Docker on Mac`_.
-
+Linux (Native)
+______________
 
 Following the same pattern as before, copy the agent configuration file to a place mercury will search
 
@@ -420,11 +395,92 @@ Now, run the agent
 
     $ docker run -p 9003:9003 -p 9004:9004 mercury/agent mercury_agent
 
+If everything goes correctly you should see output similar to:
 
-Next steps
-~~~~~~~~~~
+.. code-block:: default
 
-TODO: Link to usage documentation
+    INFO:mercury:Starting Agent
+    INFO:mercury.agent.agent:Running inspectors
+    INFO:mercury.agent.agent:Registering device inventory for MercuryID 00fc6ad81ffb792d04a7a4454a4c9af4579f9af982
+    INFO:mercury.agent.agent:Starting pong service
+    INFO:mercury.agent.agent:Registering device
+    INFO:mercury.agent.agent:Injecting MercuryID for remote logging
+    INFO:mercury.agent.agent:Injection completed
+    ERROR:mercury.agent.agent:Caught recoverable exception running async inspector: Could not find lldplite binary
+    INFO:mercury.agent.agent:Starting agent rpc service: tcp://0.0.0.0:9003
+    INFO:mercury.common.transport:Bound: tcp://0.0.0.0:9003
+
+If you check the backend console you should also see the successful connection:
+
+.. code-block:: default
+
+    2017-10-17 16:46:07,429 : INFO - mercury.rpc.active_asyncio - Adding record, 00fc6ad81ffb792d04a7a4454a4c9af4579f9af982, to active state
+
+
+Testing out the API
+~~~~~~~~~~~~~~~~~~~
+
+Now that everything is up and running, we can begin using the HTTP API to explore the inventory and rpc systems. Try
+pointing your browser here: http://localhost:9005/api/active/computers
+
+You should see something like this:
+
+.. code-block:: json
+
+    {
+        "total": 1,
+        "limit": 250,
+        "items": [
+            {
+                "_id": "59e518dd72bb0a572a05cf08",
+                "mercury_id": "00fc6ad81ffb792d04a7a4454a4c9af4579f9af982"
+            }
+        ],
+        "direction": "ASCENDING"
+    }
+
+That's you're lonely little agent running all by it's lonesome. You can enumerate the agent's RPC capabilities by
+hitting the active API with the mercury_id http://localhost:9005/api/active/computers/<mercury_id>
+
+To see it's full inventory record, hit the inventory endpoint http://localhost:9005/api/inventory/computers/<mercury_id>
+
+Now for the fun part, let's try scheduling a job!
+
+
+.. code-block:: bash
+
+    curl -H 'Content-type: application/json' -d @- -XPOST http://localhost:9005/api/rpc/jobs << EOF
+    {
+      "query": {},
+      "instruction": {
+        "method": "echo",
+        "args": [
+          "Hello Mercury!"
+        ]
+      }
+    }
+    EOF
+
+Your consoles should light up and you should get a some JSON back, containing a job_id
+
+.. code-block:: json
+
+    {"job_id": "314ac71b-d353-46e9-95c8-f2e72c3a4f77"}
+
+Try the following urls to inspect the job
+
+* http://localhost:9005/api/rpc/jobs/<job_id>
+* http://localhost:9005/api/rpc/jobs/<job_id>/status
+* http://localhost:9005/api/rpc/jobs/<job_id>/tasks
+
+
+Done!
+~~~~~
+
+Pat yourself on the back! You should now be ready to begin hacking on Mercury! For full API documentation, be sure to
+check out the `API docs <https://jr0d.github.io/mercury_api_docs>`_.
+
+TODO: List mercury resources, slack, irc, mailing list, etc
 
 
 References
