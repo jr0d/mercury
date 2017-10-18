@@ -45,9 +45,12 @@ class FrontEndController(StaticEndpointController):
         :param projection: A mongodb projection. https://goo.gl/kB2g26
         :return: A job object
         """
-        return self.prepare_for_serialization(
-            await self.jobs_collection.find_one(
-                {'job_id': job_id}, projection=projection))
+        job = await self.jobs_collection.find_one({'job_id': job_id},
+                                                  projection=projection)
+        if not job:
+            return
+
+        return self.prepare_for_serialization(job)
 
     @async_endpoint('get_job_status')
     async def get_job_status(self, job_id):
