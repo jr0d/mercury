@@ -25,6 +25,8 @@ from mercury.common.asyncio.dispatcher import AsyncDispatcher
 from mercury.rpc.configuration import rpc_configuration, get_jobs_collection, get_tasks_collection
 from mercury.rpc.frontend.controller import FrontEndController
 
+log = logging.getLogger(__name__)
+
 
 class FrontEndService(AsyncRouterReqService):
     """
@@ -57,14 +59,14 @@ class FrontEndService(AsyncRouterReqService):
 
 
 def rpc_frontend_service():
-    logging.basicConfig(level=logging.DEBUG,
+    logging.basicConfig(level=logging.INFO,
                         format='%(asctime)s : %(levelname)s - %(name)s - %(message)s')
 
     db_configuration = rpc_configuration.get('db', {})
 
     # Create the event loop
     loop = zmq.asyncio.ZMQEventLoop()
-    loop.set_debug(True)
+    loop.set_debug(False)
     asyncio.set_event_loop(loop)
 
     # Ready the DB
@@ -86,10 +88,12 @@ def rpc_frontend_service():
     try:
         loop.run_until_complete(server.start())
     except KeyboardInterrupt:
-        pass
+        log.info('Stopping services')
+        server.kill()
     finally:
-        server.socket.close(0)
-        server.context.destroy()
+        pending = asyncio.Task.all_tasks(loop=loop)
+        loop.run_until_complete(asyncio.gather(*pending))
+        loop.close()
 
 
 if __name__ == '__main__':

@@ -81,10 +81,10 @@ class BackEndService(AsyncRouterReqService):
 
 def configure_logging():
     # TODO: get these from the configuration
-    logging.basicConfig(level=logging.DEBUG,
+    logging.basicConfig(level=logging.INFO,
                         format='%(asctime)s : %(levelname)s - %(name)s - %(message)s')
-    logging.getLogger('mercury.rpc.ping').setLevel(logging.DEBUG)
-    logging.getLogger('mercury.rpc.ping2').setLevel(logging.DEBUG)
+    logging.getLogger('mercury.rpc.ping').setLevel(logging.INFO)
+    logging.getLogger('mercury.rpc.ping2').setLevel(logging.INFO)
     logging.getLogger('mercury.rpc.jobs.monitor').setLevel(logging.INFO)
     logging.getLogger('mercury.rpc.active_asyncio').setLevel(logging.INFO)
 
@@ -131,16 +131,16 @@ def rpc_backend_service():
     try:
         loop.run_until_complete(server.start())
     except KeyboardInterrupt:
+        # TODO: Add generic service TERM handler
         log.info('Sending kill signals')
         monitor.kill()
         stop_ping()
+        server.kill()
     finally:
-        log.debug('Cleaning up...')
-        pending = asyncio.Task.all_tasks()
+        pending = asyncio.Task.all_tasks(loop=loop)
         loop.run_until_complete(asyncio.gather(*pending))
+        loop.close()
 
-        # server.socket.close(0)
-        # server.context.destroy()
 
 if __name__ == '__main__':
     rpc_backend_service()
