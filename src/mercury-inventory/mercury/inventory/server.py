@@ -55,10 +55,12 @@ def main(bind_address='tcp://0.0.0.0:9000',
     try:
         loop.run_until_complete(s.start())
     except KeyboardInterrupt:
-        pass
+        log.info('Stopping service')
+        s.kill()
     finally:
-        s.socket.close(0)
-        s.context.destroy()
+        pending = asyncio.Task.all_tasks(loop=loop)
+        loop.run_until_complete(asyncio.gather(*pending))
+        loop.close()
 
 
 if __name__ == '__main__':

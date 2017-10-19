@@ -11,18 +11,24 @@ log = logging.getLogger(__name__)
 
 
 class AsyncRouterReqService(object):
-    def __init__(self, bind_address, loop=None):
+    def __init__(self, bind_address, linger=-1, poll_timeout=2, loop=None):
         self.bind_address = bind_address
         self.loop = loop
         self.context = zmq.asyncio.Context()
+        self.poll_timeout = poll_timeout
         self.socket = self.context.socket(zmq.ROUTER)
+        self.socket.setsockopt(zmq.LINGER, linger)
+
+        self.in_poller = zmq.asyncio.Poller()
+        self.in_poller.register(self.socket, zmq.POLLIN)
 
         log.debug('Bound to: ' + self.bind_address)
 
         self.socket.bind(self.bind_address)
 
-    async def receive(self):
+        self._kill = False
 
+    async def receive(self):
         multipart = await self.socket.recv_multipart()
         parsed_message = parse_multipart_message(multipart)
 
@@ -59,7 +65,10 @@ class AsyncRouterReqService(object):
         raise NotImplementedError
 
     async def start(self):
-        while True:
+        while not self._kill:
+            if not await self.in_poller.poll(self.poll_timeout * 1000):
+                log.debug('Receive Poll Timeout')
+                continue
             try:
                 address, msg = await self.receive()
             except MercuryClientException:
@@ -79,6 +88,13 @@ class AsyncRouterReqService(object):
                 continue
             await self.send(address, response)
 
+        log.info('Goodbye Cruel World')
+        self.cleanup()
+
+
+    def kill(self):
+        self._kill = True
+
     @staticmethod
     def get_key(key, data):
         try:
@@ -95,3 +111,7 @@ class AsyncRouterReqService(object):
 
         if missing:
             raise MercuryClientException('Message is missing required data: {}'.format(missing))
+
+    def cleanup(self):
+        self.socket.close(0)
+        self.context.destroy()

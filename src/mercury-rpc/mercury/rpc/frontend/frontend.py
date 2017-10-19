@@ -25,6 +25,8 @@ from mercury.common.asyncio.dispatcher import AsyncDispatcher
 from mercury.rpc.configuration import rpc_configuration, get_jobs_collection, get_tasks_collection
 from mercury.rpc.frontend.controller import FrontEndController
 
+log = logging.getLogger(__name__)
+
 
 class FrontEndService(AsyncRouterReqService):
     """
@@ -86,10 +88,12 @@ def rpc_frontend_service():
     try:
         loop.run_until_complete(server.start())
     except KeyboardInterrupt:
-        pass
+        log.info('Stopping services')
+        server.kill()
     finally:
-        server.socket.close(0)
-        server.context.destroy()
+        pending = asyncio.Task.all_tasks(loop=loop)
+        loop.run_until_complete(asyncio.gather(*pending))
+        loop.close()
 
 
 if __name__ == '__main__':

@@ -117,7 +117,6 @@ async def ping_loop(ctx,
     inventory_client = InventoryClient(inventory_router_url)
 
     while True:
-        global stop_ping_loop
         if stop_ping_loop:
             log.info('Stopping ping loop')
             break
