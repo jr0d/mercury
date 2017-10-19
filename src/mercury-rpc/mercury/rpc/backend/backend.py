@@ -83,10 +83,10 @@ def configure_logging():
     # TODO: get these from the configuration
     logging.basicConfig(level=logging.DEBUG,
                         format='%(asctime)s : %(levelname)s - %(name)s - %(message)s')
-    logging.getLogger('mercury.rpc.ping').setLevel(logging.DEBUG)
-    logging.getLogger('mercury.rpc.ping2').setLevel(logging.DEBUG)
-    logging.getLogger('mercury.rpc.jobs.monitor').setLevel(logging.DEBUG)
-    logging.getLogger('mercury.rpc.active_asyncio').setLevel(logging.DEBUG)
+    logging.getLogger('mercury.rpc.ping').setLevel(logging.INFO)
+    logging.getLogger('mercury.rpc.ping2').setLevel(logging.INFO)
+    logging.getLogger('mercury.rpc.jobs.monitor').setLevel(logging.INFO)
+    logging.getLogger('mercury.rpc.active_asyncio').setLevel(logging.INFO)
 
 
 def rpc_backend_service():
@@ -101,7 +101,7 @@ def rpc_backend_service():
 
     # Create the event loop
     loop = zmq.asyncio.ZMQEventLoop()
-    loop.set_debug(True)
+    loop.set_debug(False)
     asyncio.set_event_loop(loop)
 
     # Ready the DB
