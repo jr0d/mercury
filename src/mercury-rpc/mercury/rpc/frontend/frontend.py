@@ -59,14 +59,14 @@ class FrontEndService(AsyncRouterReqService):
 
 
 def rpc_frontend_service():
-    logging.basicConfig(level=logging.DEBUG,
+    logging.basicConfig(level=logging.INFO,
                         format='%(asctime)s : %(levelname)s - %(name)s - %(message)s')
 
     db_configuration = rpc_configuration.get('db', {})
 
     # Create the event loop
     loop = zmq.asyncio.ZMQEventLoop()
-    loop.set_debug(True)
+    loop.set_debug(False)
     asyncio.set_event_loop(loop)
 
     # Ready the DB

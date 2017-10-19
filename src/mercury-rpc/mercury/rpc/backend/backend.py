@@ -81,7 +81,7 @@ class BackEndService(AsyncRouterReqService):
 
 def configure_logging():
     # TODO: get these from the configuration
-    logging.basicConfig(level=logging.DEBUG,
+    logging.basicConfig(level=logging.INFO,
                         format='%(asctime)s : %(levelname)s - %(name)s - %(message)s')
     logging.getLogger('mercury.rpc.ping').setLevel(logging.INFO)
     logging.getLogger('mercury.rpc.ping2').setLevel(logging.INFO)
