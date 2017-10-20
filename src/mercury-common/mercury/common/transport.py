@@ -95,7 +95,6 @@ class SimpleRouterReqClient(object):
         """
         if reply.get('error'):
             self.raise_reply_error(reply)
-            print(reply)
         return reply.get('message') or reply.get('response')
 
     def transceiver(self, payload):

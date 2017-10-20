@@ -29,19 +29,17 @@ class MercuryConfigurationUnitTests(MercuryCommonUnitTest):
     def test_find_config(self, isfile_mock):
         """Test find_config() function."""
         # This should find it in the last DEFAULT_SEARCH_DIR.
-        isfile_return_values = [
-            False for _ in range(0, len(config.DEFAULT_SEARCH_DIRS) - 1)]
+        isfile_return_values = [False] * len(config.DEFAULT_SEARCH_DIRS)
         isfile_return_values.append(True)
         isfile_mock.side_effect = isfile_return_values
         full_path = config.find_config("test.yaml")
         assert full_path is not None
         assert isinstance(full_path, six.string_types)
-        assert full_path == os.path.join(config.DEFAULT_SEARCH_DIRS[-1],
-                                         "test.yaml")
+        assert full_path == os.path.join(config.DEFAULT_SEARCH_DIRS[-1], "test.yaml")
 
+        isfile_mock.side_effect = None
+        isfile_mock.return_value = False
         # Shouldn't find a config file.
-        isfile_mock.side_effect = [
-            False for _ in range(0, len(config.DEFAULT_SEARCH_DIRS))]
         full_path = config.find_config("test.yaml")
         assert full_path is None
 

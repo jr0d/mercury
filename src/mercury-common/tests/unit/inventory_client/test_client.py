@@ -15,8 +15,9 @@
 
 import mock
 from mercury.common.clients import inventory
-from mercury.common.exceptions import MercuryCritical
-from tests.unit.base import MercuryCommonUnitTest
+from mercury.common.exceptions import MercuryClientException
+
+from tests.unit import base
 
 
 class FakeInventoryClient(inventory.InventoryClient):
@@ -26,7 +27,7 @@ class FakeInventoryClient(inventory.InventoryClient):
         self.socket = None
 
 
-class InventoryClientUnitTest(MercuryCommonUnitTest):
+class InventoryClientUnitTest(base.MercuryCommonUnitTest):
     """Tests for mercury.common.inventory_client.client.InventoryClient"""
     def setUp(self):
         super(InventoryClientUnitTest, self).setUp()
@@ -35,9 +36,9 @@ class InventoryClientUnitTest(MercuryCommonUnitTest):
     def test_raise_reply_error(self):
         """Test raise_reply_error()."""
         reply = {'message': 'fake_message', 'tb': ['val1', 'val2']}
-        expected_error = ('Problem talking to inventory service: '
+        expected_error = ('Problem talking to Inventory service: '
                           'message = fake_message, tb = val1\nval2')
-        self.assertRaisesRegexp(MercuryCritical,
+        self.assertRaisesRegexp(MercuryClientException,
                                 expected_error,
                                 self.inventory_client.raise_reply_error,
                                 reply)
@@ -45,9 +46,9 @@ class InventoryClientUnitTest(MercuryCommonUnitTest):
     def test_raise_reply_error_no_traceback(self):
         """Test raise_reply_error() with no traceback."""
         reply = {'message': 'fake_message'}
-        expected_error = ('Problem talking to inventory service: '
+        expected_error = ('Problem talking to Inventory service: '
                           'message = fake_message, tb = ')
-        self.assertRaisesRegexp(MercuryCritical,
+        self.assertRaisesRegexp(MercuryClientException,
                                 expected_error,
                                 self.inventory_client.raise_reply_error,
                                 reply)
@@ -61,7 +62,7 @@ class InventoryClientUnitTest(MercuryCommonUnitTest):
     def test_check_and_return_fail(self):
         """Test check_and_return() with error."""
         reply = {'error': 'fail'}
-        self.assertRaises(MercuryCritical,
+        self.assertRaises(MercuryClientException,
                           self.inventory_client.check_and_return,
                           reply)
 
@@ -78,12 +79,12 @@ class InventoryClientUnitTest(MercuryCommonUnitTest):
 
         response = self.inventory_client.insert_one(device_info)
         mock_transceiver.assert_called_once_with(payload)
-        self.assertEqual('fake_response', response)
+        self.assertEqual('fake_response', response['response'])
 
     def test_insert_one_no_mercury_id(self):
         """Test insert_one() fails when no mercury_id in device_info."""
         device_info = {}
-        self.assertRaises(MercuryCritical,
+        self.assertRaises(MercuryClientException,
                           self.inventory_client.insert_one,
                           device_info)
 
@@ -101,7 +102,7 @@ class InventoryClientUnitTest(MercuryCommonUnitTest):
 
         response = self.inventory_client.update_one(mercury_id, update_data)
         mock_transceiver.assert_called_once_with(payload)
-        self.assertEqual('fake_response', response)
+        self.assertEqual('fake_response', response['response'])
 
     @mock.patch('mercury.common.transport.SimpleRouterReqClient.transceiver')
     def test_get_one(self, mock_transceiver):
@@ -116,7 +117,7 @@ class InventoryClientUnitTest(MercuryCommonUnitTest):
 
         response = self.inventory_client.get_one(mercury_id)
         mock_transceiver.assert_called_once_with(payload)
-        self.assertEqual('fake_response', response)
+        self.assertEqual('fake_response', response['response'])
 
     @mock.patch('mercury.common.transport.SimpleRouterReqClient.transceiver')
     def test_query(self, mock_transceiver):
@@ -135,7 +136,7 @@ class InventoryClientUnitTest(MercuryCommonUnitTest):
 
         response = self.inventory_client.query(query_data)
         mock_transceiver.assert_called_once_with(payload)
-        self.assertEqual('fake_response', response)
+        self.assertEqual('fake_response', response['response'])
 
     @mock.patch('mercury.common.transport.SimpleRouterReqClient.transceiver')
     def test_delete(self, mock_transceiver):
@@ -149,7 +150,7 @@ class InventoryClientUnitTest(MercuryCommonUnitTest):
 
         response = self.inventory_client.delete(mercury_id)
         mock_transceiver.assert_called_once_with(payload)
-        self.assertEqual('fake_response', response)
+        self.assertEqual('fake_response', response['response'])
 
     @mock.patch('mercury.common.transport.SimpleRouterReqClient.transceiver')
     def test_count(self, mock_transceiver):
@@ -163,4 +164,4 @@ class InventoryClientUnitTest(MercuryCommonUnitTest):
 
         response = self.inventory_client.count(query_data)
         mock_transceiver.assert_called_once_with(payload)
-        self.assertEqual('fake_response', response)
+        self.assertEqual('fake_response', response['response'])

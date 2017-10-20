@@ -13,7 +13,7 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-import mercury.inventory.dispatch as dispatch
+import mercury.inventory.controller as controller
 import mock
 
 from ..base import MercuryInventoryUnitTest
@@ -21,7 +21,7 @@ from ..base import MercuryInventoryUnitTest
 
 class MercuryDispatcherUnitTest(MercuryInventoryUnitTest):
     # noinspection PyMethodOverriding
-    @mock.patch('mercury.inventory.dispatch.InventoryController')
+    @mock.patch('mercury.inventory.controller.InventoryController')
     def setUp(self, ic_mock):
         super(MercuryDispatcherUnitTest, self).setUp()
         self.dispatcher = dispatch.Dispatcher()
