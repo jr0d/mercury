@@ -20,7 +20,7 @@ import zmq
 
 from mercury.common.exceptions import MercuryClientException
 from mercury.common import transport
-from tests.unit.base import MercuryCommonUnitTest
+from .base import MercuryCommonUnitTest
 
 
 @mock.patch.object(transport, 'get_ctx_and_connect_req_socket')
@@ -59,11 +59,11 @@ class SimpleRouterReqClientUnitTest(MercuryCommonUnitTest):
 
     def test_transceiver(self):
         payload = {'endpoint': 'insert_one', 'args': ['fake_info']}
-        self.req_client.socket.recv.return_value = msgpack.packb('response')
+        self.req_client.socket.recv.return_value = msgpack.packb({'message': 'OK'})
 
         unpacked = self.req_client.transceiver(payload)
 
-        assert unpacked == 'response'
+        assert unpacked == 'OK'
         self.req_client.socket.send_multipart.assert_called_once_with(
             [msgpack.packb(payload)])
         self.req_client.socket.recv.assert_called_once()

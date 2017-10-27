@@ -149,8 +149,8 @@ def test_find_in_path(mock_os_path_exists):
     """Test find_in_path()."""
     # Test with absolute path.
     mock_os_path_exists.return_value = True
-    path = cli.find_in_path('/tmp/foo')
-    assert path == '/tmp/foo'
+    path = cli.find_in_path('/does/not/exist')
+    assert path == '/does/not/exist'
 
     # Test with relative path.
     with mock.patch.dict('os.environ', {'PATH': '/:/tmp'}):
