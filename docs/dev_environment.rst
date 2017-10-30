@@ -23,12 +23,7 @@ important and you should clone it now.
     $ git clone https://github.com/jr0d/mercury.git
 
 
-.. note::
-
-    If your OCD goes crazy here, I have plans to standardize on dashes for repositories and underscores for packages
-
-
-mercury_api
+mercury-api
 ___________
 
 The mercury_api repository contains the mercury HTTP API and provides a convenient interface to the mercury inventory
@@ -36,7 +31,7 @@ and rpc ZeroMQ services. Clone this repository.
 
 .. code-block:: bash
 
-    $ git clone https://github.com/jr0d/mercury_api.git
+    $ git clone https://github.com/jr0d/mercury-api.git
 
 
 mercury-agent
@@ -439,7 +434,7 @@ You should see something like this:
         "direction": "ASCENDING"
     }
 
-That's you're lonely little agent running all by it's lonesome. You can enumerate the agent's RPC capabilities by
+That's your lonely little agent running all by it's lonesome. You can enumerate the agent's RPC capabilities by
 hitting the active API with the mercury_id http://localhost:9005/api/active/computers/<mercury_id>
 
 To see it's full inventory record, hit the inventory endpoint http://localhost:9005/api/inventory/computers/<mercury_id>
@@ -477,7 +472,7 @@ Try the following urls to inspect the job
 Done!
 ~~~~~
 
-Pat yourself on the back! You should now be ready to begin hacking on Mercury! For full API documentation, be sure to
+Pat yourself on the back! You are now be ready to begin hacking on Mercury! For full API documentation, be sure to
 check out the `API docs <https://jr0d.github.io/mercury_api_docs>`_.
 
 TODO: List mercury resources, slack, irc, mailing list, etc
