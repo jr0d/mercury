@@ -1,0 +1,6 @@
+pyyaml
+msgpack-python
+pymongo
+pyzmq
+redis
+motor
