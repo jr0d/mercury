@@ -12,7 +12,7 @@
 #    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
-
+import mock
 import pytest
 
 from mercury.rpc.frontend.controller import FrontEndController
@@ -23,10 +23,12 @@ def frontend_controller(async_mongodb):
     inventory_client = 'tcp://localhost:9000'
     jobs_collection = async_mongodb.rpc_jobs
     tasks_collection = async_mongodb.rpc_tasks
-    controller = FrontEndController(inventory_client,
-                                    jobs_collection,
-                                    tasks_collection)
-    return controller
+    # Patch the client so we don't attempt to connect the socket
+    with mock.patch('mercury.rpc.frontend.controller.InventoryClient'):
+        controller = FrontEndController(inventory_client,
+                                        jobs_collection,
+                                        tasks_collection)
+        return controller
 
 
 class TestFrontendController(object):

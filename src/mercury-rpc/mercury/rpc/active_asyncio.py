@@ -11,7 +11,6 @@ from mercury.common.clients.inventory import InventoryClient
 log = logging.getLogger(__name__)
 
 active_state = {}
-ping_queue = asyncio.Queue()
 stop_ping_loop = False
 
 

@@ -1,15 +1,12 @@
 language: python
 python: 
-  - "2.7"
+  - "3.6"
 install: pip install tox-travis
 env:
-# - TEST_DIR=mercury-agent
-  - TEST_DIR=mercury-client
   - TEST_DIR=mercury-common
   - TEST_DIR=mercury-inventory
-# - TEST_DIR=mercury-log
-# - TEST_DIR=mercury-proxy
-# - TEST_DIR=mercury-rpc
+  - TEST_DIR=mercury-log
+  - TEST_DIR=mercury-rpc
 
 script: cd src/$TEST_DIR && tox 
 notifications:

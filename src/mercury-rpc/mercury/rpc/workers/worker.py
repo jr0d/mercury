@@ -1,5 +1,4 @@
 import logging
-import time
 
 from mercury.common.task_managers.base.manager import Manager
 from mercury.common.task_managers.redis.task import RedisTask

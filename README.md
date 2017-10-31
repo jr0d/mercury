@@ -5,6 +5,8 @@
 
 ![alt tag](docs/images/project_mercury.png)
 
+[![Build Status](https://travis-ci.org/jr0d/mercury.svg?branch=master)](https://travis-ci.org/jr0d/mercury)
+
 # Welcome
 This is the mercury project repository. Here you will find the full 
 mercury source code and documentation targeted at developers.
