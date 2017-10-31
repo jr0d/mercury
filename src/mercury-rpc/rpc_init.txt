@@ -1,5 +1,0 @@
-When the service starts, it must first query the database for active inventory.
-For each active inventory it finds, the service will spawn a ping thread. This
-allows for the rpc service to restart without the clients to re-register.
-
-

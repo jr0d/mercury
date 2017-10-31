@@ -13,22 +13,7 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-"""
-Document schema:
 
-    mercury_id:
-    rpc_address:
-    rpc_port:
-    ping_address:
-    ping_port:
-    capabilities: [
-        name:
-        desc:
-        args: int
-        kwargs: [key1, key2, keyN]
-        usage:
-    ]
-"""
 import logging
 import time
 
