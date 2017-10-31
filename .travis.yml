@@ -1,7 +1,11 @@
 language: python
-python: 
-  - "3.6"
-install: pip install tox-travis
+
+python: "3.6"
+
+install:
+  - pip install tox
+  - pip install tox-travis
+
 env:
   - TEST_DIR=mercury-common
   - TEST_DIR=mercury-inventory
@@ -9,5 +13,4 @@ env:
   - TEST_DIR=mercury-rpc
 
 script: cd src/$TEST_DIR && tox 
-notifications:
-  email: false
+
