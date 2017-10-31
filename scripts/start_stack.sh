@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-WORKDIR="/home/jared/git/mercury/src"
+WORKDIR="${PWD}/src"
 SESSION="MERCURY"
-VIRTUALENV_CMD="workon python3-mercury"
+VIRTUALENV_CMD="workon ${1:-python3-mercury}"
 set -e
 
 pushd  $WORKDIR
