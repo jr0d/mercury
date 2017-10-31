@@ -2,6 +2,7 @@ import logging
 import time
 
 from mercury.common.configuration import get_configuration
+from mercury.common.exceptions import MercuryClientException
 from mercury.common.mongo import get_collection, get_connection
 from mercury.common.transport import SimpleRouterReqService
 
@@ -26,7 +27,6 @@ class AgentLogService(SimpleRouterReqService):
     def validate_message(message):
         LOG.debug(message)
         required = [
-                'mercury_id',
                 'level',
                 'scope',
                 'message',
@@ -57,8 +57,8 @@ class AgentLogService(SimpleRouterReqService):
             message['task_id'] = task_id
 
     def process(self, message):
-        # if not self.validate_message(message):
-        #    raise MercuryGeneralException('Logging controller recieved invalid message')
+        if not self.validate_message(message):
+            raise MercuryClientException('Invalid message')
 
         message.update({'time_created': time.time()})
         self.set_job_info_from_thread(message)
