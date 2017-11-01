@@ -22,7 +22,7 @@ class AsyncRouterReqService(object):
         self.in_poller = zmq.asyncio.Poller()
         self.in_poller.register(self.socket, zmq.POLLIN)
 
-        log.debug('Bound to: ' + self.bind_address)
+        log.info('Bound to: ' + self.bind_address)
 
         self.socket.bind(self.bind_address)
 

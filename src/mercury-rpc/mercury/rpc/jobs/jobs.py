@@ -11,11 +11,13 @@ log = logging.getLogger(__name__)
 
 
 class Job(object):
-    def __init__(self, instruction, targets, jobs_collection, tasks_collection):
+    def __init__(self, instruction, targets, jobs_collection, tasks_collection,
+                 task_queue):
         """
         :param instruction: Procedure dictionary containing method, args, kwargs
         :param targets: active inventory targets
         :param collection: mongodb collection object (capped)
+        :param task_queue: The redis task queue we are using
         :raises MercuryUserError: catch, log, demean, and move on
         :raises MercuryCritical: Halt and catch fire
         """
@@ -23,6 +25,7 @@ class Job(object):
         self.targets = targets
         self.jobs_collection = jobs_collection
         self.tasks_collection = tasks_collection
+        self.task_queue = task_queue
 
         self.preprocessor = None
         self.primitive = False
@@ -46,9 +49,11 @@ class Job(object):
             try:
                 capabilities = target['capabilities']
             except KeyError:
-                raise MercuryCritical('Encountered malformed target, the database is corrupted')
+                raise MercuryCritical('Encountered malformed target, the '
+                                      'database is corrupted')
             if method not in capabilities:
-                raise MercuryUserError('One of more targets does not support method: %s' % method)
+                raise MercuryUserError('One of more targets does not support '
+                                       'method: %s' % method)
 
     def __create_task(self, target):
         # TODO: select ipv4 or ipv6
@@ -58,7 +63,8 @@ class Job(object):
             host = target['active']['rpc_address']
             port = target['active']['rpc_port']
         except KeyError:
-            raise MercuryCritical('Encountered malformed target, the database is corrupted')
+            raise MercuryCritical('Encountered malformed target, the database '
+                                  'is corrupted')
 
         # Preprocessor entry
 
@@ -108,12 +114,13 @@ class Job(object):
         self.time_started = time.time()
 
         for task in list(self.tasks.values()):
-            task.enqueue()
+            task.enqueue(self.task_queue)
 
         log.info('Inserting job: %s' % self.job_id)
 
         self.jobs_collection.insert_one(self.to_dict())
-        self.tasks_collection.insert_many([task.to_dict() for task in list(self.tasks.values())])
+        self.tasks_collection.insert_many([task.to_dict() for task in list(
+            self.tasks.values())])
 
     def start(self):
         self.__insert_job()

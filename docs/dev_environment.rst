@@ -254,12 +254,31 @@ From the mercury repository root:
 Running the Services
 ____________________
 
-I am currently designing the service launcher and CLI for the inventory and backend components. Once implemented, this
-process, which requires us to launch each service directly by calling *x/server.py*; **will go away**. For now, this
-is what we have.
+When installing mercury packages, the following servers launchers are created:
 
-The services we need to launch are located in the mercury-inventory, mercury-rpc, and mercury-log packages. In addition
-to these, we probably want to start the API bottle service as well.
++--------------------+------------------------------+----------------+------------------------+
+| *Program*          | *Description*                | *Default Port* | *Config file*          |
++--------------------+------------------------------+----------------+------------------------+
+| mercury-inventory  | Starts the inventory service | 9000           | mercury-inventory.yaml |
++--------------------+------------------------------+----------------+------------------------+
+| mercury-frontend   | Starts the frontend service  | 9001           | mercury-rpc.yaml       |
++--------------------+------------------------------+----------------+------------------------+
+| mercury-backend    | Starts the backend service   | 9002           | mercury-rpc.yaml       |
++--------------------+------------------------------+----------------+------------------------+
+| mercury-rpc-worker | Starts RPC manager process   | N/A            | mercury-rpc.yaml       |
++--------------------+------------------------------+----------------+------------------------+
+| mercury-log        | Starts the log service       | 9006           | mercury-log.yaml       |
++--------------------+------------------------------+----------------+------------------------+
+
+Each command line launcher can be configured using the configuration file,
+command line arguments, or with environment variables. Running a command with
+the --help switch will expose all available options for that service.
+
+For development, starting the services from the command line may not be
+desirable. Especially if you are working in an IDE and would like to do things
+like attaching a debugger. For these cases, it is possible to launch the python
+scripts directly.
+
 
 * mercury-inventory
 
@@ -267,24 +286,26 @@ to these, we probably want to start the API bottle service as well.
 
 * mercury-rpc
 
-  * Front End ZeroMQ service | *python src/mercury-rpc/mercury/rpc/frontend/frontend.py*
-  * Back End ZeroMQ service  | *python src/mercury-rpc/mercury/rpc/backend/backend.py*
-  * Workers service          | *python src/mercury-rpc/mercury/rpc/workers/worker.py*
+  * Front End ZeroMQ service | **python src/mercury-rpc/mercury/rpc/frontend/frontend.py**
+  * Back End ZeroMQ service  | **python src/mercury-rpc/mercury/rpc/backend/backend.py**
+  * Workers service          | **python src/mercury-rpc/mercury/rpc/workers/worker.py**
 
 * mercury-log
 
-  * Logging service | *python src/mercury-log/log_service/server.py*
+  * Logging service | **python src/mercury-log/log_service/server.py**
+
+Regardless of how you choose to start the services, make sure they are all
+running before proceeding.
+
+Starting the API
+________________
+
+The API service has not matured to the point where it has a dedicated service
+launcher. To start the service, run the python file directly.
 
 * mercury-api
 
   * Bottle API service | *python mercury-api/mercury_api/frontend.py*
-
-With an IDE, such as pycharm, I typically create a profile for each service launcher. How you start
-these services is up to you. There is a script provided in the scripts directory which will launch
-all services in separate tmux windows ( with the exception of the mercury_api, which exists in
-another repository ).
-
-Once these services are running, we are ready to connect an agent to the backend.
 
 Running the Agent
 ~~~~~~~~~~~~~~~~~
@@ -310,7 +331,7 @@ Now you can run the agent with:
 
 .. code-block:: bash
 
-    $ mercury_agent
+    $ mercury-agent
 
 .. note::
 
@@ -388,7 +409,7 @@ Now, run the agent
 
 .. code-block:: bash
 
-    $ docker run -p 9003:9003 -p 9004:9004 mercury/agent mercury_agent
+    $ docker run -p 9003:9003 -p 9004:9004 mercury/agent mercury-agent
 
 If everything goes correctly you should see output similar to:
 

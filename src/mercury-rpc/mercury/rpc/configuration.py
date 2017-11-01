@@ -19,38 +19,29 @@ from mercury.common.mongo import get_collection
 
 RPC_CONFIG_FILE = 'mercury-rpc.yaml'
 
-TASK_QUEUE = 'rpc_tasks'
 
-rpc_configuration = get_configuration(RPC_CONFIG_FILE)
+def add_common_options(configuration):
+    configuration.add_option('rpc.db.servers',
+                             default='127.0.0.1:27017',
+                             special_type=list,
+                             help_string='Server or coma separated list of '
+                                         'servers to connect to')
 
-db_configuration = rpc_configuration.get('db', {})
+    configuration.add_option('rpc.db.name',
+                             default='test',
+                             help_string='The database for our collections')
 
+    configuration.add_option('rpc.db.replica_name',
+                             config_address='rpc.db.replica_name',
+                             help_string='Optional replicaset name')
 
-def get_tasks_collection(connection=None):
-    tasks_db = db_configuration.get('tasks_mongo_db', 'test')
-    tasks_collection = db_configuration.get('tasks_mongo_collection', 'rpc_tasks')
-    tasks_servers = db_configuration.get('tasks_mongo_servers', 'localhost')
-    replica_set = db_configuration.get('tasks_replica_set')
+    configuration.add_option('rpc.db.jobs_collection',
+                             config_address='rpc.db.jobs_collection',
+                             default='rpc_jobs',
+                             help_string='The collection for RPC jobs')
 
-    return get_collection(
-        tasks_db,
-        tasks_collection,
-        connection=connection,
-        server_or_servers=tasks_servers,
-        replica_set=replica_set
-    )
+    configuration.add_option('rpc.db.tasks_collection',
+                             config_address='rpc.db.tasks_collection',
+                             default='rpc_tasks',
+                             help_string='The collection for RPC tasks')
 
-
-def get_jobs_collection(connection=None):
-    jobs_db = db_configuration.get('jobs_mongo_db', 'test')
-    jobs_collection = db_configuration.get('jobs_mongo_collection', 'rpc_jobs')
-    jobs_servers = db_configuration.get('jobs_mongo_servers', 'localhost')
-    replica_set = db_configuration.get('jobs_replica_set')
-
-    return get_collection(
-        jobs_db,
-        jobs_collection,
-        connection=connection,
-        server_or_servers=jobs_servers,
-        replica_set=replica_set
-    )

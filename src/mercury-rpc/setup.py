@@ -48,5 +48,13 @@ setup(
         'redis',
         'motor',
         'mercury-common'
-    ]
+    ],
+    entry_points={
+        'console_scripts': [
+            'mercury-backend = mercury.rpc.backend.backend:rpc_backend_service',
+            'mercury-frontend = mercury.rpc.frontend.frontend:rpc_frontend_'
+            'service',
+            'mercury-rpc-worker = mercury.rpc.workers.worker:main'
+        ]
+    }
 )
