@@ -1,4 +1,4 @@
-# Copyright 2015 Jared Rodriguez (jared.rodriguez@rackspace.com)
+# Copyright 2017 Ruben Quinones (ruben.quinones@rackspace.com)
 # All Rights Reserved.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,30 +24,51 @@ class HookException(Exception):
 
 
 class Hook(object):
+    """
+    Base Hook class. Hooks provide a way to manage inventory data before or
+    after it is inserted or updated in the database and run additional 
+    processes if needed.
+    """
 
-    def __init__(self, data):
+    def __init__(self, data, *args, **kwargs):
         self.data = data
 
-    async def run(self):
+    def run(self):
         pass
 
 
 class InterfaceHook(Hook):
+    """
+    Interface data handler, this should run when updating interface data for
+    a given inventory record.
+    """
 
-    async def process_data(self):
+    def process_data(self):
+        """
+        Convert interface data to mongodb dot notation in order to update the 
+        inventory record without erasing data collected asynchronously.
+        """
         interfaces = self.data.pop('interfaces', [])
         for i, interface in enumerate(interfaces):
             for key, value in interface.items():
                 new_key = 'interfaces.{}.{}'.format(i, key)
                 self.data[new_key] = value
 
-    async def run(self):
-        await self.process_data()
+    def run(self):
+        self.process_data()
 
 
 class LLDPHook(Hook):
+    """
+    Interface LLDP data handler, this should run when updating LLDP data for
+    a given inventory interface.
+    """
 
-    async def process_data(self):
+    def process_data(self):
+        """
+        Convert interface LLDP data to mongodb dot notation in order to update
+        the interface specified by the 'interface_index' key.
+        """
         try:
             lldp = self.data.pop('lldp')
             interface_index = lldp.pop('interface_index')
@@ -56,8 +77,8 @@ class LLDPHook(Hook):
         lldp_key = 'interfaces.{}.lldp'.format(interface_index)
         self.data[lldp_key] = lldp
 
-    async def run(self):
-        await self.process_data()
+    def run(self):
+        self.process_data()
 
 
 HOOK_MAP = {
@@ -66,14 +87,27 @@ HOOK_MAP = {
 }
 
 
-async def run_hooks(hooks, data):
+def run_hooks(hooks, data):
+    """
+    Calls the run method for each hook in the hooks dict.
+    
+    :param hooks: A dict of keys/hook classes
+    :param data: Inventory data dict
+    :return: 
+    """
     for hook_key, hook_class in hooks.items():
         hook = hook_class(data)
         log.info('Running {} hook'.format(hook_key))
-        await hook.run()
+        hook.run()
 
 
-async def get_hooks_from_data(data):
+def get_hooks_from_data(data):
+    """
+    Returns a dict of hooks based on the keys present in the data dict
+    
+    :param data: Inventory data dict
+    :return: dict 
+    """
     keys = set(data.keys()) & set(HOOK_MAP.keys())
     hooks = {key: HOOK_MAP[key] for key in keys}
     return hooks
