@@ -9,7 +9,7 @@ log = logging.getLogger(__name__)
 
 
 class RedisTask(Task):
-    def __init__(self, queue_name):
+    def __init__(self, redis_host, redis_port, queue_name):
         """Create a new RedisTask task handler.
 
         :param queue_name: Name of the queue to fetch the tasks from.
@@ -19,7 +19,7 @@ class RedisTask(Task):
         self.queue_name = queue_name
         log.debug('Redis QUEUE name: %s' % self.queue_name)
 
-        self.redis = redis.Redis()
+        self.redis = redis.Redis(redis_host, redis_port)
 
     def fetch(self):
         """Fetch a task from the queue.

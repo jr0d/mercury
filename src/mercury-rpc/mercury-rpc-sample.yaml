@@ -1,42 +1,42 @@
-db:
-  rpc_mongo_db: mercury
-  rpc_mongo_collection: rpc
-  rpc_mongo_servers:
-    - localhost:27017
-  rpc_mongo_replica_set: None
-
-  jobs_mongo_db: mercury
-  jobs_mongo_collection: rpc_jobs
-  jobs_mongo_servers:
-    - localhost:27017
-  jobs_mongo_replica_set: None
-
-  tasks_mongo_db: mercury
-  tasks_mongo_collection: rpc_tasks
-  tasks_mongo_servers:
-    - localhost:27017
-  tasks_mongo_replica_set: None
-
-
-redis:
-  host: localhost
-  port: 6379
-
-inventory:
+rpc:
   inventory_router: tcp://localhost:9000
 
-fontend:
-  service_url: tcp://0.0.0.0:9001
+  db:
+    name: mercury
+    servers:
+      - localhost:27017
+    replica_name:  None
+    jobs_collection: rpc_jobs
+    tasks_collection: rpc_tasks
 
-backend:
-  service_url: tcp://0.0.0.0:9002
+  redis:
+    host: localhost
+    port: 6379
+    queue_name: rpc_task_queue
 
-workers:
-  queue_runners: 10
+  fontend:
+    bind_address: tcp://0.0.0.0:9001
 
-info:
-  name: be1-local1
-  datacenter: local1
-  address: localhost
-  frontend_port: 9001
-  backend_port: 9002
+  backend:
+    bind_address: tcp://0.0.0.0:9002
+
+  workers:
+    queue_runners: 10
+
+  origin:
+    name: be1-local1
+    datacenter: local1
+    public_address: localhost
+    frontend_port: 9001
+
+  ping:
+    interval: 30
+    cycle_time: 10
+    initial_timeout: 2500
+    retries: 5
+    backoff: .42
+
+logging:
+  log_level: INFO
+  asyncio_debug: False
+  subtask_debug: False

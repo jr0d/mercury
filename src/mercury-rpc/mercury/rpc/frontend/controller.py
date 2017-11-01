@@ -12,17 +12,20 @@ log = logging.getLogger(__name__)
 
 class FrontEndController(StaticEndpointController):
     """Controller for FrontEnd endpoints"""
-    def __init__(self, inventory_router_url, jobs_collection, tasks_collection):
+    def __init__(self, inventory_router_url, jobs_collection, tasks_collection,
+                 tasks_queue):
         """Frontend constructor override. Uses super.
 
         :param inventory_router_url:
         :param jobs_collection:
         :param tasks_collection:
+        :param tasks_queue: The redis task queue we are using
         """
 
         self.inventory_client = InventoryClient(inventory_router_url)
         self.jobs_collection = jobs_collection
         self.tasks_collection = tasks_collection
+        self.tasks_queue = tasks_queue
 
         super(FrontEndController, self).__init__()
 
@@ -152,7 +155,8 @@ class FrontEndController(StaticEndpointController):
             return
 
         try:
-            job = Job(instruction, active_matches, self.jobs_collection, self.tasks_collection)
+            job = Job(instruction, active_matches, self.jobs_collection,
+                      self.tasks_collection, self.tasks_queue)
         except MercuryUserError as mue:
             raise EndpointError(str(mue), 'create_job')
 

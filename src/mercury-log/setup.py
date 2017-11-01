@@ -41,5 +41,10 @@ setup(
     description='Mercury agent log service',
     install_requires=[
         'mercury-common'
-    ]
+    ],
+    entry_points={
+        'console_scripts': [
+            'mercury-log = mercury.log_service.server:main'
+        ]
+    }
 )

@@ -1,24 +1,53 @@
 import logging
 import time
 
-from mercury.common.configuration import get_configuration
+from mercury.common.configuration import MercuryConfiguration
 from mercury.common.exceptions import MercuryClientException
 from mercury.common.mongo import get_collection, get_connection
 from mercury.common.transport import SimpleRouterReqService
 
-
 LOG = logging.getLogger(__name__)
 
+MERCURY_LOG_CONFIG = 'mercury-log.yaml'
 
-__defaults = {
-    'configuration_file': 'mercury-log.yaml'
-}
+
+def options():
+    configuration = MercuryConfiguration(
+        'mercury-log',
+        MERCURY_LOG_CONFIG,
+        description='The mercury logging service')
+
+    configuration.add_option('log_service.bind_address',
+                             default='tcp://127.0.0.1:9006',
+                             help_string='The address to bind to'
+                             )
+
+    configuration.add_option('log_service.db.servers',
+                             default='127.0.0.1:27017',
+                             special_type=list,
+                             help_string='Server or coma separated list of '
+                                         'servers to connect to')
+
+    configuration.add_option('log_service.db.name',
+                             config_address='log_service.db.database',
+                             default='test',
+                             help_string='The database for our collections')
+
+    configuration.add_option('log_service.db.collection',
+                             default='log',
+                             help_string='The collection for our documents')
+
+    configuration.add_option('log_service.db.replica_name',
+                             help_string='An optional replica')
+
+    return configuration.scan_options()
 
 
 class AgentLogService(SimpleRouterReqService):
     """
     Logging aggregation end point for MercuryAgents
     """
+
     def __init__(self, bind_address, log_collection):
         super(AgentLogService, self).__init__(bind_address)
         self.log_collection = log_collection
@@ -27,11 +56,11 @@ class AgentLogService(SimpleRouterReqService):
     def validate_message(message):
         LOG.debug(message)
         required = [
-                'level',
-                'scope',
-                'message',
-                'name'
-            ]
+            'levelno',
+            'pathname',
+            'message',
+            'name'
+        ]
 
         for req in required:
             if req not in message:
@@ -42,11 +71,13 @@ class AgentLogService(SimpleRouterReqService):
     @staticmethod
     def set_job_info_from_thread(message):
         """
-        The task runner thread (agent.task_runner) has the following naming convention:
+        The task runner thread (agent.task_runner) has the following naming
+        convention:
 
         _<job_id>_<task_id>
 
-        This lets us associate logging messages to jobs/tasks from within the execution thread.
+        This lets us associate logging messages to jobs/tasks from within the
+        execution thread.
         :param message: reference to the log message
         :return: None
         """
@@ -61,27 +92,36 @@ class AgentLogService(SimpleRouterReqService):
             raise MercuryClientException('Invalid message')
 
         message.update({'time_created': time.time()})
+
         self.set_job_info_from_thread(message)
+
         LOG.debug(message)
+
         self.log_collection.insert(message)
+
         return {'message': 'ok'}
 
 
-if __name__ == '__main__':
-    logging.basicConfig(level=logging.DEBUG,
-                        format='%(asctime)s : %(levelname)s - %(name)s - %(message)s')
+def main():
+    config = options()
+    logging.basicConfig(level=logging.getLevelName(config.log_level),
+                        format=config.log_format)
 
-    configuration = get_configuration(__defaults['configuration_file'])
+    db_connection = get_connection(config.log_service.db.servers,
+                                   config.log_service.db.replica_name)
 
-    db_connection = get_connection(configuration['db']['servers'],
-                                   replica_set=configuration['db']['replica_set'])
-    _log_collection = get_collection(configuration['db']['database'],
-                                     configuration['db']['collection'],
-                                     db_connection)
+    collection = get_collection(config.log_service.db.name,
+                                config.log_service.db.collection,
+                                db_connection)
 
-    _bind_address = configuration['service']['url']
+    agent_log_service = AgentLogService(config.log_service.bind_address,
+                                        collection)
 
-    agent_log_service = AgentLogService(_bind_address, _log_collection)
+    LOG.info('Starting logging service on {}'.format(
+        config.log_service.bind_address))
 
-    LOG.info('Starting logging service on {}'.format(_bind_address))
     agent_log_service.start()
+
+
+if __name__ == '__main__':
+    main()

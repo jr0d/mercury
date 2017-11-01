@@ -1,1 +1,1 @@
-from .frontend import *
+from mercury.rpc.frontend import *
