@@ -1,0 +1,58 @@
+version: "3"
+services:
+    mongodb:
+        image: mongo
+        ports:
+            - '27017:27017'
+        networks:
+            - mercury_internal
+    redis:
+        image: redis
+        ports:
+            - '6379:6379'
+        networks:
+            - mercury_internal
+    mercury_inventory:
+        build: 
+            context: .
+            dockerfile: ./docker/mercury_inventory/Dockerfile
+        volumes:
+            - .:/home/mercury
+        networks:
+            - mercury_internal
+    mercury_rpc_frontend:
+        build:  
+            context: .
+            dockerfile: ./docker/mercury_rpc/frontend/Dockerfile
+        volumes:
+            - .:/home/mercury
+        networks:
+            - mercury_internal
+            - mercury_public
+    mercury_rpc_backend:
+        build:  
+            context: .
+            dockerfile: ./docker/mercury_rpc/backend/Dockerfile
+        volumes:
+            - .:/home/mercury
+        networks:
+            - mercury_internal
+    mercury_rpc_workers:
+        build:  
+            context: .
+            dockerfile: ./docker/mercury_rpc/workers/Dockerfile
+        volumes:
+            - .:/home/mercury
+        networks:
+            - mercury_internal
+    mercury_log:
+        build:  
+            context: .
+            dockerfile: ./docker/mercury_log/Dockerfile
+        volumes:
+            - .:/home/mercury
+        networks:
+            - mercury_internal
+networks:
+    mercury_internal:
+    mercury_public:
