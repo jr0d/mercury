@@ -117,6 +117,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#installing-the-services">Installing the services</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#creating-the-configuration-files">Creating the Configuration Files</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#running-the-services">Running the Services</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#starting-the-api">Starting the API</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#running-the-agent">Running the Agent</a><ul>
@@ -388,36 +389,83 @@ sure to update your local copies when necessary.</p>
 </div>
 <div class="section" id="running-the-services">
 <h3>Running the Services<a class="headerlink" href="#running-the-services" title="Permalink to this headline">¶</a></h3>
-<p>I am currently designing the service launcher and CLI for the inventory and backend components. Once implemented, this
-process, which requires us to launch each service directly by calling <em>x/server.py</em>; <strong>will go away</strong>. For now, this
-is what we have.</p>
-<p>The services we need to launch are located in the mercury-inventory, mercury-rpc, and mercury-log packages. In addition
-to these, we probably want to start the API bottle service as well.</p>
+<p>When installing mercury packages, the following servers launchers are created:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="22%" />
+<col width="33%" />
+<col width="18%" />
+<col width="27%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><em>Program</em></td>
+<td><em>Description</em></td>
+<td><em>Default Port</em></td>
+<td><em>Config file</em></td>
+</tr>
+<tr class="row-even"><td>mercury-inventory</td>
+<td>Starts the inventory service</td>
+<td>9000</td>
+<td>mercury-inventory.yaml</td>
+</tr>
+<tr class="row-odd"><td>mercury-frontend</td>
+<td>Starts the frontend service</td>
+<td>9001</td>
+<td>mercury-rpc.yaml</td>
+</tr>
+<tr class="row-even"><td>mercury-backend</td>
+<td>Starts the backend service</td>
+<td>9002</td>
+<td>mercury-rpc.yaml</td>
+</tr>
+<tr class="row-odd"><td>mercury-rpc-worker</td>
+<td>Starts RPC manager process</td>
+<td>N/A</td>
+<td>mercury-rpc.yaml</td>
+</tr>
+<tr class="row-even"><td>mercury-log</td>
+<td>Starts the log service</td>
+<td>9006</td>
+<td>mercury-log.yaml</td>
+</tr>
+</tbody>
+</table>
+<p>Each command line launcher can be configured using the configuration file,
+command line arguments, or with environment variables. Running a command with
+the –help switch will expose all available options for that service.</p>
+<p>For development, starting the services from the command line may not be
+desirable. Especially if you are working in an IDE and would like to do things
+like attaching a debugger. For these cases, it is possible to launch the python
+scripts directly.</p>
 <ul class="simple">
 <li>mercury-inventory<ul>
 <li>Inventory Service | <em>python src/mercury-inventory/mercury/inventory/server.py</em></li>
 </ul>
 </li>
 <li>mercury-rpc<ul>
-<li>Front End ZeroMQ service | <em>python src/mercury-rpc/mercury/rpc/frontend/frontend.py</em></li>
-<li>Back End ZeroMQ service  | <em>python src/mercury-rpc/mercury/rpc/backend/backend.py</em></li>
-<li>Workers service          | <em>python src/mercury-rpc/mercury/rpc/workers/worker.py</em></li>
+<li>Front End ZeroMQ service | <strong>python src/mercury-rpc/mercury/rpc/frontend/frontend.py</strong></li>
+<li>Back End ZeroMQ service  | <strong>python src/mercury-rpc/mercury/rpc/backend/backend.py</strong></li>
+<li>Workers service          | <strong>python src/mercury-rpc/mercury/rpc/workers/worker.py</strong></li>
 </ul>
 </li>
 <li>mercury-log<ul>
-<li>Logging service | <em>python src/mercury-log/log_service/server.py</em></li>
+<li>Logging service | <strong>python src/mercury-log/log_service/server.py</strong></li>
 </ul>
 </li>
+</ul>
+<p>Regardless of how you choose to start the services, make sure they are all
+running before proceeding.</p>
+</div>
+<div class="section" id="starting-the-api">
+<h3>Starting the API<a class="headerlink" href="#starting-the-api" title="Permalink to this headline">¶</a></h3>
+<p>The API service has not matured to the point where it has a dedicated service
+launcher. To start the service, run the python file directly.</p>
+<ul class="simple">
 <li>mercury-api<ul>
 <li>Bottle API service | <em>python mercury-api/mercury_api/frontend.py</em></li>
 </ul>
 </li>
 </ul>
-<p>With an IDE, such as pycharm, I typically create a profile for each service launcher. How you start
-these services is up to you. There is a script provided in the scripts directory which will launch
-all services in separate tmux windows ( with the exception of the mercury_api, which exists in
-another repository ).</p>
-<p>Once these services are running, we are ready to connect an agent to the backend.</p>
 </div>
 </div>
 <div class="section" id="running-the-agent">
@@ -434,7 +482,7 @@ cp mercury-agent/mercury-agent-sample.yaml ~/.mercury/mercury-agent.yaml
 </pre></div>
 </div>
 <p>Now you can run the agent with:</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>$ mercury_agent
+<div class="highlight-bash"><div class="highlight"><pre><span></span>$ mercury-agent
 </pre></div>
 </div>
 <div class="admonition note">
@@ -499,7 +547,7 @@ $ docker build -t mercury/agent .
 </pre></div>
 </div>
 <p>Now, run the agent</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>$ docker run -p <span class="m">9003</span>:9003 -p <span class="m">9004</span>:9004 mercury/agent mercury_agent
+<div class="highlight-bash"><div class="highlight"><pre><span></span>$ docker run -p <span class="m">9003</span>:9003 -p <span class="m">9004</span>:9004 mercury/agent mercury-agent
 </pre></div>
 </div>
 <p>If everything goes correctly you should see output similar to:</p>
