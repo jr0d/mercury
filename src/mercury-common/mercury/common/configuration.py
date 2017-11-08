@@ -199,7 +199,7 @@ class MercuryConfiguration(object):
     def convert_argparse_destination(argument_name):
         """ Converts underscores to dashes, for a deterministic mechanism
          to name (and recall) argparse destinations"""
-        return argument_name.lstrip('--').replace('-', '_')
+        return argument_name.lstrip('-').replace('-', '_')
 
     def parse_args(self):
         """ Add option arguments and parse_args """
@@ -229,13 +229,7 @@ class MercuryConfiguration(object):
         :type special_type: list, int, float, bool
         :return: None
         """
-
-        if value is None or special_type is None:
-            # Either value or special type are not set
-            # Check this here to prevent more branching up stream
-            return value
-
-        if type(special_type) != type:
+        if type(special_type) is not type:
             raise MercuryConfigurationError(
                 f'{special_type} must be a type, not an object'
             )
@@ -252,11 +246,11 @@ class MercuryConfiguration(object):
                 'Only string types are converted'
             )
 
-        if special_type == list:
+        if special_type is list:
             # Expected comma separated value, escaping is not supported
             return value.split(',')
 
-        elif special_type == bool:
+        elif special_type is bool:
             # if the string value is 0 or FALSE (any case) then the value is
             # converted to False, otherwise True
             return value.lower() not in ['0', 'false']
@@ -291,48 +285,49 @@ class MercuryConfiguration(object):
             namespace = namespace[container]
         namespace[expanded_name[-1]] = option['default']
 
+    def override_value(self, name, value, special_type):
+        """
+        DRY override method replacing a value from a given source
+        :param name: The name of the value
+        :param value: The value
+        :param special_type: type to convert the value to
+        """
+        if value:
+            if special_type:
+                value = self.format_type(value, special_type)
+            self.set_by_namespace(self.master_configuration, name, value)
+
     def override_with_configuration(self, option):
         """
-
-        :param option:
-        :return:
+        Overrides option with a value in the configuration file
+        :param option: an option from self.options
         """
-        value = self.format_type(
-            self.get_by_namespace(self.configuration,
-                                  option['config_address']),
-            option['special_type'])
-        if value is not None:
-            self.set_by_namespace(self.master_configuration,
-                                  option['name'],
-                                  value)
+        self.override_value(option['name'],
+                            self.get_by_namespace(self.configuration,
+                                                  option['config_address']),
+                            option['special_type'])
 
     def override_with_environment(self, option):
         """
-
-        :param option:
+        Overrides option with the value found in an environment variable
+        :param option: an option from self.options
         :return:
         """
-        value = self.format_type(os.environ.get(option['env_variable']),
-                                 option['special_type'])
-        if value is not None:
-            self.set_by_namespace(self.master_configuration,
-                                  option['name'],
-                                  value)
+        self.override_value(option['name'],
+                            os.environ.get(option['env_variable']),
+                            option['special_type'])
 
     def override_with_cli_options(self, option):
         """
-
-        :param option:
-        :return:
+        Override option with a value passed in as a command line argument
+        :param option: an option from self.options
         """
-        value = self.format_type(vars(
-            self.argparse_namespace).get(
-            self.convert_argparse_destination(option['cli_argument'])),
-                                 option['special_type'])
-        if value is not None:
-            self.set_by_namespace(self.master_configuration,
-                                  option['name'],
-                                  value)
+        self.override_value(option['name'],
+                            vars(
+                                self.argparse_namespace).get(
+                                self.convert_argparse_destination(
+                                    option['cli_argument'])),
+                            option['special_type'])
 
     def scan_options(self):
         """
