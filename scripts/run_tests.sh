@@ -2,7 +2,7 @@
 
 set -e
 
-TEST_CMD="tox"
+TEST_CMD="tox -r"
 
 pushd src/
 
