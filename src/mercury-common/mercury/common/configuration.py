@@ -189,6 +189,8 @@ class MercuryConfiguration(object):
         :return:
         """
         expanded = namespace.split('.')
+        # Since the last element is the value reference, we iterate only over
+        # [:-1] elements
         for k in expanded[:-1]:
             dictionary = dictionary[k]
         dictionary[expanded[-1]] = value
