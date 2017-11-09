@@ -1,9 +1,9 @@
-db:
-  database: mercury
-  collection: log
-  servers:
-    - localhost:27017
-  replica_set: null
+log_service:
+  db:
+    name: mercury
+    collection: log
+    servers:
+      - localhost:27017
+    replica_name: null
 
-service:
-  url: tcp://0.0.0.0:9006
+  bind_address: tcp://0.0.0.0:9006

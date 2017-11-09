@@ -22,8 +22,11 @@ import zmq.asyncio
 from mercury.common.asyncio.mongo import get_connection
 from mercury.common.asyncio.transport import AsyncRouterReqService
 from mercury.common.asyncio.dispatcher import AsyncDispatcher
-from mercury.rpc.configuration import rpc_configuration, get_jobs_collection, get_tasks_collection
+
 from mercury.rpc.frontend.controller import FrontEndController
+from mercury.rpc.frontend.options import parse_options
+from mercury.rpc.mongo import RPCCollectionFactory
+
 
 log = logging.getLogger(__name__)
 
@@ -33,24 +36,27 @@ class FrontEndService(AsyncRouterReqService):
     Front facing ZeroMQ service used for injecting RPC jobs
     """
 
-    def __init__(self, inventory_client, jobs_collection, tasks_collection):
+    def __init__(self, bind_address,
+                 inventory_router_url,
+                 jobs_collection,
+                 tasks_collection,
+                 tasks_queue):
         """
-
+        :param bind_address: ZeroMQ bind address
+        :param inventory_router_url: ZeroMQ URL of Inventory router service
         :param jobs_collection: motor mongodb collection
         :param tasks_collection: motor mongodb collection
+        :param tasks_queue: The task queue we are using
         """
-        service_bind_address = rpc_configuration.get('frontend',
-                                                     {}).get('service_url',
-                                                             'tcp://0.0.0.0:9001')
-        super(FrontEndService, self).__init__(service_bind_address)
+        super(FrontEndService, self).__init__(bind_address)
 
-        self.inventory_client = inventory_client
         self.jobs_collection = jobs_collection
         self.tasks_collection = tasks_collection
-
-        self.controller = FrontEndController(inventory_client,
+        self.tasks_queue = tasks_queue
+        self.controller = FrontEndController(inventory_router_url,
                                              jobs_collection,
-                                             tasks_collection)
+                                             tasks_collection,
+                                             tasks_queue)
 
         self.dispatcher = AsyncDispatcher(self.controller)
 
@@ -58,33 +64,54 @@ class FrontEndService(AsyncRouterReqService):
         return await self.dispatcher.dispatch(message)
 
 
-def rpc_frontend_service():
-    logging.basicConfig(level=logging.INFO,
-                        format='%(asctime)s : %(levelname)s - %(name)s - %(message)s')
+def configure_logging(config):
+    logging.basicConfig(level=logging.getLevelName(config.log_level),
+                        format=config.log_format)
+    if config.asyncio_debug:
+        logging.getLogger('mercury.rpc.active_asyncio').setLevel(logging.DEBUG)
 
-    db_configuration = rpc_configuration.get('db', {})
+
+def rpc_frontend_service():
+    """ Entry Point """
+
+    config = parse_options()
+
+    configure_logging(config)
 
     # Create the event loop
     loop = zmq.asyncio.ZMQEventLoop()
-    loop.set_debug(False)
+
+    # If config.asyncio_debug == True, enable debug
+    loop.set_debug(config.asyncio_debug)
+
+    # Set the zmq event loop as the default event loop
     asyncio.set_event_loop(loop)
 
     # Ready the DB
-    connection = get_connection(server_or_servers=db_configuration.get('rpc_mongo_servers',
-                                                                       'localhost'),
-                                replica_set=db_configuration.get('replica_set'))
 
-    jobs_collection = get_jobs_collection(connection)
-    tasks_collection = get_tasks_collection(connection)
+    collections = RPCCollectionFactory(
+        servers=config.rpc.db.servers,
+        database=config.rpc.db.name,
+        jobs_collection=config.rpc.db.jobs_collection,
+        tasks_collection=config.rpc.db.tasks_collection,
+        replica_name=config.rpc.db.replica_name,
+        use_asyncio=True
+    )
 
-    jobs_collection.create_index('ttl_time_completed', expireAfterSeconds=3600)
-    tasks_collection.create_index('ttl_time_completed', expireAfterSeconds=3600)
+    # Add TTL indexes for completed jobs/tasks
+    collections.jobs_collection.create_index('ttl_time_completed',
+                                             expireAfterSeconds=3600)
+    collections.tasks_collection.create_index('ttl_time_completed',
+                                              expireAfterSeconds=3600)
 
-    inventory_router = rpc_configuration['inventory']['inventory_router']
-
-    server = FrontEndService(inventory_router, jobs_collection, tasks_collection)
+    server = FrontEndService(config.rpc.frontend.bind_address,
+                             config.rpc.inventory_router,
+                             collections.jobs_collection,
+                             collections.tasks_collection,
+                             config.rpc.redis.queue)
 
     # Start main loop
+    log.info('Starting Mercury Frontend Service')
     try:
         loop.run_until_complete(server.start())
     except KeyboardInterrupt:

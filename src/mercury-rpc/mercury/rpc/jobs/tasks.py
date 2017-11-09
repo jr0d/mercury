@@ -5,13 +5,14 @@ import redis
 import time
 import uuid
 
-from mercury.rpc.configuration import TASK_QUEUE, get_jobs_collection, get_tasks_collection
+from mercury.rpc.mongo import get_rpc_collections
 
 
 log = logging.getLogger(__name__)
 
 # TODO: Save space and change these to unsigned shorts?
-COMPLETED_STATUSES = ['SUCCESS', 'ERROR', 'EXCEPTION', 'TIMEOUT']  # This will move
+COMPLETED_STATUSES = ['SUCCESS', 'ERROR', 'EXCEPTION', 'TIMEOUT']
+# This will move
 
 
 async def update_task(task_id, update_data, tasks_collection=None):
@@ -22,7 +23,7 @@ async def update_task(task_id, update_data, tasks_collection=None):
     :param update_data:
     :return:
     """
-    collection = tasks_collection or get_tasks_collection()
+    collection = tasks_collection or get_rpc_collections().tasks_collection
 
     # We'll be modifying the update data, so make a copy
     task_update = update_data.copy()
@@ -125,7 +126,8 @@ class Task(object):
     progress: Optional progress delta 0 through 1 set by the executor
     ttl_time_completed: an ISO datetime value used by mongo as an expiry index
     """
-    def __init__(self, job_id, mercury_id, host, port, method, args=None, kwargs=None):
+    def __init__(self, job_id, mercury_id, host, port, method, args=None,
+                 kwargs=None):
         """
 
         :param job_id:
@@ -181,9 +183,9 @@ class Task(object):
         return 'Task: {task_id} <{host}:{port}> ' \
                '[method: {method} args: {args}, kwargs: {kwargs}]'.format(**self.to_dict())
 
-    def enqueue(self):
+    def enqueue(self, task_queue):
         log.debug('Queuing task: %s' % self.task_id)
         redis_client = redis.Redis()
         self.time_queued = time.time()
         self.time_updated = time.time()
-        redis_client.lpush(TASK_QUEUE, json.dumps(self.to_dict()))
+        redis_client.lpush(task_queue, json.dumps(self.to_dict()))
