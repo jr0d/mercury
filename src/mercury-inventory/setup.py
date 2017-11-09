@@ -43,4 +43,9 @@ setup(
         'msgpack-python',
         'pyzmq',
     ],
+    entry_points={
+        'console_scripts': [
+            'mercury-inventory = mercury.inventory.server:main'
+        ]
+    }
 )

@@ -23,11 +23,13 @@ def frontend_controller(async_mongodb):
     inventory_client = 'tcp://localhost:9000'
     jobs_collection = async_mongodb.rpc_jobs
     tasks_collection = async_mongodb.rpc_tasks
+    rpc_tasks_queue = 'rpc_tasks'
     # Patch the client so we don't attempt to connect the socket
     with mock.patch('mercury.rpc.frontend.controller.InventoryClient'):
         controller = FrontEndController(inventory_client,
                                         jobs_collection,
-                                        tasks_collection)
+                                        tasks_collection,
+                                        'rpc_tasks')
         return controller
 
 

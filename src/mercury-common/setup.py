@@ -46,6 +46,7 @@ setup(
         'pymongo',
         'pyzmq',
         'redis',
-        'motor'
+        'motor',
+        'python-box'
     ]
 )
