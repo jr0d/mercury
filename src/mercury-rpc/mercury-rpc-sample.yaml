@@ -14,7 +14,7 @@ rpc:
     port: 6379
     queue_name: rpc_task_queue
 
-  fontend:
+  frontend:
     bind_address: tcp://0.0.0.0:9001
 
   backend:
