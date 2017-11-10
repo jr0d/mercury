@@ -109,53 +109,45 @@ def update_inventory_config(options, config_data=None):
     config_data['inventory']['db']['servers'] = [
         options.database
     ]
-    config_data['inventory']['db']['replica_set'] = options.replica_set
-    config_data['inventory']['service']['bind_url'] = options.inventory_router
+    config_data['inventory']['db']['replica_name'] = options.replica_name
+    config_data['inventory']['bind_address'] = options.inventory_router
 
     return config_data
 
 
 @ConfigWrapper('log')
 def update_log_config(options, config_data=None):
-    config_data['db']['servers'] = [
+    config_data['log_service']['db']['servers'] = [
         options.database
     ]
-    config_data['db']['replica_set'] = options.replica_set
-    config_data['service']['url'] = options.log_url
+    config_data['log_service']['db']['replica_name'] = options.replica_name
+    config_data['log_service']['bind_address'] = options.log_url
 
     return config_data
 
 @ConfigWrapper('rpc')
 def update_rpc_config(options, config_data=None):
-    mongo_configs = [
-        'rpc_mongo',
-        'jobs_mongo',
-        'tasks_mongo'
-    ]
-    for mongo_set in mongo_configs:
-        server = '{0}_servers'.format(mongo_set)
-        replica_set = '{0}_replica_set'.format(mongo_set)
-        config_data['db'][server] = [options.database]
-        config_data['db'][replica_set] = options.replica_set
+    config_data['rpc']['inventory_router'] = options.inventory_router
 
-    config_data['redis']['host'] = options.redis_host
-    config_data['redis']['port'] = options.redis_port
-    config_data['inventory']['inventory_router'] = options.inventory_router
-    config_data['frontend']['service_url'] = 'tcp://{0}:{1}'.format(
+    config_data['rpc']['db']['servers'] = [
+        options.database
+    ]
+    config_data['rpc']['db']['replica_name'] = options.replica_name
+
+    config_data['rpc']['redis']['host'] = options.redis_host
+    config_data['rpc']['redis']['port'] = options.redis_port
+
+    config_data['rpc']['frontend']['bind_address'] = 'tcp://{0}:{1}'.format(
         options.frontend_host,
         options.frontend_port
     )
-    config_data['backend']['service_url'] = 'tcp://{0}:{1}'.format(
+    config_data['rpc']['backend']['bind_address'] = 'tcp://{0}:{1}'.format(
         options.backend_host,
         options.backend_port
     )
-    config_data['frontend']['service_url'] = 'tcp://{0}:{1}'.format(
-        options.frontend_host,
-        options.frontend_port
-    )
-    config_data['info']['address'] = options.info_address
-    config_data['info']['frontend_port'] = options.frontend_port
-    config_data['info']['backend_port'] = options.backend_port
+
+    config_data['rpc']['origin']['public_address'] = options.info_address
+    config_data['rpc']['origin']['frontend_port'] = options.frontend_port
 
     return config_data
 
@@ -188,7 +180,7 @@ def main():
             default="localhost:27017"
         )
         subparser.add_argument(
-            '--replica-set', '-rs',
+            '--replica-name', '-rn',
             required=False,
             type=str,
             default=None
