@@ -5,7 +5,7 @@ from mercury.rpc.configuration import add_common_options, RPC_CONFIG_FILE
 
 def parse_options():
     configuration = MercuryConfiguration(
-        'mercury-backend',
+        'mercury-frontend',
         RPC_CONFIG_FILE,
         description='The mercury frontend RPC service'
     )
