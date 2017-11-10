@@ -18,6 +18,9 @@ import time
 
 from mercury.common.exceptions import MercuryCritical, MercuryGeneralException
 
+from mercury.inventory.hooks import get_hooks_from_data, run_hooks
+
+
 log = logging.getLogger(__name__)
 
 
@@ -60,6 +63,7 @@ class InventoryDBController(object):
         :return:
         """
         data = data or {}
+        upsert = False
 
         if not data:
             log.warning('Update data is empty')
@@ -70,8 +74,15 @@ class InventoryDBController(object):
         if 'mercury_id' in data:
             raise MercuryCritical('MercuryID cannot be updated once a record already exists')
 
+        hooks = get_hooks_from_data(data)
+        if hooks:
+            # We care about how this data is handled
+            upsert = True
+            run_hooks(hooks, data)
+
         data['time_updated'] = time.time()
-        await self.collection.update_one({'mercury_id': mercury_id}, {'$set': data})
+        await self.collection.update_one({'mercury_id': mercury_id},
+                                         {'$set': data}, upsert=upsert)
 
     async def delete(self, mercury_id):
         log.info('Deleting: %s' % mercury_id)

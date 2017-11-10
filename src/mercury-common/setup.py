@@ -26,9 +26,14 @@ def find_mercury_packages():
     return packages
 
 
+def get_version():
+    with open('../../VERSION') as fp:
+        return fp.readline().strip()
+
+
 setup(
     name='mercury-common',
-    version='0.0.4',
+    version=get_version(),
     packages=find_mercury_packages(),
     url='http://www.mercurysoft.io',
     license='Apache-2.0',
@@ -41,6 +46,7 @@ setup(
         'pymongo',
         'pyzmq',
         'redis',
-        'motor'
+        'motor',
+        'python-box'
     ]
 )

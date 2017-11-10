@@ -4,3 +4,5 @@ pymongo
 pyzmq
 redis
 motor
+python-box
+
