@@ -1,4 +1,4 @@
-FROM centos/python-35-centos7:3.5
+FROM centos/python-36-centos7:1
 # for lack of a better e-mail...just using a dev on the team ;)
 MAINTAINER DCX Baremetal Devs <ben.meyer@rackspace.com>
 
@@ -6,6 +6,7 @@ ENV APP_NAME mercury-inventory
 ENV SOURCE_ROOT ${HOME}/${APP_NAME}
 ENV LOG_DIR /var/log/${APP_NAME}
 ENV PID_DIR /var/run/${APP_NAME}
+ENV MERCURY_CONFIG_DIR ${HOME}/.mercury
 SHELL ["/bin/bash", "-c"]
 
 VOLUME ${HOME}/${APP_NAME}
@@ -24,12 +25,13 @@ RUN mkdir -p ${PID_DIR} && chmod -R +w ${PID_DIR} && chown -R default:root ${PID
 USER default
 RUN pip install --upgrade pip
 
+
 ADD . ${HOME}/${APP_NAME}
 
 WORKDIR ${SOURCE_ROOT}
 RUN cd src/mercury-common && pip install -r test-requirements.txt && pip install -e .
 RUN cd src/${APP_NAME} && pip install -e .
 
-# TODO: Add config file
-# TODO: Add log configuration file
-# TODO: Run the application
+RUN scripts/make_docker_configs.sh --rebuild inventory --database "mongo:27017" --inventory-router "tcp://mercury_inventory:9000"
+EXPOSE 9000:9000
+CMD python src/mercury-inventory/mercury/inventory/server.py
