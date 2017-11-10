@@ -23,7 +23,7 @@ class RedisTaskTest(MercuryCommonUnitTest):
     """Tests for the mercury.common.task_managers.redis.task"""
     @mock.patch('redis.Redis')
     def setUp(self, mock_redis):
-        self.redisTask = task.RedisTask('rpc_tasks')
+        self.redisTask = task.RedisTask(None, None, 'rpc_tasks')
 
     def test_fetch(self):
         """Test fetch() with JSON data in 'rpc_task' queue"""

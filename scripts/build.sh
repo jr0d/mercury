@@ -5,21 +5,27 @@ set -e
 BUILD_CMD="python setup.py bdist_egg bdist_wheel upload"
 
 pushd src/
-pushd mercury-common
-$BUILD_CMD
 
-popd
-pushd mercury-inventory
-$BUILD_CMD
+    pushd mercury-common
+    tox
+    $BUILD_CMD
+    popd
 
-popd
-pushd mercury-rpc
-$BUILD_CMD
+    pushd mercury-inventory
+    tox
+    $BUILD_CMD
+    popd
 
-popd
-pushd mercury-log
-$BUILD_CMD
-popd
+    pushd mercury-rpc
+    tox
+    $BUILD_CMD
+    popd
+
+    pushd mercury-log
+    tox
+    $BUILD_CMD
+    popd
+
 popd
 
 set +e

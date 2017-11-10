@@ -25,9 +25,14 @@ def find_mercury_packages():
     return packages
 
 
+def get_version():
+    with open('../../VERSION') as fp:
+        return fp.readline().strip()
+
+
 setup(
     name='mercury-rpc',
-    version='0.0.4',
+    version=get_version(),
     packages=find_mercury_packages(),
     url='http://www.mercurysoft.io',
     license='Apache-2.0',
@@ -43,5 +48,13 @@ setup(
         'redis',
         'motor',
         'mercury-common'
-    ]
+    ],
+    entry_points={
+        'console_scripts': [
+            'mercury-backend = mercury.rpc.backend.backend:rpc_backend_service',
+            'mercury-frontend = mercury.rpc.frontend.frontend:rpc_frontend_'
+            'service',
+            'mercury-rpc-worker = mercury.rpc.workers.worker:main'
+        ]
+    }
 )
