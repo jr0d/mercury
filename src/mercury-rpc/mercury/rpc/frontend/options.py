@@ -13,7 +13,7 @@ def parse_options():
     add_common_options(configuration)
 
     configuration.add_option('rpc.frontend.bind_address',
-                             default='tcp://127.0.0.1:9002',
+                             default='tcp://127.0.0.1:9001',
                              help_string='Backend service bind address')
 
     configuration.add_option('rpc.redis.host',
