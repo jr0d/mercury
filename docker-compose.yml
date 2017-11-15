@@ -13,42 +13,129 @@ services:
         networks:
             - mercury_internal
     mercury_inventory:
-        build: 
+        build:
             context: .
             dockerfile: ./docker/mercury_inventory/Dockerfile
+        environment:
+            MERCURY_LOG_LEVEL: DEBUG
+            MERCURY_INVENTORY_SERVICE_BIND_ADDRESS: tcp://0.0.0.0:9000
+            MERCURY_INVENTORY_DB_SERVERS: mongodb:27017
+            MERCURY_INVENTORY_DB_NAME: mercury
+            MERCURY_INVENTORY_DB_COLLECTION: inventory
+            MERCURY_INVENTORY_DB_REPLICA_NAME: ""
+            MERCURY_ASYNCIO_DEBUG: 0
+        links:
+            - mongodb
+        ports:
+            - '9000:9000'
         volumes:
             - .:/home/mercury
         networks:
             - mercury_internal
     mercury_rpc_frontend:
-        build:  
+        build:
             context: .
             dockerfile: ./docker/mercury_rpc/frontend/Dockerfile
+        ports:
+            - '9001:9001'
+        environment:
+            MERCURY_LOG_LEVEL: DEBUG
+            MERCURY_RPC_SERVICE_BIND_ADDRESS: tcp://0.0.0.0:9001
+            MERCURY_RPC_DB_SERVERS: mongodb:27017
+            MERCURY_RPC_DB_NAME: mercury
+            MERCURY_RPC_DB_REPLICA_NAME: ""
+            MERCURY_RPC_JOBS_DB_COLLECTION: rpc_jobs
+            MERCURY_RPC_TASKS_DB_COLLECTION: rpc_tasks
+            MERCURY_ASYNCIO_DEBUG: 0
+            MERCURY_SUBTASK_DEBUG: 0
+            MERCURY_RPC_INVENTORY_ROUTER: tcp://mercury_inventory:9000
+            MERCURY_RPC_REDIS_HOST: redis
+            MERCURY_RPC_REDIS_PORT: 6379
+            MERCURY_RPC_REDIS_QUEUE: rpc_task_queue
+        links:
+            - mongodb
+            - redis
         volumes:
             - .:/home/mercury
         networks:
             - mercury_internal
             - mercury_public
     mercury_rpc_backend:
-        build:  
+        build:
             context: .
             dockerfile: ./docker/mercury_rpc/backend/Dockerfile
+        ports:
+            - '9002:9002'
+        environment:
+            MERCURY_LOG_LEVEL: DEBUG
+            MERCURY_RPC_SERVICE_BIND_ADDRESS: tcp://0.0.0.0:9002
+            MERCURY_RPC_DB_SERVERS: mongodb:27017
+            MERCURY_RPC_DB_NAME: mercury
+            MERCURY_RPC_DB_REPLICA_NAME: ""
+            MERCURY_RPC_JOBS_DB_COLLECTION: rpc_jobs
+            MERCURY_RPC_TASKS_DB_COLLECTION: rpc_tasks
+            MERCURY_ASYNCIO_DEBUG: 0
+            MERCURY_SUBTASK_DEBUG: 0
+            MERCURY_RPC_ORIGIN_NAME: be1-local1
+            MERCURY_RPC_ORIGIN_DATACENTER: local1
+            MERCURY_RPC_ORIGIN_PUBLIC_ADDRESS: mercury_rpc_frontend
+            MERCURY_RPC_ORIGIN_FRONTEND_PORT: 9001
+            MERCURY_RPC_INVENTORY_ROUTER: tcp://mercury_inventory:9000
+            MERCURY_RPC_PING_INTERVAL: 30
+            MERCURY_RPC_PING_CYCLE_TIME: 10
+            MERCURY_RPC_PING_INITIAL_TIMEOUT: 2500
+            MERCURY_RPC_PING_RETRIES: 5
+            MERCURY_RPC_PING_BACKOFF: .42
+        links:
+            - mongodb
+            - mercury_rpc_frontend
+            - mercury_inventory
         volumes:
             - .:/home/mercury
         networks:
             - mercury_internal
     mercury_rpc_workers:
-        build:  
+        build:
             context: .
             dockerfile: ./docker/mercury_rpc/workers/Dockerfile
+        environment:
+            MERCURY_LOG_LEVEL: DEBUG
+            MERCURY_RPC_SERVICE_BIND_ADDRESS: tcp://0.0.0.0:9001
+            MERCURY_RPC_DB_SERVERS: mongodb:27017
+            MERCURY_RPC_DB_NAME: mercury
+            MERCURY_RPC_DB_REPLICA_NAME: ""
+            MERCURY_RPC_JOBS_DB_COLLECTION: rpc_jobs
+            MERCURY_RPC_TASKS_DB_COLLECTION: rpc_tasks
+            MERCURY_ASYNCIO_DEBUG: 0
+            MERCURY_SUBTASK_DEBUG: 0
+            MERCURY_RPC_INVENTORY_ROUTER: tcp://mercury_inventory:9000
+            MERCURY_RPC_REDIS_HOST: redis
+            MERCURY_RPC_REDIS_PORT: 6379
+            MERCURY_RPC_REDIS_QUEUE: rpc_task_queue
+            MERCURY_RPC_WORKER_THREADS: 10
+            MERCURY_RPC_WORKER_MAX_REQUESTS_PER_THREAD: 1
+        links:
+            - mongodb
+            - redis
         volumes:
             - .:/home/mercury
         networks:
             - mercury_internal
     mercury_log:
-        build:  
+        build:
             context: .
             dockerfile: ./docker/mercury_log/Dockerfile
+        ports:
+            - '9006:9006'
+        environment:
+            MERCURY_LOG_LEVEL: DEBUG
+            MERCURY_LOG_SERVICE_BIND_ADDRESS: tcp://0.0.0.0:9006
+            MERCURY_LOG_DB_SERVERS: mongodb:27017
+            MERCURY_LOG_DB_NAME: mercury
+            MERCURY_LOG_DB_COLLECTION: log
+            MERCURY_LOG_DB_REPLICA_NAME: ""
+        links:
+            - mongodb
         volumes:
             - .:/home/mercury
         networks:

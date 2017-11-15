@@ -20,7 +20,7 @@ config = None
 
 def options():
     configuration = MercuryConfiguration(
-        'mercury-backend',
+        'mercury-worker',
         RPC_CONFIG_FILE,
         description='The mercury frontend RPC service'
     )
