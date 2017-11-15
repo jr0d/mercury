@@ -1,36 +1,46 @@
-FROM centos/python-36-centos7:1
-# for lack of a better e-mail...just using a dev on the team ;)
-MAINTAINER DCX Baremetal Devs <ben.meyer@rackspace.com>
+FROM ubuntu:17.04
 
+MAINTAINER DCX Baremetal Devs <baremetal@rackspace.com>
+
+ENV HOME /root
 ENV APP_NAME mercury-log
 ENV SOURCE_ROOT ${HOME}/${APP_NAME}
 ENV LOG_DIR /var/log/${APP_NAME}
 ENV PID_DIR /var/run/${APP_NAME}
 ENV MERCURY_CONFIG_DIR ${HOME}/.mercury
+ENV MY_VENV ${HOME}/venv
+ENV MY_VENV_ACTIVATION ${MY_VENV}/bin/activate
 SHELL ["/bin/bash", "-c"]
 
 VOLUME ${HOME}/${APP_NAME}
 
-# switch to user in order to update the base image
-USER root
-# IPv6 doesn't resolve over VPN at least so force IPv4
-RUN echo "ip_resolve=4" >> /etc/yum.conf
-RUN yum -y update && yum -y install @development-tools fedora-packager rpmdevtools
+RUN apt-get -qq update && apt-get -qq upgrade && apt-get install -qqy \
+    git-core \
+    libev4 \
+    libev-dev \
+    libffi-dev \
+    libssl-dev \
+    python3.6-dev \
+    python3-pip \
+    python3-setuptools \
+	python-virtualenv
+
+RUN virtualenv -p `which python3.6` ${MY_VENV}
 
 # Create log & pid directories
-RUN mkdir -p ${LOG_DIR} && chmod -R +w ${LOG_DIR} && chown -R default:root ${LOG_DIR}
-RUN mkdir -p ${PID_DIR} && chmod -R +w ${PID_DIR} && chown -R default:root ${PID_DIR}
+RUN source ${MY_VENV_ACTIVATION} && mkdir -p ${LOG_DIR} && chmod -R +w ${LOG_DIR} && chown -R root:root ${LOG_DIR}
+RUN source ${MY_VENV_ACTIVATION} && mkdir -p ${PID_DIR} && chmod -R +w ${PID_DIR} && chown -R root:root ${PID_DIR}
 
-# switch back to the `default` user used for the Application by the base image
-USER default
-RUN pip install --upgrade pip
+# upgrade pip and setuptools within the virtualenv
+RUN source ${MY_VENV_ACTIVATION} && pip install --upgrade pip setuptools
 
 ADD . ${HOME}/${APP_NAME}
 
 WORKDIR ${SOURCE_ROOT}
-RUN cd src/mercury-common && pip install -r test-requirements.txt && pip install -e .
-RUN cd src/${APP_NAME} && pip install -e .
+# install everything into the virtualenv
+RUN source ${MY_VENV_ACTIVATION} && cd src/mercury-common && pip install -r test-requirements.txt && pip install -e .
+RUN source ${MY_VENV_ACTIVATION} && cd src/${APP_NAME} && pip install -e .
 
-RUN scripts/make_docker_configs.sh --rebuild log --database "mongo:27017" --log-url "tcp://mercury_log:9006"
 EXPOSE 9006:9006
-CMD python src/mercury-log/log_service/server.py
+# and run it
+CMD source ${MY_VENV_ACTIVATION} && ./docker/mercury_log/run_logs.sh
