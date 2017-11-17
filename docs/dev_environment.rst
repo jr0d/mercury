@@ -150,6 +150,8 @@ When you are done with them, stop them with the kill command
     $  ~ : docker kill b639809a68ff
     b639809a68ff
 
+.. See :ref:`docker` for more information Docker and functionality provided via
+	Docker-Compose.
 
 Mercury Services
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
