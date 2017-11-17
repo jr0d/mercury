@@ -5,7 +5,7 @@ rpc:
     name: mercury
     servers:
       - localhost:27017
-    replica_name:  None
+    replica_name: null
     jobs_collection: rpc_jobs
     tasks_collection: rpc_tasks
 
