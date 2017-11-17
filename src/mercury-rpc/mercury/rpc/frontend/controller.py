@@ -128,7 +128,7 @@ class FrontEndController(StaticEndpointController):
         return {'count': count, 'jobs': jobs}
 
     @async_endpoint('create_job')
-    async def create_job(self, query, instruction):
+    async def create_job(self, query, instruction, job_id=None):
         """Create a job
 
         :param query: Query representing targets of the instruction
@@ -136,6 +136,9 @@ class FrontEndController(StaticEndpointController):
         full documentation regarding instruction syntax at http://jr0d.github.io/mercury_api
         :raises EndpointException: Raised after catching a MercuryUserError as to conform
         to dispatch semantics
+        :param job_id: Use a common job_id rather than creating one. This allows
+        the injector to pass in a job_id that may be shared among multiple
+        backends
         :return: The job_id or None
         """
 
