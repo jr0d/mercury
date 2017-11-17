@@ -5,7 +5,7 @@ from mercury.rpc.configuration import add_common_options, RPC_CONFIG_FILE
 
 def parse_options():
     configuration = MercuryConfiguration(
-        'mercury-backend',
+        'mercury-frontend',
         RPC_CONFIG_FILE,
         description='The mercury frontend RPC service'
     )
@@ -13,7 +13,7 @@ def parse_options():
     add_common_options(configuration)
 
     configuration.add_option('rpc.frontend.bind_address',
-                             default='tcp://127.0.0.1:9002',
+                             default='tcp://127.0.0.1:9001',
                              help_string='Backend service bind address')
 
     configuration.add_option('rpc.redis.host',
