@@ -52,3 +52,4 @@ Indices and tables
    inventory
    installation
    dev_environment
+   docker
