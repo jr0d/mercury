@@ -1,8 +1,0 @@
-pyyaml
-msgpack-python
-pymongo
-pyzmq
-redis
-motor
-python-box
-

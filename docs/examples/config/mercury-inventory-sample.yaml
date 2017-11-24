@@ -1,0 +1,13 @@
+inventory:
+  bind_address: tcp://0.0.0.0:9000
+
+  database:
+    name: mercury
+    collection: inventory
+    servers:
+      - localhost:27017
+    replica_name: null
+
+logging:
+  level: INFO
+  debug_asyncio: False

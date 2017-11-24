@@ -1,4 +1,3 @@
-**Under Construction**
 # Mercury
 <i>Liquid Metal</i>
 
@@ -8,46 +7,49 @@
 [![Build Status](https://travis-ci.org/jr0d/mercury.svg?branch=master)](https://travis-ci.org/jr0d/mercury)
 
 # Welcome
-This is the mercury project repository. Here you will find the full 
+This is the mercury project repository. Here you will find the core 
 mercury source code and documentation targeted at developers.
 User and System Administration documentation will be available at a 
 later time.
 
+Mercury is under heavy development at the moment and is currently in alpha status
+and will remain so until the 0.5 release, at which point the software will enter it's
+beta phase.
+
+
 # Overview
+
 **Mercury is a set of services, agents, and libraries designed for the 
 purpose of managing datacenter hardware assets**
+
+Mercury provides two core facilities, a searchable hardware inventory and an API for remotely managing firmware management, BMC
+configuration, RAID configuration, OS provisioning, and secure decommissioning. Mercury has been developed specifically
+for base systems management of large numbers of servers from multiple vendors and generations,
+spread across multiple datacenters. 
+
+
+The Mercury Inventory is automatically populated and provides a detailed, 
+location aware view of hardware assets. Pairing the Inventory database with the 
+Mercury RPC system allows for unprecedented level of operator control
+
+## Mercury Is *Not*
 
 * Mercury is not cloud software or an IaaS solution. Mercury is intended to extend the inventory and management
 capabilities of these higher level applications. 
 
-* Mercury is not configuration management. However, it's real time 
-inventory databases can be used as back ends for many DevOPs workloads.
+* Mercury is not configuration management. However, it's real time inventory 
+databases can be used as back ends for many DevOPs workloads.
 
-* Mercury is the result of over 10 years of experience in the provisioning space at Rackspace, where we have built 
+
+Mercury is the result of over 10 years of experience in the provisioning space at Rackspace, where we have built 
 provisioning software for large, heterogeneous environments. 
 
-At a high level, Mercury is a protocol for interacting with physical 
-assets in a 'pre-provisioned' state. The code herein is an
-implementation of that protocol.
-
-## Design
-
-Mercury provides two core facilities, a hardware inventory and an abstraction API for firmware management, BMC
-configuration, RAID configuration, OS provisioning, and secure decommissioning. Mercury has been developed specifically
-for base systems management of large numbers of servers from multiple vendors and generations,
-spread across multiple datacenters.
 
 ## Mercury development tenets
+
 - Simplicity
 - Ease of Administration
 - Control
-
-
-## Code structure
-At present, mercury exists as a set of python packages which use the 
-mercury namespace. This structure and this repository are likely to change as mercury moves into
-alpha and beta phases. For now, this structure works as we actively develop across all libraries
-and services.
 
 
 ### Mercury Inventory
@@ -55,7 +57,8 @@ When a server boots using the mercury agent, software inspectors interrogate the
 structured into detailed objects, which are easily serialized and imported. These objects represent various attributes
 of a device, such as CPU, memory, vendor asset information, network devices and link information, storage details (RAID
 and onboard), and subsystem bus information (PCI and USB). Once these objects are created, they are serialized and
-transmitted to the mercury control servers. The objects are then stored in a document oriented database.
+transmitted to the mercury inventory controller for storage. From the outside (using the mercury HTTP API) the inventory
+is ephemeral and read only. It can only be updated by a Mercury Agent.
 
 By design, the mercury inventory does not contain state information (allocated, provisioning, error, etc). In addition,
 there will never be back references to external asset management systems such as CORE. The intent is that forward
@@ -118,7 +121,7 @@ mercury_inventory database, but also useful for standalone operation
 
 The agent provides an extensible python RPC interface. Exposed procedures, or capabilities, are published by the agent.
 The published data includes the method name, method prototype requirements (args and kwargs), doc string, and locking 
-information. This acts as a device level service discovery mechanism.
+information.
 
 ### Base capabilities
 
@@ -190,56 +193,3 @@ For all backend communication, mercury uses [0mq socket API](http://zeromq.org/w
 [MessagePack](https://github.com/msgpack/msgpack/blob/master/spec.md) for serialization . Mercury is 
 designed to work in tandem with production workloads; as such, mercury’s messaging system has been 
 developed to minimize impact on overall network capacity.
-
-
-# Installation
-## Server
-Install the mercury-server meta-package from pip
-
-`$ pip install mercury-server`
-
-This will pull in mercury-common, mercury-inventory, mercury-log, and mercury-rpc packages
-
-## Agent
-`$ pip install mercury-agent`
-
-See the [installation documentation](https://jr0d.github.io/mercury/installation.html) for full instructions on
-setting up a development environment
-
-# Running (Don't copy and paste)
-
-1) Install mongodb
-2) Install redis
-3) Create python3.6 virtualenv and activate it
-4) Install mercury-common `cd src/mercury-common ; pip install requirements.txt ; python setup.py develop`
-5) `$ mkdir ~/.mercury`
-6) copy and modify configuration samples to ~/.mercury
-    - mercury-inventory.yaml
-    - mercury-rpc.yaml
-    - mercury-log.yaml
-    
-*Note: The logging facility can be configured natively in python, presently, only the stream handler is configured*
-
-7) Start the inventory
-    
-    ```
-        $ python src/mercury-inventory/mercury/inventory/server.py &>> mercury-inventory.log &
-    ```
-8) Start the RPC services
-
-    ```
-       $ python src/mercury-rpc/mercury/rpc/backend/backend.py &>> mercury-backend.log &
-       $ python src/mercury-rpc/mercury/rpc/frontend/frontend.py &>> mercury-frontend.log &
-       $ python src/mercury-rpc/mercury/rpc/workers/worker.py &>> mercury-worker.log &
-    ```
-9) Start the Agent logging service
-
-    ```
-        $ python src/mercury-log/mercury/log_service/server.py &>> mercury-log_service.log &
-    ```
-
-Once all of these servirces are running, agents can begin connecting to the backend service.
-# Bugs and TODO
-
-* Tasks should update time_started and status once they are received by the agent
-* Unknown methods are passing though and silently failing
