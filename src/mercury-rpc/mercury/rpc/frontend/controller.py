@@ -159,7 +159,7 @@ class FrontEndController(StaticEndpointController):
 
         try:
             job = Job(instruction, active_matches, self.jobs_collection,
-                      self.tasks_collection, self.tasks_queue)
+                      self.tasks_collection, self.tasks_queue, job_id=job_id)
         except MercuryUserError as mue:
             raise EndpointError(str(mue), 'create_job')
 

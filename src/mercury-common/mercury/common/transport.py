@@ -153,6 +153,10 @@ def serialize_addresses(multipart_address):
     return [x for x in multipart_address if x]
 
 
+def format_zurl(host, port, proto='tcp'):
+    return f"{proto}://{host}:{port}"
+
+
 class SimpleRouterReqService(object):
     """Base class for a message router service."""
 

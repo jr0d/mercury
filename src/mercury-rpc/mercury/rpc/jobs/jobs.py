@@ -12,13 +12,13 @@ log = logging.getLogger(__name__)
 
 class Job(object):
     def __init__(self, instruction, targets, jobs_collection, tasks_collection,
-                 task_queue, job_uuid=None):
+                 task_queue, job_id=None):
         """
         :param instruction: Procedure dictionary containing method, args, kwargs
         :param targets: active inventory targets
         :param collection: mongodb collection object (capped)
         :param task_queue: The redis task queue we are using
-        :param job_uuid: Use this job_id rather than generating one
+        :param job_id: Use this job_id rather than generating one
         :raises MercuryUserError: catch, log, demean, and move on
         :raises MercuryCritical: Halt and catch fire
         """
@@ -31,7 +31,7 @@ class Job(object):
         self.preprocessor = None
         self.primitive = False
 
-        self.job_id = job_uuid or uuid.uuid4()
+        self.job_id = job_id or uuid.uuid4()
         self.tasks = {}
         # Populate the tasks
 

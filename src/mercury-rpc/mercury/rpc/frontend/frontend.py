@@ -19,7 +19,6 @@ import logging
 import zmq
 import zmq.asyncio
 
-from mercury.common.asyncio.mongo import get_connection
 from mercury.common.asyncio.transport import AsyncRouterReqService
 from mercury.common.asyncio.dispatcher import AsyncDispatcher
 
