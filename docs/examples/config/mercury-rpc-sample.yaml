@@ -1,0 +1,16 @@
+rpc:
+  bind_address: tcp://0.0.0.0:9001
+
+  database:
+    name: mercury
+    servers:
+      - localhost:27017
+    replica_name: null
+    jobs_collection: rpc_jobs
+    tasks_collection: rpc_tasks
+
+logging:
+  level: INFO
+  format: '%(asctime)s : %(levelname)s - %(name)s - %(message)s'
+  asyncio_debug: False
+  subtask_debug: False
