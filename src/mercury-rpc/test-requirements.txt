@@ -1,7 +1,0 @@
-mock
-pytest
-pytest-cov
-pytest-asyncio
-pytest-async-mongodb
--e ../mercury-common
-
