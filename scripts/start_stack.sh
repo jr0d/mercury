@@ -19,7 +19,7 @@ tmux split-window -h
 
 tmux send-keys "$VIRTUALENV_CMD" C-m
 tmux send-keys "pushd mercury-rpc" C-m
-tmux send-keys "python mercury/rpc/backend/backend.py" C-m
+tmux send-keys "python mercury/rpc/backend/rpc.py" C-m
 tmux send-keys "popd" C-m
 
 tmux select-pane -t 0
@@ -43,7 +43,7 @@ tmux select-window -t$SESSION:1
 
 tmux send-keys "$VIRTUALENV_CMD" C-m
 tmux send-keys "pushd mercury-rpc" C-m
-tmux send-keys "python mercury/rpc/workers/worker.py" C-m
+tmux send-keys "python mercury/rpc/workers/rpc.py" C-m
 tmux send-keys "popd" C-m
 
 tmux new-window -t $SESSION:2 -n 'htop' 'htop'

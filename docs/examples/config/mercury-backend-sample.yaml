@@ -1,0 +1,36 @@
+backend:
+  inventory_router: tcp://localhost:9000
+  rpc_router: tcp://localhost:9001
+
+  redis:
+    host: localhost
+    port: 6379
+    queue_name: rpc_task_queue
+
+  queue_service:
+    bind_address: tcp://0.0.0.0:9007
+
+  agent_service:
+    bind_address: tcp://0.0.0.0:9002
+
+  workers:
+    threads: 10
+    max_requests_per_thread: 1000
+
+  origin:
+    name: be1-local1
+    datacenter: local1
+    queue_service_vip: localhost
+    queue_service_port: 9007
+
+  ping:
+    interval: 30
+    cycle_time: 10
+    initial_timeout: 2500
+    retries: 5
+    backoff: .42
+
+logging:
+  level: INFO
+  asyncio_debug: False
+  subtask_debug: False

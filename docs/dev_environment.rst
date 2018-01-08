@@ -249,8 +249,8 @@ From the mercury repository root:
 .. code-block:: bash
 
     mkdir -p ~/.mercury && \
-    for _package in mercury-inventory mercury-rpc mercury-log; \
-    do cp src/${_package}/${_package}-sample.yaml ~/.mercury/${_package}.yaml; done
+    for _config in mercury-inventory mercury-rpc mercury-log mercury-backend; \
+    do cp docs/examples/config/${_package}/${_config}-sample.yaml ~/.mercury/${_config}.yaml; done
 
 
 Running the Services

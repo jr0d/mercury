@@ -7,23 +7,23 @@ if [ -n "${MERCURY_LOG_LEVEL}" ]; then
 fi
 
 if [ -n "${MERCURY_LOG_SERVICE_BIND_ADDRESS}" ]; then
-    MERCURY_LOG_ARGS="${MERCURY_LOG_ARGS} --log-service-bind-address ${MERCURY_LOG_SERVICE_BIND_ADDRESS}"
+    MERCURY_LOG_ARGS="${MERCURY_LOG_ARGS} --log-backend-bind-address ${MERCURY_LOG_SERVICE_BIND_ADDRESS}"
 fi
 
 if [ -n "${MERCURY_LOG_DB_SERVERS}" ]; then
-    MERCURY_LOG_ARGS="${MERCURY_LOG_ARGS} --log-service-db-servers ${MERCURY_LOG_DB_SERVERS}"
+    MERCURY_LOG_ARGS="${MERCURY_LOG_ARGS} --log-backend-db-servers ${MERCURY_LOG_DB_SERVERS}"
 fi
 
 if [ -n "${MERCURY_LOG_DB_NAME}" ]; then
-    MERCURY_LOG_ARGS="${MERCURY_LOG_ARGS} --log-service-db-name ${MERCURY_LOG_DB_NAME}"
+    MERCURY_LOG_ARGS="${MERCURY_LOG_ARGS} --log-backend-db-name ${MERCURY_LOG_DB_NAME}"
 fi
 
 if [ -n "${MERCURY_LOG_DB_COLLECTION}" ]; then
-    MERCURY_LOG_ARGS="${MERCURY_LOG_ARGS} --log-service-db-collection ${MERCURY_LOG_DB_COLLECTION}"
+    MERCURY_LOG_ARGS="${MERCURY_LOG_ARGS} --log-backend-db-collection ${MERCURY_LOG_DB_COLLECTION}"
 fi
 
 if [ -n "${MERCURY_LOG_DB_REPLICA_NAME}" ]; then
-    MERCURY_LOG_ARGS="${MERCURY_LOG_ARGS} --log-service-db-replica-name ${MERCURY_LOG_DB_REPLICA_NAME}"
+    MERCURY_LOG_ARGS="${MERCURY_LOG_ARGS} --log-backend-db-replica-name ${MERCURY_LOG_DB_REPLICA_NAME}"
 fi
 
 # All variables defined via Docker-Compose Environment
