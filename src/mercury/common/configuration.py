@@ -103,6 +103,7 @@ class MercuryConfiguration(object):
         self.argument_parser = argparse.ArgumentParser(
             prog=self.program_name,
             description=description,
+            formatter_class=argparse.ArgumentDefaultsHelpFormatter
         )
         self.config_search_dirs = config_search_dirs or []
         self.master_configuration = Box()
@@ -142,12 +143,15 @@ class MercuryConfiguration(object):
             # Configuration file is explicitly defined on the command line
             self.configuration = configuration_from_yaml(
                 self.argparse_namespace.configuration)
+        else:
+            # Search for the configuration file in the standard location
+            config_file = find_config(self.configuration_file,
+                                      self.config_search_dirs)
+            if config_file:
+                self.configuration = configuration_from_yaml(config_file)
 
-        # Search for the configuration file in the standard location
-        config_file = find_config(self.configuration_file,
-                                  self.config_search_dirs)
-        if config_file:
-            self.configuration = configuration_from_yaml(config_file)
+        # Seed namespace with configuration to capture config only values
+        self.master_configuration.update(self.configuration)
 
     @staticmethod
     def get_by_namespace(dictionary, namespace):
@@ -280,7 +284,7 @@ class MercuryConfiguration(object):
             # Check to see if the existing element is actually a container
             elif not isinstance(namespace[container], dict):
                 raise MercuryConfigurationError(
-                    f'{container} has already been assigned a value, '
+                    f'{container} exists and is not a container, '
                     f'{option["name"]} is invalid')
             namespace = namespace[container]
         namespace[expanded_name[-1]] = option['default']
@@ -342,16 +346,25 @@ class MercuryConfiguration(object):
 
             # override defaults with configuration values
             self.override_with_configuration(option)
+
             # override defaults and config options with environment variables
             self.override_with_environment(option)
+
             # command line
             self.override_with_cli_options(option)
 
+            # validate
+            value = self.get_by_namespace(self.master_configuration,
+                                          option['name'])
             # Check required
-            if option['required'] and not self.get_by_namespace(
-                    self.master_configuration, option['name']):
+            if option['required'] and not value:
                 raise MercuryConfigurationError(f'Option {option["name"]} has '
                                                 f'not been provided')
+            if option['one_of'] and not value not in 'one_of':
+                raise MercuryConfigurationError(
+                    f'Option {option["name"]} is {value} but must be one of '
+                    f'{",".join(str(option["one_of"]))}'
+                )
         return self.master_configuration
 
     @staticmethod
@@ -401,6 +414,7 @@ class MercuryConfiguration(object):
                    help_string=None,
                    special_type=None,
                    required=False,
+                   one_of=None,
                    *args,
                    **kwargs):
         """
@@ -428,6 +442,7 @@ class MercuryConfiguration(object):
             value. Supported type conversions are int, float, and list
         :param required: An exception will be raised if the namespace is not
         populated by some source
+        :param one_of:
         :param args: Additional args to pass to argparse
         :param kwargs: Additional kwargs to pass to argparse
         :return: None
@@ -442,7 +457,8 @@ class MercuryConfiguration(object):
             help=help_string,
             special_type=special_type,
             required=required,
+            one_of=one_of or [],
             args=args,
             kwargs=kwargs,
-            added_to_parser=False
+            added_to_parser=False,
         ))
