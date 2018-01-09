@@ -21,7 +21,7 @@ def get_version():
 
 
 setup(
-    name='mercury',
+    name='mercury-core',
     version=get_version(),
     packages=find_packages(exclude=['tests']),
     url='http://www.mercurysoft.io',
