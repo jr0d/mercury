@@ -7,22 +7,22 @@ BUILD_CMD="python setup.py bdist_egg bdist_wheel upload"
 pushd src/
 
     pushd mercury-common
-    tox
+    tox -r
     $BUILD_CMD
     popd
 
     pushd mercury-inventory
-    tox
+    tox -r
     $BUILD_CMD
     popd
 
     pushd mercury-rpc
-    tox
+    tox -r
     $BUILD_CMD
     popd
 
     pushd mercury-log
-    tox
+    tox -r
     $BUILD_CMD
     popd
 
