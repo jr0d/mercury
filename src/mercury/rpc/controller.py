@@ -1,3 +1,5 @@
+import logging
+
 from mercury.common.asyncio.endpoints import (
     StaticEndpointController, async_endpoint
 )
@@ -6,6 +8,8 @@ from mercury.common.exceptions import EndpointError, MercuryUserError
 from mercury.common.mongo import serialize_object_id
 
 from mercury.rpc.jobs import Job, tasks
+
+log = logging.getLogger(__name__)
 
 
 class RPCController(StaticEndpointController):
@@ -138,6 +142,8 @@ class RPCController(StaticEndpointController):
             sort_direction=1)
 
         active_matches = active_matches['items']
+
+        log.debug(f'Found {len(active_matches)} for query {query}')
 
         if not active_matches:
             return

@@ -108,4 +108,5 @@ class RPCFrontEndClient(SimpleRouterReqClient):
             'endpoint': 'create_job',
             'args': [query, instruction]
         }
+        log.debug('Dispatching query {query} : {instruction}')
         return self.transceiver(payload)
