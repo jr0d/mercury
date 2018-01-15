@@ -14,8 +14,8 @@ mercury
 _______
 
 This is the main repository for the mercury project. This documentation source (and much more) can be found in the main
-repository's *docs* directory. The repo includes the core mercury packages: common, inventory, rpc, and log. It's super
-important and you should clone it now.
+repository's *docs* directory. The repo includes the core mercury modules: common, inventory, rpc, backend, and log.
+Clone it now with:
 
 
 .. code-block:: bash
