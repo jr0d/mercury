@@ -39,7 +39,8 @@ async def update_task(update_data, tasks_collection):
             task_id,
             update_data.get('status', 'UPDATED'),
             update_data.get('action', ''),
-            update_data.get('progress', 0)
+            update_data.get('progress', 0),
+            update_data.get('traceback')
         ))
 
     await tasks_collection.update_one(
@@ -74,12 +75,10 @@ async def complete_task(response_data, jobs_collection, tasks_collection):
     task_update = {
         'task_id': response_data['task_id'],
         'status': response_data['status'],
-        'time_started': response_data['time_started'],
-        'time_updated': now,
-        'time_completed': response_data['time_completed'],
+        'time_completed': now,
         'ttl_time_completed': ttl_time,
         'message': response_data['message'],
-        'traceback': response_data['traceback_info'],
+        'traceback': response_data.get('traceback'),
         'action': response_data.get('action', '')
     }
 
@@ -158,7 +157,6 @@ class Task(object):
         self.status = 'NEW'
         self.action = 'New Task'
         self.progress = 0
-        self.time_queued = None
         self.time_started = None
         self.time_completed = None
         self.time_updated = None
@@ -179,7 +177,6 @@ class Task(object):
             'status': self.status,
             'action': self.action,
             'progress': self.progress,
-            'time_queued': self.time_queued,
             'time_started': self.time_started,
             'time_completed': self.time_completed,
             'time_updated': self.time_updated,
@@ -200,6 +197,5 @@ class Task(object):
         :return:
         """
         log.debug('Queuing task: %s' % self.task_id)
-        self.time_queued = time.time()
         self.time_updated = time.time()
         backend.enqueue_task(self.to_dict())

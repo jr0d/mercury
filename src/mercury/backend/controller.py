@@ -118,7 +118,7 @@ class BackendController(StaticEndpointController):
         :return: dict
         """
 
-        self.validate_required(['status', 'message', 'traceback_info'],
+        self.validate_required(['status', 'message'],
                                return_data)
 
         # frontend job client update here
