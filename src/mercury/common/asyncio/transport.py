@@ -67,7 +67,6 @@ class AsyncRouterReqService(object):
     async def start(self):
         while not self._kill:
             if not await self.in_poller.poll(self.poll_timeout * 1000):
-                log.debug('Receive Poll Timeout')
                 continue
             try:
                 address, msg = await self.receive()
