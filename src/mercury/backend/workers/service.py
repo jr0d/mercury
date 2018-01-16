@@ -1,6 +1,7 @@
 import logging
 
 from mercury.common.configuration import MercuryConfiguration
+from mercury.common.exceptions import fancy_traceback_short, parse_exception
 from mercury.common.task_managers.base.manager import Manager
 from mercury.common.task_managers.redis.task import RedisTask
 from mercury.common.transport import SimpleRouterReqClient
@@ -74,23 +75,27 @@ class RPCTask(RedisTask):
             'task_id': self.task['task_id'],
             'job_id': self.task['job_id']
         }
-        log.info('Dispatching task: %s' % self.task)
+        log.info(f'Dispatching task: {self.task}')
         try:
             response = client.transceiver(_payload)
-        except OSError as os_error:
-            log.error(f'Agent at {url} has gone away while handling '
-                      f'{self.task["task_id"]}')
+        except OSError:
+            err_msg = f'{self.task["mercury_id"]} has gone away while ' \
+                      f'handling {self.task["task_id"]}'
+            log.error(err_msg)
             self.rpc_router.complete_task({
+                'job_id': self.task['job_id'],
                 'task_id': self.task['task_id'],
                 'status': 'ERROR',
-                'response': f'Dispatch Error: {os_error}'
+                'message': err_msg,
+                'traceback': parse_exception()
             })
         else:
             if response['status'] != 0:
                 self.rpc_router.complete_task({
+                    'job_id': self.task['job_id'],
                     'task_id': self.task['task_id'],
-                    'status': 'ERROR', 'response': 'Dispatch Error: %s' % response})
-
+                    'status': 'ERROR',
+                    'message': f'Dispatch Error: {response}'})
             # Clean up the session
         finally:
             client.close()

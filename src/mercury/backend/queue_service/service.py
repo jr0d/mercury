@@ -38,8 +38,6 @@ class QueueService(SimpleRouterReqService):
 
         log.debug('Enqueuing task: {job_id} / {task_id}'.format(**task))
 
-        task['time_queued'] = time.time()
-
         self.redis_client.lpush(self.queue_name, json.dumps(task))
 
     def process(self, message):
