@@ -88,8 +88,8 @@ class BackendQueueManager(object):
                 task = self.tasks_queue.get(timeout=self.QUEUE_GET_TIMEOUT)
             except queue.Empty:
                 continue
-            log.debug('Dispatching task, job_id: {job_id} task_id: {task_id} '
-                      'backend: {backend}'.format(**task))
+            log.debug('Dispatching task to queue service, job_id: {job_id} '
+                      'task_id: {task_id} backend: {backend}'.format(**task))
 
             # Enqueue the task on the backend
             self.client.enqueue_task(task)
