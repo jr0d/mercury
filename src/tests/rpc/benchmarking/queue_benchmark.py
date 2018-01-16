@@ -22,7 +22,6 @@ payload = {
             'kwargs': {},
             'task_id': '1',
             'job_id': '1',
-            'time_queued': 0,
         }]
 }
 

@@ -49,7 +49,7 @@ class StaticEndpointController(object):
         missing = []
         for key in required:
             if key not in data:
-                missing.append(data)
+                missing.append(key)
 
         if missing:
             raise MercuryClientException('Message is missing required data: {}'.format(missing))
