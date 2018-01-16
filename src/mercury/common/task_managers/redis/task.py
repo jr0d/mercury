@@ -43,10 +43,7 @@ class RedisTask(Task):
             log.debug('DATA: %s' % message)
             return
 
-        log.debug('Fetched task %s; it was %s seconds old' % (
-            task['task_id'],
-            time.time() - task['time_queued']
-        ))
+        log.debug(f'Fetched task {task["task_id"]}')
         self.task = task
         return task
 

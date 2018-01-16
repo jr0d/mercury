@@ -29,13 +29,13 @@ class RedisTaskTest(MercuryCommonUnitTest):
         """Test fetch() with JSON data in 'rpc_task' queue"""
         self.redisTask.redis.blpop.return_value = [
             'rpc_tasks',
-            '{"task_id": "1", "time_queued": 10}'
+            '{"task_id": "1", "time_updated": 10}'
         ]
 
         fetched_task = self.redisTask.fetch()
 
         self.assertEqual('1', fetched_task['task_id'])
-        self.assertEqual(10, fetched_task['time_queued'])
+        self.assertEqual(10, fetched_task['time_updated'])
 
     def test_fetch_empty_redis(self):
         """Test fetch() with an empty 'rpc_task' queue"""

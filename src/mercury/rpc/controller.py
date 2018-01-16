@@ -161,10 +161,7 @@ class RPCController(StaticEndpointController):
 
     @async_endpoint('update_task')
     async def update_task(self, update_data):
-        self.validate_required(
-            'task_id',
-            update_data
-        )
+        self.validate_required(['task_id'], update_data)
         return await tasks.update_task(update_data, self.tasks_collection)
 
     @async_endpoint('complete_task')
@@ -172,10 +169,7 @@ class RPCController(StaticEndpointController):
         self.validate_required(['task_id',
                                 'job_id',
                                 'status',
-                                'time_started',
-                                'time_completed',
-                                'message',
-                                'traceback_info'], return_data)
+                                'message'], return_data)
         return await tasks.complete_task(return_data,
                                          self.jobs_collection,
                                          self.tasks_collection)
