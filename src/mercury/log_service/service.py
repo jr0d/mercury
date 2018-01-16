@@ -95,8 +95,6 @@ class AgentLogService(SimpleRouterReqService):
 
         self.set_job_info_from_thread(message)
 
-        LOG.debug(message)
-
         self.log_collection.insert(message)
 
         return {'message': 'ok'}
