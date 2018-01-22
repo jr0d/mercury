@@ -141,7 +141,7 @@ class RPCController(StaticEndpointController):
             query, projection={'active': 1, 'origin': 1}, limit=0,
             sort_direction=1)
 
-        active_matches = active_matches['items']
+        active_matches = active_matches['message']['items']
 
         log.debug(f'Found {len(active_matches)} for query {query}')
 
@@ -154,7 +154,7 @@ class RPCController(StaticEndpointController):
         except MercuryUserError as mue:
             raise EndpointError(str(mue), 'create_job')
 
-        job.insert()
+        await job.insert()
         job.enqueue_tasks()
 
         return {'job_id': str(job.job_id)}

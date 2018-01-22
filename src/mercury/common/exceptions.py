@@ -61,6 +61,10 @@ class MercuryFirmwareException(MercuryGeneralException):
     pass
 
 
+class MercuryTransportError(MercuryGeneralException):
+    pass
+
+
 class EndpointError(MercuryGeneralException):
     def __init__(self, message, endpoint, request=None):
         """

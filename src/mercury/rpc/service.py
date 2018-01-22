@@ -70,7 +70,13 @@ def main():
     )
 
     # Create an inventory socket
-    inventory_client = InventoryClient(config.rpc.inventory_router)
+    inventory_client = InventoryClient(
+        config.rpc.inventory_router,
+        # TODO: add these values to the configuration
+        linger=10,
+        response_timeout=5,
+        rcv_retry=3
+    )
 
     # Add TTL indexes for completed jobs/tasks
     collections.jobs_collection.create_index('ttl_time_completed',
@@ -98,7 +104,9 @@ def main():
         service.kill()
     finally:
         pending = asyncio.Task.all_tasks(loop=loop)
+        log.debug('Waiting on {} pending tasks'.format(len(pending)))
         loop.run_until_complete(asyncio.gather(*pending))
+        log.debug('Shutting down event loop')
         loop.close()
 
 

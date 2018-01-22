@@ -20,7 +20,7 @@ import zmq
 import zmq.asyncio
 
 from mercury.common.asyncio.dispatcher import AsyncDispatcher
-from mercury.common.asyncio.transport import AsyncRouterReqService
+from mercury.common.asyncio.transport import TrivialAsyncRouterReqService
 from mercury.common.asyncio.clients.inventory import \
     InventoryClient as AsyncInventoryClient
 from mercury.common.clients.inventory import InventoryClient
@@ -33,7 +33,7 @@ from mercury.backend.rpc_client import AsyncRPCClient
 log = logging.getLogger(__name__)
 
 
-class BackEndService(AsyncRouterReqService):
+class BackEndService(TrivialAsyncRouterReqService):
     def __init__(self,
                  bind_address,
                  inventory_client,
@@ -71,13 +71,26 @@ def reacquire(inventory_url, backend_name):
     :return:
     """
     # Onetime use synchronous client
-    inventory_client = InventoryClient(inventory_url)
+    log.info('Attempting to reacquire active agents')
+    inventory_client = InventoryClient(inventory_url,
+                                       # TODO: Add these to configuration
+                                       response_timeout=60,
+                                       rcv_retry=10)
 
     existing_documents = inventory_client.query({'active': {'$ne': None},
                                                  'origin.name': backend_name},
                                                 projection={'mercury_id': 1,
                                                             'active': 1})
-    for doc in existing_documents['items']:
+
+    if existing_documents.get('error'):  # Transport Error
+        log.error('[BACKEND CRITICAL] '
+                  'Error communicating with inventory service, could not '
+                  'reacquire: <{}>'.format(existing_documents.get('message')))
+        # Return without reacquiring any nodes. Once communication is
+        # reestablished, agents will begin to re-register
+        return
+
+    for doc in existing_documents['message']['items']:
         if not BackendController.validate_agent_info(doc['active']):
             log.error('Found junk in document {} expunging'.format(
                 doc['mercury_id']))
@@ -87,6 +100,7 @@ def reacquire(inventory_url, backend_name):
             doc['mercury_id'], doc['active']['rpc_address']))
         add_active_record(doc)
 
+    log.info('Reacquire operation complete')
     inventory_client.close()
 
 
@@ -123,8 +137,14 @@ def main():
     asyncio.set_event_loop(loop)
 
     # Create Async Clients
-    inventory_client = AsyncInventoryClient(config.backend.inventory_router)
-    rpc_client = AsyncRPCClient(config.backend.rpc_router)
+    inventory_client = AsyncInventoryClient(config.backend.inventory_router,
+                                            linger=0,
+                                            response_timeout=10,
+                                            rcv_retry=3)
+    rpc_client = AsyncRPCClient(config.backend.rpc_router,
+                                linger=0,
+                                response_timeout=10,
+                                rcv_retry=3)
 
     # Create a backend instance
     server = BackEndService(config.backend.agent_service.bind_address,
@@ -159,7 +179,9 @@ def main():
         server.kill()
     finally:
         pending = asyncio.Task.all_tasks(loop=loop)
+        log.debug('Waiting on {} pending tasks'.format(len(pending)))
         loop.run_until_complete(asyncio.gather(*pending))
+        log.debug('Shutting down event loop')
         loop.close()
 
 

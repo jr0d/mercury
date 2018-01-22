@@ -6,7 +6,7 @@ import msgpack
 import zmq
 import zmq.asyncio
 
-from mercury.common.clients.inventory import InventoryClient
+from mercury.common.asyncio.clients.inventory import InventoryClient
 
 log = logging.getLogger(__name__)
 
@@ -64,12 +64,10 @@ async def ping(record, ctx, timeout, retries, backoff, inventory_client):
         await socket.send(msgpack.packb(payload))
 
         if await socket.poll(current_timeout):  # Success condition
-            # TODO: Do something with the payload, it contains the device load average
-            # mayhaps put it in the active record and stuff it back into the database?
-
             reply = await socket.recv()  # Data is ready for snarfing
 
-            log.debug("ping success: %s : %s" % (zurl, msgpack.unpackb(reply, encoding='utf-8')))
+            log.debug("ping success: %s : %s" % (
+                zurl, msgpack.unpackb(reply, encoding='utf-8')))
             socket.close()
 
             active_state[record['mercury_id']]['last_ping'] = time.time()
@@ -86,7 +84,9 @@ async def ping(record, ctx, timeout, retries, backoff, inventory_client):
     log.info('{} timed out, removing active record'.format(record['mercury_id']))
 
     # remove agent data from the database
-    inventory_client.update_one(record['mercury_id'], {'active': None})
+    # this will await until the inventory is available
+    await inventory_client.update_one(
+        record['mercury_id'], {'active': None})
 
     # remove the record from the state data structure
     del active_state[record['mercury_id']]
@@ -113,7 +113,8 @@ async def ping_loop(ctx,
     :return:
     """
     # load the queue
-    inventory_client = InventoryClient(inventory_router_url)
+    inventory_client = InventoryClient(inventory_router_url, linger=0)
+    inventory_client.service_name = 'Inventory Service'
 
     while True:
         if stop_ping_loop:

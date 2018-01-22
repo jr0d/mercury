@@ -1,7 +1,6 @@
 import json
 import logging
 import redis
-import time
 
 from mercury.common.exceptions import MercuryClientException
 from mercury.common.transport import SimpleRouterReqService
