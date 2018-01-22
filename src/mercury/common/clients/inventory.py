@@ -14,13 +14,13 @@
 #    limitations under the License.
 
 from mercury.common.exceptions import MercuryClientException
-from mercury.common.transport import SimpleRouterReqClient
+from mercury.common.clients.router_req_client import RouterReqClient
 
 
-class InventoryClient(SimpleRouterReqClient):
+class InventoryClient(RouterReqClient):
     """Client to interact with inventory."""
 
-    _service_name = 'Inventory'
+    service_name = 'Inventory'
 
     def insert_one(self, device_info):
         """Insert a new device in inventory.

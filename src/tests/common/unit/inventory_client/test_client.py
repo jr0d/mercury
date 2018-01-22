@@ -34,40 +34,7 @@ class InventoryClientUnitTest(base.MercuryCommonUnitTest):
         super(InventoryClientUnitTest, self).setUp()
         self.inventory_client = FakeInventoryClient()
 
-    def test_raise_reply_error(self):
-        """Test raise_reply_error()."""
-        reply = {'message': 'fake_message', 'tb': ['val1', 'val2']}
-        expected_error = ('Problem talking to Inventory backend: '
-                          'message = fake_message, tb = val1\nval2')
-        self.assertRaisesRegexp(MercuryClientException,
-                                expected_error,
-                                self.inventory_client.raise_reply_error,
-                                reply)
-
-    def test_raise_reply_error_no_traceback(self):
-        """Test raise_reply_error() with no traceback."""
-        reply = {'message': 'fake_message'}
-        expected_error = ('Problem talking to Inventory backend: '
-                          'message = fake_message, tb = ')
-        self.assertRaisesRegexp(MercuryClientException,
-                                expected_error,
-                                self.inventory_client.raise_reply_error,
-                                reply)
-
-    def test_check_and_return(self):
-        """Test check_and_return()."""
-        reply = {'response': 'fake_response'}
-        response = self.inventory_client.check_and_return(reply)
-        self.assertEqual(reply['response'], response)
-
-    def test_check_and_return_fail(self):
-        """Test check_and_return() with error."""
-        reply = {'error': 'fail'}
-        self.assertRaises(MercuryClientException,
-                          self.inventory_client.check_and_return,
-                          reply)
-
-    @mock.patch('mercury.common.transport.SimpleRouterReqClient.transceiver')
+    @mock.patch('mercury.common.clients.router_req_client.RouterReqClient.transceiver')
     def test_insert_one(self, mock_transceiver):
         """Test insert_one()."""
         mock_transceiver.return_value = {'response': 'fake_response'}
@@ -89,7 +56,7 @@ class InventoryClientUnitTest(base.MercuryCommonUnitTest):
                           self.inventory_client.insert_one,
                           device_info)
 
-    @mock.patch('mercury.common.transport.SimpleRouterReqClient.transceiver')
+    @mock.patch('mercury.common.clients.router_req_client.RouterReqClient.transceiver')
     def test_update_one(self, mock_transceiver):
         """Test update_one()."""
         mock_transceiver.return_value = {'response': 'fake_response'}
@@ -105,7 +72,7 @@ class InventoryClientUnitTest(base.MercuryCommonUnitTest):
         mock_transceiver.assert_called_once_with(payload)
         self.assertEqual('fake_response', response['response'])
 
-    @mock.patch('mercury.common.transport.SimpleRouterReqClient.transceiver')
+    @mock.patch('mercury.common.clients.router_req_client.RouterReqClient.transceiver')
     def test_get_one(self, mock_transceiver):
         """Test get_one()."""
         mock_transceiver.return_value = {'response': 'fake_response'}
@@ -120,7 +87,7 @@ class InventoryClientUnitTest(base.MercuryCommonUnitTest):
         mock_transceiver.assert_called_once_with(payload)
         self.assertEqual('fake_response', response['response'])
 
-    @mock.patch('mercury.common.transport.SimpleRouterReqClient.transceiver')
+    @mock.patch('mercury.common.clients.router_req_client.RouterReqClient.transceiver')
     def test_query(self, mock_transceiver):
         """Test query()."""
         mock_transceiver.return_value = {'response': 'fake_response'}
@@ -139,7 +106,7 @@ class InventoryClientUnitTest(base.MercuryCommonUnitTest):
         mock_transceiver.assert_called_once_with(payload)
         self.assertEqual('fake_response', response['response'])
 
-    @mock.patch('mercury.common.transport.SimpleRouterReqClient.transceiver')
+    @mock.patch('mercury.common.clients.router_req_client.RouterReqClient.transceiver')
     def test_delete(self, mock_transceiver):
         """Test delete()."""
         mock_transceiver.return_value = {'response': 'fake_response'}
@@ -153,7 +120,7 @@ class InventoryClientUnitTest(base.MercuryCommonUnitTest):
         mock_transceiver.assert_called_once_with(payload)
         self.assertEqual('fake_response', response['response'])
 
-    @mock.patch('mercury.common.transport.SimpleRouterReqClient.transceiver')
+    @mock.patch('mercury.common.clients.router_req_client.RouterReqClient.transceiver')
     def test_count(self, mock_transceiver):
         """Test count()."""
         mock_transceiver.return_value = {'response': 'fake_response'}

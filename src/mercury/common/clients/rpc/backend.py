@@ -15,12 +15,12 @@
 
 import logging
 
-from mercury.common.transport import SimpleRouterReqClient
+from mercury.common.clients.router_req_client import RouterReqClient
 
 log = logging.getLogger(__name__)
 
 
-class BackEndClient(SimpleRouterReqClient):
+class BackEndClient(RouterReqClient):
     service_name = 'RPC backend'
 
     def register(self, device_info, agent_info):
