@@ -64,12 +64,10 @@ async def ping(record, ctx, timeout, retries, backoff, inventory_client):
         await socket.send(msgpack.packb(payload))
 
         if await socket.poll(current_timeout):  # Success condition
-            # TODO: Do something with the payload, it contains the device load average
-            # mayhaps put it in the active record and stuff it back into the database?
-
             reply = await socket.recv()  # Data is ready for snarfing
 
-            log.debug("ping success: %s : %s" % (zurl, msgpack.unpackb(reply, encoding='utf-8')))
+            log.debug("ping success: %s : %s" % (
+                zurl, msgpack.unpackb(reply, encoding='utf-8')))
             socket.close()
 
             active_state[record['mercury_id']]['last_ping'] = time.time()
