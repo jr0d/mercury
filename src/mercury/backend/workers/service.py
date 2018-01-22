@@ -53,15 +53,15 @@ def options():
 
 
 class RPCTask(RedisTask):
-    def __init__(self, rpc_router, redis_host, redis_port, redis_queue):
+    def __init__(self, rpc_router_url, redis_host, redis_port, redis_queue):
         """
 
-        :param rpc_router:
+        :param rpc_router_url:
         :param redis_host:
         :param redis_port:
         :param redis_queue:
         """
-        self.rpc_router = rpc_router
+        self.rpc_router = RPCClient(rpc_router_url)
         super(RPCTask, self).__init__(redis_host, redis_port, redis_queue)
 
     def do(self):
@@ -113,11 +113,9 @@ def main():
 
     # Set this up for access from our threads
 
-    rpc_router_client = RPCClient(config.backend.rpc_router)
-
     manager = Manager(RPCTask, config.backend.workers.threads,
                       config.backend.workers.max_requests_per_thread,
-                      handler_args=(rpc_router_client,
+                      handler_args=(config.backend.rpc_router,
                                     config.backend.redis.host,
                                     config.backend.redis.port,
                                     config.backend.redis.queue))
