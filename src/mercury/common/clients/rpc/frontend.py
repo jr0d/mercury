@@ -15,13 +15,13 @@
 
 import logging
 
-from mercury.common.transport import SimpleRouterReqClient
+from mercury.common.clients.router_req_client import RouterReqClient
 
 
 log = logging.getLogger(__name__)
 
 
-class RPCFrontEndClient(SimpleRouterReqClient):
+class RPCFrontEndClient(RouterReqClient):
     """Client for RPC Front End"""
 
     service_name = 'RPC frontend'

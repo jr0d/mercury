@@ -47,32 +47,6 @@ def test_get_ctx_and_connect_req_socket():
     mock_socket.assert_called_once()
 
 
-class SimpleRouterReqClientUnitTest(MercuryCommonUnitTest):
-    """Unit tests for mercury.common.transport.SimpleRouterReqClient."""
-    @mock.patch.object(transport, 'get_ctx_and_connect_req_socket')
-    def setUp(self, mock_get_ctx):
-        super(SimpleRouterReqClientUnitTest, self).setUp()
-        ctx = mock.Mock(spec_set=zmq.Context)
-        socket = ctx.socket.return_value
-        mock_get_ctx.return_value = ctx, socket
-        self.req_client = transport.SimpleRouterReqClient('localhost')
-
-    def test_transceiver(self):
-        payload = {'endpoint': 'insert_one', 'args': ['fake_info']}
-        self.req_client.socket.recv.return_value = msgpack.packb({'message': 'OK'})
-
-        unpacked = self.req_client.transceiver(payload)
-
-        assert unpacked == 'OK'
-        self.req_client.socket.send_multipart.assert_called_once_with(
-            [msgpack.packb(payload)])
-        self.req_client.socket.recv.assert_called_once()
-
-    def test_close(self):
-        self.req_client.close()
-        self.req_client.socket.close.assert_called_once()
-
-
 def test_parse_multipart_message():
     """Test parse_multipart_message()"""
     message = ['addr', '', 'msg']

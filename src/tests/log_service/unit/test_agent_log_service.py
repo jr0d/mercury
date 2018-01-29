@@ -53,6 +53,6 @@ class AgentLogServiceTestCase(unittest.TestCase):
             "mercury_id": "0112426690c16b0fd4586e91731a0cc4f3f918c5af"
         }
         self.agent_log_service.log_collection.insert = mock.MagicMock()
-        assert self.agent_log_service.process(message) == {'message': 'ok'}
+        assert self.agent_log_service.process(message) == {'message': 'ok', 'error': False}
         self.agent_log_service.log_collection.insert.assert_called_once_with(message)
 

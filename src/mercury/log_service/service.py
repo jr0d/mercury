@@ -97,7 +97,7 @@ class AgentLogService(SimpleRouterReqService):
 
         self.log_collection.insert(message)
 
-        return {'message': 'ok'}
+        return {'message': 'ok', 'error': False}
 
 
 def main():

@@ -117,12 +117,12 @@ class Job(object):
             'task_count': self.task_count
         }
 
-    def insert(self):
+    async def insert(self):
         self.time_started = time.time()
 
-        self.jobs_collection.insert_one(self.to_dict())
-        self.tasks_collection.insert_many([task.to_dict() for task in list(
-            self.tasks.values())])
+        await self.jobs_collection.insert_one(self.to_dict())
+        await self.tasks_collection.insert_many(
+            [task.to_dict() for task in list(self.tasks.values())])
 
     def enqueue_tasks(self):
         """ Uses backend manager processes to enqueue tasks """

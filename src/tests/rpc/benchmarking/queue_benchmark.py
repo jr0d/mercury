@@ -3,7 +3,7 @@ import time
 
 from multiprocessing.pool import Pool
 
-from mercury.common.transport import SimpleRouterReqClient
+from mercury.common.clients.router_req_client import RouterReqClient
 
 log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
@@ -38,7 +38,7 @@ def timer(func):
 
 
 def work(url, n):
-    client = SimpleRouterReqClient(url)
+    client = RouterReqClient(url)
 
     results = [client.transceiver(payload) for _ in range(n)]
     client.close()

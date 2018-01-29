@@ -2,7 +2,6 @@ import logging
 
 import msgpack
 import zmq
-import zmq.asyncio
 
 from mercury.common.exceptions import (
     parse_exception,
@@ -14,7 +13,7 @@ from mercury.common.exceptions import (
 log = logging.getLogger(__name__)
 
 
-class AsyncRouterReqClient(object):
+class RouterReqClient(object):
     service_name = 'Generic Service'
 
     def __init__(self, zmq_url, linger=-1, response_timeout=-1, rcv_retry=0,
@@ -32,7 +31,7 @@ class AsyncRouterReqClient(object):
         self.rcv_retry = rcv_retry
         self.raise_on_timeout = raise_on_timeout
 
-        self.context = zmq.asyncio.Context()
+        self.context = zmq.Context()
 
         self.socket = None
         self.refresh_socket()
@@ -70,18 +69,19 @@ class AsyncRouterReqClient(object):
         # Send does not block
         self.socket.send_multipart([packed])
 
-    async def safe_receive(self):
+    def safe_receive(self):
         """
         Receive server reply.
         :return: The unpacked message
         """
+
+        # Hacky do while loop. Thanks python...
         retry_count = self.rcv_retry and self.rcv_retry + 1 or 1
 
         while retry_count:
             # noinspection PyBroadException
             try:
-                return msgpack.unpackb(
-                    await self.socket.recv(), encoding='utf-8')
+                return msgpack.unpackb(self.socket.recv(), encoding='utf-8')
             except zmq.Again:
                 retry_count -= 1
                 log.error(f'[{self.service_name}] Receive timeout'
@@ -104,14 +104,14 @@ class AsyncRouterReqClient(object):
 
         return {'error': True, 'message': error_message}
 
-    async def transceiver(self, payload):
+    def transceiver(self, payload):
         """
         Convenience method
         :param payload:
         :return:
         """
         self.safe_send(payload)
-        return await self.safe_receive()
+        return self.safe_receive()
 
     def close(self):
         """ close the socket """

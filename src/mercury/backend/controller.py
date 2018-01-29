@@ -72,7 +72,8 @@ class BackendController(StaticEndpointController):
 
         response = await self.inventory_client.insert_one(device_info)
         log.debug(
-            'Created/Updated inventory record: %s' % response['object_id'])
+            'Created/Updated inventory record: %s' %
+            response['message']['object_id'])
 
         add_active_record(device_info)
 
