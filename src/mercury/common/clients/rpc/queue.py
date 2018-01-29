@@ -1,11 +1,11 @@
 import logging
 
-from mercury.common.transport import SimpleRouterReqClient
+from mercury.common.clients.router_req_client import RouterReqClient
 
 log = logging.getLogger(__name__)
 
 
-class QueueServiceClient(SimpleRouterReqClient):
+class QueueServiceClient(RouterReqClient):
     service_name = 'RPC Queue Service'
 
     def enqueue_task(self, task):

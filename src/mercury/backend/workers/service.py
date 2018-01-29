@@ -1,10 +1,9 @@
 import logging
 
 from mercury.common.configuration import MercuryConfiguration
-from mercury.common.exceptions import fancy_traceback_short, parse_exception
 from mercury.common.task_managers.base.manager import Manager
 from mercury.common.task_managers.redis.task import RedisTask
-from mercury.common.transport import SimpleRouterReqClient
+from mercury.common.clients.router_req_client import RouterReqClient
 
 from mercury.backend.rpc_client import RPCClient
 from mercury.backend.configuration import (
@@ -53,20 +52,23 @@ def options():
 
 
 class RPCTask(RedisTask):
-    def __init__(self, rpc_router, redis_host, redis_port, redis_queue):
+    def __init__(self, rpc_router_url, redis_host, redis_port, redis_queue):
         """
 
-        :param rpc_router:
+        :param rpc_router_url:
         :param redis_host:
         :param redis_port:
         :param redis_queue:
         """
-        self.rpc_router = rpc_router
+        self.rpc_router = RPCClient(rpc_router_url)
         super(RPCTask, self).__init__(redis_host, redis_port, redis_queue)
 
     def do(self):
         url = 'tcp://{host}:{port}'.format(**self.task)
-        client = SimpleRouterReqClient(url, linger=10, response_timeout=10)
+        client = RouterReqClient(url, linger=5, response_timeout=10,
+                                 rcv_retry=3)
+        client.service_name = 'AgentTaskService'
+
         _payload = {
             'category': 'rpc',
             'method': self.task['method'],
@@ -76,29 +78,24 @@ class RPCTask(RedisTask):
             'job_id': self.task['job_id']
         }
         log.info(f'Dispatching task: {self.task}')
-        try:
-            response = client.transceiver(_payload)
-        except OSError:
+        response = client.transceiver(_payload)
+        if response.get('error'):  # Transport Error
             err_msg = f'{self.task["mercury_id"]} has gone away while ' \
-                      f'handling {self.task["task_id"]}'
+                      f'handling {self.task["task_id"]}. Transport Message: ' \
+                      f'{response["message"]}'
             log.error(err_msg)
             self.rpc_router.complete_task({
                 'job_id': self.task['job_id'],
                 'task_id': self.task['task_id'],
                 'status': 'ERROR',
                 'message': err_msg,
-                'traceback': parse_exception()
             })
-        else:
-            if response['status'] != 0:
+        elif response['message']['status'] != 0:
                 self.rpc_router.complete_task({
                     'job_id': self.task['job_id'],
                     'task_id': self.task['task_id'],
                     'status': 'ERROR',
-                    'message': f'Dispatch Error: {response}'})
-            # Clean up the session
-        finally:
-            client.close()
+                    'message': f'Dispatch Error: {response["message"]}'})
 
 
 def configure_logging(config):
@@ -113,11 +110,9 @@ def main():
 
     # Set this up for access from our threads
 
-    rpc_router_client = RPCClient(config.backend.rpc_router)
-
     manager = Manager(RPCTask, config.backend.workers.threads,
                       config.backend.workers.max_requests_per_thread,
-                      handler_args=(rpc_router_client,
+                      handler_args=(config.backend.rpc_router,
                                     config.backend.redis.host,
                                     config.backend.redis.port,
                                     config.backend.redis.queue))

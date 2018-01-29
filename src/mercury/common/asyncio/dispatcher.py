@@ -8,11 +8,13 @@ log = logging.getLogger(__name__)
 
 
 class AsyncDispatcher(object):
-    def __init__(self, controller):
+    def __init__(self, controller, acknowledge_only=False):
         """
         Asynchronous generic dispatcher
 
         :param controller: An controller containing async endpoints
+        :param acknowledge_only: Immediately sync the response to the client
+        request.
         """
         self.controller = controller
         log.debug(f'Registered endpoints: {self.controller.endpoints}')
@@ -50,4 +52,4 @@ class AsyncDispatcher(object):
             ))
             return dict(error=True, traceback=tb, message=str(e))
 
-        return dict(error=False, response=response)
+        return dict(error=False, message=response)

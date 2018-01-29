@@ -1,9 +1,9 @@
-from mercury.common.transport import SimpleRouterReqClient
+from mercury.common.clients.router_req_client import RouterReqClient
 from mercury.common.asyncio.clients.async_router_req_client import \
     AsyncRouterReqClient
 
 
-class RPCClient(SimpleRouterReqClient):
+class RPCClient(RouterReqClient):
     service_name = 'RPC client'
 
     def update_task(self, update_data):

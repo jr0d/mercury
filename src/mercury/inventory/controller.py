@@ -40,6 +40,7 @@ class InventoryController(StaticEndpointController):
         if 'mercury_id' in update_data:
             raise EndpointError('Cannot update mercury_id with this method',
                                 'update_one', update_data)
+        log.debug('Updating {}'.format(mercury_id))
         return {'object_id': serialize_object_id(
             await self.db.update_one(mercury_id, update_data))}
 
