@@ -17,6 +17,7 @@ import os
 
 import requests
 from lxml import objectify as xml_objectify
+from lxml import etree
 
 from mercury.common.helpers import cli
 
@@ -65,7 +66,7 @@ def build_index_l(l, key):
 
 
 def extract_tar_archive(tarball_path, extract_path):
-    os.makedirs(extract_path)
+    os.makedirs(extract_path, exist_ok=True)
     cmd = 'tar --strip-components=1 -xvf {0} -C {1}'.format(tarball_path,
                                                             extract_path)
     return cli.run(cmd)
@@ -76,6 +77,9 @@ def download_file(url, download_path):
         r = requests.get(url, stream=True, verify=False)
     except requests.RequestException as err:
         raise err
+
+    if os.path.isfile(download_path):
+        os.remove(download_path)
 
     with open(download_path, 'wb') as f:
         for _chunk in r.iter_content(1024 ** 2):
@@ -95,7 +99,8 @@ def xml_to_dict(xml_str, xml_element):
         return dict_object
 
     # noinspection PyUnresolvedReferences
-    xml_obj = xml_objectify.fromstring(xml_str)
+    parser = etree.XMLParser(encoding='utf-8')
+    xml_obj = xml_objectify.fromstring(xml_str, parser=parser)
     xml_element_dict = []
     for i in xml_obj.findall("{0}".format(xml_element)):
         x = xml_to_dict_recursion(i)
