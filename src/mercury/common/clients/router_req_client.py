@@ -74,7 +74,9 @@ class RouterReqClient(object):
         Receive server reply.
         :return: The unpacked message
         """
-        retry_count = self.rcv_retry or 1
+
+        # Hacky do while loop. Thanks python...
+        retry_count = self.rcv_retry and self.rcv_retry + 1 or 1
 
         while retry_count:
             # noinspection PyBroadException
