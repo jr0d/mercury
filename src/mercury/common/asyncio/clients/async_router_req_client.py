@@ -75,7 +75,7 @@ class AsyncRouterReqClient(object):
         Receive server reply.
         :return: The unpacked message
         """
-        retry_count = self.rcv_retry or 1
+        retry_count = self.rcv_retry and self.rcv_retry + 1 or 1
 
         while retry_count:
             # noinspection PyBroadException
