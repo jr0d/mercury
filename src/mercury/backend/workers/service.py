@@ -100,6 +100,9 @@ class RPCTask(RedisTask):
                     'status': 'ERROR',
                     'message': f'Dispatch Error: {response["message"]}'})
 
+        # Close the socket
+        client.close()
+
 
 def configure_logging(config):
     logging.basicConfig(level=logging.getLevelName(config.logging.level),
