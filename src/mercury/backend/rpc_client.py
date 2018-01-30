@@ -4,7 +4,7 @@ from mercury.common.asyncio.clients.async_router_req_client import \
 
 
 class RPCClient(RouterReqClient):
-    service_name = 'RPC client'
+    service_name = 'RPC Service'
 
     def update_task(self, update_data):
         """

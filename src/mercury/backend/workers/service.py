@@ -60,7 +60,10 @@ class RPCTask(RedisTask):
         :param redis_port:
         :param redis_queue:
         """
-        self.rpc_router = RPCClient(rpc_router_url)
+        self.rpc_router = RPCClient(rpc_router_url,
+                                    linger=0,
+                                    response_timeout=5,
+                                    rcv_retry=3)
         super(RPCTask, self).__init__(redis_host, redis_port, redis_queue)
 
     def do(self):

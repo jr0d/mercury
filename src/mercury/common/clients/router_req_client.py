@@ -84,6 +84,7 @@ class RouterReqClient(object):
                 return msgpack.unpackb(self.socket.recv(), encoding='utf-8')
             except zmq.Again:
                 retry_count -= 1
+                # TODO: Created message wrapper so we can track these
                 log.error(f'[{self.service_name}] Receive timeout'
                           f' Retries remaining: {retry_count}')
             # TODO: explicitly catch things that zmq or msgpack might throw
