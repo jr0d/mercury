@@ -85,7 +85,6 @@ class AsyncRouterReqService(object):
             return await self.send_error(address,
                                          'Encountered server error, sorry')
 
-        log.debug('Sending {} : {}'.format(address, response))
         await self.send(address, response)
         log.debug('Sent {}'.format(address))
 

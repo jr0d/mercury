@@ -109,6 +109,7 @@ class BackendController(StaticEndpointController):
         :return: dict
         """
 
+        log.info('Dispatching task update: {}'.format(update_data))
         return await self.rpc_client.update_task(update_data)
 
     @async_endpoint('complete_task')
@@ -123,5 +124,7 @@ class BackendController(StaticEndpointController):
                                return_data)
 
         # frontend job client update here
+        log.info('Dispatching task complete notification: job_id: {job_id} , '
+                 'task_id: {task_id}'.format(**return_data))
         return await self.rpc_client.complete_task(return_data)
 
