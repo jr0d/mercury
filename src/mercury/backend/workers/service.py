@@ -101,7 +101,11 @@ class RPCTask(RedisTask):
                     'message': f'Dispatch Error: {response["message"]}'})
 
         # Close the socket
+        log.debug('Closing worker socket')
+
         client.close()
+
+        log.debug('Worker socket closed')
 
 
 def configure_logging(config):
