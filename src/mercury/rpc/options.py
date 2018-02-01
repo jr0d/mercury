@@ -62,4 +62,10 @@ def parse_options():
                              default='rpc_tasks',
                              help_string='The collection for RPC tasks')
 
+    configuration.add_option('rpc.database.username',
+                             help_string="The database user")
+
+    configuration.add_option('rpc.database.password',
+                             help_string="The database use password")
+
     return configuration.scan_options()

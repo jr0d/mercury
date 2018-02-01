@@ -66,6 +66,8 @@ def main():
         jobs_collection=config.rpc.database.jobs_collection,
         tasks_collection=config.rpc.database.tasks_collection,
         replica_name=config.rpc.database.replica_name,
+        username=config.rpc.database.username,
+        password=config.rpc.database.password,
         use_asyncio=True
     )
 

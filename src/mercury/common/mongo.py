@@ -23,12 +23,15 @@ import pymongo
 log = logging.getLogger(__name__)
 
 
-def get_connection(server_or_servers=None, replica_set=None):
+def get_connection(server_or_servers=None, replica_set=None,
+                   username=None, password=None):
     """Creates a new MongoDB client.
 
     :param server_or_servers: Hostname / MongoDB URI or list of hostnames /
         URIs for the client to connect to.
     :param replica_set: The name of the replica set to connect to.
+    :param username:
+    :param password:
     :returns: A MongoClient instance.
     """
     servers = server_or_servers
@@ -37,7 +40,12 @@ def get_connection(server_or_servers=None, replica_set=None):
             servers = [servers]
 
     log.info('Connecting to %s : replicaSet: %s' % (servers, replica_set))
-    return pymongo.MongoClient(servers, replicaset=replica_set)
+
+    if username:
+        return pymongo.MongoClient(servers, replicaset=replica_set,
+                                   username=username, password=password)
+    else:
+        return pymongo.MongoClient(servers, replicaset=replica_set)
 
 
 class MongoCollection(object):
