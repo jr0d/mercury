@@ -40,7 +40,12 @@ def parse_options():
                                          'servers to connect to')
 
     configuration.add_option('inventory.database.replica_name',
-                             config_address='inventory.db.replica_name',
-                             help_string='An optional replica')
+                             help_string='An optional replica name')
+
+    configuration.add_option('inventory.database.user',
+                             help_string='The database user')
+
+    configuration.add_option('inventory.database.password',
+                             help_string='The database user\'s password')
 
     return configuration.scan_options()

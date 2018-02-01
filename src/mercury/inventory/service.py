@@ -34,7 +34,9 @@ def main():
 
     async_connection = get_async_connection(
         config.inventory.database.servers,
-        config.inventory.database.replica_name
+        config.inventory.database.replica_name,
+        username=config.inventory.database.username,
+        password=config.inventory.database.password
     )
     inventory_collection = get_collection(
         config.inventory.database.name,
