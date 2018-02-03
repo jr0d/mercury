@@ -42,7 +42,7 @@ def parse_options():
     configuration.add_option('inventory.database.replica_name',
                              help_string='An optional replica name')
 
-    configuration.add_option('inventory.database.user',
+    configuration.add_option('inventory.database.username',
                              help_string='The database user')
 
     configuration.add_option('inventory.database.password',
