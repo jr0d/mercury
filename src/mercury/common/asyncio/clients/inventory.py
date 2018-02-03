@@ -20,7 +20,7 @@ from mercury.common.asyncio.clients.async_router_req_client import AsyncRouterRe
 class InventoryClient(AsyncRouterReqClient):
     """Client to interact with inventory."""
 
-    _service_name = 'Inventory'
+    service_name = 'Inventory'
 
     async def insert_one(self, device_info):
         """Insert a new device in inventory.
