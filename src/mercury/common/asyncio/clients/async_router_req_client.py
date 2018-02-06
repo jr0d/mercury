@@ -53,6 +53,7 @@ class AsyncRouterReqClient(object):
                 # positive timeouts should be expressed in milliseconds
                 timeout = self.response_timeout * 1000
 
+            self.socket.setsockopt(zmq.LINGER, self.linger)
             self.socket.setsockopt(zmq.RCVTIMEO, timeout)
             self.socket.connect(self.zmq_url)
 

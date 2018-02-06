@@ -10,7 +10,6 @@ from mercury.backend.configuration import (
     add_common_options, BACKEND_CONFIG_FILE
 )
 
-
 log = logging.getLogger(__name__)
 
 
@@ -60,7 +59,8 @@ class RPCTask(RedisTask):
         :param redis_port:
         :param redis_queue:
         """
-        self.rpc_router = RPCClient(rpc_router_url,
+        self.rpc_router_url = rpc_router_url
+        self.rpc_router = RPCClient(self.rpc_router_url,
                                     linger=0,
                                     response_timeout=5,
                                     rcv_retry=3)
@@ -68,8 +68,10 @@ class RPCTask(RedisTask):
 
     def do(self):
         url = 'tcp://{host}:{port}'.format(**self.task)
-        client = RouterReqClient(url, linger=5, response_timeout=10,
+        client = RouterReqClient(url, linger=0,
+                                 response_timeout=5,
                                  rcv_retry=3)
+
         client.service_name = 'AgentTaskService'
 
         _payload = {
@@ -94,18 +96,14 @@ class RPCTask(RedisTask):
                 'message': err_msg,
             })
         elif response['message']['status'] != 0:
-                self.rpc_router.complete_task({
-                    'job_id': self.task['job_id'],
-                    'task_id': self.task['task_id'],
-                    'status': 'ERROR',
-                    'message': f'Dispatch Error: {response["message"]}'})
+            self.rpc_router.complete_task({
+                'job_id': self.task['job_id'],
+                'task_id': self.task['task_id'],
+                'status': 'ERROR',
+                'message': f'Dispatch Error: {response["message"]}'})
 
-        # Close the socket
-        log.debug('Closing worker socket')
-
+        # close the socket
         client.close()
-
-        log.debug('Worker socket closed')
 
 
 def configure_logging(config):
