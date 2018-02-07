@@ -39,7 +39,8 @@ setup(
         'python-box',
         'requests',
         'lxml',
-        'pystache'
+        'pystache',
+        'flask'
     ],
     entry_points={
        'console_scripts': [
@@ -48,7 +49,8 @@ setup(
            'mercury-backend = mercury.backend.service:main',
            'mercury-backend-queue = mercury.backend.queue_service.service:main',
            'mercury-backend-worker = mercury.backend.workers.service:main',
-           'mercury-log = mercury.log_service.service:main'
+           'mercury-log = mercury.log_service.service:main',
+           'mercury-boot = mercury.boot.service:main'
        ]
     }
 )
