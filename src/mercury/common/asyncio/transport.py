@@ -49,7 +49,8 @@ class AsyncRouterReqService(object):
             raise MercuryClientException('Message is malformed')
 
         except (
-        msgpack.UnpackException, msgpack.ExtraData) as msgpack_exception:
+                msgpack.UnpackException,
+                msgpack.ExtraData) as msgpack_exception:
             log.error('Received invalid request: %s' % str(
                 msgpack_exception))
 
@@ -71,19 +72,24 @@ class AsyncRouterReqService(object):
         raise NotImplementedError
 
     async def message_handler(self, address, message):
-        # noinspection PyBroadException
-        try:
-            response = await self.process(message)
-        except MercuryClientException as mce:
-            return await self.send_error(address,
-                                         'Encountered client error: {}'.format(
-                                             mce))
-        except Exception:
-            exec_dict = parse_exception()
-            log.error('process raised an exception and should not have.')
-            log.error(fancy_traceback_short(exec_dict))
-            return await self.send_error(address,
-                                         'Encountered server error, sorry')
+        if message.get('_protocol_message') == 'keep_alive':
+            log.debug('Keep alive received from {}'.format(address))
+            response = {'_protocol_message': 'keep_alive_confirmed'}
+        else:
+            # noinspection PyBroadException
+            try:
+                response = await self.process(message)
+            except MercuryClientException as mce:
+                return await self.send_error(
+                    address,
+                    'Encountered client error: {}'.format(
+                        mce))
+            except Exception:
+                exec_dict = parse_exception()
+                log.error('process raised an exception and should not have.')
+                log.error(fancy_traceback_short(exec_dict))
+                return await self.send_error(address,
+                                             'Encountered server error, sorry')
 
         await self.send(address, response)
         log.debug('Sent {}'.format(address))
@@ -150,4 +156,3 @@ class TrivialAsyncRouterReqService(AsyncRouterReqService):
 
     async def process(self, message):
         raise NotImplementedError
-

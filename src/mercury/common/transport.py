@@ -193,7 +193,8 @@ class SimpleRouterReqService(object):
                                       encoding='utf-8')
         except TypeError as type_error:
             self.send_error(parsed_message['address'],
-                            'Received unpacked, non-string type: %s : %s' % (type(parsed_message), type_error))
+                            'Received unpacked, non-string type: %s : %s' % (
+                                type(parsed_message), type_error))
             return
         except msgpack.UnpackException as unpack_exception:
             self.send_error(parsed_message['address'],
@@ -282,19 +283,24 @@ class SimpleRouterReqService(object):
             address, message = data
             # log.debug('Request: %s' % binascii.hexlify(address))
             # noinspection PyBroadException
-            try:
-                response = self.process(message)
-            except MercuryClientException as mce:
-                self.send_error(address,
-                                'Encountered client error: {}'.format(mce))
-                continue
-            except Exception:
-                exec_dict = parse_exception()
-                log.error('process raised an exception and should not have.')
-                log.error(fancy_traceback_short(exec_dict))
-                self.send_error(address, 'Encountered server error, sorry')
-                continue
-            # log.debug('Response: %s' % binascii.hexlify(address))
+            if message.get('_protocol_message') == 'keep_alive':
+                log.debug('Keep alive received from {}'.format(address))
+                response = {'_protocol_message': 'keep_alive_confirmed'}
+            else:
+                # noinspection PyBroadException
+                try:
+                    response = self.process(message)
+                except MercuryClientException as mce:
+                    self.send_error(address,
+                                    'Encountered client error: {}'.format(mce))
+                    continue
+                except Exception:
+                    exec_dict = parse_exception()
+                    log.error('process raised an exception and should not have.')
+                    log.error(fancy_traceback_short(exec_dict))
+                    self.send_error(address, 'Encountered server error, sorry')
+                    continue
+                # log.debug('Response: %s' % binascii.hexlify(address))
             self.send(address, response)
         self.cleanup()
 
