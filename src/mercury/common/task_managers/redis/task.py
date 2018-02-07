@@ -1,7 +1,6 @@
 import logging
 import json
 import redis
-import time
 
 from mercury.common.task_managers.base.task import Task
 

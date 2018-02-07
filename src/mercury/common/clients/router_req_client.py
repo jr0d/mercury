@@ -55,6 +55,13 @@ class RouterReqClient(object):
             self.socket.setsockopt(zmq.LINGER, self.linger)
             self.socket.setsockopt(zmq.RCVTIMEO, timeout)
 
+            # Keep Alive
+
+            self.socket.setsockopt(zmq.TCP_KEEPALIVE, 1)
+            self.socket.setsockopt(zmq.TCP_KEEPALIVE_IDLE, 120)
+            self.socket.setsockopt(zmq.TCP_KEEPALIVE_CNT, 3)
+            self.socket.setsockopt(zmq.TCP_KEEPALIVE_INTVL, 10)
+
             self.socket.connect(self.zmq_url)
 
     def safe_send(self, data):
