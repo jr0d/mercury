@@ -63,7 +63,8 @@ class RPCTask(RedisTask):
         self.rpc_router = RPCClient(self.rpc_router_url,
                                     linger=0,
                                     response_timeout=5,
-                                    rcv_retry=3)
+                                    rcv_retry=3,
+                                    resend_on_timeout=2)
         super(RPCTask, self).__init__(redis_host, redis_port, redis_queue)
 
     def do(self):

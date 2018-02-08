@@ -72,10 +72,7 @@ def reacquire(inventory_url, backend_name):
     """
     # Onetime use synchronous client
     log.info('Attempting to reacquire active agents')
-    inventory_client = InventoryClient(inventory_url,
-                                       # TODO: Add these to configuration
-                                       response_timeout=60,
-                                       rcv_retry=10)
+    inventory_client = InventoryClient(inventory_url)
 
     existing_documents = inventory_client.query({'active': {'$ne': None},
                                                  'origin.name': backend_name},
@@ -140,11 +137,13 @@ def main():
     inventory_client = AsyncInventoryClient(config.backend.inventory_router,
                                             linger=0,
                                             response_timeout=10,
-                                            rcv_retry=3)
+                                            rcv_retry=3,
+                                            resend_on_timeout=1)
     rpc_client = AsyncRPCClient(config.backend.rpc_router,
                                 linger=0,
                                 response_timeout=10,
-                                rcv_retry=3)
+                                rcv_retry=3,
+                                resend_on_timeout=1)
 
     # Create a backend instance
     server = BackEndService(config.backend.agent_service.bind_address,

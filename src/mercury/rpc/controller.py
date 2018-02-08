@@ -155,7 +155,7 @@ class RPCController(StaticEndpointController):
             raise EndpointError(str(mue), 'create_job')
 
         await job.insert()
-        job.enqueue_tasks()
+        await job.enqueue_tasks()
 
         return {'job_id': str(job.job_id)}
 
