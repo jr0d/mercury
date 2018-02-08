@@ -18,13 +18,15 @@ class AsyncRouterReqClient(object):
     service_name = 'Generic Service'
 
     def __init__(self, zmq_url, linger=-1, response_timeout=-1, rcv_retry=0,
-                 raise_on_timeout=False):
+                 raise_on_timeout=False, keep_alive_interval=0):
         """
 
         :param zmq_url:
         :param linger:
         :param response_timeout:
         :param rcv_retry: The number of times to retry
+        :param keep_alive_interval: The interval to send keep_alive messages in
+        seconds
         """
         self.zmq_url = zmq_url
         self.linger = linger
@@ -55,6 +57,14 @@ class AsyncRouterReqClient(object):
 
             self.socket.setsockopt(zmq.LINGER, self.linger)
             self.socket.setsockopt(zmq.RCVTIMEO, timeout)
+
+            # Keep Alive
+
+            self.socket.setsockopt(zmq.TCP_KEEPALIVE, 1)
+            self.socket.setsockopt(zmq.TCP_KEEPALIVE_IDLE, 120)
+            self.socket.setsockopt(zmq.TCP_KEEPALIVE_CNT, 3)
+            self.socket.setsockopt(zmq.TCP_KEEPALIVE_INTVL, 10)
+
             self.socket.connect(self.zmq_url)
 
     def safe_send(self, data):
