@@ -6,6 +6,7 @@ import zmq.asyncio
 from mercury.common.asyncio.clients.inventory import InventoryClient
 from mercury.common.asyncio import transport, dispatcher
 
+from mercury.rpc.backend_clients import set_queue_client_opts
 from mercury.rpc.controller import RPCController
 from mercury.rpc.jobs.monitor import Monitor
 from mercury.rpc.mongo import init_rpc_collections
@@ -75,10 +76,19 @@ def main():
     inventory_client = InventoryClient(
         config.rpc.inventory_router,
         # TODO: add these values to the configuration
-        linger=10,
+        linger=0,
         response_timeout=5,
-        rcv_retry=3
+        rcv_retry=3,
+        resend_on_timeout=1
     )
+
+    # Configured Backend Clients
+    # Resending should never be attempted due to risk of inserting duplicate
+    # jobs
+    set_queue_client_opts(linger=0,
+                          response_timeout=100,
+                          rcv_retry=0,
+                          resend_on_timeout=0)
 
     # Add TTL indexes for completed jobs/tasks
     collections.jobs_collection.create_index('ttl_time_completed',

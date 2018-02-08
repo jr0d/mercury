@@ -1,14 +1,15 @@
 import logging
 
-from mercury.common.clients.router_req_client import RouterReqClient
+from mercury.common.asyncio.clients.async_router_req_client import \
+    AsyncRouterReqClient
 
 log = logging.getLogger(__name__)
 
 
-class QueueServiceClient(RouterReqClient):
+class QueueServiceClient(AsyncRouterReqClient):
     service_name = 'RPC Queue Service'
 
-    def enqueue_task(self, task):
+    async def enqueue_task(self, task):
         """
 
         :param task:
@@ -18,4 +19,4 @@ class QueueServiceClient(RouterReqClient):
             'endpoint': 'enqueue_task',
             'args': [task]
         }
-        return self.transceiver(_payload)
+        return await self.transceiver(_payload)

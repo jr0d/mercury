@@ -7,7 +7,7 @@ from mercury.common.helpers import util
 from mercury.common.transport import format_zurl
 from mercury.rpc.preprocessors import instruction_preprocessors
 
-from mercury.rpc.backend_clients import get_queue_manager
+from mercury.rpc.backend_clients import get_queue_service_client
 from mercury.rpc.jobs.tasks import Task
 
 
@@ -124,7 +124,7 @@ class Job(object):
         await self.tasks_collection.insert_many(
             [task.to_dict() for task in list(self.tasks.values())])
 
-    def enqueue_tasks(self):
+    async def enqueue_tasks(self):
         """ Uses backend manager processes to enqueue tasks """
 
         # Generate an index that relates backends to tasks
@@ -132,10 +132,16 @@ class Job(object):
                                             for task in self.tasks.values()],
                                            'backend')
 
-        # Loop through backends and get a queue backend manager
+        # Loop through backends and get a queue backend client
         for backend in backend_index:
-            manager = get_queue_manager(backend)
+            # Get a new socket
+            client = get_queue_service_client(backend)
 
             # Add each task to the managers queue
             for task in backend_index[backend]:
-                manager.tasks_queue.put(task)
+                await client.enqueue_task(task)
+
+            # Close the socket (long running sockets are problematic with zmq
+            # across the datacenter due to firewall disconnects).
+            # keep alive is being investigated. Also send assurances.
+            client.close()
