@@ -162,10 +162,8 @@ information.
 - dtk_update
 - omreport_health
 - syscfg
-- megaraid_create_array
-- megaraid_delete_ld
-- megaraid_clear_configuration
-- megaraid_clear_configuration_all_controllers
+- megaraid_add
+- megaraid_delete
 - megaraid_firmware_update
 
 Full RPC method documentation can be viewed in the RPC section of the API documentation
