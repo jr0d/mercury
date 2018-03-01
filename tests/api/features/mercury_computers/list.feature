@@ -12,7 +12,7 @@ Feature: List Active Computers
         Then the mercury_computers response status is 200 OK
         And the response contains a list of mercury_computers on my account
 
-    @negative @p1 @wip
+    @negative @p1 @not-tested
     Scenario: Get list of mercury_computers for unauthorized account
         Given the account is an unauthorized tenant
         And the mercury_computers client URL is /active/computers
