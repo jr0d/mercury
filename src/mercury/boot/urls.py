@@ -13,18 +13,14 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-from mercury.boot.views import BootView, FileView
-
+from mercury.boot.views import BootView, DiscoverView
 
 boot_view = BootView.as_view('boot')
-file_view = FileView.as_view('file')
-
+discover_view = DiscoverView.as_view('discover')
 
 boot_urls = [
     # Boot url rules
     ('/boot', boot_view),
-    ('/boot/<mac_address>', boot_view),
-    # File url rules
-    ('/file', file_view),
-    ('/file/<path>', file_view),
+    # Discover rules
+    ('/boot/discover/<mac_address>', discover_view),
 ]
