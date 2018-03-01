@@ -1,0 +1,8 @@
+#!ipxe
+
+echo BOOTING MERCURY AGENT
+
+kernel {{ agent.file_server_url }}/{{ agent.kernel }} initrd={{ agent.initrd }} {{ agent.rootfs_option }}={{ agent.file_server_url }}/{{ agent.file_system }} {{ agent.kernel_options }}
+initrd {{ agent.file_server_url }}/{{ agent.initrd }}
+
+boot || shell

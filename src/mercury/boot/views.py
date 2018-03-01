@@ -13,13 +13,14 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-import os
 import logging
+from urllib.parse import urlsplit
 
-from flask import request, send_file, abort, jsonify
+import pystache
+
+
+from flask import request, abort, Response
 from flask.views import MethodView
-
-from werkzeug.utils import secure_filename
 
 from mercury.common.clients.inventory import InventoryClient
 from mercury.boot.configuration import get_boot_configuration
@@ -33,118 +34,87 @@ class BootView(MethodView):
     """
     Boot method view
     """
+    def get(self):
+        """
+        Boot request, transmit the discover script
+        :return:
+        """
 
+        mercury_boot_url = '://'.join(urlsplit(request.base_url)[:2])
+
+        with open('scripts/discovery.ipxe') as script_file:
+            script = pystache.render(script_file.read(), dict(
+                mercury_boot_url=mercury_boot_url))
+
+        return Response(script, content_type='text/plain')
+
+
+class DiscoverView(MethodView):
+    """
+    Discover method view
+    """
     def __init__(self, *args, **kwargs):
-        super(BootView, self).__init__(*args, **kwargs)
+        super(DiscoverView, self).__init__(*args, **kwargs)
         inventory_url = configuration.inventory.inventory_router
         self.inventory_client = InventoryClient(inventory_url)
 
-    def get(self, mac_address=None):
-        """
-        Main boot endpoint 
+    @staticmethod
+    def render_agent_script():
+        with open('scripts/agent.ipxe') as fp:
+            template = fp.read()
 
-        :param mac_address: Inventory object mac_address, default is None.
-        :return: Boot file.
-        """
-        if mac_address:
-            result = self.inventory_client.query(
-                {
-                    'interfaces.address': mac_address
-                }
-            )
+        return pystache.render(template, **configuration)
 
-            try:
-                inventory = result['message']['items'][0]
-            except IndexError:
-                return abort(404)
-                
-            # Select boot file depending on inventory attributes
-            # if inventory and inventory.dmi.platform == 'Dell, Inc.':
-            #     return send_file(some_custom_dell_boot_menu)
+    @staticmethod
+    def plain(message):
+        return Response(message, content_type='text/plain')
 
-        return send_file(configuration.default_boot_file)
+    def get(self, mac_address):
+        """ Attempt to relate a device using the provided mac address """
+        result = self.inventory_client.query({
+            'interfaces.address': mac_address
+        }, projection={
+            'boot': 1,
+            'mercury_id': 1,
+            'dmi': 1
+        })
 
+        if result.get('error'):
+            abort(500, result)
 
+        message = result['message']
 
-class FileView(MethodView):
-    """ 
-    File method view 
-    """
+        if not message['total']:
+            log.info('New device: {}'.format(mac_address))
+            return self.plain(self.render_agent_script())
 
-    def get(self, path=''):
-        abs_path = os.path.join(configuration.file_upload_directory, path)
+        if message['total'] > 1:
+            log.error('DUPLICATE MAC ADDRESS: {}'.format(mac_address))
+            abort(500, 'Duplicate mac addresses in inventory')
 
-        if not os.path.exists(abs_path):
-            return abort(404)
+        inventory_data = message['items'][0]
 
-        if os.path.isfile(abs_path):
-            return send_file(abs_path)
+        boot_info = inventory_data.get('boot', {})
 
-        files = os.listdir(abs_path)
+        if boot_info.get('script'):
+            # Dangerous, can potentially leak entire configuration into image
+            # if an attacker knows the key names
+            return pystache.render(boot_info['script'], dict(
+                **inventory_data, **configuration))
 
-        response = []
+        boot_state = boot_info.get('state', 'agent')
 
-        for file_name in files:
-            file_path = os.path.join(configuration.file_upload_directory,
-                                     file_name)
-            data = self._get_file_data(file_name, file_path)
-            response.append(data)
+        if boot_state == 'local':
+            log.info('Booting {} from hard drive'.format(
+                inventory_data['mercury_id']))
+            return self.plain('#!ipxe\nexit\n')
 
-        return jsonify(response)
+        elif boot_info == 'rescue':
+            log.info('Booting {} to rescue mode'.format(
+                inventory_data['mercury_id']
+            ))
+            return self.plain('Boot rescue iPXE script here')
 
-    def post(self):
-        """
-        Upload a file to the upload directory
-        :return: None
-        """
-        upload = request.files['file']
-
-        if upload and upload.filename:
-            file_name = secure_filename(upload.filename)
-            file_path = os.path.join(configuration.file_upload_directory,
-                                     file_name)
-            upload.save(file_path)
-            data = self._get_file_data(file_name, file_path)
-
-            return jsonify(data)
-
-        return abort(400)
-
-    def delete(self, path):
-        """
-        Delete the file defined by path relative to the upload directory
-        :param path: File path
-        :return: None
-        """
-        abs_path = os.path.join(configuration.file_upload_directory, path)
-
-        if not os.path.exists(abs_path):
-            return abort(404)
-
-        if os.path.isfile(abs_path):
-            os.remove(abs_path)
-        else:
-            os.removedirs(abs_path)
-
-        return '', 204
-
-    def _get_file_data(self, file_name, file_path):
-        file_mtime = os.path.getmtime(file_path)
-        file_size = os.path.getsize(file_path)
-        file_link = 'http://{}:{}/file/{}'.format(configuration.host,
-                                                  configuration.port,
-                                                  file_name)
-        file_type = 'file'
-
-        if os.path.isdir(file_path):
-            file_type = 'directory'
-
-        data = {
-            'name': file_name,
-            'type': file_type,
-            'link': file_link,
-            'mtime': file_mtime,
-            'size': file_size,
-        }
-
-        return data
+        log.info('Booting {} to agent'.format(inventory_data['mercury_id']))
+        print(request.base_url)
+        return self.plain(self.render_agent_script())

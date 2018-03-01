@@ -23,23 +23,16 @@ def options(configuration):
 
     configuration.add_option(
         'host',
+        env_variable='MBOOT_HOST',
         default='127.0.0.1',
         help_string='The host address to bind to')
 
     configuration.add_option(
         'port',
+        env_variable='MBOOT_PORT',
         default=5000,
+        special_type=int,
         help_string='The port to bind to')
-
-    configuration.add_option(
-        'file_upload_directory',
-        default='/var/www/mercury-boot',
-        help_string='The file upload directory')
-
-    configuration.add_option(
-        'default_boot_file',
-        default='pxelinux.0',
-        help_string='Default boot file path')
 
     configuration.add_option(
         'inventory.inventory_router',
@@ -54,6 +47,40 @@ def options(configuration):
 
     configuration.add_option(
         'logging.level', default='DEBUG', help_string='The app log level')
+
+    configuration.add_option(
+        'agent.file_server_url',
+        required=True,
+        help_string='The file server path containing agent boot files')
+
+    configuration.add_option(
+        'agent.kernel',
+        default='vmlinuz',
+        help_string='The agent kernel')
+
+    configuration.add_option(
+        'agent.initrd',
+        default='initrd',
+        help_string='The agent initial ram file system')
+
+    configuration.add_option(
+        'agent.rootfs_option',
+        help_string='The kernel command line option used by the initrd to find '
+                    'the root file system',
+        required=True
+    )
+
+    configuration.add_option(
+        'agent.file_system',
+        default='mercury-agent.sqfs',
+        help_string='The agent file system'
+    )
+
+    configuration.add_option(
+        'agent.kernel_options',
+        default='',
+        help_string='Kernel options for the agent environment'
+    )
 
 
 def get_boot_configuration():
