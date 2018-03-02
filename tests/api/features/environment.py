@@ -51,6 +51,7 @@ def before_all(context):
         fmt="%(asctime)s - %(levelname)s:  %(name)s: %(message)s"))
     root_logger.addHandler(handler)
 
+    # TODO
     # WIP: set up env_configs from config file
     context.base_url = "http://mercury.dcx.rackspace.com:9005/api"
     context.services = defaultdict(dict)
