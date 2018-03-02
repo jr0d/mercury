@@ -6,7 +6,7 @@ Feature: Query Active Computers
       And the mercury_computers client URL is /active/computers
 
     @positive @p0 @smoke
-    Scenario Outline: Query Active Comuters With <field>
+    Scenario Outline: Query Active Computers With <field> <value>
         Given I have 'query' details for entities using the mercury_computers api
             """
             { <query> : { <field>: <value> }}
@@ -14,7 +14,8 @@ Feature: Query Active Computers
         When I get the query_results from a query of mercury_computers
         Then the mercury_computers response status is 200 OK
         And the response contains a list of mercury_computers on my account
+        And the mercury_computers entities in the response contain <field> with <value>
 
         Examples: Fields
-        | field            | value   | query   |
-        | 'dmi.sys_vendor' | 'HP'    | 'query' |
+        | field             | value     | query   |
+        | 'active.rpc_port' | 9003    | 'query' |

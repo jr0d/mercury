@@ -12,6 +12,7 @@ def step_a_service_id_is_located_for_testing(context, service_name):
     service_client = context.services[service_name]['client']
     response = service_client.get()
     try:
+        # TODO config value?
         entity_id = response.json()['items'][0]['mercury_id']
         context.services[service_name]['id'] = entity_id
     except IndexError:

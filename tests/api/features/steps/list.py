@@ -21,6 +21,7 @@ def step_the_response_contains_a_list_of_service_ids_on_my_account(
     :type service_name: str
     """
     service_resp = context.services[service_name]['resp']
+    # TODO config value?
     # active computers are listed in the "items" field
     service_entities = service_resp.json()['items']
     context.check.assertIsInstance(service_entities, list)
