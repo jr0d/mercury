@@ -19,7 +19,7 @@ def step_a_service_id_is_located_for_testing(context, service_name):
         context.check.assertIsNotNone(
             context.services[service_name]['id'],
             msg='WIP: Create {} API Not Yet Implemented'.format(service_name))
-        # WIP: Create new service entity since we don't have any
+        # TODO: Create new service entity since we don't have any
 
 
 @when("I get the entity using the {service_name} api")
@@ -43,4 +43,4 @@ def step_the_service_response_contains_valid_single_entity_details(
     service_resp = context.services[service_name]['resp']
     service_entity = service_resp.json()
     context.check.assertIsInstance(service_entity, dict)
-    # WIP validate service entity details
+    # TODO: validate actual content of entity
