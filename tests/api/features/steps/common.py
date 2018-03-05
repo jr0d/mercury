@@ -14,7 +14,7 @@ def step_the_account_is_an_auth_tenant(context, auth):
     :type context: behave.runner.Context
     :type auth: str
     """
-    # WIP: Temporary until identity system is in place
+    # TODO: Temporary until identity system is in place
     context.bypass_auth = True
     if auth == "unauthorized":
         context.bypass_auth = False
