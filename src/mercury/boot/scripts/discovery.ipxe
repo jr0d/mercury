@@ -1,0 +1,5 @@
+#!ipxe
+
+echo MERCURY BOOT DISCOVERY
+chain {{ mercury_boot_url }}/boot/discover/${netX/mac} || shell
+
