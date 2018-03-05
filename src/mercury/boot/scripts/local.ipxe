@@ -1,0 +1,4 @@
+#!ipxe
+
+echo MERCURY BOOT: EXITING
+exit

@@ -82,6 +82,7 @@ class InventoryDBController(object):
         return self.collection.find_one({'mercury_id': mercury_id},
                                         projection=projection)
 
+    # TODO: Ditch query and add find() and find_one()
     def query(self, query, extra_projection=None, limit=0, sort='_id',
               sort_direction=1):
         log.debug(
