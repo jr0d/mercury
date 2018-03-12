@@ -23,8 +23,12 @@ def step_the_response_contains_a_list_of_service_ids_on_my_account(
     service_resp = context.services[service_name]['resp']
     # TODO config value?
     # active computers are listed in the "items" field
-    service_entities = service_resp.json()['items']
+    if service_name in ["inventory_computers", "active_computers"]:
+        service_entities = service_resp.json()['items']
+    elif service_name == "rpc_jobs":
+        service_entities = service_resp.json()['jobs']
     context.check.assertIsInstance(service_entities, list)
+    # TODO make sure the actual entities in the list are what they should be
     # WIP: Validate for service IDs
 
 
