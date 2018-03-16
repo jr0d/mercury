@@ -13,7 +13,8 @@ def step_a_service_id_is_located_for_testing(context, service_name):
     response = service_client.get()
     try:
         # TODO config value?
-        entity_id = response.json()['items'][0]['mercury_id']
+        field_name = context.cfg.MERCURY.entity_field_name
+        entity_id = response.json()['items'][0][field_name]
         context.services[service_name]['id'] = entity_id
     except IndexError:
         context.check.assertIsNotNone(
