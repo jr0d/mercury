@@ -13,13 +13,13 @@ Feature: View Active Computer Information
         Then the active_computers response status is 200 OK
         And the active_computers response contains valid single entity details
 
-    @negative @p1    
+    @negative @p1
     Scenario Outline: Get Active Computer Details With <invalid_mercury_id>
         Given a active_computers <invalid_mercury_id> is provided
         When I get the entity using the active_computers api
         Then the active_computers response status is <status_code> <reason>
 
-        Examples: Invalid Loadbalancer IDs
+        Examples: Invalid Mercury IDs
         | invalid_mercury_id        | status_code          | reason    |
         | invalid_device_id_123     | 404                  | NOT FOUND |
         | 0                         | 404                  | NOT FOUND |

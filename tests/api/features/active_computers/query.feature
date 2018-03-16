@@ -17,5 +17,6 @@ Feature: Query Active Computers
         And the active_computers entities in the response contain <field> with <value>
 
         Examples: Fields
-        | field             | value     | query   |
-        | 'active.rpc_port' | 9003    | 'query' |
+        | field                    | value     | query   |
+        | 'active.rpc_port'        | 9003      | 'query' |
+        | 'active.ping_port'       | 9004      | 'query' |

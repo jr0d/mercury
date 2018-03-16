@@ -17,5 +17,6 @@ Feature: Query inventory Computers
         And the inventory_computers entities in the response contain <field> with <value>
 
         Examples: Fields
-        | field            | value   | query   |
-        | 'dmi.sys_vendor' | 'HP'    | 'query' |
+        | field            | value         | query   |
+        | 'dmi.sys_vendor' | 'HP'          | 'query' |
+        | 'mem.Dirty'      | 0             | 'query' |

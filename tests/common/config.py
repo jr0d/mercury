@@ -27,7 +27,6 @@ def get_conflagration(config_file_paths=DEFAULT_CONFIG_FILES):
     here = os.getcwd()
     paths = [os.path.join(here, filename) for filename in config_file_paths]
     if config_file_paths:
-        print(paths)
         cfg = api.conflagration(files=paths, namespace_obj=ModifiableNamespace())
     else:
         cfg = api.conflagration(default_to_env=True)
