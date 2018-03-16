@@ -3,6 +3,7 @@ import datetime
 import logging
 import os
 import unittest
+from tests.common.config import get_conflagration
 
 
 LOGS_DIR = os.environ.get("BEHAVE_LOGS_DIR", "./logs")
@@ -25,6 +26,9 @@ def before_all(context):
     """
     :type context: behave.runner.Context
     """
+
+    # Test config
+    context.cfg = get_conflagration()
 
     # -- SET LOG LEVEL: behave --logging-level=ERROR ...
     # on behave command-line or in "behave.ini".
@@ -51,9 +55,7 @@ def before_all(context):
         fmt="%(asctime)s - %(levelname)s:  %(name)s: %(message)s"))
     root_logger.addHandler(handler)
 
-    # TODO config value
-    # WIP: set up env_configs from config file
-    context.base_url = "http://mercury.dcx.rackspace.com:9005/api"
+    context.base_url = context.cfg.MERCURY.mercury_api_endpoint
     context.services = defaultdict(dict)
     context.check = unittest.TestCase()
 

@@ -29,7 +29,6 @@ def step_i_get_the_query_results_from_a_query_of_service_api(
     # TODO: also, in the feature file
     # you need to check that the query actually worked
     data = ast.literal_eval(ast.literal_eval(data))
-    # TODO consider moving "query" to a config
     context.services[service_name]['resp'] = service_client.post(data=json.dumps(data),
         url_suffix="query")
 
@@ -44,14 +43,14 @@ def step_the_entities_in_the_response_contain_field_with_value(
     """
     service_client = context.services[service_name]['client']
     service_resp = context.services[service_name]['resp']
-    # TODO?
+    # TODO config?
     # active computers are listed in the "items" field
     service_entities = service_resp.json()['items']
     context.check.assertGreater(len(service_entities),0)
 
     for entity in service_entities:
-        # TODO this is ugly and mercury_id should be defined in a config
-        entity_id = entity["mercury_id"]
+        field_name = context.cfg.MERCURY.entity_field_name
+        entity_id = entity[field_name]
         resp = service_client.get(entity_id)
         field = field.replace("'","")
         value = value.replace("'","")

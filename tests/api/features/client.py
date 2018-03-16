@@ -1,9 +1,14 @@
 import copy
+import json
 import requests
+from tests.common.config import get_conflagration
 
 class APIClient(object):
 
     def __init__(self, base_url, request_kwargs=None):
+
+        self.cfg = get_conflagration()
+        token = self.get_identity_token()
 
         timeout = None
         ssl_certificate_verify = False
@@ -16,7 +21,8 @@ class APIClient(object):
             verbose = request_kwargs.get('verbose', verbose)
 
         self.base_url = base_url
-        self.headers = {'Content-Type': 'application/json'}
+        self.headers = {'Content-Type': 'application/json',
+            'X-Auth-Token': token}
 
         self.verify = ssl_certificate_verify
         self.verbose = verbose
@@ -61,3 +67,22 @@ class APIClient(object):
             print(resp.content)
             print('*' * 48)
         return resp
+
+    def get_identity_token(self):
+        internal_idenity_url = \
+            self.cfg.INTERNAL_IDENTITY.internal_identity_url
+        internal_identity_username = \
+            self.cfg.INTERNAL_IDENTITY.internal_identity_username
+        internal_identity_password = \
+            self.cfg.INTERNAL_IDENTITY.internal_identity_password
+        domain = self.cfg.INTERNAL_IDENTITY.domain
+        domain_name = self.cfg.INTERNAL_IDENTITY.domain_name
+        identity_headers = {'Content-Type': 'application/json'}
+        identity_data = {"auth": {"passwordCredentials":
+            {"username":internal_identity_username,
+            "password":internal_identity_password},
+            domain: {"name": domain_name}}}
+        token_resp = requests.post(internal_idenity_url,
+            headers=identity_headers, data=json.dumps(identity_data))
+        token = token_resp.json()['access']['token']['id']
+        return token
