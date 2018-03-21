@@ -10,7 +10,7 @@ Feature: List RPC Jobs
     Scenario: Get list of rpc jobs
         When I get the list of rpc_jobs
         Then the rpc_jobs response status is 200 OK
-        And the response contains a list of rpc_jobs on my account
+        And the response contains a list of rpc_jobs
 
     @negative @p1 @not-tested
     Scenario: Get list of inventory_computers for unauthorized account

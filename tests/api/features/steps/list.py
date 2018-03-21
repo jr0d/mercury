@@ -13,8 +13,8 @@ def step_i_get_the_list_of_service(context, service_name):
     context.services[service_name]['resp'] = service_client.get()
 
 
-@step("the response contains a list of {service_name} on my account")
-def step_the_response_contains_a_list_of_service_ids_on_my_account(
+@step("the response contains a list of {service_name}")
+def step_the_response_contains_a_list_of_service_ids(
         context, service_name):
     """
     :type context: behave.runner.Context

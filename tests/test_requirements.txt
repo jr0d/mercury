@@ -3,4 +3,3 @@ conflagration==0.0.9
 parse==1.8.2
 parse-type==0.4.2
 requests==2.14.2
-six==1.11.0

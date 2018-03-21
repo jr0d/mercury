@@ -13,7 +13,7 @@ Feature: Query inventory Computers
             """
         When I get the query_results from a query of inventory_computers
         Then the inventory_computers response status is 200 OK
-        And the response contains a list of inventory_computers on my account
+        And the response contains a list of inventory_computers
         And the inventory_computers entities in the response contain <field> with <value>
 
         Examples: Fields

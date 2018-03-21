@@ -10,7 +10,7 @@ Feature: List inventory Computers
     Scenario: Get list of inventory_computers
         When I get the list of inventory_computers
         Then the inventory_computers response status is 200 OK
-        And the response contains a list of inventory_computers on my account
+        And the response contains a list of inventory_computers
 
     @negative @p1 @not-tested
     Scenario: Get list of inventory_computers for unauthorized account
