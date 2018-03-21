@@ -13,7 +13,7 @@ Feature: Query Active Computers
             """
         When I get the query_results from a query of active_computers
         Then the active_computers response status is 200 OK
-        And the response contains a list of active_computers on my account
+        And the response contains a list of active_computers
         And the active_computers entities in the response contain <field> with <value>
 
         Examples: Fields

@@ -10,7 +10,7 @@ Feature: List Active Computers
     Scenario: Get list of active_computers
         When I get the list of active_computers
         Then the active_computers response status is 200 OK
-        And the response contains a list of active_computers on my account
+        And the response contains a list of active_computers
 
     @negative @p1 @not-tested
     Scenario: Get list of active_computers for unauthorized account
