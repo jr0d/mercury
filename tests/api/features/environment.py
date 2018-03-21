@@ -1,8 +1,9 @@
-from collections import defaultdict
 import datetime
 import logging
 import os
 import unittest
+
+from collections import defaultdict
 from tests.common.config import get_conflagration
 
 
@@ -56,6 +57,7 @@ def before_all(context):
     root_logger.addHandler(handler)
 
     context.base_url = context.cfg.MERCURY.mercury_api_endpoint
+    context.json_location = context.cfg.TEST_DATA.json_data_location
     context.services = defaultdict(dict)
     context.check = unittest.TestCase()
 
