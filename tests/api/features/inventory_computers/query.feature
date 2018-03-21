@@ -6,17 +6,14 @@ Feature: Query inventory Computers
       And the inventory_computers client URL is /inventory/computers
 
     @positive @p0 @smoke
-    Scenario Outline: Query inventory Computers With <field> <value>
-        Given I have 'query' details for entities using the inventory_computers api
-            """
-            { <query> : { <field>: <value> }}
-            """
+    Scenario Outline: Query inventory Computers
+        Given I have 'query' details in <filename> for entities using the inventory_computers api
         When I get the query_results from a query of inventory_computers
         Then the inventory_computers response status is 200 OK
         And the response contains a list of inventory_computers
-        And the inventory_computers entities in the response contain <field> with <value>
+        And the inventory_computers entities in the response contain the data from <filename>
 
-        Examples: Fields
-        | field            | value         | query   |
-        | 'dmi.sys_vendor' | 'HP'          | 'query' |
-        | 'mem.Dirty'      | 0             | 'query' |
+        Examples: Filenames
+        | filename            |
+        | dmi_sys_vendor.json |
+        | mem_Dirty.json      |

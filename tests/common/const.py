@@ -15,6 +15,7 @@ class ConfigVars(object):
     INTERNAL_IDENTITY_PASSWORD = 'INTERNAL_IDENTITY_PASSWORD'
     DOMAIN = 'DOMAIN'
     DOMAIN_NAME = 'DOMAIN_NAME'
+    JSON_DATA_LOCATION = 'JSON_DATA_LOCATION'
 
 class Sources(object):
     """Sources to get the configuration variables from"""
