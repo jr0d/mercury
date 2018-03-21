@@ -1,5 +1,5 @@
 behave==1.2.5
-conflagration==0.0.9
+-e git://github.com/Machinarum/conflagration.git#egg=conflagration
 parse==1.8.2
 parse-type==0.4.2
 requests==2.14.2

@@ -11,9 +11,12 @@ def step_i_have_query_details_in_filename_for_entities_using_the_service_api(
     :type context: behave.runner.Context
     :type service_name: str
     """
+
+    # TODO pull this code out into a function in a common module
     filename = "{0}/{1}".format(context.json_location, filename)
     with open(filename) as file:
         data = json.loads(file.read())
+
     context.services[service_name]['details']['query'] = data
 
 @when("I get the query_results from a query of {service_name}")
