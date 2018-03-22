@@ -13,6 +13,14 @@ Feature: View RPC Job Information
         Then the rpc_jobs response status is 200 OK
         And the rpc_jobs response contains valid single entity details
 
+    @positive @p0 @smoke
+    Scenario: Get RPC Job Status
+        Given a rpc_jobs entity id is located for testing
+        When I get the status of the entity using the rpc_jobs api
+        Then the rpc_jobs response status is 200 OK
+        And the rpc_jobs response contains valid single entity status details
+
+
     @negative @p1
     Scenario Outline: Get RPC Job Details With <invalid_job_id>
         Given a rpc_jobs <invalid_job_id> is provided

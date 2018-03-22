@@ -45,9 +45,31 @@ def step_i_get_the_entity_using_the_service_api(context, service_name):
     context.services[service_name]['resp'] = service_client.get(
         context.services[service_name]['id'])
 
+@when("I get the status of the entity using the {service_name} api")
+def step_i_get_the_status_of_the_entity_using_the_service_api(context, service_name):
+    """
+    :type context: behave.runner.Context
+    :type service_name: str
+    """
+    service_client = context.services[service_name]['client']
+    print("GETTING STATUS")
+    context.services[service_name]['resp'] = service_client.get(
+        context.services[service_name]['id'], url_suffix="status")
 
 @step("the {service_name} response contains valid single entity details")
 def step_the_service_response_contains_valid_single_entity_details(
+        context, service_name):
+    """
+    :type context: behave.runner.Context
+    :type service_name: str
+    """
+    service_resp = context.services[service_name]['resp']
+    service_entity = service_resp.json()
+    context.check.assertIsInstance(service_entity, dict)
+    # TODO: validate actual content of entity
+
+@step("the {service_name} response contains valid single entity status details")
+def step_the_service_response_contains_valid_single_entity_status_details(
         context, service_name):
     """
     :type context: behave.runner.Context
