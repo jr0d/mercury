@@ -11,10 +11,22 @@ def step_a_service_id_is_located_for_testing(context, service_name):
     context.services[service_name]['id'] = None
     service_client = context.services[service_name]['client']
     response = service_client.get()
+
+    # TODO this really sucks...
+    # I guess there should be a bunch of config values based on
+    # the service name?
+    listed_service_names = context.cfg.MERCURY.listed_service_names
+    listed_service_names = listed_service_names.split(', ')
+    if service_name in listed_service_names:
+        collection_name = 'items'
+        field_name = context.cfg.MERCURY.entity_field_name
+    elif service_name == "rpc_jobs":
+        collection_name = 'jobs'
+        field_name = 'job_id'
+
     try:
         # TODO config value?
-        field_name = context.cfg.MERCURY.entity_field_name
-        entity_id = response.json()['items'][0][field_name]
+        entity_id = response.json()[collection_name][0][field_name]
         context.services[service_name]['id'] = entity_id
     except IndexError:
         context.check.assertIsNotNone(
