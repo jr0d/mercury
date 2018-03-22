@@ -91,7 +91,8 @@ class MercuryConfiguration(object):
                  program_name,
                  configuration_file,
                  description=None,
-                 config_search_dirs=None):
+                 config_search_dirs=None,
+                 enable_logging_options=True):
         """Mercury Configuration helper which simplifies cli arguments,
         environment variables, and configuration file merging
 
@@ -108,7 +109,9 @@ class MercuryConfiguration(object):
         self.config_search_dirs = config_search_dirs or []
         self.master_configuration = Box()
         self.argparse_namespace = None
+        self.extra_options = None
         self.options = []
+        self.positional_arguments = []
         self.configuration_file = configuration_file
         self.configuration = {}
 
@@ -121,19 +124,21 @@ class MercuryConfiguration(object):
         # advanced logging facilities must be implemented at the program
         # level
 
-        self.add_option('logging.level',
-                        '--log-level',
-                        'MERCURY_LOG_LEVEL',
-                        'logging.level',
-                        default='INFO',
-                        help_string='Log level, INFO | DEBUG | ERROR | WARNING')
+        if enable_logging_options:
+            self.add_option('logging.level',
+                            '--log-level',
+                            'MERCURY_LOG_LEVEL',
+                            'logging.level',
+                            default='INFO',
+                            help_string='Log level, INFO | DEBUG | ERROR | '
+                                        'WARNING')
 
-        self.add_option('logging.format',
-                        '--log-format',
-                        'MERCURY_LOG_FORMAT',
-                        'logging.format',
-                        default=log_format,
-                        help_string='Desired logging format')
+            self.add_option('logging.format',
+                            '--log-format',
+                            'MERCURY_LOG_FORMAT',
+                            'logging.format',
+                            default=log_format,
+                            help_string='Desired logging format')
 
     def set_configuration(self):
         """ Parse the configuration """
@@ -221,7 +226,17 @@ class MercuryConfiguration(object):
                 # could happen during implementation
                 opt['added_to_parser'] = True
 
-        self.argparse_namespace = self.argument_parser.parse_args()
+        for positional_argument in self.positional_arguments:
+            self.argument_parser.add_argument(
+                positional_argument['name'],
+                help=positional_argument['help'],
+                type=positional_argument['special_type']
+            )
+
+        (
+            self.argparse_namespace,
+            self.extra_options
+        ) = self.argument_parser.parse_known_args()
 
     @staticmethod
     def format_type(value, special_type):
@@ -365,6 +380,7 @@ class MercuryConfiguration(object):
                     f'Option {option["name"]} is {value} but must be one of '
                     f'{",".join(str(option["one_of"]))}'
                 )
+
         return self.master_configuration
 
     @staticmethod
@@ -461,4 +477,19 @@ class MercuryConfiguration(object):
             args=args,
             kwargs=kwargs,
             added_to_parser=False,
+        ))
+
+    def add_positional_argument(self, name,
+                                help_string=None,
+                                special_type=str):
+        """
+
+        :param name:
+        :param description:
+        :return:
+        """
+        self.positional_arguments.append(dict(
+            name=name,
+            help=help_string,
+            special_type=special_type,
         ))
