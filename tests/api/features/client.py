@@ -35,13 +35,18 @@ class APIClient(object):
         if timeout:
             self.request_kwargs['timeout'] = timeout
 
-    def get(self, resource_id=None, params=None, url=None):
+    def get(self, resource_id=None, params=None, url=None, url_suffix=None):
         request_kwargs = copy.deepcopy(self.request_kwargs)
         if url:
             request_kwargs['url'] = url
         if resource_id:
             resource_url = request_kwargs['url']
             request_kwargs['url'] = '{0}/{1}'.format(resource_url, resource_id)
+        if url_suffix:
+            print("There's a suffix {0}".format(url_suffix))
+            resource_url = request_kwargs['url']
+            request_kwargs['url'] = '{0}/{1}'.format(resource_url, url_suffix)
+            print(request_kwargs['url'])
         if params:
            request_kwargs['params'] = params
         resp = requests.get(**request_kwargs)
