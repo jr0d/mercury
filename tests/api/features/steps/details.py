@@ -12,8 +12,7 @@ def step_a_service_id_is_located_for_testing(context, service_name):
     service_client = context.services[service_name]['client']
     response = service_client.get()
 
-    # TODO this really sucks...
-    # I guess there should be a bunch of config values based on
+    # TODO this is weird, I guess there should be a bunch of config values based on
     # the service name?
     listed_service_names = context.cfg.MERCURY.listed_service_names
     listed_service_names = listed_service_names.split(', ')
