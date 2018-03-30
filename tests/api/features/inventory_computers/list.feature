@@ -12,6 +12,7 @@ Feature: List inventory Computers
         Then the inventory_computers response status is 200 OK
         And the response contains a list of inventory_computers
 
+    # TODO make the test work with bad auth
     @negative @p1 @not-tested
     Scenario: Get list of inventory_computers for unauthorized account
         Given the account is an unauthorized tenant

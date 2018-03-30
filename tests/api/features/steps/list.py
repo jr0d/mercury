@@ -23,10 +23,14 @@ def step_the_response_contains_a_list_of_service_ids(
     service_resp = context.services[service_name]['resp']
     listed_service_names = context.cfg.MERCURY.listed_service_names
     listed_service_names = listed_service_names.split(', ')
+    # TODO
+    # Better configuration for these strings
     if service_name in listed_service_names:
         service_entities = service_resp.json()['items']
     elif service_name == "rpc_jobs":
         service_entities = service_resp.json()['jobs']
+    elif service_name == "rpc_tasks":
+        service_entities = service_resp.json()['tasks']
     context.check.assertIsInstance(service_entities, list)
     # TODO make sure the actual entities in the list are what they should be
     # WIP: Validate for service IDs
