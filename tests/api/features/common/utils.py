@@ -41,9 +41,8 @@ def to_singular(name):
 def get_entity_list_container_field(name):
     """Returns the container field used in list responses
 
-    GET /servers       -> {"servers": [...]}
-    GET /loadbalancers -> {"laodbalancers": [...]}
-    GET /devices       -> {"inventory": [...]}
+    GET /active_computers       -> {"items": [...]}
+    GET /jobs                   -> {"jobs": [...]}
     """
     if name == 'active_computers':
         return 'items'
@@ -53,4 +52,20 @@ def get_entity_list_container_field(name):
         return 'tasks'
     elif name == 'rpc_jobs':
         return 'jobs'
+    return name
+
+def get_entity_id_field(name):
+    """Returns the id field used for entities in list responses
+
+    GET /active_computers       -> {"items": [{"mercury_id": "...", ...}}]}
+    GET /jobs                   -> {"jobs": [{"job_id": "...", ...}}]}
+    """
+    if name == 'active_computers':
+        return 'mercury_id'
+    elif name == 'inventory_computers':
+        return 'mercury_id'
+    elif name == 'rpc_tasks':
+        return 'task_id'
+    elif name == 'rpc_jobs':
+        return 'job_id'
     return name

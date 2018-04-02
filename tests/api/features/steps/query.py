@@ -3,6 +3,8 @@ import operator
 from functools import reduce
 
 from behave import given, when, step
+from tests.api.features.common.utils import get_entity_list_container_field, get_entity_id_field
+
 
 @given("I have 'query' details in {filename} for entities using the {service_name} api")
 def step_i_have_query_details_in_filename_for_entities_using_the_service_api(
@@ -43,9 +45,8 @@ def step_the_entities_in_the_response_contain_the_data_from_filename(
     """
     service_client = context.services[service_name]['client']
     service_resp = context.services[service_name]['resp']
-    # TODO config?
-    # active computers are listed in the "items" field
-    service_entities = service_resp.json()['items']
+    container_field = get_entity_list_container_field(service_name)
+    service_entities = service_resp.json()[container_field]
     context.check.assertGreater(len(service_entities),0)
 
     query_data = context.services[service_name]['details']['query']
