@@ -1,4 +1,5 @@
 from behave import when, step
+from tests.api.features.common.utils import get_entity_list_container_field, get_entity_id_field
 
 
 @step("a {service_name} entity id is located for testing")
@@ -12,20 +13,11 @@ def step_a_service_id_is_located_for_testing(context, service_name):
     service_client = context.services[service_name]['client']
     response = service_client.get()
 
-    # TODO this is weird, I guess there should be a bunch of config values based on
-    # the service name?
-    listed_service_names = context.cfg.MERCURY.listed_service_names
-    listed_service_names = listed_service_names.split(', ')
-    if service_name in listed_service_names:
-        collection_name = 'items'
-        field_name = context.cfg.MERCURY.entity_field_name
-    elif service_name == "rpc_jobs":
-        collection_name = 'jobs'
-        field_name = 'job_id'
-
+    container_field = get_entity_list_container_field(service_name)
+    field_name = get_entity_id_field(service_name)
     try:
         # TODO config value?
-        entity_id = response.json()[collection_name][0][field_name]
+        entity_id = response.json()[container_field][0][field_name]
         context.services[service_name]['id'] = entity_id
     except IndexError:
         context.check.assertIsNotNone(
