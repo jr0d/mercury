@@ -49,10 +49,10 @@ def step_the_entities_in_the_response_contain_the_data_from_filename(
     service_entities = service_resp.json()[container_field]
     context.check.assertGreater(len(service_entities),0)
 
+    field_name = get_entity_id_field(service_name)
     query_data = context.services[service_name]['details']['query']
     for entity in service_entities:
         # Make a call for each returned entity
-        field_name = context.cfg.MERCURY.entity_field_name
         entity_id = entity[field_name]
         resp = service_client.get(entity_id)
 
