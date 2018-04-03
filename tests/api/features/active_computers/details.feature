@@ -21,10 +21,10 @@ Feature: View Active Computer Information
 
         Examples: Invalid Mercury IDs
         | invalid_mercury_id        | status_code          | reason    |
-        | invalid_device_id_123     | 404                  | NOT FOUND |
-        | 0                         | 404                  | NOT FOUND |
-        | 9999999999999999999       | 404                  | NOT FOUND |
-        | ""                        | 404                  | NOT FOUND |
-        | !@#$%^&*()_               | 404                  | NOT FOUND |
-        | None                      | 404                  | NOT FOUND |
-        | 123e4567-e89b-12d3-a456-42665544000 | 404        | NOT FOUND |
+        | invalid_device_id_123     | 404                  | Not Found |
+        | 0                         | 404                  | Not Found |
+        | 9999999999999999999       | 404                  | Not Found |
+        | ""                        | 404                  | Not Found |
+        | !@#$%^&*()_               | 404                  | Not Found |
+        | None                      | 404                  | Not Found |
+        | 123e4567-e89b-12d3-a456-42665544000 | 404        | Not Found |
