@@ -74,8 +74,8 @@ def step_the_service_response_status_is(context, service_name, status_code,
 
     actual_resp_reason = context.services[service_name]['resp'].reason
     context.check.assertEqual(
-        actual_resp_reason,
-        reason,
+        actual_resp_reason.upper(),
+        reason.upper(),
         msg="Response reason was {}, should be {}".format(
             actual_resp_reason, reason))
 
