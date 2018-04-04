@@ -1,0 +1,11 @@
+{
+  "query": {
+    "interfaces.lldp.switch_name": "j6-23-1S.ord1"
+  },
+  "instruction": {
+    "method": "echo",
+    "args": [
+      "Hello World!"
+    ]
+  }
+}

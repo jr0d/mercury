@@ -1,4 +1,5 @@
 import time
+import json
 
 import requests
 
@@ -69,3 +70,10 @@ def get_entity_id_field(name):
     elif name == 'rpc_jobs':
         return 'job_id'
     return name
+
+def read_json_from_file(filename, location):
+    filename = "{0}/{1}".format(location, filename)
+    with open(filename) as file:
+        data = json.loads(file.read())
+
+    return data
