@@ -3,21 +3,18 @@ import operator
 from functools import reduce
 
 from behave import given, when, step
-from tests.api.features.common.utils import get_entity_list_container_field, get_entity_id_field
+from tests.api.features.common.utils import get_entity_list_container_field, get_entity_id_field, read_json_from_file
 
 
-@given("I have 'query' details in {filename} for entities using the {service_name} api")
+@given("I have query details in {filename} for entities using the {service_name} api")
 def step_i_have_query_details_in_filename_for_entities_using_the_service_api(
         context, filename, service_name):
     """
     :type context: behave.runner.Context
     :type service_name: str
     """
-
-    # TODO pull this code out into a function in a common module
-    filename = "{0}/{1}".format(context.json_location, filename)
-    with open(filename) as file:
-        data = json.loads(file.read())
+    location = context.json_location
+    data = read_json_from_file(filename, location)
 
     context.services[service_name]['details']['query'] = data
 
