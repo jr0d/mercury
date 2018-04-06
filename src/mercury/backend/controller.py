@@ -1,3 +1,4 @@
+import time
 import logging
 
 from mercury.common.asyncio.endpoints import async_endpoint, \
@@ -63,6 +64,7 @@ class BackendController(StaticEndpointController):
             log.debug('Agent payload: {}'.format(agent_info))
             raise MercuryClientException('Received invalid data from agent')
 
+        agent_info['active_since'] = time.time()
         device_info.update(
             {
                 'active': agent_info,
