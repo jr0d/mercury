@@ -17,5 +17,6 @@ Feature: Inject RPC Jobs
         And the corresponding rpc_jobs job is valid with 200 OK
 
         Examples: Filenames
-        | filename         |
-        | echo_job.json    |
+        | filename           |
+        | echo_job.json      |
+        | inspector_job.json |

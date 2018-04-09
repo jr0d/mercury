@@ -1,4 +1,5 @@
 import json
+import time
 import operator
 from functools import reduce
 
@@ -66,6 +67,25 @@ def step_the_corresponding_service_job_is_valid(
         int(status_code),
         msg="Response status code was {}, should be {}".format(
             actual_resp_reason, reason))
+
+    completed = service_resp.json()['ttl_time_completed']
+    timeout = 20
+    while completed == None:
+        if timeout <= 0:
+            break
+        time.sleep(5)
+        service_resp = service_client.get(
+            context.services[service_name]['id'])
+        completed = service_resp.json()['ttl_time_completed']
+
+    status_resp = service_client.get(
+        context.services[service_name]['id'], url_suffix="status")
+    tasks = status_resp.json()['tasks']
+    statuses = [task["status"] for task in tasks]
+    for status in statuses:
+        context.check.assertEqual(status, "SUCCESS")
+    has_failures = status_resp.json()['has_failures']
+    context.check.assertEqual(has_failures, False)
 
     # TODO is the job valid/working?
     context.check.assertIsNotNone(None)
