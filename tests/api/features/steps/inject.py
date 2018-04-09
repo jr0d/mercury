@@ -28,11 +28,8 @@ def step_i_get_the_injection_results_from_a_post_to_service_api(
     service_client = context.services[service_name]['client']
     data = context.services[service_name]['details']['job_data']
 
-    #context.services[service_name]['resp'] = \
-    #    service_client.post(data=json.dumps(data))
-    # TODO
-    print("Posting data...")
-    context.services[service_name]['resp'] = "Mock Resp"
+    context.services[service_name]['resp'] = \
+        service_client.post(data=json.dumps(data))
 
 @step("the response contains a {service_name} job_id")
 def step_the_response_contains_a_job_id(
@@ -41,17 +38,34 @@ def step_the_response_contains_a_job_id(
     :type context: behave.runner.Context
     :type service_name: str
     """
-    print("Checking for job id in response...")
     service_resp = context.services[service_name]['resp']
-    print(service_resp)
-    # TODO check that service resp contains a job_id
+    job_id = service_resp.json()["job_id"]
+    context.check.assertIsInstance(job_id, str)
+    context.services[service_name]['id'] = job_id
+    # TODO is the job id valid?
 
-@step("the corresponding job is valid")
-def step_the_corresponding_job_is_valid(
-        context):
+@step("the corresponding {service_name} job is valid with {status_code} {reason}")
+def step_the_corresponding_service_job_is_valid(
+        context, service_name, status_code, reason):
     """
     :type context: behave.runner.Context
     """
-    print("Checking for valid job...")
-    # TODO get job, check that job is valid
+    service_client = context.services[service_name]['client']
+    service_resp = service_client.get(
+        context.services[service_name]['id'])
+
+    actual_resp_reason = service_resp.reason
+    actual_status_code = service_resp.status_code
+    context.check.assertEqual(
+        actual_resp_reason.upper(),
+        reason.upper(),
+        msg="Response reason was {}, should be {}".format(
+            actual_resp_reason, reason))
+    context.check.assertEqual(
+        int(actual_status_code),
+        int(status_code),
+        msg="Response status code was {}, should be {}".format(
+            actual_resp_reason, reason))
+
+    # TODO is the job valid/working?
     context.check.assertIsNotNone(None)
