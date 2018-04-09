@@ -14,6 +14,7 @@ Feature: Query inventory Computers
         And the inventory_computers entities in the response contain the data from <filename>
 
         Examples: Filenames
-        | filename            |
-        | dmi_sys_vendor.json |
-        | mem_Dirty.json      |
+        | filename             |
+        #| dmi_sys_vendor.json  |
+        #| mem_Dirty.json       |
+        | dmi_virtual_box.json |
