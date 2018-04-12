@@ -4,7 +4,8 @@ import operator
 from functools import reduce
 
 from behave import given, when, step
-from tests.api.features.common.utils import get_entity_list_container_field, get_entity_id_field, read_json_from_file
+from tests.api.features.common.utils import (get_entity_list_container_field,
+    get_entity_id_field, read_json_from_file, wait_for_not_none)
 
 
 @given("I have job injection details in {filename} for creating jobs using the {service_name} api")
@@ -45,38 +46,22 @@ def step_the_response_contains_a_job_id(
     context.services[service_name]['id'] = job_id
     # TODO is the job id valid?
 
-@step("the corresponding {service_name} job is valid with {status_code} {reason}")
+@step("the corresponding {service_name} job is valid")
 def step_the_corresponding_service_job_is_valid(
-        context, service_name, status_code, reason):
+        context, service_name):
     """
     :type context: behave.runner.Context
     """
     service_client = context.services[service_name]['client']
     service_resp = service_client.get(
         context.services[service_name]['id'])
+    context.services[service_name]['resp'] = service_resp
 
-    actual_resp_reason = service_resp.reason
-    actual_status_code = service_resp.status_code
-    context.check.assertEqual(
-        actual_resp_reason.upper(),
-        reason.upper(),
-        msg="Response reason was {}, should be {}".format(
-            actual_resp_reason, reason))
-    context.check.assertEqual(
-        int(actual_status_code),
-        int(status_code),
-        msg="Response status code was {}, should be {}".format(
-            actual_resp_reason, reason))
+    def get_time_completed(job_id):
+        return service_client.get(job_id).json()['ttl_time_completed']
+    completed = wait_for_not_none(get_time_completed, context.services[service_name]['id'])
 
-    completed = service_resp.json()['ttl_time_completed']
-    timeout = 20
-    while completed == None:
-        if timeout <= 0:
-            break
-        time.sleep(5)
-        service_resp = service_client.get(
-            context.services[service_name]['id'])
-        completed = service_resp.json()['ttl_time_completed']
+    #completed = wait_for_job_completion(context.services[service_name]['id'], service_client)
 
     status_resp = service_client.get(
         context.services[service_name]['id'], url_suffix="status")
@@ -88,4 +73,3 @@ def step_the_corresponding_service_job_is_valid(
     context.check.assertEqual(has_failures, False)
 
     # TODO is the job valid/working?
-    context.check.assertIsNotNone(None)
