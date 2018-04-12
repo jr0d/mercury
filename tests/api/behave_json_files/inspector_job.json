@@ -1,0 +1,8 @@
+{
+  "query": {
+    "dmi.bios_version": "VirtualBox"
+  },
+  "instruction": {
+    "method": "inspector"
+  }
+}
