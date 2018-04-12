@@ -14,7 +14,7 @@ Feature: Inject RPC Jobs
         When I get the injection results from a post to rpc_jobs
         Then the rpc_jobs response status is 200 OK
         Then the response contains a rpc_jobs job_id
-        And the corresponding rpc_jobs job is valid
+        And the corresponding rpc_jobs job is completed with successful tasks
         And the rpc_jobs response status is 200 OK
 
         Examples: Filenames

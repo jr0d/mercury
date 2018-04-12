@@ -46,8 +46,8 @@ def step_the_response_contains_a_job_id(
     context.services[service_name]['id'] = job_id
     # TODO is the job id valid?
 
-@step("the corresponding {service_name} job is valid")
-def step_the_corresponding_service_job_is_valid(
+@step("the corresponding {service_name} job is completed with successful tasks")
+def step_the_corresponding_service_job_is_completed_and_successful(
         context, service_name):
     """
     :type context: behave.runner.Context
@@ -60,8 +60,6 @@ def step_the_corresponding_service_job_is_valid(
     def get_time_completed(job_id):
         return service_client.get(job_id).json()['ttl_time_completed']
     completed = wait_for_not_none(get_time_completed, context.services[service_name]['id'])
-
-    #completed = wait_for_job_completion(context.services[service_name]['id'], service_client)
 
     status_resp = service_client.get(
         context.services[service_name]['id'], url_suffix="status")
