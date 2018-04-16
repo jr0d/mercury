@@ -14,10 +14,18 @@ def step_the_account_is_an_auth_tenant(context, auth):
     :type context: behave.runner.Context
     :type auth: str
     """
-    # TODO: Temporary until identity system is in place
-    context.bypass_auth = True
+    context.authorized = True
     if auth == "unauthorized":
-        context.bypass_auth = False
+        context.authorized = False
+
+@given('the auth token for the {service_name} client is nonexistent')
+def step_the_auth_token_is_nonexistent(context, service_name):
+    """
+    :type context: behave.runner.Context
+    :type service_name: str
+    """
+    client = context.services[service_name]['client']
+    client.headers.pop('X-Auth-Token')
 
 
 @given("the {service_name} client URL is {service_url}")
@@ -31,7 +39,9 @@ def step_the_service_client_url_is(context, service_name, service_url):
     request_kwargs['timeout'] = None
     request_kwargs['ssl_certificate_verify'] = False
     request_kwargs['verbose'] = True
-    request_kwargs['bypass_auth'] = context.bypass_auth
+
+    client_kwargs = dict()
+    client_kwargs['authorized'] = context.authorized
 
     # Keep track of services being used
     context.services[service_name] = defaultdict(dict)
@@ -54,7 +64,8 @@ def step_the_service_client_url_is(context, service_name, service_url):
     full_service_url = context.base_url + service_url
     context.services[service_name]['url'] = full_service_url
     context.services[service_name]['client'] = APIClient(
-        base_url=full_service_url, request_kwargs=request_kwargs)
+        base_url=full_service_url, request_kwargs=request_kwargs,
+        client_kwargs=client_kwargs)
 
 
 @then("the {service_name} response status is {status_code} {reason}")
