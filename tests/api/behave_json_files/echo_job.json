@@ -1,0 +1,11 @@
+{
+  "query": {
+    "dmi.bios_version": "VirtualBox"
+  },
+  "instruction": {
+    "method": "echo",
+    "args": [
+      "Hello World!"
+    ]
+  }
+}
