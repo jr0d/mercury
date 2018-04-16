@@ -1,4 +1,5 @@
 import time
+import json
 
 import requests
 
@@ -69,3 +70,18 @@ def get_entity_id_field(name):
     elif name == 'rpc_jobs':
         return 'job_id'
     return name
+
+def read_json_from_file(filename, location):
+    filename = "{0}/{1}".format(location, filename)
+    with open(filename) as file:
+        data = json.loads(file.read())
+    return data
+
+def wait_for_not_none(func, *args, timeout=20):
+    value = func(*args)
+    while value == None:
+        if timeout <= 0:
+            break
+        time.sleep(5)
+        value = func(*args)
+    return value
