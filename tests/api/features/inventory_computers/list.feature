@@ -16,7 +16,7 @@ Feature: List inventory Computers
     # /inventory/computers - params
     @positive @p0 @smoke
     Scenario: Get list of inventory_computers with parameters
-        When I get the list of inventory_computers with params
+        When I get with parameters the list of inventory_computers
         # TODO anything else?
         Then the inventory_computers response status is 200 OK
         And the response contains a list of inventory_computers
