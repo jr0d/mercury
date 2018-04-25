@@ -17,3 +17,6 @@ Feature: Query Active Computers
         | filename              |
         | active_rpc_port.json  |
         | active_ping_port.json |
+
+
+    # TODO negative testing

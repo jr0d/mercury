@@ -18,10 +18,4 @@ Feature: List active computer negative tests
     Scenario: Get list of active_computers for unauthorized account with no token
         Given the auth token for the active_computers client is nonexistent
         When I get the list of active_computers
-        Then the active_computers response status is 401 X-AUTH-TOKEN HEADER NOT FOUND
-
-    # /active/computers - bad method
-    @negative @p1
-    Scenario: Post instead of getting list of active_computers
-        When I use post on active_computers
-        Then the active_computers response status is 405 METHOD NOT ALLOWED
+        Then the active_computers response status is 401 X-AUTH-TOKEN HEADER NOT FOUND    

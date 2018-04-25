@@ -6,6 +6,7 @@ Feature: View Active Computer Information
         Given the account is an authorized tenant
         And the active_computers client URL is /active/computers
 
+    # /active/computers/<mercury_id>
     @positive @p0 @smoke
     Scenario: Get Active Computer Details
         Given a active_computers entity id is located for testing
@@ -13,6 +14,7 @@ Feature: View Active Computer Information
         Then the active_computers response status is 200 OK
         And the active_computers response contains valid single entity details
 
+    # /active/computers/<mercury_id> - bad id
     @negative @p1
     Scenario Outline: Get Active Computer Details With <invalid_mercury_id>
         Given a active_computers <invalid_mercury_id> is provided
@@ -28,3 +30,10 @@ Feature: View Active Computer Information
         | !@#$%^&*()_               | 404                  | Not Found |
         | None                      | 404                  | Not Found |
         | 123e4567-e89b-12d3-a456-42665544000 | 404        | Not Found |
+
+
+    # /active/computers/<mercury_id> - bad method
+    @negative @p1
+    Scenario: Post instead of getting details of active_computers
+        When I use post on active_computers
+        Then the active_computers response status is 405 METHOD NOT ALLOWED
