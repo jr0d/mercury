@@ -6,8 +6,6 @@ Feature: View active computer negative tests
         Given the account is an unauthorized tenant
         And the active_computers client URL is /active/computers
 
-    # CHANGE ALL OF BELOW TO DETAILS INSTEAD OF LIST
-
     # /active/computers/<mercury_id> - bad token
     # TODO add more bad token examples?
     @negative @p1
