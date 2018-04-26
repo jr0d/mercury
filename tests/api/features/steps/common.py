@@ -1,6 +1,6 @@
 from collections import defaultdict
 
-from behave import given, then, step, use_step_matcher
+from behave import given, then, when, step, use_step_matcher
 
 from tests.api.features.client import APIClient
 
