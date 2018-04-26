@@ -13,20 +13,6 @@ def step_i_get_the_list_of_service(context, service_name):
     service_client = context.services[service_name]['client']
     context.services[service_name]['resp'] = service_client.get()
 
-@when("I use {method} on {service_name}")
-def step_i_use_method_on_service(context, method, service_name):
-    """
-    :type context: behave.runner.Context
-    :type method: str
-    :type service_name: str
-    """
-    # TODO hmm
-    service_client = context.services[service_name]['client']
-    if method == "get":
-        context.services[service_name]['resp'] = service_client.get()
-    elif method == "post":
-        context.services[service_name]['resp'] = service_client.post(data={})
-    # TODO etc
 
 @step("the response contains a list of {service_name}")
 def step_the_response_contains_a_list_of_service_ids(

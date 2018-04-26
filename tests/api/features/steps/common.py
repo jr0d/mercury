@@ -118,3 +118,19 @@ def step_a_service_invalid_id_is_provided(context, service_name, invalid_id):
     :type invalid_id: str
     """
     context.services[service_name]['id'] = invalid_id
+
+
+# Used for bad method testing
+@when("I use {method} on {service_name}")
+def step_i_use_method_on_service(context, method, service_name):
+    """
+    :type context: behave.runner.Context
+    :type method: str
+    :type service_name: str
+    """
+    service_client = context.services[service_name]['client']
+    if method == "get":
+        context.services[service_name]['resp'] = service_client.get()
+    elif method == "post":
+        context.services[service_name]['resp'] = service_client.post(data={})
+    # TODO etc
