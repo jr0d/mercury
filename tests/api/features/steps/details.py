@@ -25,6 +25,13 @@ def step_a_service_id_is_located_for_testing(context, service_name):
             msg='WIP: Create {} API Not Yet Implemented'.format(service_name))
         # TODO: Create new service entity since we don't have any
 
+@step("a {service_name} entity id is defined for testing")
+def step_a_test_id_is_defined_for_testing(context, service_name):
+    """
+    :type context: behave.runner.Context
+    """
+    context.services[service_name]['id'] = "1234"
+
 
 @when("I get the entity using the {service_name} api")
 def step_i_get_the_entity_using_the_service_api(context, service_name):

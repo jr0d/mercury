@@ -6,20 +6,15 @@ Feature: List Active Computers
         Given the account is an authorized tenant
         And the active_computers client URL is /active/computers
 
+    # /active/computers
     @positive @p0 @smoke
     Scenario: Get list of active_computers
         When I get the list of active_computers
         Then the active_computers response status is 200 OK
         And the response contains a list of active_computers
 
-    # TODO make the test work with bad auth
-    @negative @p1 @not-tested
-    Scenario: Get list of active_computers for unauthorized account
-        Given the account is an unauthorized tenant
-        And the active_computers client URL is /active/computers
-        When I get the list of active_computers
-        Then the active_computers response status is 401 UNAUTHORIZED
-        And the active_computers response contains an error message of
-            """
-            UNAUTHORIZED
-            """
+    # /active/computers - bad method
+    @negative @p1
+    Scenario: Post instead of getting list of active_computers
+        When I use post on active_computers
+        Then the active_computers response status is 405 METHOD NOT ALLOWED
