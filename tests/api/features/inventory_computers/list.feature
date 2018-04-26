@@ -11,15 +11,3 @@ Feature: List inventory Computers
         When I get the list of inventory_computers
         Then the inventory_computers response status is 200 OK
         And the response contains a list of inventory_computers
-
-    # TODO make the test work with bad auth
-    @negative @p1 @not-tested
-    Scenario: Get list of inventory_computers for unauthorized account
-        Given the account is an unauthorized tenant
-        And the inventory_computers client URL is /inventory/computers
-        When I get the list of inventory_computers
-        Then the inventory_computers response status is 401 UNAUTHORIZED
-        And the inventory_computers response contains an error message of
-            """
-            UNAUTHORIZED
-            """

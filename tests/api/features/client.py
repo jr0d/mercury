@@ -5,7 +5,7 @@ from tests.common.config import get_conflagration
 
 class APIClient(object):
 
-    def __init__(self, base_url, request_kwargs=None):
+    def __init__(self, base_url, request_kwargs=None, client_kwargs=None):
 
         self.cfg = get_conflagration()
         token = self.get_identity_token()
@@ -23,6 +23,10 @@ class APIClient(object):
         self.base_url = base_url
         self.headers = {'Content-Type': 'application/json',
             'X-Auth-Token': token}
+
+        if client_kwargs:
+            if not client_kwargs['authorized']:
+                self.headers['X-Auth-Token'] = ''
 
         self.verify = ssl_certificate_verify
         self.verbose = verbose
