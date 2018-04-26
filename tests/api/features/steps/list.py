@@ -13,17 +13,6 @@ def step_i_get_the_list_of_service(context, service_name):
     service_client = context.services[service_name]['client']
     context.services[service_name]['resp'] = service_client.get()
 
-@when("I get with parameters the list of {service_name}")
-def step_i_get_the_list_of_service_with_params(context, service_name):
-    """
-    :type context: behave.runner.Context
-    :type service_name: str
-    """
-    # TODO we probably need another argument with params to pass
-    # probably a json file
-    service_client = context.services[service_name]['client']
-    context.services[service_name]['resp'] = service_client.get()
-
 @when("I use {method} on {service_name}")
 def step_i_use_method_on_service(context, method, service_name):
     """
