@@ -21,3 +21,5 @@ Feature: Inject RPC Jobs
         | filename           |
         | echo_job.json      |
         | inspector_job.json |
+
+    # TODO negative testing

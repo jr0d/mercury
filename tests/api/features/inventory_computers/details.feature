@@ -28,3 +28,10 @@ Feature: View Inventory Computer Information
         | !@#$%^&*()_               | 404                  | Not Found |
         | None                      | 404                  | Not Found |
         | 123e4567-e89b-12d3-a456-42665544000 | 404        | Not Found |
+
+
+        # /inventory/computers/<mercury_id> - bad method
+        @negative @p1
+        Scenario: Post instead of getting details of inventory_computers
+            When I use post on inventory_computers
+            Then the inventory_computers response status is 405 METHOD NOT ALLOWED
