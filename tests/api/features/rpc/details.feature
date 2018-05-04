@@ -41,7 +41,7 @@ Feature: View RPC Job Information
         And the rpc_tasks response contains valid single entity details
 
     # TODO
-    # More negative tests for other endpoints
+    # Bad method tests
 
     # /rpc/jobs/{job_id}
     @negative @p1
