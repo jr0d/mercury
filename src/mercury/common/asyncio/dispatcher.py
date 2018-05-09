@@ -34,7 +34,8 @@ class AsyncDispatcher(object):
 
         # noinspection PyBroadException
         try:
-            response = await self.controller.endpoints[endpoint](self.controller, *args, **kwargs)
+            response = await self.controller.endpoints[endpoint](
+                self.controller, *args, **kwargs)
         except EndpointError as endpoint_error:
             tb = traceback.format_exception(*sys.exc_info())
             log.error('Endpoint Error: endpoint=%s, message=%s, traceback=%s' % (
@@ -45,7 +46,8 @@ class AsyncDispatcher(object):
             return dict(error=True, traceback=tb, message=endpoint_error.message)
         except Exception as e:
             tb = traceback.format_exception(*sys.exc_info())
-            log.error('An unhandled exception has been encountered: endpoint=%s, message=%s, traceback=%s' % (
+            log.error('An unhandled exception has been encountered: endpoint=%s,'
+                      ' message=%s, traceback=%s' % (
                 endpoint,
                 str(e),
                 '\n'.join(tb)
