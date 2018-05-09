@@ -70,7 +70,7 @@ class InventoryController(StaticEndpointController):
             'total': total_items,
             'limit': limit,
             'items': items,
-            'direction': sort_direction > 0 and 'ASCENDING' or 'DESCENDING'
+            'sort_direction': sort_direction > 0 and 'ASCENDING' or 'DESCENDING'
         }
 
     @async_endpoint('count')
