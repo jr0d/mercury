@@ -29,7 +29,7 @@ def options():
                                          'servers to connect to')
 
     configuration.add_option('log_service.db.name',
-                             config_address='log_service.db.database',
+                             config_address='log_service.db.name',
                              default='test',
                              help_string='The database for our collections')
 
