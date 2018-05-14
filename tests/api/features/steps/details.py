@@ -88,6 +88,9 @@ def step_the_service_response_contains_valid_single_entity_details(
     service_resp = context.services[service_name]['resp']
     service_entity = service_resp.json()
     context.check.assertIsInstance(service_entity, dict)
+    expected_id = context.services[service_name]['id']
+    actual_id = service_entity.get(get_entity_id_field(service_name))
+    context.check.assertEqual(actual_id, expected_id)
     # TODO: validate actual content of entity
     # TODO: need to be able to tell what the entity is, in some
     # tests it's a job, some it's a task, some it's a computer
