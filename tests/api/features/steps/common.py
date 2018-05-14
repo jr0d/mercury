@@ -2,6 +2,7 @@ from collections import defaultdict
 
 from behave import given, then, when, step, use_step_matcher
 
+from tests.api.features.common.utils import check_params_applied_in_resp
 from tests.api.features.client import APIClient
 
 
@@ -118,6 +119,18 @@ def step_a_service_invalid_id_is_provided(context, service_name, invalid_id):
     :type invalid_id: str
     """
     context.services[service_name]['id'] = invalid_id
+
+
+@then("url parameters to the {service_name} api are applied")
+def step_url_parameters_to_service_api_are_applied(context, service_name):
+    """
+    """
+
+    resp = context.services[service_name]['resp']
+    param_data = context.services[service_name]['param_data']
+    params_applied = check_params_applied_in_resp(param_data, resp)
+
+    context.check.assertTrue(params_applied)
 
 
 # Used for bad method testing

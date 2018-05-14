@@ -11,6 +11,7 @@ def step_i_have_query_details_in_filename_for_entities_using_the_service_api(
         context, filename, service_name):
     """
     :type context: behave.runner.Context
+    :type filename: str
     :type service_name: str
     """
     location = context.json_location
