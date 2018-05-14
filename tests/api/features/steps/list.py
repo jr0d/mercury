@@ -1,7 +1,7 @@
 import random
 
 from behave import when, step, then, given
-from tests.api.features.common.utils import get_entity_list_container_field
+from tests.api.features.common.utils import get_entity_list_container_field, read_json_from_file
 
 
 @when("I get the list of {service_name}")
@@ -13,6 +13,25 @@ def step_i_get_the_list_of_service(context, service_name):
     service_client = context.services[service_name]['client']
     context.services[service_name]['resp'] = service_client.get()
 
+@when("I get with parameters in {filename} the list of {service_name}")
+def step_i_get_the_list_of_service_with_params_in_filename(context, service_name, filename):
+    """
+    :type context: behave.runner.Context
+    :type service_name: str
+    :type filename: str
+    """
+    location = context.json_location
+    data = read_json_from_file(filename, location)
+
+    keys = data.keys()
+    suffix = "?"
+    for key in keys:
+        suffix = "{0}{1}={2}&".format(suffix, key, data[key])
+    # trim trailing &
+    suffix = suffix.rstrip('&')
+    context.services[service_name]['param_data'] = data
+    service_client = context.services[service_name]['client']
+    context.services[service_name]['resp'] = service_client.get(url_suffix=suffix)
 
 @step("the response contains a list of {service_name}")
 def step_the_response_contains_a_list_of_service_ids(
