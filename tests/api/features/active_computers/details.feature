@@ -14,6 +14,23 @@ Feature: View Active Computer Information
         Then the active_computers response status is 200 OK
         And the active_computers response contains valid single entity details
 
+    # /active/computers/<mercury_id> - params
+    @positive @p0 @smoke
+    Scenario Outline: Get Active Computer Details with parameters
+        Given a active_computers entity id is located for testing
+        When I get with parameters in <filename> the entity using the active_computers api
+        Then the active_computers response status is 200 OK
+        And the active_computers response contains valid single entity details
+        And url parameters to the active_computers api are applied
+
+        Examples: Fields
+        | filename                    |
+        | typical_detail_params.json  |
+        # TODO more param files
+        # TODO | bad_params.json             |
+
+    # TODO negative test for params
+
     # /active/computers/<mercury_id> - bad id
     @negative @p1
     Scenario Outline: Get Active Computer Details With <invalid_mercury_id>
