@@ -85,3 +85,71 @@ def wait_for_not_none(func, *args, timeout=20):
         time.sleep(5)
         value = func(*args)
     return value
+
+def keys_in_list_or_dict(key_stack, item):
+    if len(key_stack) <= 0:
+        return True
+    else:
+        key = key_stack[0]
+        if type(item) == dict:
+            if key not in item.keys():
+                return False
+            new_item = item[key]
+            r = keys_in_list_or_dict(key_stack[1:], new_item)
+            return r
+        elif type(item) == list:
+            results = True
+            for sub in item:
+                r = keys_in_list_or_dict(key_stack, sub)
+                results = results and r
+            return results
+        else:
+            return False
+
+
+def check_params_applied_in_resp(param_data, resp):
+
+    # TODO define checks for specific keys
+    # for example the order and limit come back in the respnose
+
+    all_matched = True
+
+    keys = param_data.keys()
+    for key in keys:
+        # in case a key returned is a different string
+        akey = key
+        if key == "limit":
+            expected_result = param_data[key]
+            actual_result = resp.json()[akey]
+            if expected_result != actual_result:
+                all_matched = False
+        elif key == "sort_direction":
+            pass
+            # TODO this param is broken
+            """
+            akey = "direction"
+            expected_result = param_data[key]
+            actual_result = resp.json()[akey]
+            if expected_result != actual_result:
+                all_matched = False
+            """
+        elif key == "offset_id":
+            pass
+            # TODO this param is broken
+            # make sure the _id specified is included in the returned list
+        elif key == "projection":
+            projections = param_data[key].split(",")
+            if "items" in resp.json().keys():
+                for item in resp.json()["items"]:
+                    for projection in projections:
+                        pstack = projection.split(".")
+                        result = keys_in_list_or_dict(pstack, item)
+                        all_matched = all_matched and result
+            else:
+                item = resp.json()
+                for projection in projections:
+                    pstack = projection.split(".")
+                    result = keys_in_list_or_dict(pstack, item)
+                    all_matched = all_matched and result
+
+    return all_matched
