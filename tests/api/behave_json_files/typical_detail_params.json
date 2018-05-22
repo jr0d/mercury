@@ -1,1 +1,1 @@
-{ "projection": "mercury_id,cpu.frequency.max,raid.total_drives"}
+{ "projection": "mercury_id,cpu.frequency.max,raid.total_drives" }
