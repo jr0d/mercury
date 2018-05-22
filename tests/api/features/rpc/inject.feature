@@ -9,7 +9,7 @@ Feature: Inject RPC Jobs
     # /rpc/jobs
     @positive @p0 @smoke
     Scenario Outline: Inject rpc jobs
-        # Filename should have a query dict and an insruction dict
+        # Filename should have a query dict and an instruction dict
         Given I have job injection details in <filename> for creating jobs using the rpc_jobs api
         When I get the injection results from a post to rpc_jobs
         Then the rpc_jobs response status is 200 OK
@@ -23,3 +23,4 @@ Feature: Inject RPC Jobs
         | inspector_job.json |
 
     # TODO negative testing
+    # Bad method

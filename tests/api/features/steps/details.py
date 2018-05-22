@@ -1,5 +1,5 @@
 from behave import when, step
-from tests.api.features.common.utils import get_entity_list_container_field, get_entity_id_field
+from tests.api.features.common.utils import get_entity_list_container_field, get_entity_id_field, read_json_from_file
 
 
 @step("a {service_name} entity id is located for testing")
@@ -42,6 +42,27 @@ def step_i_get_the_entity_using_the_service_api(context, service_name):
     service_client = context.services[service_name]['client']
     context.services[service_name]['resp'] = service_client.get(
         context.services[service_name]['id'])
+
+@when("I get with parameters in {filename} the entity using the {service_name} api")
+def step_i_get_the_entity_with_params_in_filename(context, service_name, filename):
+    """
+    :type context: behave.runner.Context
+    :type service_name: str
+    :type filename: str
+    """
+    location = context.json_location
+    data = read_json_from_file(filename, location)
+
+    keys = data.keys()
+    suffix = "?"
+    for key in keys:
+        suffix = "{0}{1}={2}&".format(suffix, key, data[key])
+    # trim trailing &
+    suffix = suffix.rstrip('&')
+    context.services[service_name]['param_data'] = data
+    service_client = context.services[service_name]['client']
+    context.services[service_name]['resp'] = service_client.get(resource_id=context.services[service_name]['id'],
+        url_suffix=suffix)
 
 @when("I get the status of the entity using the {service_name} api")
 def step_i_get_the_status_of_the_entity_using_the_service_api(context, service_name):
@@ -88,6 +109,9 @@ def step_the_service_response_contains_valid_single_entity_details(
     service_resp = context.services[service_name]['resp']
     service_entity = service_resp.json()
     context.check.assertIsInstance(service_entity, dict)
+    expected_id = context.services[service_name]['id']
+    actual_id = service_entity.get(get_entity_id_field(service_name))
+    context.check.assertEqual(actual_id, expected_id)
     # TODO: validate actual content of entity
     # TODO: need to be able to tell what the entity is, in some
     # tests it's a job, some it's a task, some it's a computer
