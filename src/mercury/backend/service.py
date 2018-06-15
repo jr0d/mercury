@@ -72,6 +72,8 @@ def reacquire(inventory_url, backend_name):
     """
     # Onetime use synchronous client
     log.info('Attempting to reacquire active agents')
+    log.debug('Inventory Router: {}'.format(inventory_url))
+
     inventory_client = InventoryClient(inventory_url,
                                        # TODO: Add these to configuration
                                        response_timeout=60,
