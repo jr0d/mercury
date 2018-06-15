@@ -34,6 +34,8 @@ class RouterReqClient(object):
         self.context = zmq.Context()
 
         self.socket = None
+        log.debug('[{}] Creating connection to {}'.format(self.service_name,
+                                                          self.zmq_url))
         self.refresh_socket()
 
     def refresh_socket(self):
