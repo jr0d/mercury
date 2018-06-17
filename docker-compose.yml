@@ -1,0 +1,57 @@
+version: "3"
+services:
+    mongodb:
+        image: mongo
+        ports:
+            - '27017:27017'
+        networks:
+            mercury_internal:
+                ipv4_address: 172.16.200.100
+    redis:
+        image: redis
+        ports:
+            - '6379:6379'
+        networks:
+            mercury_internal:
+                ipv4_address: 172.16.200.101
+    mercury-inventory:
+        build:
+            context: .
+            dockerfile: docker_files/mercury-inventory/Dockerfile 
+        environment:
+            MERCURY_LOG_LEVEL: DEBUG
+        depends_on:
+            - mongodb
+        ports:
+            - '9000:9000'
+        volumes:
+            - .:/home/mercury
+        networks:
+            mercury_public:
+            mercury_internal:
+                ipv4_address: 172.16.200.103
+    mercury-rpc:
+        build:
+            context: .
+            dockerfile: docker_files/mercury-rpc/Dockerfile
+        environment:
+            MERCURY_LOG_LEVEL: DEBUG
+        depends_on:
+            - mongodb
+            - redis
+        ports:
+            - '9001:9001'
+        volumes:
+            - .:/home/mercury
+        networks:
+            mercury_public:
+            mercury_internal:
+                ipv4_address: 172.16.200.104
+networks:
+    mercury_internal:
+        ipam:
+            driver: default
+            config:
+                -
+                    subnet: 172.16.200.0/24
+    mercury_public:
