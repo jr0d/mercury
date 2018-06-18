@@ -84,24 +84,30 @@ class InventoryDBController(object):
 
     # TODO: Ditch query and add find() and find_one()
     def query(self, query, extra_projection=None, limit=0, sort='_id',
-              sort_direction=1):
+              sort_direction=1, offset_id=None):
         log.debug(
-            'Executing query: {} limit: {} key: {} direction: {}'.format(query,
-                                                                         limit,
-                                                                         sort,
-                                                                         sort_direction))
+            'Executing query: {} limit: {} key: {} direction: {}'.format(
+                query,
+                limit,
+                sort,
+                sort_direction))
 
         projection = {'mercury_id': 1}
 
         if extra_projection:
             projection.update(extra_projection)
 
+        if offset_id and sort not in query:
+            inequality_operator = '$gt' if sort_direction >= 0 else '$lt'
+            query.update({sort: {inequality_operator: offset_id}})
+
         c = self.collection.find(query, projection=projection)
 
         if limit:
             c.limit(limit)
 
-        if sort:
+        if sort != '_id' or sort_direction != 1:
+            # non-default sort
             c.sort(sort, sort_direction)
 
         return c
