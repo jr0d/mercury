@@ -98,7 +98,9 @@ class InventoryClientUnitTest(base.MercuryCommonUnitTest):
             'kwargs': {
                 'projection': None,
                 'limit': 0,
-                'sort_direction': 1
+                'sort': '_id',
+                'sort_direction': 1,
+                'offset_id': None
             }
         }
 
