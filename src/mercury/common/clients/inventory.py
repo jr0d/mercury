@@ -71,14 +71,17 @@ class InventoryClient(RouterReqClient):
         }
         return self.transceiver(payload)
 
-    def query(self, query_data, projection=None, limit=0, sort_direction=1):
+    def query(self, query_data, projection=None, limit=0, sort='_id',
+              sort_direction=1, offset_id=None):
         """Query inventory for devices matching query_data.
 
         :param query_data: A dict to filter the results.
         :param projection: A dict specifying which fields should be included
             in the results.
         :param limit: The maximum number of results to return.
+        :param sort: The sort key default `_id`
         :param sort_direction: The sort direction.
+        :param offset_id: The offset_id to use for paging
         :returns: The 'response' field of the transceiver's reply.
         """
         payload = {
@@ -87,7 +90,9 @@ class InventoryClient(RouterReqClient):
             'kwargs': {
                 'projection': projection,
                 'limit': limit,
-                'sort_direction': sort_direction
+                'sort': sort,
+                'sort_direction': sort_direction,
+                'offset_id': offset_id
             }
         }
         return self.transceiver(payload)
