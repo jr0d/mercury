@@ -47,6 +47,55 @@ services:
             mercury_public:
             mercury_internal:
                 ipv4_address: 172.16.200.104
+    mercury-backend:
+        build:
+            context: .
+            dockerfile: docker_files/mercury-backend/Dockerfile
+        environment:
+            MERCURY_LOG_LEVEL: DEBUG 
+            BACKEND_INVENTORY_ROUTER: tcp://invalid.host.com:9000
+            BACKEND_RPC_ROUTER: tcp://invalid.host.com:9000
+        depends_on:
+            - mongodb
+            - mercury-rpc
+            - mercury-inventory
+        ports:
+            - '9002:9002'
+        volumes:
+            - .:/home/mercury 
+        networks:
+            mercury_internal:
+                ipv4_address: 172.16.200.105 
+    #mercury-backend-queue:
+    mercury-backend-worker:
+        build:
+            context: .
+            dockerfile: docker_files/mercury-backend-worker/Dockerfile
+        environment:
+            MERCURY_LOG_LEVEL: DEBUG
+            BACKEND_RPC_ROUTER: tcp://invalid.host.com:9000
+        depends_on:
+            - mongodb
+            - redis
+        volumes:
+            - .:/home/mercury
+        networks:
+           - mercury_internal 
+    mercury-log:
+        build:
+            context: .
+            dockerfile: docker_files/mercury-log/Dockerfile
+        environment:
+            MERCURY_LOG_LEVEL: DEBUG
+        depends_on:
+            - mongodb
+        volumes:
+            - .:/home/mercury
+        networks:
+            mercury_public:
+            mercury_internal:
+                ipv4_address: 172.16.200.106
+    #mercury-boot:
 networks:
     mercury_internal:
         ipam:
