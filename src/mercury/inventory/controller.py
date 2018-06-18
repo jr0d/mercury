@@ -1,3 +1,4 @@
+import bson
 import logging
 
 from mercury.inventory.db import InventoryDBController
@@ -16,6 +17,7 @@ log = logging.getLogger(__name__)
 
 class InventoryController(StaticEndpointController):
     """ Inventory controller """
+
     def __init__(self,
                  inventory_collection):
         """
@@ -53,12 +55,37 @@ class InventoryController(StaticEndpointController):
         return serialize_object_id(
             await self.db.get_one(mercury_id=mercury_id, projection=projection))
 
+    @staticmethod
+    def convert_bson_offset_id(offset_id):
+        """
+        Checks to see if offset_id is a bson object_id
+        :param offset_id:
+        :return:
+        """
+
+        if bson.ObjectId.is_valid(offset_id):
+            return bson.ObjectId(offset_id)
+        return offset_id
+
     @async_endpoint('query')
-    async def query(self, q, projection, limit=0, sort_direction=1):
+    async def query(self, q, projection, limit=0, sort='id', sort_direction=1,
+                    offset_id=None):
+        """
+
+        :param q:
+        :param projection:
+        :param limit:
+        :param sort:
+        :param sort_direction:
+        :param offset_id:
+        :return:
+        """
         c = self.db.query(query=deserialize_object_id(q),
                           extra_projection=projection,
                           limit=limit,
-                          sort_direction=sort_direction)
+                          sort=sort,
+                          sort_direction=sort_direction,
+                          offset_id=self.convert_bson_offset_id(offset_id))
 
         total_items = await c.count()
 

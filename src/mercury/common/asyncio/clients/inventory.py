@@ -14,7 +14,8 @@
 #    limitations under the License.
 
 from mercury.common.exceptions import MercuryClientException
-from mercury.common.asyncio.clients.async_router_req_client import AsyncRouterReqClient
+from mercury.common.asyncio.clients.async_router_req_client import \
+    AsyncRouterReqClient
 
 
 class InventoryClient(AsyncRouterReqClient):
@@ -71,14 +72,17 @@ class InventoryClient(AsyncRouterReqClient):
         }
         return await self.transceiver(payload)
 
-    async def query(self, query_data, projection=None, limit=0, sort_direction=1):
+    async def query(self, query_data, projection=None, limit=0, sort='_id',
+                    sort_direction=1, offset_id=None):
         """Query inventory for devices matching query_data.
 
         :param query_data: A dict to filter the results.
         :param projection: A dict specifying which fields should be included
             in the results.
+        :param sort:
         :param limit: The maximum number of results to return.
         :param sort_direction: The sort direction.
+        :param offset_id:
         :returns: The 'response' field of the transceiver's reply.
         """
         payload = {
