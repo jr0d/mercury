@@ -3,7 +3,7 @@ FROM ubuntu:17.10
 MAINTAINER DCX Baremetal Devs <baremetal@rackspace.com>
 
 ENV HOME /root
-ENV APP_NAME mercury-inventory
+ENV APP_NAME mercury-boot
 ENV SOURCE_ROOT ${HOME}/${APP_NAME}
 ENV LOG_DIR /var/log/${APP_NAME}
 ENV PID_DIR /var/run/${APP_NAME}
@@ -41,6 +41,6 @@ WORKDIR ${SOURCE_ROOT}
 # install everything into the virtualenv
 RUN source ${MY_VENV_ACTIVATION} && cd ./tests && pip install -r test_requirements.txt
 RUN source ${MY_VENV_ACTIVATION} && cd ./src && pip install -e . 
-EXPOSE 9000:9000
+#EXPOSE 9000:9000
 # and run it
-CMD source ${MY_VENV_ACTIVATION} && mercury-inventory
+CMD source ${MY_VENV_ACTIVATION} && mercury-boot

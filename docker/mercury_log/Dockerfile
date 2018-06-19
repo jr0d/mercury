@@ -1,4 +1,4 @@
-FROM ubuntu:17.04
+FROM ubuntu:17.10
 
 MAINTAINER DCX Baremetal Devs <baremetal@rackspace.com>
 
@@ -37,10 +37,10 @@ RUN source ${MY_VENV_ACTIVATION} && pip install --upgrade pip setuptools
 ADD . ${HOME}/${APP_NAME}
 
 WORKDIR ${SOURCE_ROOT}
-# install everything into the virtualenv
-RUN source ${MY_VENV_ACTIVATION} && cd src/mercury-common && pip install -r test-requirements.txt && pip install -e .
-RUN source ${MY_VENV_ACTIVATION} && cd src/${APP_NAME} && pip install -e .
 
+# install everything into the virtualenv
+RUN source ${MY_VENV_ACTIVATION} && cd ./tests && pip install -r test_requirements.txt
+RUN source ${MY_VENV_ACTIVATION} && cd ./src && pip install -e . 
 EXPOSE 9006:9006
 # and run it
-CMD source ${MY_VENV_ACTIVATION} && ./docker/mercury_log/run_logs.sh
+CMD source ${MY_VENV_ACTIVATION} && mercury-log
