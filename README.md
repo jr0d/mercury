@@ -210,6 +210,6 @@ docker build -t local/mercury-core -f docker/mercury-core-local/Dockerfile .
 Once the local image has been built, use the full stack compose file to
 start the mercury-core services
 ```
-docker-compose -f docker/docker-compose-fullstack.yaml up
+docker-compose -f docker/docker-compose-fullstack.yaml -p mercury up
 ```
 
