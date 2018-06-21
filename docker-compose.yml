@@ -4,24 +4,16 @@ services:
         image: mongo
         ports:
             - '27017:27017'
-        networks:
-            mercury_internal:
-                ipv4_address: 172.16.200.100
     redis:
         image: redis
         ports:
             - '6379:6379'
-        networks:
-            mercury_internal:
-                ipv4_address: 172.16.200.101
     mercury_inventory:
-        build:
-            context: .
-            dockerfile: ./docker/mercury_inventory/Dockerfile
+        image: local/mercury-core:latest
         environment:
             LOG_LEVEL: DEBUG
             INVENTORY_BIND_ADDRESS: tcp://0.0.0.0:9000
-            INVENTORY_DATABASE_SERVERS: 172.16.200.100:27017
+            INVENTORY_DATABASE_SERVERS: mongodb:27017
             INVENTORY_DATABASE_NAME: mercury
             INVENTORY_DATABASE_COLLECTION: inventory
             INVENTORY_DATABASE_REPLICA_NAME: ""
@@ -30,141 +22,87 @@ services:
             - mongodb
         ports:
             - '9000:9000'
-        volumes:
-            - .:/home/mercury
-        networks:
-            mercury_public:
-            mercury_internal:
-                ipv4_address: 172.16.200.103
+        command: mercury-inventory
     mercury_rpc:
-        build:
-            context: .
-            dockerfile: ./docker/mercury_rpc/Dockerfile
+        image: local/mercury-core:latest
         ports:
             - '9001:9001'
         environment:
             LOG_LEVEL: DEBUG
-            RPC_BIND_ADDRESS: tcp://172.16.200.104:9001
-            RPC_DATABASE_SERVERS: 172.16.200.100:27017
+            RPC_BIND_ADDRESS: tcp://0.0.0.0:9001
+            RPC_DATABASE_SERVERS: mongodb:27017
             RPC_DATABASE_NAME: mercury
             RPC_DATABASE_REPLICA_NAME: ""
             RPC_DATABASE_JOBS_COLLECTION: rpc_jobs
             RPC_DATABASE_TASKS_COLLECTION: rpc_tasks
             ASYNCIO_DEBUG: 0
             SUBTASK_DEBUG: 0
-            RPC_INVENTORY_ROUTER: tcp://172.16.200.103:9000
-            MERCURY_RPC_REDIS_HOST: 172.16.200.101
-            MERCURY_RPC_REDIS_PORT: 6379
-            MERCURY_RPC_REDIS_QUEUE: rpc_task_queue
+            RPC_INVENTORY_ROUTER: tcp://mercury_inventory:9000
         depends_on:
             - mongodb
-            - redis
-        volumes:
-            - .:/home/mercury
-        networks:
-            mercury_public:
-            mercury_internal:
-                ipv4_address: 172.16.200.104
+        command: mercury-rpc
     mercury_backend:
-        build:
-            context: .
-            dockerfile: ./docker/mercury_backend/Dockerfile
+        image: local/mercury-core:latest
         ports:
             - '9002:9002'
         environment:
             LOG_LEVEL: DEBUG
             BACKEND_AGENT_SERVICE_BIND_ADDRESS: tcp://0.0.0.0:9002
-            RPC_DB_SERVERS: 172.16.200.100:27017
-            RPC_DB_NAME: mercury
-            RPC_DB_REPLICA_NAME: ""
-            RPC_DB_JOBS_COLLECTION: rpc_jobs
-            RPC_DB_TASKS_COLLECTION: rpc_tasks
             ASYNCIO_DEBUG: 0
             SUBTASK_DEBUG: 0
-            #BACKEND_ORIGIN_NAME: be1-local1
-            #BACKEND_ORIGIN_DATACENTER: local1
-            BACKEND_ORIGIN_PUBLIC_ADDRESS: 172.16.200.104
+            BACKEND_ORIGIN_NAME: docker1
+            BACKEND_ORIGIN_DATACENTER: docker1
+            BACKEND_ORIGIN_PUBLIC_ADDRESS: mercury_backend
             BACKEND_ORIGIN_FRONTEND_PORT: 9001
-            BACKEND_INVENTORY_ROUTER: tcp://172.16.200.103:9000
+            BACKEND_INVENTORY_ROUTER: tcp://mercury_inventory:9000
             BACKEND_PING_INTERVAL: 30
             BACKEND_PING_CYCLE_TIME: 10
             BACKEND_PING_INITIAL_TIMEOUT: 2500
             BACKEND_PING_RETRIES: 5
             BACKEND_PING_BACKOFF: .42
-            BACKEND_RPC_ROUTER: tcp://172.16.200.104:9001
+            BACKEND_RPC_ROUTER: tcp://mercury_rcp:9001
         depends_on:
-            - mongodb
             - mercury_rpc
             - mercury_inventory
-        volumes:
-            - .:/home/mercury
-        networks:
-            mercury_internal:
-                ipv4_address: 172.16.200.105
+        command: mercury-backend
     mercury_backend_queue:
-        build:
-            context: .
-            dockerfile: ./docker/mercury_backend_queue/Dockerfile
+        image: local/mercury-core:latest
+        links:
+            - "redis"
+            - "mercury_inventory"
         environment:
             LOG_LEVEL: DEBUG
-            BACKEND_REDIS_HOST: 172.16.200.101
+            BACKEND_REDIS_HOST: redis
             BACKEND_REDIS_PORT: 6379
             BACKEND_REDIS_QUEUE: rpc_task_queue
-            BACKEND_INVENTORY_ROUTER: tcp://172.16.200.103:9000
+            BACKEND_INVENTORY_ROUTER: tcp://mercury_inventory:9000
+        command: mercury-backend-queue
     mercury_backend_worker:
-        build:
-            context: .
-            dockerfile: ./docker/mercury_backend_worker/Dockerfile
+        image: local/mercury-core:latest
         environment:
             LOG_LEVEL: DEBUG
-            RPC_DB_SERVERS: 172.16.200.100:27017
-            RPC_DB_NAME: mercury
-            RPC_DB_REPLICA_NAME: ""
-            RPC_DB_JOBS_COLLECTION: rpc_jobs
-            RPC_DB_TASKS_COLLECTION: rpc_tasks
-            BACKEND_REDIS_HOST: 172.16.200.101
+            BACKEND_REDIS_HOST: redis
             BACKEND_REDIS_PORT: 6379
             BACKEND_REDIS_QUEUE: rpc_task_queue
             BACKEND_WORKERS_THREADS: 10
             BACKEND_WORKERS_MAX_REQUESTS_PER_THREAD: 1
-            BACKEND_RPC_ROUTER: tcp://172.16.200.104:9001
+            BACKEND_RPC_ROUTER: tcp://mercury_rpc:9001
         depends_on:
-            - mongodb
             - redis
-        volumes:
-            - .:/home/mercury
-        networks:
-            - mercury_internal
+            - mercury_rpc
+        command: mercury-backend-worker
     mercury_log:
-        build:
-            context: .
-            dockerfile: ./docker/mercury_log/Dockerfile
+        image: local/mercury-core:latest
         ports:
             - '9006:9006'
         environment:
             LOG_LEVEL: DEBUG
             LOG_SERVICE_BIND_ADDRESS: tcp://0.0.0.0:9006
-            LOG_SERVICE_DB_SERVERS: 172.16.200.100:27017
+            LOG_SERVICE_DB_SERVERS: mongodb:27017
             LOG_SERVICE_DB_NAME: mercury
             LOG_SERVICE_DB_COLLECTION: log
             LOG_SERVICE_DB_REPLICA_NAME: ""
         depends_on:
             - mongodb
-        volumes:
-            - .:/home/mercury
-        networks:
-            mercury_public:
-            mercury_internal:
-                ipv4_address: 172.16.200.106
-    #mercury_boot:
-    #    build:
-    #        context: .
-    #        dockerfile: ./docker/mercury_boot/Dockerfile
-networks:
-    mercury_internal:
-        ipam:
-            driver: default
-            config:
-                -
-                    subnet: 172.16.200.0/24
-    mercury_public:
+        command: mercury-log
+
