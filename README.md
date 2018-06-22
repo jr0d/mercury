@@ -191,3 +191,25 @@ For all backend communication, mercury uses [0mq socket API](http://zeromq.org/w
 [MessagePack](https://github.com/msgpack/msgpack/blob/master/spec.md) for serialization . Mercury is 
 designed to work in tandem with production workloads; as such, mercury’s messaging system has been 
 developed to minimize impact on overall network capacity.
+
+
+# Docker
+## Building a local test image
+
+A Dockerfile exist which will install the current source tree into
+a docker image, along with the test suite.
+
+To build the image use the following command
+
+```
+docker build -t local/mercury-core -f docker/mercury-core-local/Dockerfile .
+```
+
+## Starting the stack
+
+Once the local image has been built, use the full stack compose file to
+start the mercury-core services
+```
+docker-compose -f docker/docker-compose-fullstack.yaml -p mercury up
+```
+
