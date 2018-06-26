@@ -52,7 +52,7 @@ services:
             BACKEND_ORIGIN_NAME: docker1
             BACKEND_ORIGIN_DATACENTER: docker1
             BACKEND_ORIGIN_QUEUE_SERVICE_VIP: mercury-backend-queue
-            BACKEND_ORIGIN_QUEUE_SERVICE_PORT: 9001
+            BACKEND_ORIGIN_QUEUE_SERVICE_PORT: 9007
             BACKEND_INVENTORY_ROUTER: tcp://mercury-inventory:9000
             BACKEND_PING_INTERVAL: 30
             BACKEND_PING_CYCLE_TIME: 10
