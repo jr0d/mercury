@@ -30,6 +30,7 @@ services:
         environment:
             LOG_LEVEL: DEBUG
             RPC_BIND_ADDRESS: tcp://0.0.0.0:9001
+            RPC_INVENTORY_ROUTER: tcp://mercury-inventory:9000
             RPC_DATABASE_SERVERS: mongodb:27017
             RPC_DATABASE_NAME: mercury
             RPC_DATABASE_REPLICA_NAME: ""
