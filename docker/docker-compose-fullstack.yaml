@@ -51,8 +51,8 @@ services:
             SUBTASK_DEBUG: 0
             BACKEND_ORIGIN_NAME: docker1
             BACKEND_ORIGIN_DATACENTER: docker1
-            BACKEND_ORIGIN_PUBLIC_ADDRESS: mercury-backend
-            BACKEND_ORIGIN_FRONTEND_PORT: 9001
+            BACKEND_ORIGIN_QUEUE_SERVICE_VIP: mercury-backend-queue
+            BACKEND_ORIGIN_QUEUE_SERVICE_PORT: 9007
             BACKEND_INVENTORY_ROUTER: tcp://mercury-inventory:9000
             BACKEND_PING_INTERVAL: 30
             BACKEND_PING_CYCLE_TIME: 10
@@ -64,19 +64,20 @@ services:
             - mercury-rpc
             - mercury-inventory
         command: mercury-backend
-    mercury-backend_queue:
+    mercury-backend-queue:
         image: local/mercury-core:latest
         links:
             - "redis"
             - "mercury-inventory"
         environment:
             LOG_LEVEL: DEBUG
+            BACKEND_QUEUE_SERVICE_BIND_ADDRESS: tcp://0.0.0.0:9007
             BACKEND_REDIS_HOST: redis
             BACKEND_REDIS_PORT: 6379
             BACKEND_REDIS_QUEUE: rpc_task_queue
             BACKEND_INVENTORY_ROUTER: tcp://mercury-inventory:9000
         command: mercury-backend-queue
-    mercury-backend_worker:
+    mercury-backend-worker:
         image: local/mercury-core:latest
         environment:
             LOG_LEVEL: DEBUG
@@ -104,4 +105,3 @@ services:
         depends_on:
             - mongodb
         command: mercury-log
-
