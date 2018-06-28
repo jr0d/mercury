@@ -128,6 +128,8 @@ def check_params_applied_in_resp(param_data, resp):
             expected_result = param_data[key]
             if expected_result == -1:
                 expected_result = "DESCENDING"
+            else:
+                expected_result = "ASCENDING"
             actual_result = resp.json()[akey]
             if expected_result != actual_result:
                 all_matched = False
