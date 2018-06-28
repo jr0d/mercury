@@ -16,8 +16,8 @@ Feature: Query inventory Computers
 
         Examples: Filenames
         | filename              |
-        | dmi_sys_vendor.json   |
-        | mem_Dirty.json        |
+        #| dmi_sys_vendor.json   |
+        #| mem_Dirty.json        |
         | active_rpc_port.json  |
         | active_ping_port.json |
         #| dmi_virtual_box.json |
@@ -36,7 +36,7 @@ Feature: Query inventory Computers
         | query_filename              | param_filename            |
         | active_rpc_port.json        | typical_query_params.json |
         | active_ping_port.json       | typical_query_params.json |
-        | dmi_sys_vendor.json         | typical_query_params.json |
-        | mem_Dirty.json              | typical_query_params.json |
+        #| dmi_sys_vendor.json         | typical_query_params.json |
+        #| mem_Dirty.json              | typical_query_params.json |
 
         # TODO negative testing

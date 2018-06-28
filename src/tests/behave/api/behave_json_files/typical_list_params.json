@@ -1,1 +1,1 @@
-{ "limit" : 5 , "sort_direction": "DESCENDING", "projection": "cpu.frequency.max,raid.total_drives" }
+{ "limit" : 5 , "sort_direction": -1, "projection": "cpu.frequency.max" }
