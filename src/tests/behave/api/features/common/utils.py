@@ -133,7 +133,11 @@ def check_params_applied_in_resp(param_data, resp):
                 all_matched = False
         elif key == "offset_id":
             given_offset_id = param_data[key]
-            # TODO this param is broken
+            # TODO update the test that uses this
+            # have it get a list with limit=10
+            # then have it get a list using an offset id from that list
+            # and limit it to 5
+            # make sure it's the second half of the first list
             # make sure the _id specified is included in the returned list
         elif key == "projection":
             projections = param_data[key].split(",")
