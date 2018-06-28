@@ -3,7 +3,7 @@ import json
 
 import requests
 
-from tests.api.features.common.exception import TimeoutException
+from src.tests.behave.api.features.common.exception import TimeoutException
 
 
 def check_service_api(url, interval_time=5, timeout=20):
@@ -83,6 +83,7 @@ def wait_for_not_none(func, *args, timeout=20):
         if timeout <= 0:
             break
         time.sleep(5)
+        timeout -= 1
         value = func(*args)
     return value
 
@@ -124,27 +125,28 @@ def check_params_applied_in_resp(param_data, resp):
             if expected_result != actual_result:
                 all_matched = False
         elif key == "sort_direction":
-            pass
-            # TODO this param is broken
-            """
-            akey = "direction"
             expected_result = param_data[key]
+            if expected_result == -1:
+                expected_result = "DESCENDING"
             actual_result = resp.json()[akey]
             if expected_result != actual_result:
                 all_matched = False
-            """
         elif key == "offset_id":
-            pass
+            given_offset_id = param_data[key]
             # TODO this param is broken
             # make sure the _id specified is included in the returned list
         elif key == "projection":
             projections = param_data[key].split(",")
             if "items" in resp.json().keys():
-                for item in resp.json()["items"]:
-                    for projection in projections:
-                        pstack = projection.split(".")
-                        result = keys_in_list_or_dict(pstack, item)
-                        all_matched = all_matched and result
+                if resp.json()["items"] == []:
+                    return False
+                    # TODO add a computer to the DB somehow
+                else:
+                    for item in resp.json()["items"]:
+                        for projection in projections:
+                            pstack = projection.split(".")
+                            result = keys_in_list_or_dict(pstack, item)
+                            all_matched = all_matched and result
             else:
                 item = resp.json()
                 for projection in projections:

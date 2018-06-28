@@ -12,6 +12,6 @@ import the methods from the parent file.
 
 see: https://media.readthedocs.org/pdf/behave/latest/behave.pdf
 '''
-from tests.api.features.environment import ( # noqa # pylint: disable=unused-import
+from src.tests.behave.api.features.environment import ( # noqa # pylint: disable=unused-import
     before_all, after_all, before_feature, after_feature,
     before_scenario, after_scenario, before_step, after_step)

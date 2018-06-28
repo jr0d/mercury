@@ -4,12 +4,12 @@ import os
 
 from conflagration import api
 from conflagration.namespace import ModifiableNamespace
-from tests.common.const import ConfigVars, Sources
+from src.tests.behave.common.const import ConfigVars, Sources
 
 
 DEFAULT_CONFIG_FILES = (
-    'tests/configs/mercury_tests_creds.config',
-    'tests/configs/mercury_tests.config',
+    'src/tests/behave/configs/mercury_tests_creds.config',
+    'src/tests/behave/configs/mercury_tests.config',
 )
 
 

@@ -1,5 +1,5 @@
 from behave import when, step
-from tests.api.features.common.utils import get_entity_list_container_field, get_entity_id_field, read_json_from_file
+from src.tests.behave.api.features.common.utils import get_entity_list_container_field, get_entity_id_field, read_json_from_file
 
 
 @step("a {service_name} entity id is located for testing")
@@ -17,7 +17,10 @@ def step_a_service_id_is_located_for_testing(context, service_name):
     field_name = get_entity_id_field(service_name)
     try:
         # TODO config value?
-        entity_id = response.json()[container_field][0][field_name]
+        service_entities = response.json()[container_field]
+        # TODO if this is empty add one somehow?
+        context.check.assertGreater(len(service_entities),0)
+        entity_id = service_entities[0][field_name]
         context.services[service_name]['id'] = entity_id
     except IndexError:
         context.check.assertIsNotNone(
@@ -97,6 +100,7 @@ def step_i_get_a_task_from_the_entity_using_the_service_api(context, service_nam
     first_task = tasks_resp.json()["tasks"][0]
     # TODO config value?
     task_id = first_task["task_id"]
+    context.services[tasks_service_name]['id'] = task_id
     context.services[tasks_service_name]['resp'] = tasks_service_client.get(resource_id=task_id)
 
 @step("the {service_name} response contains valid single entity details")

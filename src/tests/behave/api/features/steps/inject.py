@@ -4,7 +4,7 @@ import operator
 from functools import reduce
 
 from behave import given, when, step
-from tests.api.features.common.utils import (get_entity_list_container_field,
+from src.tests.behave.api.features.common.utils import (get_entity_list_container_field,
     get_entity_id_field, read_json_from_file, wait_for_not_none)
 
 

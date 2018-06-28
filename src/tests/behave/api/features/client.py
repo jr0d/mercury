@@ -1,7 +1,7 @@
 import copy
 import json
 import requests
-from tests.common.config import get_conflagration
+from src.tests.behave.common.config import get_conflagration
 
 class APIClient(object):
 

@@ -1,7 +1,7 @@
 import random
 
 from behave import when, step, then, given
-from tests.api.features.common.utils import get_entity_list_container_field, read_json_from_file
+from src.tests.behave.api.features.common.utils import get_entity_list_container_field, read_json_from_file
 
 
 @when("I get the list of {service_name}")

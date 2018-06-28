@@ -4,7 +4,7 @@ import os
 import unittest
 
 from collections import defaultdict
-from tests.common.config import get_conflagration
+from src.tests.behave.common.config import get_conflagration
 
 
 LOGS_DIR = os.environ.get("BEHAVE_LOGS_DIR", "./logs")

@@ -3,7 +3,7 @@ import operator
 from functools import reduce
 
 from behave import given, when, step
-from tests.api.features.common.utils import get_entity_list_container_field, get_entity_id_field, read_json_from_file
+from src.tests.behave.api.features.common.utils import get_entity_list_container_field, get_entity_id_field, read_json_from_file
 
 
 @given("I have query details in {filename} for entities using the {service_name} api")
@@ -71,6 +71,7 @@ def step_the_entities_in_the_response_contain_the_data_from_filename(
     service_resp = context.services[service_name]['resp']
     container_field = get_entity_list_container_field(service_name)
     service_entities = service_resp.json()[container_field]
+    # TODO if len is 0 add a computer somehow
     context.check.assertGreater(len(service_entities),0)
 
     field_name = get_entity_id_field(service_name)
