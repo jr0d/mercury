@@ -25,7 +25,19 @@ Feature: List Active Computers
         | filename                  |
         | typical_list_params.json  |
         # TODO more param files
-        # TODO | bad_params.json             |
+        # TODO | bad_params.json    |
+
+    # /active/computer - offset_id
+    @positive @p0 @offset
+    Scenario Outline: Get list of active_computers and test the offset_id param
+        When I get with parameters in <filename> the list of active_computers
+        Then I get with offset parameters in <second_few> the list of active_computers
+        Then the active_computers response status is 200 OK
+        And the response contains an offset list of active_computers that have been offset by the offset_id
+
+        Examples: Fields
+        | filename        | second_few     |
+        | first_ten.json  | next_five.json |
 
     # TODO negative test for params
 
