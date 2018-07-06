@@ -27,6 +27,18 @@ Feature: List inventory Computers
         # TODO more param files
         # TODO | bad_params.json             |
 
+    # /inventory/computer - offset_id
+    @positive @p0 @offset
+    Scenario Outline: Get list of inventory_computers and test the offset_id param
+        When I get with parameters in <filename> the list of inventory_computers
+        Then I get with offset parameters in <second_few> the list of inventory_computers
+        Then the inventory_computers response status is 200 OK
+        And the response contains an offset list of inventory_computers that have been offset by the offset_id
+
+        Examples: Fields
+        | filename        | second_few     |
+        | first_ten.json  | next_five.json |
+
     # TODO negative test for params
 
     # /inventory/computers - bad method

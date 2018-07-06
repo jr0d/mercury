@@ -39,4 +39,19 @@ Feature: Query inventory Computers
         #| dmi_sys_vendor.json         | typical_query_params.json |
         #| mem_Dirty.json              | typical_query_params.json |
 
+    # /inventory/computers/query - offset_id
+    @positive @p0 @smoke @offset
+    Scenario Outline: Query Inventory Computers parameters and test the offset_id param
+        Given I have query details in <query_filename> for entities using the inventory_computers api
+        When I get with parameters in <param_filename> the query_results from a query of inventory_computers
+        Then I get with offset parameters in <second_few> the query_results from a query of inventory_computers
+        Then the inventory_computers response status is 200 OK
+        And the response contains an offset list of inventory_computers that have been offset by the offset_id
+        And the inventory_computers entities in the response contain the data from <filename>
+
+        Examples: Fields
+        | query_filename              | param_filename | second_few |
+        | active_rpc_port.json        | first_ten.json | next_five.json |
+        | active_ping_port.json       | first_ten.json | next_five.json |
+
         # TODO negative testing

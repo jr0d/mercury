@@ -35,7 +35,7 @@ def step_i_get_the_list_of_service_with_params_in_filename(context, service_name
 
 
 @step("I get with offset parameters in {filename} the list of {service_name}")
-def step_i_get_the_list_of_service_with_params_in_filename(context, service_name, filename):
+def step_i_get_the_offset_list_of_service_with_params_in_filename(context, service_name, filename):
     """
     :type context: behave.runner.Context
     :type service_name: str
