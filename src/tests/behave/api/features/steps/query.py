@@ -58,6 +58,47 @@ def step_i_get_the_query_results_from_a_query_with_params_in_filename_of_service
     context.services[service_name]['resp'] = \
         service_client.post(data=json.dumps(data), url_suffix=suffix)
 
+
+@step("I get with offset parameters in {filename} the query_results from a query of {service_name}")
+def step_i_get_the_offset_query_results_from_a_query_with_params_in_filename_of_service_api(
+    context, filename, service_name):
+    """
+    :type context: behave.runner.Context
+    :type filename: str
+    :type service_name: str
+    """
+
+    service_resp = context.services[service_name]['resp']
+    container_field = get_entity_list_container_field(service_name)
+    service_entities = service_resp.json()[container_field]
+    # TODO configure or calculate the indices
+    offset_id = service_entities[4]["_id"]
+    first_id = service_entities[5]["_id"]
+    context.services[service_name]['offset_id'] = offset_id
+    context.services[service_name]['first_id'] = first_id
+
+    location = context.json_location
+    param_data = read_json_from_file(filename, location)
+
+    keys = param_data.keys()
+    suffix = "query?"
+    for key in keys:
+        if key == "offset_id":
+            param_data["offset_id"] = offset_id
+        suffix = "{0}{1}={2}&".format(suffix, key, param_data[key])
+    # trim trailing &
+    suffix = suffix.rstrip('&')
+    context.services[service_name]['offset_param_data'] = param_data
+
+    service_client = context.services[service_name]['client']
+    data = context.services[service_name]['details']['query']
+
+    context.services[service_name]['offset_resp'] = \
+        service_client.post(data=json.dumps(data), url_suffix=suffix)
+    # so we can use existing checks on this response too
+    context.services[service_name]['resp'] = \
+        context.services[service_name]['offset_resp']
+
 @step("the {service_name} entities in the response contain the data from {filename}")
 def step_the_entities_in_the_response_contain_the_data_from_filename(
         context, service_name, filename):
