@@ -18,9 +18,6 @@ Feature: Query inventory Computers
         | filename              |
         | active_rpc_port.json  |
         | active_ping_port.json |
-<<<<<<< HEAD
-        #| dmi_virtual_box.json |
-=======
 
     # /inventory/computers/query - not local
     @positive @p0 @smoke @not-local
@@ -35,7 +32,6 @@ Feature: Query inventory Computers
         | filename              |
         | dmi_sys_vendor.json   |
         | mem_Dirty.json        |
->>>>>>> a9f5ee9... Tag tests for running on jenkins so you can run everything against prod and don't run the tests that fail locally against a temporary docker env
 
     # /inventory/computers/query - params
     @positive @p0 @smoke
