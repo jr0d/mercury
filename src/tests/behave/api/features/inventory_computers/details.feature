@@ -32,7 +32,7 @@ Feature: View Inventory Computer Information
     # TODO negative test for params
 
     # /inventory/computers/<mercury_id> - bad id
-    @negative @p1
+    @negative @p0 @smoke
     Scenario Outline: Get inventory Computer Details With <invalid_mercury_id>
         Given a inventory_computers <invalid_mercury_id> is provided
         When I get the entity using the inventory_computers api
@@ -50,7 +50,7 @@ Feature: View Inventory Computer Information
 
 
         # /inventory/computers/<mercury_id> - bad method
-        @negative @p1
+        @negative @p0 @smoke
         Scenario: Post instead of getting details of inventory_computers
             When I use post on inventory_computers
             Then the inventory_computers response status is 405 METHOD NOT ALLOWED

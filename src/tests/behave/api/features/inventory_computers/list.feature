@@ -28,7 +28,7 @@ Feature: List inventory Computers
         # TODO | bad_params.json             |
 
     # /inventory/computer - offset_id
-    @positive @p0 @offset
+    @positive @p0 @smoke @offset @not-local
     Scenario Outline: Get list of inventory_computers and test the offset_id param
         When I get with parameters in <filename> the list of inventory_computers
         Then I get with offset parameters in <second_few> the list of inventory_computers
@@ -42,7 +42,7 @@ Feature: List inventory Computers
     # TODO negative test for params
 
     # /inventory/computers - bad method
-    @negative @p1
+    @negative @p0 @smoke
     Scenario: Post instead of getting list of inventory_computers
         When I use post on inventory_computers
         Then the inventory_computers response status is 405 METHOD NOT ALLOWED

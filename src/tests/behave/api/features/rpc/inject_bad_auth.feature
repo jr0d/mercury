@@ -7,7 +7,7 @@ Feature: Inject RPC Jobs negative tests
         And the rpc_jobs client URL is /rpc/jobs
 
     # /rpc/jobs - bad token
-    @negative @p0 @smoke
+    @negative @p0 @smoke @not-local
     Scenario Outline: Inject rpc jobs
         # Filename should have a query dict and an instruction dict
         Given I have job injection details in <filename> for creating jobs using the rpc_jobs api
@@ -20,7 +20,7 @@ Feature: Inject RPC Jobs negative tests
         | inspector_job.json |
 
     # /rpc/jobs - no token
-    @negative @p0 @smoke
+    @negative @p0 @smoke @not-local
     Scenario Outline: Inject rpc jobs
         # Filename should have a query dict and an insruction dict
         Given the auth token for the rpc_jobs client is nonexistent

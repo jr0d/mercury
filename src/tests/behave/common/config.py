@@ -8,8 +8,9 @@ from src.tests.behave.common.const import ConfigVars, Sources
 
 
 DEFAULT_CONFIG_FILES = (
-    'src/tests/behave/configs/mercury_tests_creds.config',
-    'src/tests/behave/configs/mercury_tests.config',
+    #'src/tests/behave/configs/mercury_tests_creds.config',
+    #'src/tests/behave/configs/mercury_tests.config',
+    # USE ENVIRONMENT VARIABLES
 )
 
 

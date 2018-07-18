@@ -14,7 +14,7 @@ Feature: List Active Computers
         And the response contains a list of active_computers
 
     # /active/computers - params
-    @positive @p0
+    @positive @p0 @smoke
     Scenario Outline: Get list of active_computers with parameters
         When I get with parameters in <filename> the list of active_computers
         Then the active_computers response status is 200 OK
@@ -28,7 +28,7 @@ Feature: List Active Computers
         # TODO | bad_params.json    |
 
     # /active/computer - offset_id
-    @positive @p0 @offset
+    @positive @p0 @smoke @offset @not-local
     Scenario Outline: Get list of active_computers and test the offset_id param
         When I get with parameters in <filename> the list of active_computers
         Then I get with offset parameters in <second_few> the list of active_computers
@@ -42,7 +42,7 @@ Feature: List Active Computers
     # TODO negative test for params
 
     # /active/computers - bad method
-    @negative @p1
+    @negative @p0 @smoke
     Scenario: Post instead of getting list of active_computers
         When I use post on active_computers
         Then the active_computers response status is 405 METHOD NOT ALLOWED

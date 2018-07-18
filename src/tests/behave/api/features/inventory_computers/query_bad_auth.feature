@@ -6,7 +6,7 @@ Feature: Query Inventory Computers negative tests
       Given the account is an unauthorized tenant
       And the inventory_computers client URL is /inventory/computers
 
-    @negative @p0 @smoke
+    @negative @p0 @smoke @not-local
     Scenario Outline: Query Inventory Computers
         Given I have query details in <filename> for entities using the inventory_computers api
         When I get the query_results from a query of inventory_computers
