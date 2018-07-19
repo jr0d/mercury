@@ -13,7 +13,7 @@ class ConfigVars(object):
     DOMAIN = 'DOMAIN'
     DOMAIN_NAME = 'DOMAIN_NAME'
     # Test Data
-    JSON_DATA_LOCATION = 'JSON_DATA_LOCATION'
+    JSON_API_DATA_LOCATION = 'JSON_API_DATA_LOCATION'
 
 class Sources(object):
     """Sources to get the configuration variables from"""

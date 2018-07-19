@@ -8,14 +8,14 @@ Feature: List active computer negative tests
 
     # /active/computers - bad token
     # TODO add more bad token examples?
-    @negative @p1
+    @negative @p0 @smoke @not-local
     Scenario: Get list of active_computers for unauthorized account
         When I get the list of active_computers
         Then the active_computers response status is 401 X-AUTH-TOKEN HEADER NOT FOUND
 
     # /active/computers - no token
-    @negative @p1
+    @negative @p0 @smoke @not-local
     Scenario: Get list of active_computers for unauthorized account with no token
         Given the auth token for the active_computers client is nonexistent
         When I get the list of active_computers
-        Then the active_computers response status is 401 X-AUTH-TOKEN HEADER NOT FOUND    
+        Then the active_computers response status is 401 X-AUTH-TOKEN HEADER NOT FOUND

@@ -32,7 +32,7 @@ Feature: View Active Computer Information
     # TODO negative test for params
 
     # /active/computers/<mercury_id> - bad id
-    @negative @p1
+    @negative @p0 @smoke
     Scenario Outline: Get Active Computer Details With <invalid_mercury_id>
         Given a active_computers <invalid_mercury_id> is provided
         When I get the entity using the active_computers api
@@ -50,7 +50,7 @@ Feature: View Active Computer Information
 
 
     # /active/computers/<mercury_id> - bad method
-    @negative @p1
+    @negative @p0 @smoke
     Scenario: Post instead of getting details of active_computers
         When I use post on active_computers
         Then the active_computers response status is 405 METHOD NOT ALLOWED

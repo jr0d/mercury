@@ -1,6 +1,6 @@
 {
   "query": {
-    "dmi.bios_version": "VirtualBox"
+    "dmi.sys_vendor": "HP"
   },
   "instruction": {
     "method": "inspector"

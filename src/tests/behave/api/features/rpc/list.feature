@@ -14,7 +14,7 @@ Feature: List RPC Jobs
         And the response contains a list of rpc_jobs
 
     # TODO make the test work with bad auth
-    @negative @p1 @not-tested
+    @negative @p0 @smoke @not-local
     Scenario: Get list of inventory_computers for unauthorized account
         Given the account is an unauthorized tenant
         And the inventory_computers client URL is /inventory/computers

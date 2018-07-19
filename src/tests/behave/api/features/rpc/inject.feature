@@ -7,7 +7,7 @@ Feature: Inject RPC Jobs
         And the rpc_jobs client URL is /rpc/jobs
 
     # /rpc/jobs
-    @positive @p0 @smoke
+    @positive @p0 @smoke @not-local
     Scenario Outline: Inject rpc jobs
         # Filename should have a query dict and an instruction dict
         Given I have job injection details in <filename> for creating jobs using the rpc_jobs api

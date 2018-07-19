@@ -44,7 +44,7 @@ Feature: View RPC Job Information
     # Bad method tests
 
     # /rpc/jobs/{job_id}
-    @negative @p1
+    @negative @p0 @smoke
     Scenario Outline: Get RPC Job Details With <invalid_job_id>
         Given a rpc_jobs <invalid_job_id> is provided
         When I get the entity using the rpc_jobs api

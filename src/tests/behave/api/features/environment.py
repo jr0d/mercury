@@ -57,7 +57,7 @@ def before_all(context):
     root_logger.addHandler(handler)
 
     context.base_url = context.cfg.MERCURY.mercury_api_endpoint
-    context.json_location = context.cfg.TEST_DATA.json_data_location
+    context.json_location = context.cfg.TEST_DATA.json_api_data_location
     context.services = defaultdict(dict)
     context.check = unittest.TestCase()
 
