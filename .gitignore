@@ -72,3 +72,5 @@ mercury-inventory.yaml
 mercury-log.yaml
 mercury-rpc.yaml
 
+mercury_tests.config
+mercury_tests_creds.config
