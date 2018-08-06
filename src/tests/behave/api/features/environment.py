@@ -62,7 +62,7 @@ def before_all(context):
     context.check = unittest.TestCase()
 
     context.logger.all.info("++++++++++++++++")
-    context.logger.all.info("TESTS STARTED!")
+    context.logger.all.info("TESTS STARTED! (Endpoint {0})".format(context.base_url))
     context.logger.all.info("++++++++++++++++")
 
 
