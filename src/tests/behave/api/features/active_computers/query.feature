@@ -20,7 +20,7 @@ Feature: Query Active Computers
         | active_ping_port.json |
 
     # /active/computers/query - params
-    @positive @p0 @smoke
+    @positive @p0
     Scenario Outline: Query Active Computers parameters
         Given I have query details in <query_filename> for entities using the active_computers api
         When I get with parameters in <param_filename> the query_results from a query of active_computers
@@ -35,7 +35,8 @@ Feature: Query Active Computers
         | active_ping_port.json       | typical_query_params.json |
 
     # /active/computers/query - offset_id
-    @positive @p0 @smoke @offset @not-local
+    @positive @p0
+    @offset @not-local
     Scenario Outline: Query Active Computers parameters and test the offset_id param
         Given I have query details in <query_filename> for entities using the active_computers api
         When I get with parameters in <param_filename> the query_results from a query of active_computers
