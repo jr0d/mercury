@@ -8,14 +8,16 @@ Feature: View inventory computer negative tests
 
     # /inventory/computers/<mercury_id> - bad token
     # TODO add more bad token examples?
-    @negative @p0 @smoke @not-local
+    @negative @p0 @smoke
+    @not-local
     Scenario: Get Inventory Computer Details for unauthorized account
         Given a inventory_computers test entity id is defined for testing
         When I get the entity using the inventory_computers api
         Then the inventory_computers response status is 401 X-AUTH-TOKEN HEADER NOT FOUND
 
     # /inventory/computers/<mercury_id> - no token
-    @negative @p0 @smoke @not-local
+    @negative @p0 @smoke
+    @not-local
     Scenario: Get Inventory Computer Details for unauthorized account with no token
         Given the auth token for the inventory_computers client is nonexistent
         And a inventory_computers test entity id is defined for testing

@@ -8,13 +8,15 @@ Feature: List inventory computer negative tests
 
     # /inventory/computers - bad token
     # TODO add more bad token examples?
-    @negative @p0 @smoke @not-local
+    @negative @p0 @smoke
+    @not-local
     Scenario: Get list of inventory_computers for unauthorized account
         When I get the list of inventory_computers
         Then the inventory_computers response status is 401 X-AUTH-TOKEN HEADER NOT FOUND
 
     # /inventory/computers - no token
-    @negative @p0 @smoke @not-local
+    @negative @p0 @smoke
+    @not-local
     Scenario: Get list of inventory_computers for unauthorized account with no token
         Given the auth token for the inventory_computers client is nonexistent
         When I get the list of inventory_computers
