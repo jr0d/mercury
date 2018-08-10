@@ -6,7 +6,8 @@ Feature: Query Active Computers negative tests
       Given the account is an unauthorized tenant
       And the active_computers client URL is /active/computers
 
-    @negative @p0 @smoke @not-local
+    @negative @p0 @smoke
+    @not-local
     Scenario Outline: Query Active Computers
         Given I have query details in <filename> for entities using the active_computers api
         When I get the query_results from a query of active_computers

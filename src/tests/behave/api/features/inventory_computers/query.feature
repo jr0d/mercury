@@ -20,7 +20,8 @@ Feature: Query inventory Computers
         | active_ping_port.json |
 
     # /inventory/computers/query - not local
-    @positive @p0 @smoke @not-local
+    @positive @p0 @smoke
+    @not-local
     Scenario Outline: Query inventory Computers not local
         Given I have query details in <filename> for entities using the inventory_computers api
         When I get the query_results from a query of inventory_computers
@@ -34,7 +35,7 @@ Feature: Query inventory Computers
         | mem_Dirty.json        |
 
     # /inventory/computers/query - params
-    @positive @p0 @smoke
+    @positive @p0
     Scenario Outline: Query Inventory Computers parameters
         Given I have query details in <query_filename> for entities using the inventory_computers api
         When I get with parameters in <param_filename> the query_results from a query of inventory_computers
@@ -49,7 +50,8 @@ Feature: Query inventory Computers
         | active_ping_port.json       | typical_query_params.json |
 
     # /inventory/computers/query - params - not local
-    @positive @p0 @smoke @not-local
+    @positive @p0
+    @not-local
     Scenario Outline: Query Inventory Computers parameters not local
         Given I have query details in <query_filename> for entities using the inventory_computers api
         When I get with parameters in <param_filename> the query_results from a query of inventory_computers
@@ -64,7 +66,8 @@ Feature: Query inventory Computers
         | mem_Dirty.json              | typical_query_params.json |
 
     # /inventory/computers/query - offset_id
-    @positive @p0 @smoke @offset @not-local
+    @positive @p0
+    @offset @not-local
     Scenario Outline: Query Inventory Computers parameters and test the offset_id param
         Given I have query details in <query_filename> for entities using the inventory_computers api
         When I get with parameters in <param_filename> the query_results from a query of inventory_computers

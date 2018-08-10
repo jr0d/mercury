@@ -14,7 +14,7 @@ Feature: List inventory Computers
         And the response contains a list of inventory_computers
 
     # /inventory/computers - params
-    @positive @p0 @smoke
+    @positive @p0
     Scenario Outline: Get list of inventory_computers with parameters
         When I get with parameters in <filename> the list of inventory_computers
         Then the inventory_computers response status is 200 OK
@@ -28,7 +28,8 @@ Feature: List inventory Computers
         # TODO | bad_params.json             |
 
     # /inventory/computer - offset_id
-    @positive @p0 @smoke @offset @not-local
+    @positive @p0
+    @offset @not-local
     Scenario Outline: Get list of inventory_computers and test the offset_id param
         When I get with parameters in <filename> the list of inventory_computers
         Then I get with offset parameters in <second_few> the list of inventory_computers

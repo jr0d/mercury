@@ -15,7 +15,7 @@ Feature: View Inventory Computer Information
         And the inventory_computers response contains valid single entity details
 
     # /inventory/computers/<mercury_id> - params
-    @positive @p0 @smoke
+    @positive @p0
     Scenario Outline: Get Inventory Computer Details with parameters
         Given a inventory_computers entity id is located for testing
         When I get with parameters in <filename> the entity using the inventory_computers api

@@ -15,7 +15,7 @@ Feature: View Active Computer Information
         And the active_computers response contains valid single entity details
 
     # /active/computers/<mercury_id> - params
-    @positive @p0 @smoke
+    @positive @p0
     Scenario Outline: Get Active Computer Details with parameters
         Given a active_computers entity id is located for testing
         When I get with parameters in <filename> the entity using the active_computers api
