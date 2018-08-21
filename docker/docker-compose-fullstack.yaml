@@ -60,7 +60,7 @@ services:
             BACKEND_PING_INITIAL_TIMEOUT: 2500
             BACKEND_PING_RETRIES: 5
             BACKEND_PING_BACKOFF: .42
-            BACKEND_RPC_ROUTER: tcp://mercury-rcp:9001
+            BACKEND_RPC_ROUTER: tcp://mercury-rpc:9001
         depends_on:
             - mercury-rpc
             - mercury-inventory
