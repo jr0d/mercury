@@ -7,7 +7,6 @@ Feature: View active computer negative tests
         And the active_computers client URL is /active/computers
 
     # /active/computers/<mercury_id> - bad token
-    # TODO add more bad token examples?
     @negative @p0 @smoke
     @not-local
     Scenario: Get Active Computer Details for unauthorized account
