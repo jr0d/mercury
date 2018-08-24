@@ -83,7 +83,7 @@ Feature: View Active Computer Information
     # /active/computers/<mercury_id> - wrong headers
     @negative @p0 @smoke
     @nyi
-    Scenario: Get active Computer Details with wrong headers
+    Scenario Outline: Get active Computer Details with wrong headers
         Given a active_computers entity id is located for testing
         When I get with bad headers in <filename> the entity using the active_computers api
         # TODO expected behavior?

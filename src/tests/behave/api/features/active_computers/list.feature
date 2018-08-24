@@ -16,7 +16,7 @@ Feature: List Active Computers
     # /active/computers - bad url
     @negative @p0 @smoke
     @nyi
-    Scenario: Get list of active_computers with a bad url
+    Scenario Outline: Get list of active_computers with a bad url
         # TODO change the client url somehow (might need to use different feature file)
         Given a active_computers <bad_url> is provided
         When I get the list of active_computers
@@ -75,7 +75,7 @@ Feature: List Active Computers
     # /active/computers - wrong headers
     @negative @p0 @smoke
     @nyi
-    Scenario: Get list of active_computers with wrong headers
+    Scenario Outline: Get list of active_computers with wrong headers
         When I get with bad headers in <filename> the list of active_computers
         Then the active_computers response status is 400 Bad Request
 

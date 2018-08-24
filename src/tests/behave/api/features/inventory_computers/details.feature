@@ -21,7 +21,7 @@ Feature: View Inventory Computer Information
         When I get the entity using the inventory_computers api
         Then the inventory_computers response status is <status_code> <reason>
 
-        Examples: Invalid Loadbalancer IDs
+        Examples: Invalid Mercury IDs
         | invalid_mercury_id        | status_code          | reason    |
         | invalid_device_id_123     | 404                  | Not Found |
         | 0                         | 404                  | Not Found |
@@ -83,7 +83,7 @@ Feature: View Inventory Computer Information
     # /inventory/computers/<mercury_id> - wrong headers
     @negative @p0 @smoke
     @nyi
-    Scenario: Get inventory Computer Details with wrong headers
+    Scenario Outline: Get inventory Computer Details with wrong headers
         Given a inventory_computers entity id is located for testing
         When I get with bad headers in <filename> the entity using the inventory_computers api
         # TODO expected behavior?

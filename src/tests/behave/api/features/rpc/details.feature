@@ -46,7 +46,7 @@ Feature: View RPC Job Information
     @negative @p0 @smoke
     @nyi
     @not-local
-    Scenario: Get RPC Job status bad id
+    Scenario Outline: Get RPC Job status bad id
         Given a rpc_jobs <invalid_entity_id> is located for testing
         When I get the status of the entity entity using the rpc_jobs api
         Then the rpc_jobs response status is <status_code> <reason>
@@ -74,7 +74,7 @@ Feature: View RPC Job Information
     @negative @p0 @smoke
     @nyi
     @not-local
-    Scenario: Get RPC Job Tasks bad id
+    Scenario Outline: Get RPC Job Tasks bad id
         Given a rpc_jobs <invalid_entity_id> is located for testing
         When I get the rpc_tasks tasks of the entity using the rpc_jobs api
         Then the rpc_jobs response status is <status_code> <reason>
@@ -103,7 +103,7 @@ Feature: View RPC Job Information
     @negative @p0 @smoke
     @nyi
     @not-local
-    Scenario: Get RPC Job Tasks bad id
+    Scenario Outline: Get RPC Job Tasks bad id
         Given a rpc_jobs entity id is located for testing
         When I get the rpc_tasks tasks of the entity using the rpc_jobs api
         And I have a <invalid_task_id>

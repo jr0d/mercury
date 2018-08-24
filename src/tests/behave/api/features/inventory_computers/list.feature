@@ -16,7 +16,7 @@ Feature: List inventory Computers
     # /inventory/computers - bad url
     @negative @p0 @smoke
     @nyi
-    Scenario: Get list of inventory_computers with a bad url
+    Scenario Outline: Get list of inventory_computers with a bad url
         # TODO change the client url somehow (might need to use different feature file)
         Given a inventory_computers <bad_url> is provided
         When I get the list of inventory_computers
@@ -75,7 +75,7 @@ Feature: List inventory Computers
     # /inventory/computers - wrong headers
     @negative @p0 @smoke
     @nyi
-    Scenario: Get list of inventory_computers with wrong headers
+    Scenario Outline: Get list of inventory_computers with wrong headers
         When I get with bad headers in <filename> the list of inventory_computers
         Then the inventory_computers response status is 400 Bad Request
 
