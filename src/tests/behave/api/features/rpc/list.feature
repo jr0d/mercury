@@ -13,15 +13,28 @@ Feature: List RPC Jobs
         Then the rpc_jobs response status is 200 OK
         And the response contains a list of rpc_jobs
 
-    # TODO make the test work with bad auth
+    # TODO negative testing
+
+    # /rpc/jobs - bad method
     @negative @p0 @smoke
-    @not-local
-    Scenario: Get list of inventory_computers for unauthorized account
-        Given the account is an unauthorized tenant
-        And the inventory_computers client URL is /inventory/computers
-        When I get the list of inventory_computers
-        Then the inventory_computers response status is 401 UNAUTHORIZED
-        And the inventory_computers response contains an error message of
-            """
-            UNAUTHORIZED
-            """
+    @nyi
+    Scenario Outline: List rpc jobs with bad HTTP method
+        When I get the list of rpc_jobs
+
+    # /rpc/jobs - bad url
+    @negative @p0 @smoke
+    @nyi
+    Scenario Outline: List rpc jobs with a bad URL
+        When I get the list of rpc_jobs
+
+    # /rpc/jobs - wrong headers
+    @negative @p0 @smoke
+    @nyi
+    Scenario Outline: List rpc jobs with bad headers
+        When I get the list of rpc_jobs
+
+    # /rpc/jobs - bad params
+    @negative @p0 @smoke
+    @nyi
+    Scenario Outline: List rpc jobs with bad parameters
+        When I get the list of rpc_jobs

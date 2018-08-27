@@ -6,8 +6,7 @@ Feature: List inventory computer negative tests
         Given the account is an unauthorized tenant
         And the inventory_computers client URL is /inventory/computers
 
-    # /inventory/computers - bad token
-    # TODO add more bad token examples?
+    # /inventory/computers - bad token    
     @negative @p0 @smoke
     @not-local
     Scenario: Get list of inventory_computers for unauthorized account

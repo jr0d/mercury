@@ -7,7 +7,6 @@ Feature: List active computer negative tests
         And the active_computers client URL is /active/computers
 
     # /active/computers - bad token
-    # TODO add more bad token examples?
     @negative @p0 @smoke
     @not-local
     Scenario: Get list of active_computers for unauthorized account

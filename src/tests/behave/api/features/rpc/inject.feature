@@ -24,4 +24,47 @@ Feature: Inject RPC Jobs
         | inspector_job.json |
 
     # TODO negative testing
-    # Bad method
+
+    # /rpc/jobs - bad method
+    @negative @p0 @smoke
+    @nyi
+    Scenario Outline: Inject rpc jobs with bad HTTP method
+        Given I have job injection details in <filename> for creating jobs using the rpc_jobs api
+
+        Examples: Filenames
+        | filename           |
+        | echo_job.json      |
+        | inspector_job.json |
+
+    # /rpc/jobs - bad url
+    @negative @p0 @smoke
+    @nyi
+    Scenario Outline: Inject rpc jobs with a bad URL
+        Given I have job injection details in <filename> for creating jobs using the rpc_jobs api
+
+        Examples: Filenames
+        | filename           |
+        | echo_job.json      |
+        | inspector_job.json |
+
+    # /rpc/jobs - wrong headers
+    @negative @p0 @smoke
+    @nyi
+    Scenario Outline: Inject rpc jobs with bad headers
+        Given I have job injection details in <filename> for creating jobs using the rpc_jobs api
+
+        Examples: Filenames
+        | filename           |
+        | echo_job.json      |
+        | inspector_job.json |
+
+    # /rpc/jobs - bad params
+    @negative @p0 @smoke
+    @nyi
+    Scenario Outline: Inject rpc jobs with bad parameters
+        Given I have job injection details in <filename> for creating jobs using the rpc_jobs api
+
+        Examples: Filenames
+        | filename           |
+        | echo_job.json      |
+        | inspector_job.json |

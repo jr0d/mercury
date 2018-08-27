@@ -81,4 +81,28 @@ Feature: Query inventory Computers
         | active_rpc_port.json        | first_ten.json | next_five.json |
         | active_ping_port.json       | first_ten.json | next_five.json |
 
-        # TODO negative testing
+    # TODO negative testing
+
+    # /inventory/computers/query - bad method
+    @negative @p0 @smoke
+    @nyi
+    Scenario Outline: Query Inventory Computers with bad HTTP method
+        Given I have query details in <query_filename> for entities using the inventory_computers api
+
+    # /inventory/computers/query - bad url
+    @negative @p0 @smoke
+    @nyi
+    Scenario Outline: Query Inventory Computers with a bad URL
+        Given I have query details in <query_filename> for entities using the inventory_computers api
+
+    # /inventory/computers/query - wrong headers
+    @negative @p0 @smoke
+    @nyi
+    Scenario Outline: Query Inventory Computers with bad headers
+        Given I have query details in <query_filename> for entities using the inventory_computers api
+
+    # /inventory/computers/query - bad params
+    @negative @p0 @smoke
+    @nyi
+    Scenario Outline: Query Inventory Computers with bad parameters
+        Given I have query details in <query_filename> for entities using the inventory_computers api
