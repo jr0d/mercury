@@ -119,8 +119,12 @@ def check_params_applied_in_resp(param_data, resp):
     for key in keys:
         # in case a key returned is a different string
         akey = key
+        if param_data[key] == None:
+            break
         if key == "limit":
             expected_result = param_data[key]
+            if type(expected_result) is not int or expected_result < 0:
+                expected_result = 250
             actual_result = resp.json()[akey]
             if expected_result != actual_result:
                 all_matched = False
