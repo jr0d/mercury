@@ -39,7 +39,7 @@ class APIClient(object):
         if timeout:
             self.request_kwargs['timeout'] = timeout
 
-    def get(self, resource_id=None, params=None, url=None, url_suffix=None):
+    def get(self, resource_id=None, params=None, url=None, url_suffix=None, headers=None):
         request_kwargs = copy.deepcopy(self.request_kwargs)
         if url:
             request_kwargs['url'] = url
@@ -50,7 +50,9 @@ class APIClient(object):
             resource_url = request_kwargs['url']
             request_kwargs['url'] = '{0}/{1}'.format(resource_url, url_suffix)
         if params:
-           request_kwargs['params'] = params
+            request_kwargs['params'] = params
+        if headers:
+            request_kwargs['headers'].update(headers)
         resp = requests.get(**request_kwargs)
         if self.verbose:
             print('{0}GET REQUEST{1}'.format('*' * 20, '*' * 24))
@@ -60,11 +62,13 @@ class APIClient(object):
             print('*' * 48)
         return resp
 
-    def post(self, data, url_suffix=None):
+    def post(self, data, url_suffix=None, headers=None):
         request_kwargs = copy.deepcopy(self.request_kwargs)
         if url_suffix:
             resource_url = request_kwargs['url']
             request_kwargs['url'] = '{0}/{1}'.format(resource_url, url_suffix)
+        if headers:
+            request_kwargs['headers'].update(headers)
         request_kwargs['data'] = data
         resp = requests.post(**request_kwargs)
         if self.verbose:
