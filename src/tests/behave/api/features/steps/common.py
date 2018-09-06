@@ -28,6 +28,43 @@ def step_the_auth_token_is_nonexistent(context, service_name):
     client = context.services[service_name]['client']
     client.headers.pop('X-Auth-Token')
 
+@given("a {service_name} bad url {bad_url} is provided")
+def step_a_service_bad_url_is_provided(context, service_name, bad_url):
+    """
+    : type context: behave.runner.Context
+    : type service_name: str
+    : type bad_url: str
+    """
+    request_kwargs = dict()
+    request_kwargs['timeout'] = None
+    request_kwargs['ssl_certificate_verify'] = False
+    request_kwargs['verbose'] = True
+
+    client_kwargs = dict()
+    client_kwargs['authorized'] = context.authorized
+
+    context.services[service_name]['name'] = service_name
+
+    # Construct complex urls
+    if "_id>" in bad_url:
+        new_url_parts = service_url.split('/')
+        url_parts = service_url.split('/')
+        for index, element in enumerate(url_parts):
+            # note:  all feature files will have to conform to using
+            # *_id> in any url passed in for service entity ids
+            # ex: /loadbalancers/<lb_id>/nodes/<node_id>
+            if "_id>" in element:
+                service_url_part = url_parts[index - 1]
+                new_url_parts[index] = (
+                    context.services[service_url_part]['id'])
+        service_url = '/'.join(new_url_parts)
+
+    full_service_url = context.base_url + bad_url
+    context.services[service_name]['url'] = full_service_url
+    context.services[service_name]['client'] = APIClient(
+        base_url=full_service_url, request_kwargs=request_kwargs,
+        client_kwargs=client_kwargs)
+
 
 @given("the {service_name} client URL is {service_url}")
 def step_the_service_client_url_is(context, service_name, service_url):
@@ -130,6 +167,27 @@ def step_url_parameters_to_service_api_are_applied(context, service_name):
     param_data = context.services[service_name]['param_data']
     params_applied = check_params_applied_in_resp(param_data, resp)
 
+    context.check.assertTrue(params_applied)
+
+@then("the valid url parameters to the {service_name} api are applied")
+def step_valid_url_parameters_to_service_api_are_applied(context, service_name):
+    """
+    """
+
+    resp = context.services[service_name]['resp']
+    param_data = context.services[service_name]['param_data']
+    keys = param_data.keys()
+    for key in keys:
+        if param_data[key] == None:
+            break
+        if key == "projection":
+            p = param_data[key].split(",")
+            p = [projection for projection in p if "invalid" not in projection]
+            for projection in p:
+                if "invalid" in projection:
+                    p.remove(projection)
+            param_data[key] = ",".join(p)
+    params_applied = check_params_applied_in_resp(param_data, resp)
     context.check.assertTrue(params_applied)
 
 

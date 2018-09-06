@@ -32,6 +32,24 @@ def step_i_get_the_query_results_from_a_query_of_service_api(
     context.services[service_name]['resp'] = \
         service_client.post(data=json.dumps(data), url_suffix="query")
 
+@when("I get with bad headers in {filename} the query_results from a query of {service_name}")
+def step_i_get_the_query_results_from_a_query_of_service_api(
+        context, filename, service_name):
+    """
+    :type context: behave.runner.Context
+    :type service_name: str
+    :type filename: str
+    """
+    service_client = context.services[service_name]['client']
+    data = context.services[service_name]['details']['query']
+
+    location = context.json_location
+    headers = read_json_from_file(filename, location)
+
+    context.services[service_name]['resp'] = \
+        service_client.post(data=json.dumps(data), url_suffix="query",
+                            headers=headers)
+
 @when("I get with parameters in {filename} the query_results from a query of {service_name}")
 def step_i_get_the_query_results_from_a_query_with_params_in_filename_of_service_api(
         context, filename, service_name):
@@ -130,3 +148,21 @@ def step_the_entities_in_the_response_contain_the_data_from_filename(
             keys = key.split(".")
             actual_value = reduce(operator.getitem, keys, resp.json())
             context.check.assertEqual(value, actual_value)
+
+
+# Used for bad method testing
+@when("I query with {method} for {service_name}")
+def step_i_use_method_on_query_service(context, method, service_name):
+    """
+    :type context: behave.runner.Context
+    :type method: str
+    :type service_name: str
+    """
+    service_client = context.services[service_name]['client']
+    data = context.services[service_name]['details']['query']
+
+    if method == "get":
+        context.services[service_name]['resp'] = service_client.get(url_suffix="query")
+    elif method == "post":
+        context.services[service_name]['resp'] = service_client.post(data=json.dumps(data), url_suffix="query")
+    # TODO etc
