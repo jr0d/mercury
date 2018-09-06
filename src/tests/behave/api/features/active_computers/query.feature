@@ -7,6 +7,7 @@ Feature: Query Active Computers
 
     # /active/computers/query
     @positive @p0 @smoke
+    @MRC-56
     Scenario Outline: Query Active Computers
         Given I have query details in <filename> for entities using the active_computers api
         When I get the query_results from a query of active_computers
@@ -21,6 +22,7 @@ Feature: Query Active Computers
 
     # /active/computers/query - params
     @positive @p0
+    @MRC-70
     Scenario Outline: Query Active Computers parameters
         Given I have query details in <query_filename> for entities using the active_computers api
         When I get with parameters in <param_filename> the query_results from a query of active_computers
@@ -36,6 +38,7 @@ Feature: Query Active Computers
 
     # /active/computers/query - offset_id
     @positive @p0
+    @MRC-70
     @offset @not-local
     Scenario Outline: Query Active Computers parameters and test the offset_id param
         Given I have query details in <query_filename> for entities using the active_computers api
@@ -50,28 +53,76 @@ Feature: Query Active Computers
         | active_rpc_port.json        | first_ten.json | next_five.json |
         | active_ping_port.json       | first_ten.json | next_five.json |
 
-    # TODO negative testing
 
     # /active/computers/query - bad method
     @negative @p0 @smoke
-    @nyi
+    @MRC-103
     Scenario Outline: Query Active Computers with bad HTTP method
         Given I have query details in <query_filename> for entities using the active_computers api
+        When I query with get for active_computers
+        Then the active_computers response status is 405 METHOD NOT ALLOWED
+
+        Examples: Fields
+        | query_filename        |
+        | active_rpc_port.json  |
+        | active_ping_port.json |
 
     # /active/computers/query - bad url
     @negative @p0 @smoke
-    @nyi
+    @MRC-103
     Scenario Outline: Query Active Computers with a bad URL
         Given I have query details in <query_filename> for entities using the active_computers api
+        Given a active_computers bad url <bad_url> is provided
+        When I get the query_results from a query of active_computers
+        Then the active_computers response status is 404 Not Found
+
+        Examples: Fields
+        | query_filename        | bad_url               |
+        | active_rpc_port.json  | /active/typo/query    |
+        | active_rpc_port.json  | /active/computer/typo |
+        | active_ping_port.json | /active/typo/query    |
+        | active_ping_port.json | /active/computer/typo |
 
     # /active/computers/query - wrong headers
     @negative @p0 @smoke
-    @nyi
+    @MRC-103
     Scenario Outline: Query Active Computers with bad headers
         Given I have query details in <query_filename> for entities using the active_computers api
+        When I get with bad headers in <filename> the query_results from a query of active_computers
+        Then the active_computers response status is <status_code> <reason>
 
-    # /active/computers/query - bad params
+        Examples: Fields
+        | query_filename        | filename         | status_code | reason |
+        | active_rpc_port.json  | bad_headers.json | 500 | Internal Server Error |
+        | active_ping_port.json | bad_headers.json | 500 | Internal Server Error |
+
+    # /active/computers/query - extra headers
     @negative @p0 @smoke
-    @nyi
-    Scenario Outline: Query Active Computers with bad parameters
+    @MRC-103
+    Scenario Outline: Query Active Computers with extra headers
         Given I have query details in <query_filename> for entities using the active_computers api
+        When I get with bad headers in <filename> the query_results from a query of active_computers
+        Then the active_computers response status is <status_code> <reason>
+        And the response contains a list of active_computers
+        And the active_computers entities in the response contain the data from <filename>
+
+        Examples: Fields
+        | query_filename        | filename         | status_code | reason |
+        | active_rpc_port.json  | extra_headers.json | 200 | OK |
+        | active_ping_port.json | extra_headers.json | 200 | OK |
+
+    # /active/computers/query - invalid params
+    @positive @p0 @smoke
+    @MRC-103
+    Scenario Outline: Query Active Computers with bad parameters
+        Given I have query details in <filename> for entities using the active_computers api
+        When I get with parameters in <param_filename> the query_results from a query of active_computers
+        Then the active_computers response status is 200 OK
+        And the response contains a list of active_computers
+        And the valid url parameters to the active_computers api are applied
+        And the active_computers entities in the response contain the data from <filename>
+
+        Examples: Fields
+        | filename              | param_filename                  |
+        | active_rpc_port.json  | invalid_query_param_values.json |
+        | active_ping_port.json | invalid_query_param_values.json |
