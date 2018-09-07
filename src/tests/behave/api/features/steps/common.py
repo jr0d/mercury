@@ -147,6 +147,8 @@ def step_a_service_invalid_id_is_provided(context, service_name, invalid_id):
 @then("url parameters to the {service_name} api are applied")
 def step_url_parameters_to_service_api_are_applied(context, service_name):
     """
+    :type context: behave.runner.Context
+    :type service_name: str
     """
 
     resp = context.services[service_name]['resp']
@@ -158,11 +160,18 @@ def step_url_parameters_to_service_api_are_applied(context, service_name):
 @then("the valid url parameters to the {service_name} api are applied")
 def step_valid_url_parameters_to_service_api_are_applied(context, service_name):
     """
+    :type context: behave.runner.Context
+    :type service_name: str
     """
 
     resp = context.services[service_name]['resp']
     param_data = context.services[service_name]['param_data']
     keys = param_data.keys()
+
+    # Check each url parameter
+    # If null was passed as a url param, ignore it
+    # Remove any invalid projection keys so we don't check for step_i_get_the_list_of_service
+    # Since they are ignored when the query is passed to mongo
     for key in keys:
         if param_data[key] == None:
             break
@@ -173,6 +182,7 @@ def step_valid_url_parameters_to_service_api_are_applied(context, service_name):
                 if "invalid" in projection:
                     p.remove(projection)
             param_data[key] = ",".join(p)
+    # Check that all the (valid) url parameters are applied properly
     params_applied = check_params_applied_in_resp(param_data, resp)
     context.check.assertTrue(params_applied)
 
