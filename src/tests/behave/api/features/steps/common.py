@@ -45,20 +45,6 @@ def step_a_service_bad_url_is_provided(context, service_name, bad_url):
 
     context.services[service_name]['name'] = service_name
 
-    # Construct complex urls
-    if "_id>" in bad_url:
-        new_url_parts = service_url.split('/')
-        url_parts = service_url.split('/')
-        for index, element in enumerate(url_parts):
-            # note:  all feature files will have to conform to using
-            # *_id> in any url passed in for service entity ids
-            # ex: /loadbalancers/<lb_id>/nodes/<node_id>
-            if "_id>" in element:
-                service_url_part = url_parts[index - 1]
-                new_url_parts[index] = (
-                    context.services[service_url_part]['id'])
-        service_url = '/'.join(new_url_parts)
-
     full_service_url = context.base_url + bad_url
     context.services[service_name]['url'] = full_service_url
     context.services[service_name]['client'] = APIClient(
