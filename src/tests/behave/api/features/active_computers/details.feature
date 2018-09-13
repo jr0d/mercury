@@ -82,14 +82,14 @@ Feature: View Active Computer Information
         When I use post on active_computers
         Then the active_computers response status is 405 METHOD NOT ALLOWED
 
-    # /active/computers/<mercury_id> - invalid headers
+    # /active/computers/<mercury_id> - ignored headers
     @positive @p0 @smoke
     @MRC-103
-    Scenario Outline: Get active Computer Details with invalid headers
+    Scenario Outline: Get active Computer Details with invalid headers that are ignored by mercury
         Given a active_computers entity id is located for testing
         When I get with bad headers in <filename> the entity using the active_computers api
         Then the active_computers response status is 200 OK
 
         Examples: Fields
-        | filename                          |
-        | bad_headers.json          |
+        | filename         |
+        | bad_headers.json |

@@ -76,13 +76,13 @@ Feature: List Active Computers
         When I use post on active_computers
         Then the active_computers response status is 405 METHOD NOT ALLOWED
 
-    # /active/computers - invalid headers
+    # /active/computers - ignored headers
     @positive @p0 @smoke
     @MRC-103
-    Scenario Outline: Get list of active_computers with wrong headers
+    Scenario Outline: Get list of active_computers with invalid headers that are ignored by mercury
         When I get with bad headers in <filename> the list of active_computers
         Then the active_computers response status is 200 OK
 
         Examples: Fields
-        | filename              |
+        | filename         |
         | bad_headers.json |
