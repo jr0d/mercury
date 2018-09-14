@@ -98,7 +98,7 @@ Feature: Query Active Computers
         | active_ping_port.json | bad_headers.json | 500 | Internal Server Error |
 
     # /active/computers/query - extra headers
-    @negative @p0 @smoke
+    @positive @p0 @smoke
     @MRC-103
     Scenario Outline: Query Active Computers with extra headers
         Given I have query details in <query_filename> for entities using the active_computers api

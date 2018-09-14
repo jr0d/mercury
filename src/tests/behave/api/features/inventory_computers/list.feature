@@ -8,6 +8,7 @@ Feature: List inventory Computers
 
     # /inventory/computers
     @positive @p0 @smoke
+    @MRC-57
     Scenario: Get list of inventory_computers
         When I get the list of inventory_computers
         Then the inventory_computers response status is 200 OK
@@ -15,20 +16,19 @@ Feature: List inventory Computers
 
     # /inventory/computers - bad url
     @negative @p0 @smoke
-    @nyi
+    @MRC-68
     Scenario Outline: Get list of inventory_computers with a bad url
-        # TODO change the client url somehow (might need to use different feature file)
-        Given a inventory_computers <bad_url> is provided
-        When I get the list of inventory_computers
-        Then the inventory_computers response status is <status_code> <reason>
+    Given a inventory_computers bad url <bad_url> is provided
+    When I get the list of inventory_computers
+    Then the inventory_computers response status is <status_code> <reason>
 
         Examples: Invalid Mercury IDs
-        | bad_url        | status_code          | reason    |
+        | bad_url           | status_code          | reason    |
         | /inventory/typo   | 404                  | Not Found |
-        # TODO etc
 
     # /inventory/computers - params
     @positive @p0
+    @MRC-70
     Scenario Outline: Get list of inventory_computers with parameters
         When I get with parameters in <filename> the list of inventory_computers
         Then the inventory_computers response status is 200 OK
@@ -42,6 +42,7 @@ Feature: List inventory Computers
 
     # /inventory/computer - offset_id
     @positive @p0
+    @MRC-70
     @offset @not-local
     Scenario Outline: Get list of inventory_computers and test the offset_id param
         When I get with parameters in <filename> the list of inventory_computers
@@ -54,32 +55,34 @@ Feature: List inventory Computers
         | first_ten.json  | next_five.json |
 
     # /inventory/computers - bad params
-    @negative @p0
-    @nyi
+    @positive @p0
+    @MRC-103
     Scenario Outline: Get list of inventory_computers with bad parameters
         When I get with parameters in <filename> the list of inventory_computers
-        Then the inventory_computers response status is 400 Bad Request
+        Then the inventory_computers response status is 200 OK
+        And the response contains a list of inventory_computers
+        And the valid url parameters to the inventory_computers api are applied
 
         Examples: Fields
-        | filename                       |
-        | non_existant_params.json       |
-        | invalid_list_param_values.json |
-        # TODO
+        | filename                         |
+        | non_existant_list_params.json    |
+        | invalid_list_param_values.json   |
+        | invalid_list_param_values_2.json |
 
     # /inventory/computers - bad method
     @negative @p0 @smoke
+    @MRC-68
     Scenario: Post instead of getting list of inventory_computers
         When I use post on inventory_computers
         Then the inventory_computers response status is 405 METHOD NOT ALLOWED
 
-    # /inventory/computers - wrong headers
-    @negative @p0 @smoke
-    @nyi
-    Scenario Outline: Get list of inventory_computers with wrong headers
+    # /inventory/computers - ignored headers
+    @positive @p0 @smoke
+    @MRC-103
+    Scenario Outline: Get list of inventory_computers with invalid headers that are ignored by mercury
         When I get with bad headers in <filename> the list of inventory_computers
-        Then the inventory_computers response status is 400 Bad Request
+        Then the inventory_computers response status is 200 OK
 
         Examples: Fields
         | filename              |
         | bad_list_headers.json |
-        # TODO
