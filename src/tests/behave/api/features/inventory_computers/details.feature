@@ -72,7 +72,7 @@ Feature: View Inventory Computer Information
 
         Examples: Fields
         | filename                          |
-        | non_existant_params.json          |
+        | non_existant_details_params.json          |
         | invalid_details_param_values.json |
 
     # /inventory/computers/<mercury_id> - bad method
@@ -92,4 +92,4 @@ Feature: View Inventory Computer Information
 
         Examples: Fields
         | filename                          |
-        | bad_details_headers.json          |
+        | bad_headers.json          |

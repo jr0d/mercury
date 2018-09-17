@@ -85,4 +85,4 @@ Feature: List inventory Computers
 
         Examples: Fields
         | filename              |
-        | bad_list_headers.json |
+        | bad_headers.json |

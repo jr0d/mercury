@@ -157,6 +157,6 @@ Feature: Query inventory Computers
         And the inventory_computers entities in the response contain the data from <filename>
 
         Examples: Fields
-        | filename              | param_filename                  |
+        | query_filename              | param_filename                  |
         | active_rpc_port.json  | invalid_query_param_values.json |
         | active_ping_port.json | invalid_query_param_values.json |
