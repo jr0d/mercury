@@ -6,8 +6,9 @@ Feature: View inventory computer negative tests
         Given the account is an unauthorized tenant
         And the inventory_computers client URL is /inventory/computers
 
-    # /inventory/computers/<mercury_id> - bad token    
+    # /inventory/computers/<mercury_id> - bad token
     @negative @p0 @smoke
+    @MRC-68
     @not-local
     Scenario: Get Inventory Computer Details for unauthorized account
         Given a inventory_computers test entity id is defined for testing
@@ -16,6 +17,7 @@ Feature: View inventory computer negative tests
 
     # /inventory/computers/<mercury_id> - no token
     @negative @p0 @smoke
+    @MRC-68
     @not-local
     Scenario: Get Inventory Computer Details for unauthorized account with no token
         Given the auth token for the inventory_computers client is nonexistent

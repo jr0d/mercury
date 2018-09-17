@@ -64,9 +64,9 @@ Feature: List Active Computers
         And the valid url parameters to the active_computers api are applied
 
         Examples: Fields
-        | filename                       |
-        | non_existant_list_params.json       |
-        | invalid_list_param_values.json |
+        | filename                         |
+        | non_existant_list_params.json    |
+        | invalid_list_param_values.json   |
         | invalid_list_param_values_2.json |
 
     # /active/computers - bad method

@@ -8,6 +8,7 @@ Feature: Query Inventory Computers negative tests
 
     # /inventory/computers/query - bad token
     @negative @p0 @smoke
+    @MRC-68
     @not-local
     Scenario Outline: Query Inventory Computers
         Given I have query details in <filename> for entities using the inventory_computers api
@@ -22,6 +23,7 @@ Feature: Query Inventory Computers negative tests
 
     # /inventory/computers/query - no token
     @negative @p0 @smoke
+    @MRC-68
     @not-local
     Scenario: Query Inventory Computers for unauthorized account with no token
         Given the auth token for the inventory_computers client is nonexistent

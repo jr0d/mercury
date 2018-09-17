@@ -27,7 +27,8 @@ def check_service_api(url, interval_time=5, timeout=20):
     else:
         raise TimeoutException(
             "check_service_api ran for {0} seconds and "
-            "could not reach service: {1}".format(timeout, url))
+            "could not reach service: {1}".format(timeout, url)
+        )
     return resp
 
 
@@ -36,7 +37,7 @@ def to_singular(name):
 
     This just trims a trailing 's', if found.
     """
-    return name[:-1] if name.endswith('s') else name
+    return name[:-1] if name.endswith("s") else name
 
 
 def get_entity_list_container_field(name):
@@ -45,15 +46,16 @@ def get_entity_list_container_field(name):
     GET /active_computers       -> {"items": [...]}
     GET /jobs                   -> {"jobs": [...]}
     """
-    if name == 'active_computers':
-        return 'items'
-    elif name == 'inventory_computers':
-        return 'items'
-    elif name == 'rpc_tasks':
-        return 'tasks'
-    elif name == 'rpc_jobs':
-        return 'jobs'
+    if name == "active_computers":
+        return "items"
+    elif name == "inventory_computers":
+        return "items"
+    elif name == "rpc_tasks":
+        return "tasks"
+    elif name == "rpc_jobs":
+        return "jobs"
     return name
+
 
 def get_entity_id_field(name):
     """Returns the id field used for entities in list responses
@@ -61,21 +63,23 @@ def get_entity_id_field(name):
     GET /active_computers       -> {"items": [{"mercury_id": "...", ...}}]}
     GET /jobs                   -> {"jobs": [{"job_id": "...", ...}}]}
     """
-    if name == 'active_computers':
-        return 'mercury_id'
-    elif name == 'inventory_computers':
-        return 'mercury_id'
-    elif name == 'rpc_tasks':
-        return 'task_id'
-    elif name == 'rpc_jobs':
-        return 'job_id'
+    if name == "active_computers":
+        return "mercury_id"
+    elif name == "inventory_computers":
+        return "mercury_id"
+    elif name == "rpc_tasks":
+        return "task_id"
+    elif name == "rpc_jobs":
+        return "job_id"
     return name
+
 
 def read_json_from_file(filename, location):
     filename = "{0}/{1}".format(location, filename)
     with open(filename) as file:
         data = json.loads(file.read())
     return data
+
 
 def wait_for_not_none(func, *args, timeout=20):
     value = func(*args)
@@ -86,6 +90,7 @@ def wait_for_not_none(func, *args, timeout=20):
         timeout -= 1
         value = func(*args)
     return value
+
 
 def keys_in_list_or_dict(key_stack, item):
     if len(key_stack) <= 0:

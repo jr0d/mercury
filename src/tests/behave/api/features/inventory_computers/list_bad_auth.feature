@@ -6,8 +6,9 @@ Feature: List inventory computer negative tests
         Given the account is an unauthorized tenant
         And the inventory_computers client URL is /inventory/computers
 
-    # /inventory/computers - bad token    
+    # /inventory/computers - bad token
     @negative @p0 @smoke
+    @MRC-68
     @not-local
     Scenario: Get list of inventory_computers for unauthorized account
         When I get the list of inventory_computers
@@ -15,6 +16,7 @@ Feature: List inventory computer negative tests
 
     # /inventory/computers - no token
     @negative @p0 @smoke
+    @MRC-68
     @not-local
     Scenario: Get list of inventory_computers for unauthorized account with no token
         Given the auth token for the inventory_computers client is nonexistent

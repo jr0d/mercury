@@ -4,7 +4,7 @@ Commonly used exceptions used in tests.
 
 
 class BaseBehaveException(Exception):
-    message = 'Not Set'
+    message = "Not Set"
 
     def __init__(self, message=None):
         super(BaseBehaveException, self).__init__()
@@ -15,4 +15,4 @@ class BaseBehaveException(Exception):
 
 
 class TimeoutException(BaseBehaveException):
-    message = 'Request timed out'
+    message = "Request timed out"
