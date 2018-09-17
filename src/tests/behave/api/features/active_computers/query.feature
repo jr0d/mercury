@@ -56,6 +56,7 @@ Feature: Query Active Computers
 
     # /active/computers/query - bad method
     @negative @p0 @smoke
+    @quarantined @MRC-110
     @MRC-103
     Scenario Outline: Query Active Computers with bad HTTP method
         Given I have query details in <query_filename> for entities using the active_computers api
