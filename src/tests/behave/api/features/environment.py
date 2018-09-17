@@ -11,7 +11,6 @@ LOGS_DIR = os.environ.get("BEHAVE_LOGS_DIR", "./logs")
 
 
 class Loggers(object):
-
     def __init__(self, loglevel=logging.DEBUG):
         self.feature = logging.getLogger("behave.feature")
         self.feature.setLevel(loglevel)
@@ -38,7 +37,8 @@ def before_all(context):
 
     product = context.config.paths[0].split("/")[-1]
     timestamp = str(datetime.datetime.now()).translate(
-        str.maketrans(" :", "__"))
+        str.maketrans(" :", "__")
+    )
 
     product_dir = os.path.join(LOGS_DIR, product)
     current_log_dir = os.path.join(product_dir, timestamp)
@@ -50,10 +50,14 @@ def before_all(context):
     # WIP: set up logging level from config file
     root_logger.setLevel(logging.DEBUG)
     handler = logging.FileHandler(
-        filename=os.path.join(current_log_dir, "behave.master.log"), mode="w")
+        filename=os.path.join(current_log_dir, "behave.master.log"), mode="w"
+    )
     handler.setLevel(logging.DEBUG)
-    handler.setFormatter(logging.Formatter(
-        fmt="%(asctime)s - %(levelname)s:  %(name)s: %(message)s"))
+    handler.setFormatter(
+        logging.Formatter(
+            fmt="%(asctime)s - %(levelname)s:  %(name)s: %(message)s"
+        )
+    )
     root_logger.addHandler(handler)
 
     context.base_url = context.cfg.MERCURY.mercury_api_endpoint
@@ -62,7 +66,9 @@ def before_all(context):
     context.check = unittest.TestCase()
 
     context.logger.all.info("++++++++++++++++")
-    context.logger.all.info("TESTS STARTED! (Endpoint {0})".format(context.base_url))
+    context.logger.all.info(
+        "TESTS STARTED! (Endpoint {0})".format(context.base_url)
+    )
     context.logger.all.info("++++++++++++++++")
 
 
@@ -108,8 +114,9 @@ def after_scenario(context, scenario):
     :type context: behave.runner.Context
     :type scenario: behave.model.Scenario
     """
-    context.logger.scenario.info("   Scenario Completed: {}"
-                                 .format(scenario.name))
+    context.logger.scenario.info(
+        "   Scenario Completed: {}".format(scenario.name)
+    )
 
 
 def before_step(context, step):
@@ -117,8 +124,9 @@ def before_step(context, step):
     :type context: behave.runner.Context
     :type step: behave.model.Step
     """
-    context.logger.step.info("            {} {}"
-                             .format(step.keyword, step.name))
+    context.logger.step.info(
+        "            {} {}".format(step.keyword, step.name)
+    )
 
 
 def after_step(context, step):
@@ -128,8 +136,9 @@ def after_step(context, step):
     """
     if step.status == "failed":
         context.logger.step.info("              ---------")
-        context.logger.step.info("              - FAILED: {} {}"
-                                 .format(step.keyword, step.name))
+        context.logger.step.info(
+            "              - FAILED: {} {}".format(step.keyword, step.name)
+        )
         context.logger.step.info("              ---------")
     else:
         context.logger.step.info("              - passed")

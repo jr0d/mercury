@@ -1,0 +1,4 @@
+{ "limit": -200, "projection":
+  "mercury_id,invalid_param,invalid",
+  "sort_direction": "invalid_direction",
+  "other": 5}

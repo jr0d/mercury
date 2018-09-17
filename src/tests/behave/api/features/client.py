@@ -3,8 +3,8 @@ import json
 import requests
 from src.tests.behave.common.config import get_conflagration
 
-class APIClient(object):
 
+class APIClient(object):
     def __init__(self, base_url, request_kwargs=None, client_kwargs=None):
 
         self.cfg = get_conflagration()
@@ -15,81 +15,104 @@ class APIClient(object):
         verbose = True
 
         if request_kwargs:
-            timeout = request_kwargs.get('timeout', timeout)
+            timeout = request_kwargs.get("timeout", timeout)
             ssl_certificate_verify = request_kwargs.get(
-                'ssl_certificate_verify', ssl_certificate_verify)
-            verbose = request_kwargs.get('verbose', verbose)
+                "ssl_certificate_verify", ssl_certificate_verify
+            )
+            verbose = request_kwargs.get("verbose", verbose)
 
         self.base_url = base_url
-        self.headers = {'Content-Type': 'application/json',
-            'X-Auth-Token': token}
+        self.headers = {
+            "Content-Type": "application/json",
+            "X-Auth-Token": token,
+        }
 
         if client_kwargs:
-            if not client_kwargs['authorized']:
-                self.headers['X-Auth-Token'] = ''
+            if not client_kwargs["authorized"]:
+                self.headers["X-Auth-Token"] = ""
 
         self.verify = ssl_certificate_verify
         self.verbose = verbose
 
         self.request_kwargs = dict()
-        self.request_kwargs['url'] = self.base_url
-        self.request_kwargs['headers'] = self.headers
-        self.request_kwargs['verify'] = self.verify
+        self.request_kwargs["url"] = self.base_url
+        self.request_kwargs["headers"] = self.headers
+        self.request_kwargs["verify"] = self.verify
 
         if timeout:
-            self.request_kwargs['timeout'] = timeout
+            self.request_kwargs["timeout"] = timeout
 
-    def get(self, resource_id=None, params=None, url=None, url_suffix=None):
+    def get(
+        self,
+        resource_id=None,
+        params=None,
+        url=None,
+        url_suffix=None,
+        headers=None,
+    ):
         request_kwargs = copy.deepcopy(self.request_kwargs)
         if url:
-            request_kwargs['url'] = url
+            request_kwargs["url"] = url
         if resource_id:
-            resource_url = request_kwargs['url']
-            request_kwargs['url'] = '{0}/{1}'.format(resource_url, resource_id)
+            resource_url = request_kwargs["url"]
+            request_kwargs["url"] = "{0}/{1}".format(resource_url, resource_id)
         if url_suffix:
-            resource_url = request_kwargs['url']
-            request_kwargs['url'] = '{0}/{1}'.format(resource_url, url_suffix)
+            resource_url = request_kwargs["url"]
+            request_kwargs["url"] = "{0}/{1}".format(resource_url, url_suffix)
         if params:
-           request_kwargs['params'] = params
+            request_kwargs["params"] = params
+        if headers:
+            request_kwargs["headers"].update(headers)
         resp = requests.get(**request_kwargs)
         if self.verbose:
-            print('{0}GET REQUEST{1}'.format('*' * 20, '*' * 24))
+            print("{0}GET REQUEST{1}".format("*" * 20, "*" * 24))
             print(request_kwargs)
-            print('{0}RESPONSE{1}'.format('*' * 20, '*' * 27))
+            print("{0}RESPONSE{1}".format("*" * 20, "*" * 27))
             print(resp.content)
-            print('*' * 48)
+            print("*" * 48)
         return resp
 
-    def post(self, data, url_suffix=None):
+    def post(self, data, url_suffix=None, headers=None):
         request_kwargs = copy.deepcopy(self.request_kwargs)
         if url_suffix:
-            resource_url = request_kwargs['url']
-            request_kwargs['url'] = '{0}/{1}'.format(resource_url, url_suffix)
-        request_kwargs['data'] = data
+            resource_url = request_kwargs["url"]
+            request_kwargs["url"] = "{0}/{1}".format(resource_url, url_suffix)
+        if headers:
+            request_kwargs["headers"].update(headers)
+        request_kwargs["data"] = data
         resp = requests.post(**request_kwargs)
         if self.verbose:
-            print('{0}GET REQUEST{1}'.format('*' * 20, '*' * 24))
+            print("{0}GET REQUEST{1}".format("*" * 20, "*" * 24))
             print(request_kwargs)
-            print('{0}RESPONSE{1}'.format('*' * 20, '*' * 27))
+            print("{0}RESPONSE{1}".format("*" * 20, "*" * 27))
             print(resp.content)
-            print('*' * 48)
+            print("*" * 48)
         return resp
 
     def get_identity_token(self):
-        internal_idenity_url = \
-            self.cfg.INTERNAL_IDENTITY.internal_identity_url
-        internal_identity_username = \
+        internal_idenity_url = self.cfg.INTERNAL_IDENTITY.internal_identity_url
+        internal_identity_username = (
             self.cfg.INTERNAL_IDENTITY.internal_identity_username
-        internal_identity_password = \
+        )
+        internal_identity_password = (
             self.cfg.INTERNAL_IDENTITY.internal_identity_password
+        )
         domain = self.cfg.INTERNAL_IDENTITY.domain
         domain_name = self.cfg.INTERNAL_IDENTITY.domain_name
-        identity_headers = {'Content-Type': 'application/json'}
-        identity_data = {"auth": {"passwordCredentials":
-            {"username":internal_identity_username,
-            "password":internal_identity_password},
-            domain: {"name": domain_name}}}
-        token_resp = requests.post(internal_idenity_url,
-            headers=identity_headers, data=json.dumps(identity_data))
-        token = token_resp.json()['access']['token']['id']
+        identity_headers = {"Content-Type": "application/json"}
+        identity_data = {
+            "auth": {
+                "passwordCredentials": {
+                    "username": internal_identity_username,
+                    "password": internal_identity_password,
+                },
+                domain: {"name": domain_name},
+            }
+        }
+        token_resp = requests.post(
+            internal_idenity_url,
+            headers=identity_headers,
+            data=json.dumps(identity_data),
+        )
+        token = token_resp.json()["access"]["token"]["id"]
         return token

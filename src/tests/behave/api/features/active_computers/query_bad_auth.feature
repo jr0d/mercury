@@ -8,6 +8,7 @@ Feature: Query Active Computers negative tests
 
     # /active/computers/query - bad token
     @negative @p0 @smoke
+    @MRC-68
     @not-local
     Scenario Outline: Query Active Computers with unauthorized tenant
         Given I have query details in <filename> for entities using the active_computers api
@@ -22,6 +23,7 @@ Feature: Query Active Computers negative tests
 
     # /active/computers/query - no token
     @negative @p0 @smoke
+    @MRC-68
     @not-local
     Scenario: Query Active Computers for unauthorized account with no token
         Given the auth token for the active_computers client is nonexistent

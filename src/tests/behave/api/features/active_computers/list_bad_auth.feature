@@ -8,6 +8,7 @@ Feature: List active computer negative tests
 
     # /active/computers - bad token
     @negative @p0 @smoke
+    @MRC-68
     @not-local
     Scenario: Get list of active_computers for unauthorized account
         When I get the list of active_computers
@@ -15,6 +16,7 @@ Feature: List active computer negative tests
 
     # /active/computers - no token
     @negative @p0 @smoke
+    @MRC-68
     @not-local
     Scenario: Get list of active_computers for unauthorized account with no token
         Given the auth token for the active_computers client is nonexistent

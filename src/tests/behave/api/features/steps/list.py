@@ -13,6 +13,20 @@ def step_i_get_the_list_of_service(context, service_name):
     service_client = context.services[service_name]['client']
     context.services[service_name]['resp'] = service_client.get()
 
+@when("I get with bad headers in {filename} the list of {service_name}")
+def step_i_get_with_bad_headers_the_list_of_service(context, filename, service_name):
+    """
+    :type context: behave.runner.Context
+    :type service_name: str
+    :type filename: str
+    """
+
+    location = context.json_location
+    headers = read_json_from_file(filename, location)
+
+    service_client = context.services[service_name]['client']
+    context.services[service_name]['resp'] = service_client.get(headers=headers)
+
 @when("I get with parameters in {filename} the list of {service_name}")
 def step_i_get_the_list_of_service_with_params_in_filename(context, service_name, filename):
     """
