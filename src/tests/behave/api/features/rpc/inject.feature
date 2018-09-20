@@ -74,10 +74,7 @@ Feature: Inject RPC Jobs
     Scenario Outline: Inject rpc jobs with bad headers
         Given I have job injection details in <filename> for creating jobs using the rpc_jobs api
         When I get with bad headers in <bad_header_filename> the injection results from a post to rpc_jobs
-        Then the rpc_jobs response status is 200 OK
-        Then the response contains a rpc_jobs job_id
-        And the corresponding rpc_jobs job is completed with successful tasks
-        And the rpc_jobs response status is 500 Internal Server Error
+        Then the rpc_jobs response status is 500 Internal Server Error        
 
         Examples: Filenames
         | filename           | bad_header_filename |
