@@ -128,6 +128,7 @@ Feature: View RPC Job Information
     # /rpc/task/{task_id} - bad method
     @negative @p0 @smoke
     @MRC-103
+    @not-local
     Scenario Outline: Get rpc task details with bad HTTP method
         Given a rpc_jobs entity id is located for testing
         When I get the rpc_tasks tasks of the entity using the rpc_jobs api
@@ -137,6 +138,7 @@ Feature: View RPC Job Information
     # /rpc/jobs/{job_id} - bad method
     @negative @p0 @smoke
     @MRC-103
+    @not-local
     Scenario Outline: Get rpc job details with bad HTTP method
         Given a rpc_jobs entity id is located for testing
         When I with an entity use post on rpc_jobs
@@ -145,6 +147,7 @@ Feature: View RPC Job Information
     # /rpc/task/{task_id} - bad ur
     @negative @p0 @smoke
     @MRC-103
+    @not-local
     Scenario Outline: Get rpc task details with a bad URL
         Given a rpc_jobs entity id is located for testing
         And a rpc_tasks <bad_url> is provided
@@ -159,6 +162,7 @@ Feature: View RPC Job Information
     # /rpc/jobs/{job_id} - bad url
     @negative @p0 @smoke
     @MRC-103
+    @not-local
     Scenario Outline: Get rpc job details with a bad URL
         Given a rpc_jobs entity id is located for testing
         And a rpc_jobs <bad_url> is provided

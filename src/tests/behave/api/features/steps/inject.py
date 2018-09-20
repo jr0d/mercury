@@ -118,10 +118,8 @@ def step_i_use_method_on_inject_service(context, method, service_name):
     :type service_name: str
     """
     service_client = context.services[service_name]["client"]
-    data = context.services[service_name]["details"]["query"]
+    data = context.services[service_name]["details"]["job_data"]
 
     if method == "delete":
-        context.services[service_name]["resp"] = service_client.delete(
-            url_suffix="query"
-        )
+        context.services[service_name]["resp"] = service_client.delete()
     # TODO etc
