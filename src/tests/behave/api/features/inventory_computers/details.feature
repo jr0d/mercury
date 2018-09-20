@@ -79,7 +79,7 @@ Feature: View Inventory Computer Information
     @MRC-68
     Scenario: Post instead of getting details of inventory_computers
         Given a inventory_computers entity id is located for testing
-        When I use with an entity post on inventory_computers
+        When I with an entity use post on inventory_computers
         Then the inventory_computers response status is 405 METHOD NOT ALLOWED
 
     # /inventory/computers/<mercury_id> - ignored headers

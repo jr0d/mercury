@@ -222,7 +222,7 @@ def step_i_use_method_on_service(context, method, service_name):
 
 
 # Used for bad method testing
-@when("I use with an entity {method} on {service_name}")
+@when("I with an entity use {method} on {service_name}")
 def step_i_use_method_on_service_with_entity(context, method, service_name):
     """
     :type context: behave.runner.Context

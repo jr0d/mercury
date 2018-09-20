@@ -79,7 +79,7 @@ Feature: View Active Computer Information
     @MRC-68
     Scenario: Post instead of getting details of active_computers
         Given a active_computers <invalid_mercury_id> is provided
-        When I use with an entity post on active_computers
+        When I with an entity use post on active_computers
         Then the active_computers response status is 405 METHOD NOT ALLOWED
 
     # /active/computers/<mercury_id> - ignored headers

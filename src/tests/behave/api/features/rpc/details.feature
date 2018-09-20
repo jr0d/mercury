@@ -131,7 +131,7 @@ Feature: View RPC Job Information
     Scenario Outline: Get rpc task details with bad HTTP method
         Given a rpc_jobs entity id is located for testing
         When I get the rpc_tasks tasks of the entity using the rpc_jobs api
-        When I use with an entity post on rpc_tasks
+        When I with an entity use post on rpc_tasks
         Then the rpc_jobs response status is 405 METHOD NOT ALLOWED
 
     # /rpc/jobs/{job_id} - bad method
@@ -139,7 +139,7 @@ Feature: View RPC Job Information
     @MRC-103
     Scenario Outline: Get rpc job details with bad HTTP method
         Given a rpc_jobs entity id is located for testing
-        When I use with an entity post on rpc_jobs
+        When I with an entity use post on rpc_jobs
         Then the rpc_jobs response status is 405 METHOD NOT ALLOWED
 
     # /rpc/task/{task_id} - bad ur
