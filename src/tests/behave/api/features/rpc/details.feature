@@ -176,6 +176,7 @@ Feature: View RPC Job Information
     # /rpc/task/{task_id} - ignored headers
     @positive @p0 @smoke
     @MRC-103
+    @not-local
     Scenario Outline: Get rpc task details with bad headers
         Given a rpc_jobs entity id is located for testing
         When I get the rpc_tasks tasks of the entity using the rpc_jobs api
@@ -190,6 +191,7 @@ Feature: View RPC Job Information
     # /rpc/jobs/{job_id} - ignored headers
     @positive @p0 @smoke
     @MRC-103
+    @not-local
     Scenario Outline: Get rpc job details with bad headers
         Given a rpc_jobs entity id is located for testing
         When I get with bad headers in <filename> the entity using the rpc_jobs api

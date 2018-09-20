@@ -47,7 +47,7 @@ def step_i_get_the_injection_results_from_a_post_to_service_api(
 @when(
     "I get with bad headers in {filename} the injection results from a post to {service_name}"
 )
-def step_i_get_with_bad_headers_the_results_from_a_poat_to_service(
+def step_i_get_with_bad_headers_the_results_from_a_post_to_service(
     context, filename, service_name
 ):
     """
@@ -60,6 +60,8 @@ def step_i_get_with_bad_headers_the_results_from_a_poat_to_service(
     headers = read_json_from_file(filename, location)
 
     service_client = context.services[service_name]["client"]
+    data = context.services[service_name]["details"]["job_data"]
+    
     context.services[service_name]["resp"] = service_client.post(
         data=json.dumps(data), headers=headers
     )

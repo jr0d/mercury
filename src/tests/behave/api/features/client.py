@@ -85,7 +85,26 @@ class APIClient(object):
         request_kwargs["data"] = data
         resp = requests.post(**request_kwargs)
         if self.verbose:
-            print("{0}GET REQUEST{1}".format("*" * 20, "*" * 24))
+            print("{0}POST REQUEST{1}".format("*" * 20, "*" * 24))
+            print(request_kwargs)
+            print("{0}RESPONSE{1}".format("*" * 20, "*" * 27))
+            print(resp.content)
+            print("*" * 48)
+        return resp
+
+    def delete(self, url_suffix=None, headers=None, resource_id=None):
+        request_kwargs = copy.deepcopy(self.request_kwargs)
+        if resource_id:
+            resource_url = request_kwargs["url"]
+            request_kwargs["url"] = "{0}/{1}".format(resource_url, resource_id)
+        if url_suffix:
+            resource_url = request_kwargs["url"]
+            request_kwargs["url"] = "{0}/{1}".format(resource_url, url_suffix)
+        if headers:
+            request_kwargs["headers"].update(headers)
+        resp = requests.delete(**request_kwargs)
+        if self.verbose:
+            print("{0}DELETE REQUEST{1}".format("*" * 20, "*" * 24))
             print(request_kwargs)
             print("{0}RESPONSE{1}".format("*" * 20, "*" * 27))
             print(resp.content)
