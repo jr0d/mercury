@@ -54,7 +54,8 @@ Feature: Inject RPC Jobs
     # /rpc/jobs - ignored headers
     @positive @p0 @smoke
     @MRC-103
-    Scenario Outline: Inject rpc jobs with bad headers
+    @not-local
+    Scenario Outline: Inject rpc jobs with ignored headers
         Given I have job injection details in <filename> for creating jobs using the rpc_jobs api
         When I get with bad headers in <bad_header_filename> the injection results from a post to rpc_jobs
         Then the rpc_jobs response status is 200 OK
