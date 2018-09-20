@@ -41,7 +41,7 @@ Feature: View Active Computer Information
         When I get the entity using the active_computers api
         Then the active_computers response status is <status_code> <reason>
 
-        Examples: Invalid Mercury IDs
+        Examples: Bad URLs
         | bad_url        | status_code          | reason    |
         | /active/typo   | 404                  | Not Found |
 
@@ -55,10 +55,9 @@ Feature: View Active Computer Information
         And the active_computers response contains valid single entity details
         And url parameters to the active_computers api are applied
 
-        Examples: Fields
+        Examples: Filename
         | filename                    |
         | typical_detail_params.json  |
-        # TODO more param files
 
     # /active/computers/<mercury_id> - invalid params
     @positive @p0 @smoke
@@ -70,7 +69,7 @@ Feature: View Active Computer Information
         # TODO contains valid single entity details (fails for the None param)
         And the valid url parameters to the active_computers api are applied
 
-        Examples: Fields
+        Examples: Filename
         | filename                          |
         | non_existant_details_params.json  |
         | invalid_details_param_values.json |
@@ -79,7 +78,8 @@ Feature: View Active Computer Information
     @negative @p0 @smoke
     @MRC-68
     Scenario: Post instead of getting details of active_computers
-        When I use post on active_computers
+        Given a active_computers <invalid_mercury_id> is provided
+        When I use post on active_computers with an entity
         Then the active_computers response status is 405 METHOD NOT ALLOWED
 
     # /active/computers/<mercury_id> - ignored headers
@@ -89,7 +89,8 @@ Feature: View Active Computer Information
         Given a active_computers entity id is located for testing
         When I get with bad headers in <filename> the entity using the active_computers api
         Then the active_computers response status is 200 OK
+        And the active_computers response contains valid single entity details
 
-        Examples: Fields
+        Examples: Filename
         | filename         |
         | bad_headers.json |

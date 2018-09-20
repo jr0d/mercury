@@ -72,8 +72,11 @@ class APIClient(object):
             print("*" * 48)
         return resp
 
-    def post(self, data, url_suffix=None, headers=None):
+    def post(self, data, url_suffix=None, headers=None, resource_id=None):
         request_kwargs = copy.deepcopy(self.request_kwargs)
+        if resource_id:
+            resource_url = request_kwargs["url"]
+            request_kwargs["url"] = "{0}/{1}".format(resource_url, resource_id)
         if url_suffix:
             resource_url = request_kwargs["url"]
             request_kwargs["url"] = "{0}/{1}".format(resource_url, url_suffix)

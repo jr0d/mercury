@@ -22,7 +22,7 @@ Feature: List Active Computers
         When I get the list of active_computers
         Then the active_computers response status is <status_code> <reason>
 
-        Examples: Invalid Mercury IDs
+        Examples: Bad URLs
         | bad_url        | status_code          | reason    |
         | /active/typo   | 404                  | Not Found |
 
@@ -35,10 +35,9 @@ Feature: List Active Computers
         And the response contains a list of active_computers
         And url parameters to the active_computers api are applied
 
-        Examples: Fields
+        Examples: Filename
         | filename                  |
         | typical_list_params.json  |
-        # TODO more param files
 
     # /active/computer - offset_id
     @positive @p0
@@ -50,7 +49,7 @@ Feature: List Active Computers
         Then the active_computers response status is 200 OK
         And the response contains an offset list of active_computers that have been offset by the offset_id
 
-        Examples: Fields
+        Examples: Filenames
         | filename        | second_few     |
         | first_ten.json  | next_five.json |
 
@@ -63,7 +62,7 @@ Feature: List Active Computers
         And the response contains a list of active_computers
         And the valid url parameters to the active_computers api are applied
 
-        Examples: Fields
+        Examples: Filename
         | filename                         |
         | non_existant_list_params.json    |
         | invalid_list_param_values.json   |
@@ -82,7 +81,8 @@ Feature: List Active Computers
     Scenario Outline: Get list of active_computers with invalid headers that are ignored by mercury
         When I get with bad headers in <filename> the list of active_computers
         Then the active_computers response status is 200 OK
+        And the response contains a list of active_computers
 
-        Examples: Fields
+        Examples: Filename
         | filename         |
         | bad_headers.json |

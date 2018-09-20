@@ -155,6 +155,52 @@ def step_i_get_a_task_from_the_entity_using_the_service_api(
     )
 
 
+@when(
+    "I get with bad headers in {filename} a task from the {service_name} entity using the {tasks_service_name} api"
+)
+def step_i_get_a_task_from_the_entity_using_the_service_api(
+    context, service_name, tasks_service_name, filename
+):
+    """
+    :type context: behave.runner.Context
+    :type service_name: str
+    :type tasks_service_name: str
+    :type filename: str
+    """
+    location = context.json_location
+    headers = read_json_from_file(filename, location)
+
+    service_client = context.services[service_name]["client"]
+    tasks_service_client = context.services[tasks_service_name]["client"]
+    tasks_resp = context.services[tasks_service_name]["resp"]
+
+    first_task = tasks_resp.json()["tasks"][0]
+    # TODO config value?
+    task_id = first_task["task_id"]
+    context.services[tasks_service_name]["id"] = task_id
+    context.services[tasks_service_name]["resp"] = tasks_service_client.get(
+        resource_id=task_id, headers=headers
+    )
+
+
+@when(
+    "I get a task by id from the {service_name} entity using the {tasks_service_name} api"
+)
+def step_i_get_a_task_by_id_from_the_entity_using_the_service_api(
+    context, service_name, tasks_service_name
+):
+    """
+    :type context: behave.runner.Context
+    :type service_name: str
+    """
+    tasks_service_client = context.services[tasks_service_name]["client"]
+
+    task_id = context.services[tasks_service_name]["id"]
+    context.services[tasks_service_name]["resp"] = tasks_service_client.get(
+        resource_id=task_id
+    )
+
+
 @step("the {service_name} response contains valid single entity details")
 def step_the_service_response_contains_valid_single_entity_details(
     context, service_name
@@ -186,3 +232,13 @@ def step_the_service_response_contains_valid_single_entity_status_details(
     service_entity = service_resp.json()
     context.check.assertIsInstance(service_entity, dict)
     # TODO: validate actual content of entity
+
+
+@step("I have a {invalid_id} for {tasks_service_name}")
+def step_have_invalid_id(context, invalid_id, tasks_service_name):
+    """
+    :type context: behave.runner.context
+    :type invalid_id: str
+    :type tasks_service_name: str
+    """
+    context.services[tasks_service_name]["id"] = invalid_id

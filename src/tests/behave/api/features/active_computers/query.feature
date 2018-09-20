@@ -15,7 +15,7 @@ Feature: Query Active Computers
         And the response contains a list of active_computers
         And the active_computers entities in the response contain the data from <filename>
 
-        Examples: Fields
+        Examples: Filename
         | filename              |
         | active_rpc_port.json  |
         | active_ping_port.json |
@@ -31,7 +31,7 @@ Feature: Query Active Computers
         And url parameters to the active_computers api are applied
         And the active_computers entities in the response contain the data from <filename>
 
-        Examples: Fields
+        Examples: Filenames
         | query_filename              | param_filename            |
         | active_rpc_port.json        | typical_query_params.json |
         | active_ping_port.json       | typical_query_params.json |
@@ -48,8 +48,8 @@ Feature: Query Active Computers
         And the response contains an offset list of active_computers that have been offset by the offset_id
         And the active_computers entities in the response contain the data from <filename>
 
-        Examples: Fields
-        | query_filename              | param_filename | second_few |
+        Examples: Filenames
+        | query_filename              | param_filename | second_few     |
         | active_rpc_port.json        | first_ten.json | next_five.json |
         | active_ping_port.json       | first_ten.json | next_five.json |
 
@@ -63,7 +63,7 @@ Feature: Query Active Computers
         When I query with get for active_computers
         Then the active_computers response status is 405 METHOD NOT ALLOWED
 
-        Examples: Fields
+        Examples: Filename
         | query_filename        |
         | active_rpc_port.json  |
         | active_ping_port.json |
@@ -77,7 +77,7 @@ Feature: Query Active Computers
         When I get the query_results from a query of active_computers
         Then the active_computers response status is 404 Not Found
 
-        Examples: Fields
+        Examples: Filename and Bad URLs
         | query_filename        | bad_url               |
         | active_rpc_port.json  | /active/typo/query    |
         | active_rpc_port.json  | /active/computer/typo |
@@ -92,10 +92,10 @@ Feature: Query Active Computers
         When I get with bad headers in <filename> the query_results from a query of active_computers
         Then the active_computers response status is <status_code> <reason>
 
-        Examples: Fields
-        | query_filename        | filename         | status_code | reason |
-        | active_rpc_port.json  | bad_headers.json | 500 | Internal Server Error |
-        | active_ping_port.json | bad_headers.json | 500 | Internal Server Error |
+        Examples: Filanemes
+        | query_filename        | filename         | status_code | reason                |
+        | active_rpc_port.json  | bad_headers.json | 500         | Internal Server Error |
+        | active_ping_port.json | bad_headers.json | 500         | Internal Server Error |
 
     # /active/computers/query - extra headers
     @positive @p0 @smoke
@@ -107,10 +107,10 @@ Feature: Query Active Computers
         And the response contains a list of active_computers
         And the active_computers entities in the response contain the data from <filename>
 
-        Examples: Fields
-        | query_filename        | filename         | status_code | reason |
-        | active_rpc_port.json  | extra_headers.json | 200 | OK |
-        | active_ping_port.json | extra_headers.json | 200 | OK |
+        Examples: Filenames
+        | query_filename        | filename           | status_code | reason |
+        | active_rpc_port.json  | extra_headers.json | 200         | OK     |
+        | active_ping_port.json | extra_headers.json | 200         | OK     |
 
     # /active/computers/query - invalid params
     @positive @p0 @smoke
@@ -123,7 +123,7 @@ Feature: Query Active Computers
         And the valid url parameters to the active_computers api are applied
         And the active_computers entities in the response contain the data from <filename>
 
-        Examples: Fields
+        Examples: Filenames
         | filename              | param_filename                  |
         | active_rpc_port.json  | invalid_query_param_values.json |
         | active_ping_port.json | invalid_query_param_values.json |

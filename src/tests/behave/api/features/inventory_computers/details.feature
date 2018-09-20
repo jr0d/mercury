@@ -41,7 +41,7 @@ Feature: View Inventory Computer Information
         When I get the entity using the inventory_computers api
         Then the inventory_computers response status is <status_code> <reason>
 
-        Examples: Invalid Mercury IDs
+        Examples: Bad urls
         | bad_url          | status_code          | reason    |
         | /inventory/typo  | 404                  | Not Found |
 
@@ -55,10 +55,9 @@ Feature: View Inventory Computer Information
         And the inventory_computers response contains valid single entity details
         And url parameters to the inventory_computers api are applied
 
-        Examples: Fields
+        Examples: Filename
         | filename                    |
         | typical_detail_params.json  |
-        # TODO more param files
 
     # /inventory/computers/<mercury_id> - bad params
     @positive @p0 @smoke
@@ -70,16 +69,17 @@ Feature: View Inventory Computer Information
         # TODO contains valid single entity details (fails for the None param)
         And the valid url parameters to the inventory_computers api are applied
 
-        Examples: Fields
+        Examples: Filename
         | filename                          |
-        | non_existant_details_params.json          |
+        | non_existant_details_params.json  |
         | invalid_details_param_values.json |
 
     # /inventory/computers/<mercury_id> - bad method
     @negative @p0 @smoke
     @MRC-68
     Scenario: Post instead of getting details of inventory_computers
-        When I use post on inventory_computers
+        Given a inventory_computers entity id is located for testing
+        When I use post on inventory_computers with an entity
         Then the inventory_computers response status is 405 METHOD NOT ALLOWED
 
     # /inventory/computers/<mercury_id> - ignored headers
@@ -88,8 +88,9 @@ Feature: View Inventory Computer Information
     Scenario Outline: Get inventory Computer Details with ignored headers
         Given a inventory_computers entity id is located for testing
         When I get with bad headers in <filename> the entity using the inventory_computers api
-        Then the active_computers response status is 200 OK
+        Then the inventory_computers response status is 200 OK
+        And the inventory_computers response contains valid single entity details
 
-        Examples: Fields
-        | filename                          |
-        | bad_headers.json          |
+        Examples: Filename
+        | filename          |
+        | bad_headers.json  |

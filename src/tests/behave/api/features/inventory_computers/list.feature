@@ -18,11 +18,11 @@ Feature: List inventory Computers
     @negative @p0 @smoke
     @MRC-68
     Scenario Outline: Get list of inventory_computers with a bad url
-    Given a inventory_computers bad url <bad_url> is provided
-    When I get the list of inventory_computers
-    Then the inventory_computers response status is <status_code> <reason>
+        Given a inventory_computers bad url <bad_url> is provided
+        When I get the list of inventory_computers
+        Then the inventory_computers response status is <status_code> <reason>
 
-        Examples: Invalid Mercury IDs
+        Examples: Bad URLs
         | bad_url           | status_code          | reason    |
         | /inventory/typo   | 404                  | Not Found |
 
@@ -35,10 +35,9 @@ Feature: List inventory Computers
         And the response contains a list of inventory_computers
         And url parameters to the inventory_computers api are applied
 
-        Examples: Fields
+        Examples: Filename
         | filename                  |
-        | typical_list_params.json  |
-        # TODO more param files
+        | typical_list_params.json  |        
 
     # /inventory/computer - offset_id
     @positive @p0
@@ -50,7 +49,7 @@ Feature: List inventory Computers
         Then the inventory_computers response status is 200 OK
         And the response contains an offset list of inventory_computers that have been offset by the offset_id
 
-        Examples: Fields
+        Examples: Filenames
         | filename        | second_few     |
         | first_ten.json  | next_five.json |
 
@@ -63,7 +62,7 @@ Feature: List inventory Computers
         And the response contains a list of inventory_computers
         And the valid url parameters to the inventory_computers api are applied
 
-        Examples: Fields
+        Examples: Filename
         | filename                         |
         | non_existant_list_params.json    |
         | invalid_list_param_values.json   |
@@ -82,7 +81,8 @@ Feature: List inventory Computers
     Scenario Outline: Get list of inventory_computers with invalid headers that are ignored by mercury
         When I get with bad headers in <filename> the list of inventory_computers
         Then the inventory_computers response status is 200 OK
+        And the response contains a list of inventory_computers
 
-        Examples: Fields
-        | filename              |
+        Examples: Filename
+        | filename         |
         | bad_headers.json |
