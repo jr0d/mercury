@@ -8,15 +8,17 @@ Feature: List RPC Jobs negative tests
 
     # /rpc/jobs - bad token
     @negative @p0 @smoke
+    @MRC-68
     @not-local
-    Scenario: Get list of rpc jobs
+    Scenario: Get list of rpc jobs with bad token
         When I get the list of rpc_jobs
         Then the rpc_jobs response status is 401 X-AUTH-TOKEN HEADER NOT FOUND
 
     # /rpc/jobs - no token
     @negative @p0 @smoke
+    @MRC-68
     @not-local
-    Scenario: Get list of rpc jobs
+    Scenario: Get list of rpc jobs with no token
         Given the auth token for the rpc_jobs client is nonexistent
         When I get the list of rpc_jobs
         Then the rpc_jobs response status is 401 X-AUTH-TOKEN HEADER NOT FOUND

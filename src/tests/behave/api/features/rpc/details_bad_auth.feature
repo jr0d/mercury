@@ -9,16 +9,18 @@ Feature: View RPC Job Information negative tests
 
     # /rpc/jobs/{job_id} - bad token
     @negative @p0 @smoke
+    @MRC-68
     @not-local
-    Scenario: Get RPC Job Details for unauthorized account
+    Scenario: Get RPC Job Details for unauthorized account bad token
         Given a rpc_jobs test entity id is defined for testing
         When I get the entity using the rpc_jobs api
         Then the rpc_jobs response status is 401 X-AUTH-TOKEN HEADER NOT FOUND
 
     # /rpc/jobs/{job_id} - no token
     @negative @p0 @smoke
+    @MRC-68
     @not-local
-    Scenario: Get RPC Job Details for unauthorized account
+    Scenario: Get RPC Job Details for unauthorized account no token
         Given the auth token for the rpc_jobs client is nonexistent
         And a rpc_jobs test entity id is defined for testing
         When I get the entity using the rpc_jobs api
@@ -26,16 +28,18 @@ Feature: View RPC Job Information negative tests
 
     # /rpc/jobs/{job_id}/status - bad token
     @negative @p0 @smoke
+    @MRC-68
     @not-local
-    Scenario: Get RPC Job Status
+    Scenario: Get RPC Job Status with bad token
         Given a rpc_jobs entity id is defined for testing
         When I get the status of the entity using the rpc_jobs api
         Then the rpc_jobs response status is 401 X-AUTH-TOKEN HEADER NOT FOUND
 
     # /rpc/jobs/{job_id}/status - no token
     @negative @p0 @smoke
+    @MRC-68
     @not-local
-    Scenario: Get RPC Job Status
+    Scenario: Get RPC Job Status with no token
         Given the auth token for the rpc_jobs client is nonexistent
         And a rpc_jobs entity id is defined for testing
         When I get the status of the entity using the rpc_jobs api
@@ -43,16 +47,18 @@ Feature: View RPC Job Information negative tests
 
     # /rpc/jobs/{job_id}/tasks - bad token
     @negative @p0 @smoke
+    @MRC-68
     @not-local
-    Scenario: Get RPC Job Tasks
+    Scenario: Get RPC Job Tasks with bad token
         Given a rpc_jobs entity id is defined for testing
         When I get the rpc_tasks tasks of the entity using the rpc_jobs api
         Then the rpc_tasks response status is 401 X-AUTH-TOKEN HEADER NOT FOUND
 
     # /rpc/jobs/{job_id}/tasks - no token
     @negative @p0 @smoke
+    @MRC-68
     @not-local
-    Scenario: Get RPC Job Tasks
+    Scenario: Get RPC Job Tasks with no token
         Given the auth token for the rpc_jobs client is nonexistent
         And a rpc_jobs entity id is defined for testing
         When I get the rpc_tasks tasks of the entity using the rpc_jobs api

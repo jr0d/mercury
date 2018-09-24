@@ -44,6 +44,29 @@ def step_i_get_the_injection_results_from_a_post_to_service_api(
     )
 
 
+@when(
+    "I get with bad headers in {filename} the injection results from a post to {service_name}"
+)
+def step_i_get_with_bad_headers_the_results_from_a_post_to_service(
+    context, filename, service_name
+):
+    """
+    :type context: behave.runner.Context
+    :type service_name: str
+    :type filename: str
+    """
+
+    location = context.json_location
+    headers = read_json_from_file(filename, location)
+
+    service_client = context.services[service_name]["client"]
+    data = context.services[service_name]["details"]["job_data"]
+    
+    context.services[service_name]["resp"] = service_client.post(
+        data=json.dumps(data), headers=headers
+    )
+
+
 @step("the response contains a {service_name} job_id")
 def step_the_response_contains_a_job_id(context, service_name):
     """
@@ -86,3 +109,19 @@ def step_the_corresponding_service_job_is_completed_and_successful(
     context.check.assertEqual(has_failures, False)
 
     # TODO is the job valid/working?
+
+
+# Used for bad method testing
+@when("I inject with {method} for {service_name}")
+def step_i_use_method_on_inject_service(context, method, service_name):
+    """
+    :type context: behave.runner.Context
+    :type method: str
+    :type service_name: str
+    """
+    service_client = context.services[service_name]["client"]
+    data = context.services[service_name]["details"]["job_data"]
+
+    if method == "delete":
+        context.services[service_name]["resp"] = service_client.delete()
+    # TODO etc

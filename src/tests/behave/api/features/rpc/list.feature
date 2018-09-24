@@ -8,33 +8,39 @@ Feature: List RPC Jobs
 
     # /rpc/jobs
     @positive @p0 @smoke
+    @MRC-63
     Scenario: Get list of rpc jobs
         When I get the list of rpc_jobs
         Then the rpc_jobs response status is 200 OK
         And the response contains a list of rpc_jobs
 
-    # TODO negative testing
-
     # /rpc/jobs - bad method
     @negative @p0 @smoke
-    @nyi
+    @MRC-103
     Scenario Outline: List rpc jobs with bad HTTP method
-        When I get the list of rpc_jobs
+        When I use post on rpc_jobs
+        Then the rpc_jobs response status is 405 METHOD NOT ALLOWED
 
     # /rpc/jobs - bad url
     @negative @p0 @smoke
-    @nyi
+    @MRC-103
     Scenario Outline: List rpc jobs with a bad URL
+        Given a rpc_jobs bad url <bad_url> is provided
         When I get the list of rpc_jobs
+        Then the rpc_jobs response status is <status_code> <reason>
 
-    # /rpc/jobs - wrong headers
-    @negative @p0 @smoke
-    @nyi
+        Examples: Bad URLs
+        | bad_url           | status_code          | reason    |
+        | /rpc/typo         | 404                  | Not Found |
+
+    # /rpc/jobs - ignored headers
+    @positive @p0 @smoke
+    @MRC-103
     Scenario Outline: List rpc jobs with bad headers
-        When I get the list of rpc_jobs
+        When I get with bad headers in <filename> the list of rpc_jobs
+        Then the rpc_jobs response status is 200 OK
+        And the response contains a list of rpc_jobs
 
-    # /rpc/jobs - bad params
-    @negative @p0 @smoke
-    @nyi
-    Scenario Outline: List rpc jobs with bad parameters
-        When I get the list of rpc_jobs
+        Examples: Filename
+        | filename         |
+        | bad_headers.json |

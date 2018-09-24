@@ -8,6 +8,7 @@ Feature: Inject RPC Jobs
 
     # /rpc/jobs
     @positive @p0 @smoke
+    @MRC-63
     @not-local
     Scenario Outline: Inject rpc jobs
         # Filename should have a query dict and an instruction dict
@@ -23,13 +24,13 @@ Feature: Inject RPC Jobs
         | echo_job.json      |
         | inspector_job.json |
 
-    # TODO negative testing
-
     # /rpc/jobs - bad method
     @negative @p0 @smoke
-    @nyi
+    @MRC-103
     Scenario Outline: Inject rpc jobs with bad HTTP method
         Given I have job injection details in <filename> for creating jobs using the rpc_jobs api
+        When I inject with delete for rpc_jobs
+        Then the rpc_jobs response status is 405 METHOD NOT ALLOWED
 
         Examples: Filenames
         | filename           |
@@ -38,33 +39,44 @@ Feature: Inject RPC Jobs
 
     # /rpc/jobs - bad url
     @negative @p0 @smoke
-    @nyi
+    @MRC-103
     Scenario Outline: Inject rpc jobs with a bad URL
         Given I have job injection details in <filename> for creating jobs using the rpc_jobs api
+        And a rpc_jobs <bad_url> is provided
+        When I get the injection results from a post to rpc_jobs
+        Then the rpc_jobs response status is <status_code> <reason>
+
+        Examples: Bad URLs and Filename
+        | filename           | bad_url     | status_code | reason    |
+        | echo_job.json      | /rpc/typos  | 404         | Not Found |
+        | inspector_job.json | /typos/jobs | 404         | Not Found |
+
+    # /rpc/jobs - ignored headers
+    @positive @p0 @smoke
+    @MRC-103
+    @not-local
+    Scenario Outline: Inject rpc jobs with ignored headers
+        Given I have job injection details in <filename> for creating jobs using the rpc_jobs api
+        When I get with bad headers in <bad_header_filename> the injection results from a post to rpc_jobs
+        Then the rpc_jobs response status is 200 OK
+        Then the response contains a rpc_jobs job_id
+        And the corresponding rpc_jobs job is completed with successful tasks
+        And the rpc_jobs response status is 200 OK
 
         Examples: Filenames
-        | filename           |
-        | echo_job.json      |
-        | inspector_job.json |
+        | filename           | bad_header_filename |
+        | echo_job.json      | extra_headers.json  |
+        | inspector_job.json | extra_headers.json  |
 
-    # /rpc/jobs - wrong headers
+    # /rpc/jobs - bad headers
     @negative @p0 @smoke
-    @nyi
+    @MRC-103
     Scenario Outline: Inject rpc jobs with bad headers
         Given I have job injection details in <filename> for creating jobs using the rpc_jobs api
+        When I get with bad headers in <bad_header_filename> the injection results from a post to rpc_jobs
+        Then the rpc_jobs response status is 500 Internal Server Error        
 
         Examples: Filenames
-        | filename           |
-        | echo_job.json      |
-        | inspector_job.json |
-
-    # /rpc/jobs - bad params
-    @negative @p0 @smoke
-    @nyi
-    Scenario Outline: Inject rpc jobs with bad parameters
-        Given I have job injection details in <filename> for creating jobs using the rpc_jobs api
-
-        Examples: Filenames
-        | filename           |
-        | echo_job.json      |
-        | inspector_job.json |
+        | filename           | bad_header_filename |
+        | echo_job.json      | bad_headers.json    |
+        | inspector_job.json | bad_headers.json    |

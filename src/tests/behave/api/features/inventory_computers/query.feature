@@ -47,7 +47,7 @@ Feature: Query inventory Computers
         And url parameters to the inventory_computers api are applied
         And the inventory_computers entities in the response contain the data from <filename>
 
-        Examples: Fields
+        Examples: Filenames
         | query_filename              | param_filename            |
         | active_rpc_port.json        | typical_query_params.json |
         | active_ping_port.json       | typical_query_params.json |
@@ -64,7 +64,7 @@ Feature: Query inventory Computers
         And url parameters to the inventory_computers api are applied
         And the inventory_computers entities in the response contain the data from <filename>
 
-        Examples: Fields
+        Examples: Filenames
         | query_filename              | param_filename            |
         | dmi_sys_vendor.json         | typical_query_params.json |
         | mem_Dirty.json              | typical_query_params.json |
@@ -81,8 +81,8 @@ Feature: Query inventory Computers
         And the response contains an offset list of inventory_computers that have been offset by the offset_id
         And the inventory_computers entities in the response contain the data from <filename>
 
-        Examples: Fields
-        | query_filename              | param_filename | second_few |
+        Examples: Filename
+        | query_filename              | param_filename | second_few     |
         | active_rpc_port.json        | first_ten.json | next_five.json |
         | active_ping_port.json       | first_ten.json | next_five.json |
 
@@ -96,7 +96,7 @@ Feature: Query inventory Computers
         When I query with get for inventory_computers
         Then the inventory_computers response status is 405 METHOD NOT ALLOWED
 
-        Examples: Fields
+        Examples: Filename
         | query_filename        |
         | active_rpc_port.json  |
         | active_ping_port.json |
@@ -110,7 +110,7 @@ Feature: Query inventory Computers
         When I get the query_results from a query of inventory_computers
         Then the inventory_computers response status is 404 Not Found
 
-        Examples: Fields
+        Examples: Filenames and Bad URLs
         | query_filename        | bad_url               |
         | active_rpc_port.json  | /inventory/typo/query    |
         | active_rpc_port.json  | /inventory/computer/typo |
@@ -125,7 +125,7 @@ Feature: Query inventory Computers
         When I get with bad headers in <filename> the query_results from a query of inventory_computers
         Then the inventory_computers response status is <status_code> <reason>
 
-        Examples: Fields
+        Examples: Filenames
         | query_filename        | filename         | status_code | reason |
         | active_rpc_port.json  | bad_headers.json | 500 | Internal Server Error |
         | active_ping_port.json | bad_headers.json | 500 | Internal Server Error |
@@ -140,10 +140,10 @@ Feature: Query inventory Computers
         And the response contains a list of inventory_computers
         And the inventory_computers entities in the response contain the data from <filename>
 
-        Examples: Fields
-        | query_filename        | filename         | status_code | reason |
-        | active_rpc_port.json  | extra_headers.json | 200 | OK |
-        | active_ping_port.json | extra_headers.json | 200 | OK |
+        Examples: Filenames
+        | query_filename        | filename           | status_code | reason |
+        | active_rpc_port.json  | extra_headers.json | 200         | OK     |
+        | active_ping_port.json | extra_headers.json | 200         | OK     |
 
     # /inventory/computers/query - bad params
     @negative @p0 @smoke
@@ -156,7 +156,7 @@ Feature: Query inventory Computers
         And the valid url parameters to the inventory_computers api are applied
         And the inventory_computers entities in the response contain the data from <filename>
 
-        Examples: Fields
-        | query_filename              | param_filename                  |
+        Examples: Filenames
+        | query_filename        | param_filename                  |
         | active_rpc_port.json  | invalid_query_param_values.json |
         | active_ping_port.json | invalid_query_param_values.json |
