@@ -25,7 +25,7 @@ Feature: Query Active Computers negative tests
     @negative @p0 @smoke
     @MRC-68
     @not-local
-    Scenario: Query Active Computers for unauthorized account with no token
+    Scenario Outline: Query Active Computers for unauthorized account with no token
         Given the auth token for the active_computers client is nonexistent
         And I have query details in <filename> for entities using the active_computers api
         When I get the query_results from a query of active_computers
