@@ -50,7 +50,7 @@ Feature: View RPC Job Information
     @MRC-103
     @not-local
     Scenario Outline: Get RPC Job status bad id
-        Given a rpc_jobs <invalid_entity_id> is located for testing
+        Given a rpc_jobs <invalid_entity_id> is provided
         When I get the status of the entity entity using the rpc_jobs api
         Then the rpc_jobs response status is <status_code> <reason>
 
@@ -79,7 +79,7 @@ Feature: View RPC Job Information
     @MRC-63
     @not-local
     Scenario Outline: Get RPC Job Tasks bad id
-        Given a rpc_jobs <invalid_entity_id> is located for testing
+        Given a rpc_jobs <invalid_entity_id> is provided
         When I get the rpc_tasks tasks of the entity using the rpc_jobs api
         Then the rpc_jobs response status is <status_code> <reason>
 
@@ -144,13 +144,13 @@ Feature: View RPC Job Information
         When I with an entity use post on rpc_jobs
         Then the rpc_jobs response status is 405 METHOD NOT ALLOWED
 
-    # /rpc/task/{task_id} - bad ur
+    # /rpc/task/{task_id} - bad url
     @negative @p0 @smoke
     @MRC-103
     @not-local
     Scenario Outline: Get rpc task details with a bad URL
         Given a rpc_jobs entity id is located for testing
-        And a rpc_tasks <bad_url> is provided
+        And a rpc_tasks bad url <bad_url> is provided
         When I get the rpc_tasks tasks of the entity using the rpc_jobs api
         And I get a task from the rpc_jobs entity using the rpc_tasks api
         Then the rpc_tasks response status is <status_code> <reason>
@@ -165,7 +165,7 @@ Feature: View RPC Job Information
     @not-local
     Scenario Outline: Get rpc job details with a bad URL
         Given a rpc_jobs entity id is located for testing
-        And a rpc_jobs <bad_url> is provided
+        And a rpc_jobs bad url <bad_url> is provided
         When I get the entity using the rpc_jobs api
         Then the rpc_jobs response status is <status_code> <reason>
 

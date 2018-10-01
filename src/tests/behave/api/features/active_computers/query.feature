@@ -91,7 +91,7 @@ Feature: Query Active Computers
         When I get with bad headers in <filename> the query_results from a query of active_computers
         Then the active_computers response status is <status_code> <reason>
 
-        Examples: Filanemes
+        Examples: Filenames
         | query_filename        | filename         | status_code | reason                |
         | active_rpc_port.json  | bad_headers.json | 500         | Internal Server Error |
         | active_ping_port.json | bad_headers.json | 500         | Internal Server Error |

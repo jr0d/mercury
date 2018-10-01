@@ -42,7 +42,7 @@ Feature: Inject RPC Jobs
     @MRC-103
     Scenario Outline: Inject rpc jobs with a bad URL
         Given I have job injection details in <filename> for creating jobs using the rpc_jobs api
-        And a rpc_jobs <bad_url> is provided
+        Given a rpc_jobs bad url <bad_url> is provided
         When I get the injection results from a post to rpc_jobs
         Then the rpc_jobs response status is <status_code> <reason>
 
@@ -74,7 +74,7 @@ Feature: Inject RPC Jobs
     Scenario Outline: Inject rpc jobs with bad headers
         Given I have job injection details in <filename> for creating jobs using the rpc_jobs api
         When I get with bad headers in <bad_header_filename> the injection results from a post to rpc_jobs
-        Then the rpc_jobs response status is 500 Internal Server Error        
+        Then the rpc_jobs response status is 500 Internal Server Error
 
         Examples: Filenames
         | filename           | bad_header_filename |
