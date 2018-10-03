@@ -51,7 +51,7 @@ Feature: View RPC Job Information
     @not-local
     Scenario Outline: Get RPC Job status bad id
         Given a rpc_jobs <invalid_entity_id> is provided
-        When I get the status of the entity entity using the rpc_jobs api
+        When I get the status of the entity using the rpc_jobs api
         Then the rpc_jobs response status is <status_code> <reason>
 
         Examples: Invalid entity IDs
@@ -81,7 +81,7 @@ Feature: View RPC Job Information
     Scenario Outline: Get RPC Job Tasks bad id
         Given a rpc_jobs <invalid_entity_id> is provided
         When I get the rpc_tasks tasks of the entity using the rpc_jobs api
-        Then the rpc_jobs response status is <status_code> <reason>
+        Then the rpc_tasks response status is <status_code> <reason>
 
         Examples: Invalid entity IDs
         | invalid_entity_id        | status_code          | reason    |
