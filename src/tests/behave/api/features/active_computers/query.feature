@@ -38,6 +38,7 @@ Feature: Query Active Computers
 
     # /active/computers/query - offset_id
     @positive @p0
+    @quarantined @MRC-118
     @MRC-70
     @offset @not-local
     Scenario Outline: Query Active Computers parameters and test the offset_id param
@@ -85,6 +86,7 @@ Feature: Query Active Computers
 
     # /active/computers/query - wrong headers
     @negative @p0 @smoke
+    @quarantined @MRC-115
     @MRC-103
     Scenario Outline: Query Active Computers with bad headers
         Given I have query details in <query_filename> for entities using the active_computers api

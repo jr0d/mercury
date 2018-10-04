@@ -70,6 +70,7 @@ Feature: Inject RPC Jobs
 
     # /rpc/jobs - bad headers
     @negative @p0 @smoke
+    @quarantined @MRC-115
     @MRC-103
     Scenario Outline: Inject rpc jobs with bad headers
         Given I have job injection details in <filename> for creating jobs using the rpc_jobs api
