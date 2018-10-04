@@ -41,6 +41,7 @@ Feature: List Active Computers
 
     # /active/computer - offset_id
     @positive @p0
+    @quarantined @MRC-118
     @MRC-70
     @offset @not-local
     Scenario Outline: Get list of active_computers and test the offset_id param

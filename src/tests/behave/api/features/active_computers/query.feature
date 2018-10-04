@@ -38,6 +38,7 @@ Feature: Query Active Computers
 
     # /active/computers/query - offset_id
     @positive @p0
+    @quarantined @MRC-118
     @MRC-70
     @offset @not-local
     Scenario Outline: Query Active Computers parameters and test the offset_id param

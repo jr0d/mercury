@@ -37,10 +37,11 @@ Feature: List inventory Computers
 
         Examples: Filename
         | filename                  |
-        | typical_list_params.json  |        
+        | typical_list_params.json  |
 
     # /inventory/computer - offset_id
     @positive @p0
+    @quarantined @MRC-118
     @MRC-70
     @offset @not-local
     Scenario Outline: Get list of inventory_computers and test the offset_id param
