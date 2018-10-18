@@ -5,4 +5,5 @@ from src.tests.behave.api.features.steps import (  # noqa pylint: disable=redefi
     list,
     details,
     inject,
+    rpc_capabilities,
 )
