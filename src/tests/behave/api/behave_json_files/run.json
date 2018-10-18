@@ -1,0 +1,11 @@
+{
+  "query": {
+    "mercury_id": ""
+  },
+  "instruction": {
+    "method": "run",
+    "args": [
+      "pwd"
+    ]
+  }
+}
