@@ -30,9 +30,13 @@ def step_the_first_task_has_output_in_file(
     device_id = context.services[device_service]["id"]
 
     if "_sub_" in stdout:
+        # We need to get information from the mercury device details
+        # to compare to what was returned from the RPC job
         prefix, suffix = stdout.split("_sub_")
         device_resp = device_client.get(device_id)
 
+        # reduce something like active.rpc_port in order ro read it
+        # from a dict, for example resp.json()["active"]["rpc_port"]
         keys = prefix.split(".")
         actual_value = reduce(operator.getitem, keys, device_resp.json())
         stdout = actual_value + suffix
