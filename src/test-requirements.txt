@@ -9,3 +9,4 @@ parse==1.8.2
 parse-type==0.4.2
 requests==2.20.0
 gevent
+tox
