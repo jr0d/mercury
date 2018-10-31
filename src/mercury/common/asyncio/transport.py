@@ -72,7 +72,7 @@ class AsyncRouterReqService(object):
         raise NotImplementedError
 
     async def message_handler(self, address, message):
-        if message.get('_protocol_message') == 'keep_alive':
+        if isinstance(message, dict) and message.get('_protocol_message') == 'keep_alive':
             log.debug('Keep alive received from {}'.format(address))
             response = {'_protocol_message': 'keep_alive_confirmed'}
         else:
@@ -105,7 +105,7 @@ class AsyncRouterReqService(object):
 
             asyncio.ensure_future(self.message_handler(address, message))
 
-        log.info('Goodbye Cruel World')
+        log.info('Shutting down')
 
     def kill(self):
         self._kill = True
