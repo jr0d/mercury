@@ -105,7 +105,7 @@ class AsyncRouterReqService(object):
 
             asyncio.ensure_future(self.message_handler(address, message))
 
-        log.info('Goodbye Cruel World')
+        log.info('Shutting down')
 
     def kill(self):
         self._kill = True

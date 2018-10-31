@@ -72,9 +72,15 @@ class SimpleRouterReqServiceUnitTest(MercuryCommonUnitTest):
     """Tests for mercury.common.transport.SimpleRouterReqService."""
     def setUp(self):
         super(SimpleRouterReqServiceUnitTest, self).setUp()
+        self.patch_context = mock.patch('mercury.common.transport.zmq.Context')
+        self.mock_context = mock.Mock(spec=zmq.Context)
+        mock_context_callable = self.patch_context.start()
+        mock_context_callable.return_value = self.mock_context
         self.req_service = transport.SimpleRouterReqService('localhost')
-        self.req_service.context = mock.Mock(spec_set=zmq.Context)
-        self.req_service.socket = self.req_service.context.socket.return_value
+
+    def tearDown(self):
+        super(SimpleRouterReqServiceUnitTest, self).tearDown()
+        self.patch_context.stop()
 
     def test_receive(self):
         """Test receive()"""
@@ -91,10 +97,7 @@ class SimpleRouterReqServiceUnitTest(MercuryCommonUnitTest):
     def test_receive_no_message(self):
         """Test receive() fails when received message is empty."""
         self.req_service.socket.recv_multipart.return_value = []
-
-        received_msg = self.req_service.receive()
-
-        assert received_msg is None
+        self.assertRaises(MercuryClientException, self.req_service.receive)
 
     @mock.patch('msgpack.unpackb')
     def test_receive_wrong_type(self, mock_unpack):
@@ -105,13 +108,9 @@ class SimpleRouterReqServiceUnitTest(MercuryCommonUnitTest):
 
         mock_unpack.side_effect = [TypeError]
 
-        with mock.patch.object(self.req_service, 'send_error') as mock_error:
-            received_msg = self.req_service.receive()
-
-        assert received_msg is None
-        mock_error.assert_called_once_with(
-            ['addr', ''],
-            "Received unpacked, non-string type: {} : ".format(type(payload)))
+        with mock.patch.object(self.req_service, 'send_error'):
+            self.assertRaises(MercuryClientException,
+                              self.req_service.receive)
 
     @mock.patch('msgpack.unpackb')
     def test_receive_unpack_error(self, mock_unpack):
@@ -123,12 +122,8 @@ class SimpleRouterReqServiceUnitTest(MercuryCommonUnitTest):
         mock_unpack.side_effect = [msgpack.UnpackException]
 
         with mock.patch.object(self.req_service, 'send_error') as mock_error:
-            received_msg = self.req_service.receive()
-
-        assert received_msg is None
-        mock_error.assert_called_once_with(
-            ['addr', ''],
-            "Received invalid request: ")
+            self.assertRaises(MercuryClientException,
+                              self.req_service.receive)
 
     def test_send_error(self):
         address = ['addr', '']
@@ -177,47 +172,3 @@ class SimpleRouterReqServiceUnitTest(MercuryCommonUnitTest):
             else:
                 assert exc_info.value.msg == \
                        "Message is missing required data: ['key2']"
-
-    def test_start_with_exceptions(self):
-        """Test start().
-
-        Cases tested:
-        - Data is received, process() returns a response
-        - Data is received, process() raises MercuryClientException
-        - Data is received, process() raises unexpected Exception
-        - No data received (process() is not called)
-        - KeyboardInterrupt raised while receiving data (process() is not
-          called)
-        """
-        expected_msg = (['addr', ''],
-                        {'endpoint': 'insert_one', 'args': ['fake_info']})
-        self.req_service.receive = mock.Mock(side_effect=[
-            expected_msg,
-            expected_msg,
-            expected_msg,
-            None,
-            KeyboardInterrupt])
-        self.req_service.process = mock.Mock(side_effect=[
-            'fake_response',
-            MercuryClientException,
-            Exception])
-
-        self.req_service.send_error = mock.Mock()
-        self.req_service.send = mock.Mock()
-
-        self.req_service.start()
-
-        assert self.req_service.bound
-        assert self.req_service.receive.call_count == 5
-        assert self.req_service.process.call_count == 3
-
-        assert self.req_service.send.call_count == 1
-        self.req_service.send.assert_called_once_with(
-            ['addr', ''], 'fake_response')
-
-        assert self.req_service.send_error.call_count == 2
-        self.req_service.send_error.assert_has_calls([
-            mock.call(['addr', ''], 'Encountered client error: '),
-            mock.call(['addr', ''], 'Encountered server error, sorry')])
-
-        self.req_service.context.destroy.assert_called_once()

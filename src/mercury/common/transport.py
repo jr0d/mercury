@@ -163,9 +163,8 @@ def format_zurl(host, port, proto='tcp'):
 class SimpleRouterReqService(object):
     """Base class for a message router backend."""
 
-    def __init__(self, bind_address, linger=-1, poll_timeout=2, loop=None):
+    def __init__(self, bind_address, linger=-1, poll_timeout=2):
         self.bind_address = bind_address
-        self.loop = loop
         self.context = zmq.Context()
         self.poll_timeout = poll_timeout
         self.socket = self.context.socket(zmq.ROUTER)
@@ -294,14 +293,18 @@ class SimpleRouterReqService(object):
 
     def start(self):
         while not self._kill:
-            if not self.in_poller.poll(self.poll_timeout * 1000):
-                continue
+            try:
+                if not self.in_poller.poll(self.poll_timeout * 1000):
+                    continue
+            except KeyboardInterrupt:
+                log.info('Interrupted')
+                break
             try:
                 address, message = self.receive()
             except MercuryClientException:
                 continue
             self.message_handler(address, message)
-        log.info('Goodbye Cruel World')
+        log.info('Shutting down')
 
     def process(self, message):
         raise NotImplementedError
