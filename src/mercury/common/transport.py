@@ -93,9 +93,12 @@ class SimpleRouterReqClient(object):
         :param reply: A dictionary containing the transceiver's reply.
         :returns: The 'response' field of the transceiver's reply.
         """
-        if reply.get('error'):
-            self.raise_reply_error(reply)
-        return reply.get('message') or reply.get('response')
+        if isinstance(reply, dict):
+            if reply.get('error'):
+                self.raise_reply_error(reply)
+            return reply.get('message') or reply.get('response')
+        else:
+            return reply
 
     def transceiver(self, payload):
         """Sends and receives messages.
@@ -160,47 +163,50 @@ def format_zurl(host, port, proto='tcp'):
 class SimpleRouterReqService(object):
     """Base class for a message router backend."""
 
-    def __init__(self, bind_address):
-        """Creates a new ZMQ context with a ROUTER socket."""
+    def __init__(self, bind_address, linger=-1, poll_timeout=2, loop=None):
         self.bind_address = bind_address
+        self.loop = loop
         self.context = zmq.Context()
-        # noinspection PyUnresolvedReferences
+        self.poll_timeout = poll_timeout
         self.socket = self.context.socket(zmq.ROUTER)
-        self.bound = False
+        self.socket.setsockopt(zmq.LINGER, linger)
 
-    def bind(self):
+        self.in_poller = zmq.Poller()
+        self.in_poller.register(self.socket, zmq.POLLIN)
+
+        log.info('Bound to: ' + self.bind_address)
+
         self.socket.bind(self.bind_address)
-        log.info('Bound: %s' % self.bind_address)
-        self.bound = True
+
+        self._kill = False
 
     def receive(self):
-        """Receives, parses, and unpacks client's messages.
-
-        Format of received message: ['address', '', 'packed_message']
-
-        :returns: A tuple containing the address and the unpacked
-            message parts of the original message.
-        """
         multipart = self.socket.recv_multipart()
-
         parsed_message = parse_multipart_message(multipart)
 
         if not parsed_message:
-            return
+            log.error('Received junk off the wire')
+            raise MercuryClientException('Message is malformed')
 
         try:
             message = msgpack.unpackb(parsed_message['message'],
                                       encoding='utf-8')
         except TypeError as type_error:
+            log.error('Received unpacked, non-string type: %s : %s' % (
+                type(parsed_message), type_error))
             self.send_error(parsed_message['address'],
-                            'Received unpacked, non-string type: %s : %s' % (
-                                type(parsed_message), type_error))
-            return
-        except msgpack.UnpackException as unpack_exception:
+                            'Client error, message is not packed')
+            raise MercuryClientException('Message is malformed')
+
+        except (
+                msgpack.UnpackException,
+                msgpack.ExtraData) as msgpack_exception:
+            log.error('Received invalid request: %s' % str(
+                msgpack_exception))
+
             self.send_error(parsed_message['address'],
-                            'Received invalid request: %s' %
-                            str(unpack_exception))
-            return
+                            'Client error, message is malformed')
+            raise MercuryClientException('Message is malformed')
 
         return parsed_message['address'], message
 
@@ -263,46 +269,39 @@ class SimpleRouterReqService(object):
             raise MercuryClientException('Message is missing required data: {}'
                                          .format(missing))
 
-    def start(self):
-        """Starts SimpleRouterReqService.
-
-        Format of received messages: ['address', '', 'packed_payload']
-        Format of responses being sent: ['address', '', 'packed_response']
-        """
-        if not self.bound:
-            self.bind()
-
-        while True:
-            response = None
-            try:
-                data = self.receive()
-            except KeyboardInterrupt:
-                break
-            if not data:
-                continue
-            address, message = data
-            # log.debug('Request: %s' % binascii.hexlify(address))
+    def message_handler(self, address, message):
+        if isinstance(message, dict) and message.get('_protocol_message') == 'keep_alive':
+            log.debug('Keep alive received from {}'.format(address))
+            response = {'_protocol_message': 'keep_alive_confirmed'}
+        else:
             # noinspection PyBroadException
-            if message.get('_protocol_message') == 'keep_alive':
-                log.debug('Keep alive received from {}'.format(address))
-                response = {'_protocol_message': 'keep_alive_confirmed'}
-            else:
-                # noinspection PyBroadException
-                try:
-                    response = self.process(message)
-                except MercuryClientException as mce:
-                    self.send_error(address,
-                                    'Encountered client error: {}'.format(mce))
-                    continue
-                except Exception:
-                    exec_dict = parse_exception()
-                    log.error('process raised an exception and should not have.')
-                    log.error(fancy_traceback_short(exec_dict))
-                    self.send_error(address, 'Encountered server error, sorry')
-                    continue
-                # log.debug('Response: %s' % binascii.hexlify(address))
-            self.send(address, response)
-        self.cleanup()
+            try:
+                response = self.process(message)
+            except MercuryClientException as mce:
+                return self.send_error(
+                    address,
+                    'Encountered client error: {}'.format(
+                        mce))
+            except Exception:
+                exec_dict = parse_exception()
+                log.error('process raised an exception and should not have.')
+                log.error(fancy_traceback_short(exec_dict))
+                return self.send_error(address,
+                                       'Encountered server error, sorry')
+
+        self.send(address, response)
+        log.debug('Sent {}'.format(address))
+
+    def start(self):
+        while not self._kill:
+            if not self.in_poller.poll(self.poll_timeout * 1000):
+                continue
+            try:
+                address, message = self.receive()
+            except MercuryClientException:
+                continue
+            self.message_handler(address, message)
+        log.info('Goodbye Cruel World')
 
     def process(self, message):
         raise NotImplementedError
