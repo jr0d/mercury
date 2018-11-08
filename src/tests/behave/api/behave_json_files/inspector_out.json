@@ -1,8 +1,9 @@
 {
-  "message":
+  "message" :
     {
-      "stdout": "/root\n",
+      "stdout": "_sub_",
       "returncode": 0,
       "stderr": ""
     }
+
 }

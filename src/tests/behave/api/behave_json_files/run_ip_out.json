@@ -1,5 +1,9 @@
 {
-  "stdout": "active.rpc_address_sub_ \n",
-  "returncode": 0,
-  "stderr": ""
+  "message" :
+    {
+      "stdout": "_sub_active.rpc_address_sub_ \n",
+      "returncode": 0,
+      "stderr": ""
+    }
+
 }
