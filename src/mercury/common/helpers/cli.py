@@ -76,7 +76,8 @@ def run(command,
         ignore_error=False,
         quiet=False,
         env=None,
-        _input=None):
+        _input=None,
+        raw=False):
     """Runs a command and returns its result.
 
     The command result (stdout, stderr, and return code) is stored
@@ -94,8 +95,11 @@ def run(command,
     :param env: Dict containing variables to add to the environment.
     :param quiet: Boolean indicating if debug logs should be silenced.
     :param _input: Pass data into stdin fd
+    :param raw: Return the process object directly. Useful for direct access
+    to output streams
 
-    :returns: :func:`mercury_CLIResult`.
+    :returns: :func:`mercury_CLIResult` unless raw is set, in which case
+    this function returns a process object
     """
     if not quiet:
         log.debug('Running: {}'.format(command))
@@ -111,6 +115,10 @@ def run(command,
                                  stderr=subprocess.PIPE,
                                  bufsize=bufsize,
                                  env=our_env)
+            if raw:
+                p.wait()
+                return p
+
             out, err = p.communicate(input=_input)
             ret = p.returncode
         except (OSError, ValueError) as e:
