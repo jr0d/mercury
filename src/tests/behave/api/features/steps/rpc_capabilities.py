@@ -57,10 +57,8 @@ def step_the_first_task_has_stdout_output_in_file(
                 keys = sub.replace("_sub_", "").split(".")
                 value = reduce(operator.getitem, keys, device_resp.json())
                 stdout = stdout.replace(sub, str(value))
-
             # reduce something like active.rpc_port in order ro read it
             # from a dict, for example resp.json()["active"]["rpc_port"]
-            stdout = actual_value + suffix
 
         context.check.assertEqual(
             task_message["stdout"],
