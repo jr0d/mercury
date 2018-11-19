@@ -137,19 +137,20 @@ class RPCController(StaticEndpointController):
         # devices (devices that are accessible through an agent)
         query.update({'active': {'$ne': None}})
 
-        active_matches = await self.inventory_client.query(
+        active_targets = await self.inventory_client.query(
             query, projection={'active': 1, 'origin': 1}, limit=0,
             sort_direction=1)
 
-        active_matches = active_matches['message']['items']
+        total_targets = active_targets['message']['total']
+        targets = active_targets['message']['items']
 
-        log.debug(f'Found {len(active_matches)} for query {query}')
+        log.debug(f'Found {total_targets} for query {query}')
 
-        if not active_matches:
+        if not total_targets:
             return
 
         try:
-            job = Job(instruction, active_matches, self.jobs_collection,
+            job = Job(instruction, targets, self.jobs_collection,
                       self.tasks_collection)
         except MercuryUserError as mue:
             raise EndpointError(str(mue), 'create_job')
@@ -157,7 +158,7 @@ class RPCController(StaticEndpointController):
         await job.insert()
         job.enqueue_tasks()
 
-        return {'job_id': str(job.job_id)}
+        return {'job_id': str(job.job_id), 'targets': total_targets}
 
     @async_endpoint('update_task')
     async def update_task(self, update_data):
