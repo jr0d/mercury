@@ -1,6 +1,7 @@
 import copy
 import json
 import requests
+import datetime
 from src.tests.behave.common.config import get_conflagration
 
 
@@ -65,7 +66,12 @@ class APIClient(object):
             request_kwargs["headers"].update(headers)
         resp = requests.get(**request_kwargs)
         if self.verbose:
+            d = datetime.datetime.now()
+            s = "{}-{}-{} {}:{}:{}".format(
+                d.year, d.month, d.day, d.hour, d.minute, d.second
+            )
             print("{0}GET REQUEST{1}".format("*" * 20, "*" * 24))
+            print("{0}{1}{2}".format("*" * 16, s, "*" * 20))
             print(request_kwargs)
             print("{0}RESPONSE{1}".format("*" * 20, "*" * 27))
             print(resp.content)
@@ -85,7 +91,12 @@ class APIClient(object):
         request_kwargs["data"] = data
         resp = requests.post(**request_kwargs)
         if self.verbose:
+            d = datetime.datetime.now()
+            s = "{}-{}-{} {}:{}:{}".format(
+                d.year, d.month, d.day, d.hour, d.minute, d.second
+            )
             print("{0}POST REQUEST{1}".format("*" * 20, "*" * 24))
+            print("{0}{1}{2}".format("*" * 16, s, "*" * 21))
             print(request_kwargs)
             print("{0}RESPONSE{1}".format("*" * 20, "*" * 27))
             print(resp.content)
@@ -104,7 +115,12 @@ class APIClient(object):
             request_kwargs["headers"].update(headers)
         resp = requests.delete(**request_kwargs)
         if self.verbose:
+            d = datetime.datetime.now()
+            s = "{}-{}-{} {}:{}:{}".format(
+                d.year, d.month, d.day, d.hour, d.minute, d.second
+            )
             print("{0}DELETE REQUEST{1}".format("*" * 20, "*" * 24))
+            print("{0}{1}{2}".format("*" * 18, s, "*" * 21))
             print(request_kwargs)
             print("{0}RESPONSE{1}".format("*" * 20, "*" * 27))
             print(resp.content)
