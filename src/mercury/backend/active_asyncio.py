@@ -33,7 +33,7 @@ def add_active_record(record):
     })
 
 
-async def ping(record, ctx, timeout, retries, backoff, inventory_client):
+async def ping(record, ctx, timeout, retries, backoff, inventory_client, rpc_client):
     """
     ping node until it responds or encounters x timeouts of x*backoff
     :param timeout:
@@ -91,6 +91,21 @@ async def ping(record, ctx, timeout, retries, backoff, inventory_client):
     # remove the record from the state data structure
     del active_state[record['mercury_id']]
 
+    # mark any active associated tasks as failed
+    # retrieve currently active tasks
+    result = await rpc_client.get_active_tasks_by_mercury_id(record['mercury_id'])
+    task_count = result['message']['count']
+    # error tasks out
+    if task_count > 0:
+        tasks = result['message']['tasks']
+        for task in tasks:
+            await rpc_client.complete_task({
+                'job_id': task['job_id'],
+                'task_id': task['task_id'],
+                'status': 'ERROR',
+                'message': "AAWOL - Agent went AWOL while handling task.",
+            })
+
 
 async def ping_loop(ctx,
                     ping_interval,
@@ -99,7 +114,8 @@ async def ping_loop(ctx,
                     ping_retries,
                     backoff,
                     loop,
-                    inventory_router_url):
+                    inventory_router_url,
+                    rpc_client):
     """
 
     :param ctx:
@@ -126,6 +142,7 @@ async def ping_loop(ctx,
             if now - data['last_ping'] > ping_interval and not data['pinging']:
                 log.debug('Scheduling ping for {}'.format(mercury_id))
                 active_state[mercury_id]['pinging'] = True
-                asyncio.ensure_future(ping(data, ctx, initial_ping_timeout, ping_retries, backoff, inventory_client),
+                asyncio.ensure_future(ping(data, ctx, initial_ping_timeout, ping_retries,
+                                           backoff, inventory_client, rpc_client),
                                       loop=loop)
         await asyncio.sleep(cycle_time)

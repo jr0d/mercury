@@ -51,3 +51,9 @@ class AsyncRPCClient(AsyncRouterReqClient):
             'endpoint': 'complete_task',
             'args': [result_data]
         })
+
+    async def get_active_tasks_by_mercury_id(self, mercury_id):
+        return await self.transceiver({
+            'endpoint': 'get_active_tasks_by_mercury_id',
+            'args': [mercury_id]
+        })
