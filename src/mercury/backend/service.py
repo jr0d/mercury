@@ -168,7 +168,8 @@ def main():
         config.backend.ping.retries,
         config.backend.ping.backoff,
         loop,
-        config.backend.inventory_router),
+        config.backend.inventory_router,
+        rpc_client),
         loop=loop)
 
     log.info('Starting Mercury Backend Service')

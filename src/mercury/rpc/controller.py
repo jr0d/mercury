@@ -103,6 +103,23 @@ class RPCController(StaticEndpointController):
 
         return self.prepare_for_serialization(task)
 
+    @async_endpoint('get_active_tasks_by_mercury_id')
+    async def get_active_tasks_by_mercury_id(self, mercury_id):
+        """Gets all active tasks associated with specified mercury id
+
+        :param mercury_id:
+        :return: dictionary containing tasks list and count
+        """
+        c = self.tasks_collection.find({'mercury_id': mercury_id,
+                                        'time_completed': None})
+        count = await c.count()
+        tasks = []
+        async for task in c:
+            tasks.append(self.prepare_for_serialization(task))
+
+        return {'count': count, 'tasks': tasks}
+
+
     @async_endpoint('get_jobs')
     async def get_jobs(self, projection=None):
         """Get active jobs. The jobs collection is made ephemeral via a ttl key;
