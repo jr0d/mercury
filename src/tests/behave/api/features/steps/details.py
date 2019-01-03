@@ -34,6 +34,42 @@ def step_a_service_id_is_located_for_testing(context, service_name):
         # TODO: Create new service entity since we don't have any
 
 
+@step("an active {service_name} entity id is located for testing")
+def step_a_service_id_is_located_for_testing(context, service_name):
+    """
+    :type context: behave.runner.Context
+    :type service_name: str
+    """
+    # Find a valid service entity from list call
+    context.services[service_name]["id"] = None
+    service_client = context.services[service_name]["client"]
+    response = service_client.get()
+
+    container_field = get_entity_list_container_field(service_name)
+    field_name = get_entity_id_field(service_name)
+    try:
+        # TODO config value?
+        service_entities = response.json()[container_field]
+        # TODO if this is empty add one somehow?
+        context.check.assertGreater(len(service_entities), 0)
+        i = 0
+        entity_id = service_entities[i][field_name]
+        resp = service_client.get(entity_id)
+
+        while resp.json()["active"] == None:
+            i += 1
+            entity_id = service_entities[i][field_name]
+            resp = service_client.get(entity_id)
+
+        context.services[service_name]["id"] = entity_id
+    except IndexError:
+        context.check.assertIsNotNone(
+            context.services[service_name]["id"],
+            msg="WIP: Create {} API Not Yet Implemented".format(service_name),
+        )
+        # TODO: Create new service entity since we don't have any
+
+
 @step("a {service_name} entity id is defined for testing")
 def step_a_test_id_is_defined_for_testing(context, service_name):
     """
