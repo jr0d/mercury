@@ -16,7 +16,7 @@ Feature: Inject RPC Jobs
         When I get the injection results from a post to rpc_jobs
         Then the rpc_jobs response status is 200 OK
         Then the response contains a rpc_jobs job_id
-        And the corresponding rpc_jobs job is completed with successful rpc_tasks tasks
+        And the corresponding rpc_jobs job is completed with SUCCESS state rpc_tasks tasks
         And the rpc_jobs response status is 200 OK
 
         Examples: Filenames
@@ -60,7 +60,7 @@ Feature: Inject RPC Jobs
         When I get with bad headers in <bad_header_filename> the injection results from a post to rpc_jobs
         Then the rpc_jobs response status is 200 OK
         Then the response contains a rpc_jobs job_id
-        And the corresponding rpc_jobs job is completed with successful rpc_tasks tasks
+        And the corresponding rpc_jobs job is completed with SUCCESS state rpc_tasks tasks
         And the rpc_jobs response status is 200 OK
 
         Examples: Filenames
