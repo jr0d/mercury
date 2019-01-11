@@ -1,3 +1,4 @@
+import json
 from behave import when, step
 from src.tests.behave.api.features.common.utils import (
     get_entity_list_container_field,
@@ -16,6 +17,40 @@ def step_a_service_id_is_located_for_testing(context, service_name):
     context.services[service_name]["id"] = None
     service_client = context.services[service_name]["client"]
     response = service_client.get()
+
+    container_field = get_entity_list_container_field(service_name)
+    field_name = get_entity_id_field(service_name)
+    try:
+        # TODO config value?
+        service_entities = response.json()[container_field]
+        # TODO if this is empty add one somehow?
+        context.check.assertGreater(len(service_entities), 0)
+        entity_id = service_entities[0][field_name]
+        context.services[service_name]["id"] = entity_id
+    except IndexError:
+        context.check.assertIsNotNone(
+            context.services[service_name]["id"],
+            msg="WIP: Create {} API Not Yet Implemented".format(service_name),
+        )
+        # TODO: Create new service entity since we don't have any
+
+
+@step("first device queried from {filename} of type {service_name} entity id is located for testing")
+def step_a_service_id_is_located_for_testing(context, service_name, filename):
+    """
+    :type context: behave.runner.Context
+    :type filename: str
+    :type service_name: str
+    """
+
+    location = context.json_location
+    data = read_json_from_file(filename, location)
+
+    service_client = context.services[service_name]["client"]
+
+    response = service_client.post(
+        data=json.dumps(data), url_suffix="query"
+    )
 
     container_field = get_entity_list_container_field(service_name)
     field_name = get_entity_id_field(service_name)
