@@ -4,6 +4,6 @@
   },
   "instruction": {
     "method": "hp_update_firmware",
-    "kwargs": {"url": ""}
+    "kwargs": {"url": null}
   }
 }
