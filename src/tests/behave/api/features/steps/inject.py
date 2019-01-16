@@ -98,10 +98,10 @@ def step_the_response_contains_a_job_id(context, service_name):
 
 
 @step(
-    "the corresponding {service_name} job is completed with successful {tasks_service_name} tasks"
+    "the corresponding {service_name} job is completed with {state} state {tasks_service_name} tasks"
 )
 def step_the_corresponding_service_job_is_completed_and_successful(
-    context, service_name, tasks_service_name
+    context, service_name, tasks_service_name, state
 ):
     """
     :type context: behave.runner.Context
@@ -124,7 +124,7 @@ def step_the_corresponding_service_job_is_completed_and_successful(
     context.services[tasks_service_name]["tasks"] = tasks
     statuses = [task["status"] for task in tasks]
     for status in statuses:
-        context.check.assertEqual(status, "SUCCESS")
+        context.check.assertEqual(status, state)
     has_failures = status_resp.json()["has_failures"]
     context.check.assertEqual(has_failures, False)
 

@@ -81,7 +81,7 @@ def read_json_from_file(filename, location):
     return data
 
 
-def wait_for_not_none(func, *args, timeout=20):
+def wait_for_not_none(func, *args, timeout=50):
     value = func(*args)
     while value == None:
         if timeout <= 0:
