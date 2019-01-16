@@ -35,7 +35,9 @@ def step_a_service_id_is_located_for_testing(context, service_name):
         # TODO: Create new service entity since we don't have any
 
 
-@step("first device queried from {filename} of type {service_name} entity id is located for testing")
+@step(
+    "first device queried from {filename} of type {service_name} entity id is located for testing"
+)
 def step_a_service_id_is_located_for_testing(context, service_name, filename):
     """
     :type context: behave.runner.Context
@@ -48,9 +50,7 @@ def step_a_service_id_is_located_for_testing(context, service_name, filename):
 
     service_client = context.services[service_name]["client"]
 
-    response = service_client.post(
-        data=json.dumps(data), url_suffix="query"
-    )
+    response = service_client.post(data=json.dumps(data), url_suffix="query")
 
     container_field = get_entity_list_container_field(service_name)
     field_name = get_entity_id_field(service_name)
