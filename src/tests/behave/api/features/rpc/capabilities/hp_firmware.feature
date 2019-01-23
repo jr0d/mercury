@@ -15,7 +15,7 @@ Feature: Inject HP Firmware Capability RPC Jobs
     @quarantined @MRC-131
     @MRC-130
     @not-local
-    Scenario Outline: Inject rpc hp_update_firmware capability
+    Scenario Outline: Inject rpc hp_update_firmware capability with no url
         Given first device queried from <query_filename> of type active_computers entity id is located for testing
         And I have job injection details for a specific active_computers device in <job_filename> for creating jobs using the rpc_jobs api
         When I get the injection results from a post to rpc_jobs
@@ -33,7 +33,7 @@ Feature: Inject HP Firmware Capability RPC Jobs
     @negative @p0 @smoke
     @MRC-130
     @not-local
-    Scenario Outline: Inject rpc hp_update_firmware capability
+    Scenario Outline: Inject rpc hp_update_firmware capability with a bad url
       Given first device queried from <query_filename> of type active_computers entity id is located for testing
       And I have job injection details for a specific active_computers device in <job_filename> for creating jobs using the rpc_jobs api
       When I get the injection results from a post to rpc_jobs
@@ -45,22 +45,3 @@ Feature: Inject HP Firmware Capability RPC Jobs
       Examples: Filenames
       | query_filename | job_filename                        |
       | hp_query.json  | hp_firmware_update_job_bad_url.json |
-
-
-    # /rpc/jobs hp_update_firmware
-    @positive @p0 @smoke
-    @nyi
-    @MRC-130
-    @not-local
-    Scenario Outline: Inject rpc hp_update_firmware capability
-        Given first device queried from <query_filename> of type active_computers entity id is located for testing
-        And I have job injection details for a specific active_computers device in <job_filename> for creating jobs using the rpc_jobs api
-        When I get the injection results from a post to rpc_jobs
-        Then the rpc_jobs response status is 200 OK
-        Then the response contains a rpc_jobs job_id
-        And the corresponding rpc_jobs job is completed with SUCCESS state rpc_tasks tasks
-        And the rpc_jobs response status is 200 OK
-
-        Examples: Filenames
-        | query_filename | job_filename                |
-        | hp_query.json  | hp_firmware_update_job.json |
