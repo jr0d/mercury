@@ -4,9 +4,9 @@ pytest-cov
 pytest-asyncio
 pytest-async-mongodb
 behave==1.2.5
--e git://github.com/Machinarum/conflagration.git#egg=conflagration
+conflagration==0.0.10
 parse==1.8.2
 parse-type==0.4.2
-requests==2.20.0
+requests==2.21.0
 gevent
 tox
