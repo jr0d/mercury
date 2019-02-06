@@ -82,6 +82,18 @@ def options(configuration):
         help_string='Kernel options for the agent environment'
     )
 
+    configuration.add_option(
+        'agent.backend_url_cmdline',
+        help_string='Provide an alternative backend url. This will be appended to the agent '
+                    'kernel command line, overriding the configuration backed into the image'
+    )
+
+    configuration.add_option(
+        'agent.log_service_cmdline',
+        help_string='Provide an alternative log service url. This will be appended to the agent '
+                    'kernel command line, overriding the configuration baked into the image'
+    )
+
 
 def get_boot_configuration():
     boot_configuration = MercuryConfiguration('mercury-boot', BOOT_CONFIG_FILE)
