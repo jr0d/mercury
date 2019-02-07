@@ -17,6 +17,7 @@ import argparse
 import ast
 import logging
 import os
+import shlex
 import yaml
 
 from box import Box
@@ -333,6 +334,26 @@ class MercuryConfiguration(object):
                                     option['cli_argument'])),
                             option['special_type'])
 
+    def override_with_proc_cmdline(self, option):
+        """
+        Attempt to read option from /proc/cmdline
+        """
+        try:
+            with open('/proc/cmdline') as fp:
+                cmdline_options = shlex.split(fp.read())
+        except OSError:
+            LOG.info('/proc/cmdline is not available for parsing')
+            return
+
+        for cmdline_option in cmdline_options:
+            item = cmdline_option.split('=', 1)
+            # flags are not yet supported
+            if len(item) > 1:
+                k, v = item
+                if k == option['proc_cmdline_argument']:
+                    self.override_value(k, v, option['special_type'])
+                    break
+
     def scan_options(self):
         """
         :return: The master configuration
@@ -349,6 +370,10 @@ class MercuryConfiguration(object):
 
             # override defaults and config options with environment variables
             self.override_with_environment(option)
+
+            # /proc/cmdline overrides all if present
+            if option['proc_cmdline_argument']:
+                self.override_with_proc_cmdline(option)
 
             # command line
             self.override_with_cli_options(option)
@@ -410,6 +435,7 @@ class MercuryConfiguration(object):
                    cli_argument=None,
                    env_variable=None,
                    config_address=None,
+                   proc_cmdline_argument=None,
                    default=None,
                    help_string=None,
                    special_type=None,
@@ -435,6 +461,8 @@ class MercuryConfiguration(object):
 
         nest1.nest2.nest3 == 'My Value'
 
+        :param proc_cmdline_argument: If available (linux) search /proc/cmdline for the
+            specified argument.
         :param default: The default value of the option
         :param help_string: Description of what the option does and how to use
             it
@@ -453,6 +481,7 @@ class MercuryConfiguration(object):
             cli_argument=cli_argument or self.auto_format_cli_argument(name),
             env_variable=env_variable or self.auto_format_env_variable(name),
             config_address=config_address or name,
+            proc_cmdline_argument=proc_cmdline_argument,
             default=default,
             help=help_string,
             special_type=special_type,

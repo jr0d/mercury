@@ -247,3 +247,17 @@ class MercuryConfigurationUnitTests(MercuryCommonUnitTest):
 
         with pytest.raises(mercury.common.exceptions.MercuryConfigurationError):
             new_mc.scan_options()
+
+    @staticmethod
+    def test_proc_cmdline():
+        cmdline_data = 'rw quiet TEST_OPTION="VALUE"\n'
+        option = {'name': 'test.option',
+                  'proc_cmdline_argument': 'TEST_OPTION',
+                  'special_type': None}
+        mopen = mock.mock_open(read_data=cmdline_data)
+        mc = config.MercuryConfiguration('test', 'test.yaml')
+        mc.add_option(**option)
+        with mock.patch('mercury.common.configuration.open', mopen):
+            mc.override_with_proc_cmdline(option)
+
+        assert mc.master_configuration.TEST_OPTION == 'VALUE'

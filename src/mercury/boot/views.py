@@ -59,10 +59,24 @@ class DiscoverView(MethodView):
         self.inventory_client = InventoryClient(inventory_url)
 
     @staticmethod
+    def update_cmdline_backend_options():
+        backend_url = configuration.agent.backend_url_cmdline
+        log_service_url = configuration.agent.log_service_cmdline
+
+        if backend_url or log_service_url:
+            configuration['__BACKEND_OPTIONS__'] = '{}{}'.format(
+                ' MERCURY_BACKEND={} '.format(backend_url) if backend_url else ' ',
+                'MERCURY_LOG_SERVICE={} '.format(log_service_url) if log_service_url else ''
+            )
+        else:
+            configuration['__BACKEND_OPTIONS__'] = ' '
+
+    @staticmethod
     def render_agent_script():
         with open('scripts/agent.ipxe') as fp:
             template = fp.read()
 
+        DiscoverView.update_cmdline_backend_options()
         return pystache.render(template, **configuration)
 
     @staticmethod
@@ -116,5 +130,4 @@ class DiscoverView(MethodView):
             return self.plain('Boot rescue iPXE script here')
 
         log.info('Booting {} to agent'.format(inventory_data['mercury_id']))
-        print(request.base_url)
         return self.plain(self.render_agent_script())
