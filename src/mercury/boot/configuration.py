@@ -85,7 +85,7 @@ def options(configuration):
     configuration.add_option(
         'agent.backend_url_cmdline',
         help_string='Provide an alternative backend url. This will be appended to the agent '
-                    'kernel command line, overriding the configuration backed into the image'
+                    'kernel command line, overriding the configuration baked into the image'
     )
 
     configuration.add_option(
