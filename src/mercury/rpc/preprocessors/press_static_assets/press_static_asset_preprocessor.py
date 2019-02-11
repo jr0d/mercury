@@ -32,7 +32,8 @@ def __asset_list_hax(assets):
             assets[k] = '[%s]' % ', '.join(v)
 
 
-@preprocessor.preprocessor('press_static_assets', 'Uses user supplied assets to render press configuration templates')
+@preprocessor.preprocessor('press_static_assets',
+                           'Uses user supplied assets to render press configuration templates')
 def press_static_assets(target, instruction):
     """Uses a mercury_id indexed asset store which is supplied, in it's entirety, within the instruction
     :param target: A target containing a mercury_id
@@ -55,10 +56,10 @@ def press_static_assets(target, instruction):
 
     render_data = asset_db.get(target['mercury_id'])
 
-    __asset_list_hax(render_data)
-
     if not render_data:
         raise MercuryUserError('Assets supplied do not cover target')
+
+    __asset_list_hax(render_data)
 
     rendered = pystache.render(template, **render_data)
 
