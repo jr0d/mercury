@@ -1,9 +1,0 @@
-{
-  "query": {
-    "dmi.sys_vendor": "HP",
-    "active.capabilities.inspector.description": "Run inspector"
-  },
-  "instruction": {
-    "method": "inspector"
-  }
-}

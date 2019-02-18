@@ -1,4 +1,5 @@
 import json
+import random
 from behave import when, step
 from src.tests.behave.api.features.common.utils import (
     get_entity_list_container_field,
@@ -25,7 +26,8 @@ def step_a_service_id_is_located_for_testing(context, service_name):
         service_entities = response.json()[container_field]
         # TODO if this is empty add one somehow?
         context.check.assertGreater(len(service_entities), 0)
-        entity_id = service_entities[0][field_name]
+        i = random.randint(0,len(service_entities)-1)
+        entity_id = service_entities[i][field_name]
         context.services[service_name]["id"] = entity_id
     except IndexError:
         context.check.assertIsNotNone(
@@ -87,7 +89,7 @@ def step_a_service_id_is_located_for_testing(context, service_name):
         service_entities = response.json()[container_field]
         # TODO if this is empty add one somehow?
         context.check.assertGreater(len(service_entities), 0)
-        i = 0
+        i = random.randint(0,len(service_entities)-1)
         entity_id = service_entities[i][field_name]
         resp = service_client.get(entity_id)
 

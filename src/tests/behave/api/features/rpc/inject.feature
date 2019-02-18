@@ -22,7 +22,6 @@ Feature: Inject RPC Jobs
         Examples: Filenames
         | filename           |
         | echo_job.json      |
-        | inspector_job.json |
 
     # /rpc/jobs - bad method
     @negative @p0 @smoke
@@ -35,7 +34,6 @@ Feature: Inject RPC Jobs
         Examples: Filenames
         | filename           |
         | echo_job.json      |
-        | inspector_job.json |
 
     # /rpc/jobs - bad url
     @negative @p0 @smoke
@@ -49,7 +47,7 @@ Feature: Inject RPC Jobs
         Examples: Bad URLs and Filename
         | filename           | bad_url     | status_code | reason    |
         | echo_job.json      | /rpc/typos  | 404         | Not Found |
-        | inspector_job.json | /typos/jobs | 404         | Not Found |
+        | echo_job.json      | /typos/jobs | 404         | Not Found |
 
     # /rpc/jobs - ignored headers
     @positive @p0 @smoke
@@ -66,7 +64,6 @@ Feature: Inject RPC Jobs
         Examples: Filenames
         | filename           | bad_header_filename |
         | echo_job.json      | extra_headers.json  |
-        | inspector_job.json | extra_headers.json  |
 
     # /rpc/jobs - bad headers
     @negative @p0 @smoke
@@ -80,4 +77,3 @@ Feature: Inject RPC Jobs
         Examples: Filenames
         | filename           | bad_header_filename |
         | echo_job.json      | bad_headers.json    |
-        | inspector_job.json | bad_headers.json    |
