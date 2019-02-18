@@ -33,4 +33,4 @@ Feature: Inject RPC Jobs negative tests
 
         Examples: Filenames
         | filename           |
-        | echo_job.json
+        | echo_job.json      |

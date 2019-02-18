@@ -31,6 +31,7 @@ Feature: Inject HP Firmware Capability RPC Jobs
 
     # /rpc/jobs hp_update_firmware - bad url
     @negative @p0 @smoke
+    @quarantined @MRC-131
     @MRC-130
     @not-local
     Scenario Outline: Inject rpc hp_update_firmware capability with a bad url
