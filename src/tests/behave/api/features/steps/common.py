@@ -3,7 +3,7 @@ from collections import defaultdict
 from behave import given, then, when, step, use_step_matcher
 
 from src.tests.behave.api.features.common.utils import (
-    check_params_applied_in_resp
+    check_params_applied_in_resp,
 )
 from src.tests.behave.api.features.client import APIClient
 

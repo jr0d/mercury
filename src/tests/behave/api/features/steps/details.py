@@ -1,4 +1,5 @@
 import json
+import random
 from behave import when, step
 from src.tests.behave.api.features.common.utils import (
     get_entity_list_container_field,
@@ -25,7 +26,8 @@ def step_a_service_id_is_located_for_testing(context, service_name):
         service_entities = response.json()[container_field]
         # TODO if this is empty add one somehow?
         context.check.assertGreater(len(service_entities), 0)
-        entity_id = service_entities[0][field_name]
+        i = random.randint(0, len(service_entities) - 1)
+        entity_id = service_entities[i][field_name]
         context.services[service_name]["id"] = entity_id
     except IndexError:
         context.check.assertIsNotNone(
@@ -35,7 +37,9 @@ def step_a_service_id_is_located_for_testing(context, service_name):
         # TODO: Create new service entity since we don't have any
 
 
-@step("first device queried from {filename} of type {service_name} entity id is located for testing")
+@step(
+    "first device queried from {filename} of type {service_name} entity id is located for testing"
+)
 def step_a_service_id_is_located_for_testing(context, service_name, filename):
     """
     :type context: behave.runner.Context
@@ -48,9 +52,7 @@ def step_a_service_id_is_located_for_testing(context, service_name, filename):
 
     service_client = context.services[service_name]["client"]
 
-    response = service_client.post(
-        data=json.dumps(data), url_suffix="query"
-    )
+    response = service_client.post(data=json.dumps(data), url_suffix="query")
 
     container_field = get_entity_list_container_field(service_name)
     field_name = get_entity_id_field(service_name)
@@ -87,7 +89,7 @@ def step_a_service_id_is_located_for_testing(context, service_name):
         service_entities = response.json()[container_field]
         # TODO if this is empty add one somehow?
         context.check.assertGreater(len(service_entities), 0)
-        i = 0
+        i = random.randint(0, len(service_entities) - 1)
         entity_id = service_entities[i][field_name]
         resp = service_client.get(entity_id)
 

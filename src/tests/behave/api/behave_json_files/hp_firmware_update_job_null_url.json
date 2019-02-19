@@ -3,6 +3,7 @@
     "dmi.sys_vendor": "HP"
   },
   "instruction": {
-    "method": "inspector"
+    "method": "hp_update_firmware",
+    "kwargs": {"url": null}
   }
 }

@@ -19,7 +19,6 @@ Feature: Inject RPC Jobs negative tests
         Examples: Filenames
         | filename           |
         | echo_job.json      |
-        | inspector_job.json |
 
     # /rpc/jobs - no token
     @negative @p0 @smoke
@@ -35,4 +34,3 @@ Feature: Inject RPC Jobs negative tests
         Examples: Filenames
         | filename           |
         | echo_job.json      |
-        | inspector_job.json |
