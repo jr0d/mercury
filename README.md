@@ -7,7 +7,7 @@
 [![Build Status](https://travis-ci.org/jr0d/mercury.svg?branch=master)](https://travis-ci.org/jr0d/mercury)
 
 # Welcome
-This repository houses common libraries and the core backend services of the mercury stack. Some other mercury notable
+This repository houses common libraries and the core backend services of the mercury stack. Some other notable
 repositories are:
 
 * [mercury-agent](https://github.com/jr0d/mercury-agent) : agent code, RPC endpoints, inspectors, and hardware libraries
