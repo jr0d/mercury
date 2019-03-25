@@ -15,7 +15,7 @@
 
 import logging
 
-from gevent.wsgi import WSGIServer
+from gevent.pywsgi import WSGIServer
 
 from mercury.boot.configuration import get_boot_configuration
 from mercury.boot.app import app
