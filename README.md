@@ -7,57 +7,65 @@
 [![Build Status](https://travis-ci.org/jr0d/mercury.svg?branch=master)](https://travis-ci.org/jr0d/mercury)
 
 # Welcome
-This repository houses common libraries and the core backend services of the mercury stack. Some other notable
-repositories are:
+This repository houses common libraries and the core backend services of the mercury stack. Some
+other notable repositories are:
 
-* [mercury-agent](https://github.com/jr0d/mercury-agent) : agent code, RPC endpoints, inspectors, and hardware libraries
+* [mercury-agent](https://github.com/jr0d/mercury-agent) : agent code, RPC endpoints, inspectors,
+and hardware libraries
 * [mercury-api](https://github.com/jr0d/mercury-api) : the frontend HTTP API
-* [mercury-sdk](https://github.com/jr0d/mercury-sdk) : Python SDK for mercury and the Mercury command line interface,
-    mcli
+* [mercury-sdk](https://github.com/jr0d/mercury-sdk) : Python SDK for mercury and the Mercury
+command line interface, mcli
 
 
 # Overview
 
-**Mercury is a set of services, agents, and libraries designed for the purpose of managing datacenter hardware assets**
+**Mercury is a set of services, agents, and libraries designed for the purpose of managing
+datacenter hardware assets**
 
-Mercury provides two core facilities, a searchable hardware inventory and an API for remotely managing devices. The latter is comes via a powerful RPC system which provides first party remote support for managing firmware, BMCs, hardware RAID controllers, and local storage. 
+Mercury provides two core facilities, a searchable hardware inventory and an API for remotely
+managing devices. The latter comes via a powerful RPC system which provides first party remote
+support for managing firmware, BMCs, hardware RAID controllers, and local storage.
 
-Mercury has been developed specifically for base systems management of large numbers of servers from multiple vendors and generations,
-spread across multiple datacenters.
+Mercury has been developed specifically for base systems management of large numbers of devices
+from multiple vendors and generations, spread across multiple datacenters.
 
 
 ### Mercury Inventory
-When a server boots using the [mercury agent](https://github.com/jr0d/mercury-agent), software inspectors interrogate the hardware. The gathered information is
-structured into detailed objects, which are easily serialized and imported. These objects represent various attributes
-of a device, such as CPU, memory, vendor asset information, network devices and link information, storage details (RAID
-and onboard), and subsystem bus information (PCI and USB). Once these objects are created, they are serialized and
-transmitted to the mercury inventory controller for storage. From the outside (using the mercury HTTP API) the inventory
-is ephemeral and read only. It can only be updated by a Mercury Agent.
+When a server boots using the [mercury agent](https://github.com/jr0d/mercury-agent), software
+inspectors interrogate the hardware. The gathered information is structured into detailed objects,
+which are easily serialized and imported. These objects represent various attributes of a device,
+such as CPU, memory, vendor asset information, network devices and link information, storage
+details (RAID and onboard), and subsystem bus information (PCI and USB). Once these objects are
+created, they are serialized and transmitted to the mercury inventory controller for storage. From
+the outside (using the mercury HTTP API) the inventory is ephemeral and read only. It can only be
+updated by a Mercury Agent.
 
 ### MercuryId
 
-MercuryId is a vendor neutral method for heuristically generating a unique value for a hardware chassis.
-The Id is generated in multiple ways. In the case of OEMs that guarantee a unique product UUID in SMBIOS tables,
-the mercury ID is hashed directly from that value. For ODMs and white boxes, the Id is typically a hash of all on board
-interface MAC addresses.
+MercuryId is a vendor neutral method for heuristically generating a unique value for a hardware
+chassis. The Id is generated in multiple ways. In the case of OEMs that guarantee a unique product
+UUID in SMBIOS tables, the mercury ID is hashed directly from that value. For ODMs and white boxes,
+the Id is typically a hash of all on board interface MAC addresses.
 
 The mercury ID should never change for a given chassis. If a device has it's RAM or CPU replace in
-the rack, the value will not change. This allows mercury to correlate datacenter location information (LLDP)
-to a unique device; which is a rather important feature which provides Mercury's in the rack, automated
-discovery.
+the rack, the value will not change. This allows mercury to correlate datacenter location
+information (LLDP) to a unique device; which is a rather important feature which provides Mercury's
+in the rack, automated discovery.
 
 
 
 ### Mercury Agent
-The core agent that operates within an ephemeral OS running on an inventory target (device still under provider
-control, ie not sold or allocated). The OS environment contains libraries and abstraction layers for the intent of
-providing a common RPC interface for provisioning and decommissioning workflows. Agent capabilities expose mechanisms
-for managing firmware, hardware RAID, OS Provisioning, drive sanitation, etc.
+The core agent that operates within an ephemeral OS running on an inventory target (device still
+under provider control, ie not sold or allocated). The OS environment contains libraries and
+abstraction layers for the intent of providing a common RPC interface for provisioning and
+decommissioning workflows. Agent capabilities expose mechanisms for managing firmware, hardware
+RAID, OS Provisioning, drive sanitation, etc.
 
 ### Inspectors
-These core software units provide the most precises and full featured libraries for interrogating hardware, discovering
-network interfaces and neighbors (LLDP), and detecting hardware state change. Used primarily for populating the
-mercury_inventory database, but also useful for standalone operation
+These core software units provide the most precises and full featured libraries for interrogating
+hardware, discovering network interfaces and neighbors (LLDP), and detecting hardware state change.
+Used primarily for populating the mercury_inventory database, but also useful for standalone
+operation.
 
 ### Supported inspectors
 - bmc
@@ -76,9 +84,9 @@ mercury_inventory database, but also useful for standalone operation
 
 ### RPC
 
-The agent provides an extensible python RPC interface. Exposed procedures, or capabilities, are published by the agent.
-The published data includes the method name, method prototype requirements (args and kwargs), doc string, and locking 
-information.
+The agent provides an extensible python RPC interface. Exposed procedures, or capabilities, are 
+published by the agent. The published data includes the method name, method prototype requirements 
+(args and kwargs), doc string, and locking information.
 
 ### Base capabilities
 
@@ -127,25 +135,27 @@ Full RPC method documentation can be viewed in the RPC section of the API docume
 
 ### Preprocessors
 
-Parallel execution of an identical task does not always make sense. This is especially evident when considering
-the press workflow. For instance, if I happen to create a job that matches 12 active inventory records and provide a
-single press configuration to the `press` method, all 12 nodes would be provisioned using the same user and
-networking information. This is usually not the intended result. As such, mercury provides a preprocessor interface.
+Parallel execution of an identical task does not always make sense. This is especially evident when
+considering the press workflow. For instance, if I happen to create a job that matches 12 active
+inventory records and provide a single press configuration to the `press` method, all 12 nodes
+would be provisioned using the same user and networking information. This is usually not the
+intended result. As such, mercury provides a preprocessor interface.
 
 
-With preprocessors, press templates can be rendered using inventory data and external asset management
-systems. Adding preprocessors can occur through the plugin interface. See [Preprocessor](documentation_link)
-documentation for more information
+With preprocessors, press templates can be rendered using inventory data and external asset
+management systems. Adding preprocessors can occur through the plugin interface. See
+[Preprocessor](documentation_link) documentation for more information
 
 
-This version of Mercury provides a reference implementation called `press_static_assets`. As the name suggest, it
-allows the user to submit a set of static assets, referenced by mercury_id, to be used when rendering the provided
-template. 
+This version of Mercury provides a reference implementation called `press_static_assets`. As the 
+name suggest, it allows the user to submit a set of static assets, referenced by mercury_id, to be 
+used when rendering the provided template. 
 
 ### Transport
 
-For all backend communication, mercury uses [0mq socket API](http://zeromq.org/whitepapers:architecture) and
-[MessagePack](https://github.com/msgpack/msgpack/blob/master/spec.md) for serialization . Mercury is 
+For all backend communication, mercury uses 
+[0mq socket API](http://zeromq.org/whitepapers:architecture) and
+[MessagePack](https://github.com/msgpack/msgpack/blob/master/spec.md) for serialization. Mercury is 
 designed to work in tandem with production workloads; as such, mercury’s messaging system has been 
 developed to minimize impact on overall network capacity.
 
