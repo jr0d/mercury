@@ -2,7 +2,6 @@ import logging
 import time
 
 from mercury.common.configuration import MercuryConfiguration
-from mercury.common.exceptions import MercuryClientException
 from mercury.common.mongo import get_collection, get_connection
 from mercury.common.transport import SimpleRouterReqService
 
@@ -58,15 +57,14 @@ class AgentLogService(SimpleRouterReqService):
         required = [
             'levelno',
             'pathname',
-            'message',
+            'msg',
             'name'
         ]
-
+        missing = []
         for req in required:
             if req not in message:
-                return False
-
-        return True
+                missing.append(req)
+        return missing
 
     @staticmethod
     def set_job_info_from_thread(message):
@@ -88,8 +86,11 @@ class AgentLogService(SimpleRouterReqService):
             message['task_id'] = task_id
 
     def process(self, message):
-        if not self.validate_message(message):
-            raise MercuryClientException('Invalid message')
+        missing = self.validate_message(message)
+        if missing:
+            LOG.error("Missing required data from message: {}".format(missing))
+            LOG.debug("msg was: {}".format(message))
+            return {"message": "Invalid message", "error": True}
 
         message.update({'time_created': time.time()})
 

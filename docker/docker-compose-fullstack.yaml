@@ -9,7 +9,7 @@ services:
         ports:
             - '6379:6379'
     mercury-inventory:
-        image: local/mercury-core:latest
+        image: jaredrodriguez/mercury-core:latest
         environment:
             LOG_LEVEL: DEBUG
             INVENTORY_BIND_ADDRESS: tcp://0.0.0.0:9000
@@ -24,7 +24,7 @@ services:
             - '9000:9000'
         command: mercury-inventory
     mercury-rpc:
-        image: local/mercury-core:latest
+        image: jaredrodriguez/mercury-core:latest
         ports:
             - '9001:9001'
         environment:
@@ -42,7 +42,7 @@ services:
             - mongodb
         command: mercury-rpc
     mercury-backend:
-        image: local/mercury-core:latest
+        image: jaredrodriguez/mercury-core:latest
         ports:
             - '9002:9002'
         environment:
@@ -66,7 +66,7 @@ services:
             - mercury-inventory
         command: mercury-backend
     mercury-backend-queue:
-        image: local/mercury-core:latest
+        image: jaredrodriguez/mercury-core:latest
         links:
             - "redis"
             - "mercury-inventory"
@@ -79,7 +79,7 @@ services:
             BACKEND_INVENTORY_ROUTER: tcp://mercury-inventory:9000
         command: mercury-backend-queue
     mercury-backend-worker:
-        image: local/mercury-core:latest
+        image: jaredrodriguez/mercury-core:latest
         environment:
             LOG_LEVEL: DEBUG
             BACKEND_REDIS_HOST: redis
@@ -93,7 +93,7 @@ services:
             - mercury-rpc
         command: mercury-backend-worker
     mercury-log:
-        image: local/mercury-core:latest
+        image: jaredrodriguez/mercury-core:latest
         ports:
             - '9006:9006'
         environment:
