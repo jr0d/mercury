@@ -24,8 +24,9 @@ class AgentLogServiceTestCase(unittest.TestCase):
                                                                 log_collection)
 
     def test_process(self):
-        with pytest.raises(MercuryClientException):
-            self.agent_log_service.process({})
+        self.assertDictEqual(
+            self.agent_log_service.process({}),
+            {"message": "Invalid message", "error": True})
 
         message = {
             "name": "mercury.agent.agent",

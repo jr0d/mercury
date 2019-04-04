@@ -67,7 +67,7 @@ def configuration_from_yaml(filename):
     """
     try:
         with open(filename) as infile:
-            return yaml.load(infile.read())
+            return yaml.safe_load(infile.read())
     except IOError:
         return {}
 

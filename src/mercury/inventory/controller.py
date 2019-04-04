@@ -103,3 +103,47 @@ class InventoryController(StaticEndpointController):
     @async_endpoint('count')
     async def count(self, q):
         return await self.db.count(query=q)
+
+    @staticmethod
+    def check_boot_data(boot_data, endpoint):
+        """
+
+        :param boot_data:
+        :return:
+        """
+        only = ['boot.state', 'boot.script']
+        for k in boot_data:
+            if k not in only:
+                raise EndpointError(
+                    "Boot data is invalid, can only contain {}".format(only),
+                    endpoint)
+
+    @async_endpoint('update_boot')
+    async def update_boot(self, mercury_id, boot_data):
+        """
+
+        :param mercury_id:
+        :param boot_data:
+        :return:
+        """
+        self.check_boot_data(boot_data, 'update_boot')
+        result = await self.db.update_boot(mercury_id, boot_data)
+        return {
+            'matched_count': result.matched_count,
+            'modified_count': result.modified_count
+        }
+
+    @async_endpoint('update_boot_many')
+    async def update_boot(self, query, boot_data):
+        """
+
+        :param query:
+        :param boot_data:
+        :return:
+        """
+        self.check_boot_data(boot_data, 'update_boot_many')
+        result = await self.db.update_boot_many(query, boot_data)
+        return {
+            'matched_count': result.matched_count,
+            'modified_count': result.modified_count
+        }

@@ -114,3 +114,34 @@ class InventoryDBController(object):
 
     def count(self, query):
         return self.collection.count(query)
+
+    async def update_boot(self, mercury_id, boot_data):
+        """
+        Updates the document boot state of the give device
+        :param mercury_id:
+        :param boot_data:
+        :return:
+        """
+        _update = {
+            'time_updated': time.time(),
+        }
+        _update.update(boot_data)
+
+        _filter = {'mercury_id': mercury_id}
+
+        return await self.collection.update_one(
+            filter=_filter, update={"$set": _update})
+
+    async def update_boot_many(self, query, boot_data):
+        """
+        Updates the document boot state for all documents which match query
+        :param query:
+        :param boot_data:
+        :return:
+        """
+        _update = {
+            'time_updated': time.time()
+        }
+        _update.update(boot_data)
+        return await self.collection.update_many(
+            filter=query, update={"$set": _update})
