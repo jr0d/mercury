@@ -16,7 +16,7 @@
 import logging
 import os
 import shlex
-import subprocess
+import subprocess # nosec
 
 log = logging.getLogger(__name__)
 
@@ -109,7 +109,7 @@ def run(command,
     stdin = _input and subprocess.PIPE or None
     if not dry_run:
         try:
-            p = subprocess.Popen(cmd,
+            p = subprocess.Popen(cmd,  # nosec
                                  stdin=stdin,
                                  stdout=subprocess.PIPE,
                                  stderr=subprocess.PIPE,

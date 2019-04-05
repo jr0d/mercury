@@ -15,7 +15,6 @@
 
 from flask import Flask
 
-from mercury.boot.configuration import get_boot_configuration
 from mercury.boot.urls import boot_urls
 
 app = Flask(__name__)
@@ -23,7 +22,3 @@ app = Flask(__name__)
 # Add url rules
 for url, view_func in boot_urls:
     app.add_url_rule(url, view_func=view_func, strict_slashes=False)
-
-if __name__ == '__main__':
-    configuration = get_boot_configuration()
-    app.run(host=configuration.host, port=configuration.port, debug=True)

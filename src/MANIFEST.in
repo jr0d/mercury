@@ -1,3 +1,4 @@
+include VERSION
 include mercury/boot/scripts/agent.ipxe
 include mercury/boot/scripts/discovery.ipxe
 include mercury/boot/scripts/local.ipxe

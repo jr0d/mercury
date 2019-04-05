@@ -2,6 +2,7 @@ mock
 pytest
 pytest-cov
 pytest-asyncio
+mongomock==3.8.0
 pytest-async-mongodb
 behave==1.2.5
 conflagration==0.0.10
@@ -10,3 +11,4 @@ parse-type==0.4.2
 requests==2.21.0
 gevent
 tox
+bandit

@@ -41,7 +41,7 @@ def full_req_transceiver(zmq_url, data):
     socket.send_multipart([packed])
 
     rep = socket.recv()
-    unpacked_rep = msgpack.unpackb(rep, encoding='utf-8')
+    unpacked_rep = msgpack.unpackb(rep, raw=False)
 
     socket.close()
     ctx.term()
@@ -188,8 +188,7 @@ class SimpleRouterReqService(object):
             raise MercuryClientException('Message is malformed')
 
         try:
-            message = msgpack.unpackb(parsed_message['message'],
-                                      encoding='utf-8')
+            message = msgpack.unpackb(parsed_message['message'], raw=False)
         except TypeError as type_error:
             log.error('Received unpacked, non-string type: %s : %s' % (
                 type(parsed_message), type_error))

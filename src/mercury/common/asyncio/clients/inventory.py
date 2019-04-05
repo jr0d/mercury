@@ -119,3 +119,29 @@ class InventoryClient(AsyncRouterReqClient):
             'args': [query_data]
         }
         return await self.transceiver(payload)
+
+    async def update_boot(self, mercury_id, update_data):
+        """
+
+        :param mercury_id:
+        :param update_data:
+        :return:
+        """
+        payload = {
+            'endpoint': 'update_boot',
+            'args': [mercury_id, update_data]
+        }
+        return await self.transceiver(payload)
+
+    async def update_boot_many(self, query, update_data):
+        """
+
+        :param query:
+        :param update_data:
+        :return:
+        """
+        payload = {
+            'endpoint': 'update_boot_many',
+            'args': [query, update_data]
+        }
+        return await self.transceiver(payload)

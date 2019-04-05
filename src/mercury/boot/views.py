@@ -113,8 +113,8 @@ class DiscoverView(MethodView):
         if boot_info.get('script'):
             # Dangerous, can potentially leak entire configuration into image
             # if an attacker knows the key names
-            return pystache.render(boot_info['script'], dict(
-                **inventory_data, **configuration))
+            return self.plain(pystache.render(boot_info['script'], dict(
+                **inventory_data, **configuration)))
 
         boot_state = boot_info.get('state', 'agent')
 

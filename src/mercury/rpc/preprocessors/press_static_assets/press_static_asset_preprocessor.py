@@ -63,6 +63,6 @@ def press_static_assets(target, instruction):
 
     rendered = pystache.render(template, **render_data)
 
-    configuration = yaml.load(rendered)
+    configuration = yaml.safe_load(rendered)
 
     return {'method': 'press', 'kwargs': {'configuration': configuration}}
