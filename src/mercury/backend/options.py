@@ -88,4 +88,9 @@ def parse_options():
                              special_type=float,
                              help_string='Exponential backoff modifier')
 
+    configuration.add_option('backend.ping.max_to_schedule',
+                             default=50,
+                             special_type=int,
+                             help_string='Maximum ping jobs to schedule')
+
     return configuration.scan_options()
