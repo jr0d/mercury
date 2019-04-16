@@ -145,6 +145,7 @@ async def ping_loop(ctx,
             # could change out from under us
             if scheduled_count >= max_to_schedule:
                 # If we've scheduled the maximum, cycle and wait for them to finish
+                log.info('Max scheduled ping jobs (%s) are scheduled.', max_to_schedule)
                 break
             if now - data['last_ping'] > ping_interval and not data['pinging']:
                 scheduled_count += 1
