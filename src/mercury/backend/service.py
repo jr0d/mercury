@@ -161,15 +161,16 @@ def main():
 
     # Inject ping loop
     asyncio.ensure_future(ping_loop(
-        server.context,
-        config.backend.ping.interval,
-        config.backend.ping.cycle_time,
-        config.backend.ping.initial_timeout,
-        config.backend.ping.retries,
-        config.backend.ping.backoff,
-        loop,
-        config.backend.inventory_router,
-        rpc_client),
+            ctx=server.context,
+            ping_interval=config.backend.ping.interval,
+            cycle_time=config.backend.ping.cycle_time,
+            initial_ping_timeout=config.backend.ping.initial_timeout,
+            ping_retries=config.backend.ping.retries,
+            backoff=config.backend.ping.backoff,
+            max_to_schedule=config.backend.ping.max_to_schedule,
+            loop=loop,
+            inventory_router_url=config.backend.inventory_router,
+            rpc_client=rpc_client),
         loop=loop)
 
     log.info('Starting Mercury Backend Service')

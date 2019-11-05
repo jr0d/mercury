@@ -42,6 +42,7 @@ async def ping(record, ctx, timeout, retries, backoff, inventory_client, rpc_cli
     :param record:
     :param ctx:
     :param inventory_client:
+    :param rpc_client:
     :return:
     """
     failures = 0
@@ -113,6 +114,7 @@ async def ping_loop(ctx,
                     initial_ping_timeout,
                     ping_retries,
                     backoff,
+                    max_to_schedule,
                     loop,
                     inventory_router_url,
                     rpc_client):
@@ -124,22 +126,29 @@ async def ping_loop(ctx,
     :param initial_ping_timeout:
     :param ping_retries:
     :param backoff:
+    :param max_to_schedule:
     :param loop:
     :param inventory_router_url:
+    :param rpc_client:
     :return:
     """
     # load the queue
     inventory_client = InventoryClient(inventory_router_url, linger=0)
     inventory_client.service_name = 'Inventory Service'
-
     while True:
         if stop_ping_loop:
             log.info('Stopping ping loop')
             break
         now = time.time()
-        for mercury_id, data in list(active_state.items()):  # copy to list because the list length could change
-            # out from under us
+        scheduled_count = 0
+        for mercury_id, data in list(active_state.items()):  # copy to list because the list length
+            # could change out from under us
+            if scheduled_count >= max_to_schedule:
+                # If we've scheduled the maximum, cycle and wait for them to finish
+                log.info('Max ping jobs (%s) are scheduled.', max_to_schedule)
+                break
             if now - data['last_ping'] > ping_interval and not data['pinging']:
+                scheduled_count += 1
                 log.debug('Scheduling ping for {}'.format(mercury_id))
                 active_state[mercury_id]['pinging'] = True
                 asyncio.ensure_future(ping(data, ctx, initial_ping_timeout, ping_retries,
